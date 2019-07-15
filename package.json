@@ -1,0 +1,73 @@
+{
+  "name": "@bifravst/aws",
+  "version": "0.0.0-development",
+  "description": "AWS-based implementation of Bifravst",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npx tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bifravst/aws.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bifravst/aws/issues"
+  },
+  "homepage": "https://bifravst.gitbook.io/bifravst/v/saga/",
+  "keywords": [
+    "Cloud",
+    "IoT",
+    "bifravst",
+    "AssetTracker",
+    "NordicSemiconductor"
+  ],
+  "author": "Nordic Semiconductor ASA | nordicsemi.no",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@aws-cdk/aws-codebuild": "^1.0.0",
+    "@aws-cdk/aws-cognito": "^1.0.0",
+    "@aws-cdk/aws-iam": "^1.0.0",
+    "@aws-cdk/aws-iot": "^1.0.0",
+    "@aws-cdk/aws-s3": "^1.0.0",
+    "@aws-cdk/core": "^1.0.0",
+    "@commitlint/cli": "^8.0.0",
+    "@commitlint/config-angular": "^8.0.0",
+    "@types/node": "^12.6.1",
+    "@typescript-eslint/eslint-plugin": "^1.12.0",
+    "@typescript-eslint/parser": "^1.12.0",
+    "cdk": "^1.0.0",
+    "eslint": "^6.0.1",
+    "eslint-config-prettier": "^6.0.0",
+    "husky": "^3.0.0",
+    "lint-staged": "^9.2.0",
+    "prettier": "^1.18.0",
+    "typescript": "^3.5.3"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e",
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint --ext .js,.ts",
+      "git add"
+    ]
+  },
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  },
+  "release": {
+    "branch": "saga",
+    "remoteTags": true,
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github"
+    ]
+  }
+}

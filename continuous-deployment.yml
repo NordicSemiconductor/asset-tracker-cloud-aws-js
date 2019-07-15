@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+    commands:
+    - npm install -g npm@
+    - npm ci --no-audit
+  build:
+    commands:
+    - npx cdk deploy --trace -v --require-approval never '*'
