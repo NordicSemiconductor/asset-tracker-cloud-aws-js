@@ -1,4 +1,4 @@
-# AWS-based implementation of Bifravst *Bifravst :rainbow:*
+# AWS-based implementation of *Bifravst :rainbow:*
 
 [![CircleCI](https://circleci.com/gh/bifravst/aws/tree/saga.svg?style=svg)](https://circleci.com/gh/bifravst/aws/tree/saga)
 [![Greenkeeper badge](https://badges.greenkeeper.io/bifravst/aws.svg)](https://greenkeeper.io/)
@@ -7,4 +7,4 @@
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier/)
 [![ESLint: TypeScript](https://img.shields.io/badge/ESLint-TypeScript-blue.svg)](https://github.com/typescript-eslint/typescript-eslint)  
 
-Read the documentation at https://bifravst.gitbook.io/bifravst/v/saga/docs/aws.
+Read the documentation at https://bifravst.gitbook.io/bifravst/v/saga/docs/aws/gettingstarted.
