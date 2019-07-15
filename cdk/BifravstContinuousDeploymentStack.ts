@@ -52,16 +52,6 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 			environment: {
 				computeType: CodeBuild.ComputeType.LARGE,
 				buildImage: CodeBuild.LinuxBuildImage.STANDARD_2_0,
-				environmentVariables: {
-					GH_USERNAME: {
-						value: '/codebuild/github-username',
-						type: CodeBuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-					},
-					GH_TOKEN: {
-						value: '/codebuild/github-token',
-						type: CodeBuild.BuildEnvironmentVariableType.PARAMETER_STORE,
-					},
-				},
 			},
 			role: codeBuildRole,
 		})
