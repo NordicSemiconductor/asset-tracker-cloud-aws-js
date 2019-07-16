@@ -23,7 +23,9 @@
   ],
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "aws-sdk": "^2.493.0"
+  },
   "devDependencies": {
     "@aws-cdk/aws-codebuild": "^1.0.0",
     "@aws-cdk/aws-codepipeline": "^1.0.0",
@@ -35,6 +37,7 @@
     "@aws-cdk/core": "^1.0.0",
     "@commitlint/cli": "^8.0.0",
     "@commitlint/config-angular": "^8.0.0",
+    "@types/aws-sdk": "^2.7.0",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.1",
     "@typescript-eslint/eslint-plugin": "^1.12.0",
