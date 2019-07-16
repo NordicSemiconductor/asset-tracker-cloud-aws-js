@@ -6,6 +6,7 @@ phases:
     commands:
     - npm install -g npm@
     - npm ci --no-audit
+    - npx tsc
   build:
     commands:
     - npx cdk deploy --trace -v --require-approval never '*'

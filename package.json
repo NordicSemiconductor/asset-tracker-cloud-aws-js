@@ -3,7 +3,7 @@
   "version": "0.0.0-development",
   "description": "AWS-based implementation of Bifravst",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "test -n \"$SKIP_TESTS\" && true || jest",
     "postinstall": "npx tsc"
   },
   "repository": {
@@ -26,13 +26,16 @@
   "dependencies": {},
   "devDependencies": {
     "@aws-cdk/aws-codebuild": "^1.0.0",
+    "@aws-cdk/aws-codepipeline": "^1.0.0",
     "@aws-cdk/aws-cognito": "^1.0.0",
     "@aws-cdk/aws-iam": "^1.0.0",
     "@aws-cdk/aws-iot": "^1.0.0",
     "@aws-cdk/aws-s3": "^1.0.0",
+    "@aws-cdk/aws-ssm": "^1.0.0",
     "@aws-cdk/core": "^1.0.0",
     "@commitlint/cli": "^8.0.0",
     "@commitlint/config-angular": "^8.0.0",
+    "@types/jest": "^24.0.15",
     "@types/node": "^12.6.1",
     "@typescript-eslint/eslint-plugin": "^1.12.0",
     "@typescript-eslint/parser": "^1.12.0",
@@ -40,8 +43,10 @@
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
     "husky": "^3.0.0",
+    "jest": "^24.8.0",
     "lint-staged": "^9.2.0",
     "prettier": "^1.18.0",
+    "ts-jest": "^24.0.2",
     "typescript": "^3.5.3"
   },
   "husky": {
@@ -69,5 +74,26 @@
       "@semantic-release/release-notes-generator",
       "@semantic-release/github"
     ]
+  },
+  "deploy": {
+    "branch": "saga"
+  },
+  "jest": {
+    "testURL": "http://localhost",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": ".+\\.spec\\.ts$",
+    "globals": {
+      "ts-jest": {
+        "diagnostics": true
+      }
+    }
   }
 }
