@@ -6,17 +6,8 @@ import * as S3 from '@aws-cdk/aws-s3'
 import { HttpMethods } from '@aws-cdk/aws-s3'
 
 export class BifravstStack extends CloudFormation.Stack {
-	public constructor(
-		parent: CloudFormation.App,
-		id: string,
-		env: {
-			account: string
-			region: string
-		},
-	) {
-		super(parent, id, {
-			env,
-		})
+	public constructor(parent: CloudFormation.App, id: string) {
+		super(parent, id)
 
 		const userPool = new Cognito.UserPool(this, 'userPool', {
 			userPoolName: id,
