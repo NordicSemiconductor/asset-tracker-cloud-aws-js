@@ -4,9 +4,15 @@ import { BifravstContinuousDeploymentStack } from './BifravstContinuousDeploymen
 export class BifravstContinuousDeploymentApp extends CloudFormation.App {
 	public constructor(props: {
 		stackId: string
+		bifravstStackId: string
 		owner: string
 		repo: string
 		branch: string
+		app: {
+			owner: string
+			repo: string
+			branch: string
+		}
 	}) {
 		super()
 

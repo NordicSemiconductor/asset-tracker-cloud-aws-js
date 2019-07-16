@@ -13,14 +13,20 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 		parent: CloudFormation.App,
 		id: string,
 		properties: {
+			bifravstStackId: string
 			owner: string
 			repo: string
 			branch: string
+			app: {
+				owner: string
+				repo: string
+				branch: string
+			}
 		},
 	) {
 		super(parent, id)
 
-		const { owner, repo, branch } = properties
+		const { owner, repo, branch, app, bifravstStackId } = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
@@ -98,7 +104,7 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 		)
 
-		const p = new CodePipeline.CfnPipeline(this, 'CodePipeline', {
+		const pipeline = new CodePipeline.CfnPipeline(this, 'CodePipeline', {
 			roleArn: codePipelineRole.roleArn,
 			artifactStore: {
 				type: 'S3',
@@ -158,7 +164,7 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 				},
 			],
 		})
-		p.node.addDependency(codePipelineRole)
+		pipeline.node.addDependency(codePipelineRole)
 
 		new CodePipeline.CfnWebhook(this, 'webhook', {
 			name: `${id}-InvokePipelineFromGitHubChange`,
@@ -169,6 +175,113 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 				{
 					jsonPath: '$.ref',
 					matchEquals: `refs/heads/${branch}`,
+				},
+			],
+			authentication: 'GITHUB_HMAC',
+			authenticationConfiguration: {
+				secretToken: githubToken.stringValue,
+			},
+			registerWithThirdParty: false,
+		})
+
+		// App CD
+		const appProject = new CodeBuild.CfnProject(this, 'AppCodeBuildProject', {
+			name: `${id}-app`,
+			description:
+				'This project sets up the continuous deployment of the Bifravst app',
+			source: {
+				type: 'CODEPIPELINE',
+				buildSpec: 'continuous-deployment-app.yml',
+			},
+			serviceRole: codeBuildRole.roleArn,
+			artifacts: {
+				type: 'CODEPIPELINE',
+			},
+			environment: {
+				type: 'LINUX_CONTAINER',
+				computeType: 'BUILD_GENERAL1_LARGE',
+				image: 'aws/codebuild/standard:2.0',
+				environmentVariables: [
+					{
+						name: 'BIFRAVST_STACK_ID',
+						value: bifravstStackId,
+					},
+				],
+			},
+		})
+		project.node.addDependency(codeBuildRole)
+
+		const appPipeline = new CodePipeline.CfnPipeline(this, 'AppCodePipeline', {
+			roleArn: codePipelineRole.roleArn,
+			artifactStore: {
+				type: 'S3',
+				location: bucket.bucketName,
+			},
+			name: `${id}-app`,
+			stages: [
+				{
+					name: 'Source',
+					actions: [
+						{
+							name: 'SourceAction',
+							actionTypeId: {
+								category: 'Source',
+								owner: 'ThirdParty',
+								version: '1',
+								provider: 'GitHub',
+							},
+							outputArtifacts: [
+								{
+									name: 'SourceOutput',
+								},
+							],
+							configuration: {
+								Branch: app.branch,
+								Owner: app.owner,
+								Repo: app.repo,
+								OAuthToken: githubToken.stringValue,
+							},
+							runOrder: 1,
+						},
+					],
+				},
+				{
+					name: 'Deploy',
+					actions: [
+						{
+							name: 'DeployAction',
+							inputArtifacts: [{ name: 'SourceOutput' }],
+							actionTypeId: {
+								category: 'Build',
+								owner: 'AWS',
+								version: '1',
+								provider: 'CodeBuild',
+							},
+							configuration: {
+								ProjectName: appProject.name,
+							},
+							runOrder: 1,
+							outputArtifacts: [
+								{
+									name: 'BuildId',
+								},
+							],
+						},
+					],
+				},
+			],
+		})
+		appPipeline.node.addDependency(codePipelineRole)
+
+		new CodePipeline.CfnWebhook(this, 'appWebhook', {
+			name: `${id}-app-InvokePipelineFromGitHubChange`,
+			targetPipeline: `${id}-app`,
+			targetPipelineVersion: 1,
+			targetAction: 'Source',
+			filters: [
+				{
+					jsonPath: '$.ref',
+					matchEquals: `refs/heads/${app.branch}`,
 				},
 			],
 			authentication: 'GITHUB_HMAC',

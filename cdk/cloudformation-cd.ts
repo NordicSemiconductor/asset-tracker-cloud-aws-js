@@ -11,6 +11,11 @@ const pjson = JSON.parse(
 
 new BifravstContinuousDeploymentApp({
 	stackId: `${STACK_ID}-continuous-deployment`,
+	bifravstStackId: STACK_ID,
 	...extractRepoAndOwner(pjson.repository.url),
 	branch: pjson.deploy.branch || 'saga',
+	app: {
+		...extractRepoAndOwner(pjson.deploy.app.repository),
+		branch: pjson.deploy.app.branch || 'saga',
+	},
 }).synth()

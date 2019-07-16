@@ -80,7 +80,11 @@
     ]
   },
   "deploy": {
-    "branch": "saga"
+    "branch": "saga",
+    "app": {
+      "repository": "https://github.com/bifravst/app.git",
+      "branch": "saga"
+    }
   },
   "jest": {
     "testURL": "http://localhost",
