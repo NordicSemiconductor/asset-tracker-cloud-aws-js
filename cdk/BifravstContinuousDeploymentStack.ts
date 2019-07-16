@@ -73,13 +73,39 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 		project.node.addDependency(codeBuildRole)
 
+		const appProject = new CodeBuild.CfnProject(this, 'AppCodeBuildProject', {
+			name: `${id}-app`,
+			description:
+				'This project sets up the continuous deployment of the Bifravst app',
+			source: {
+				type: 'CODEPIPELINE',
+				buildSpec: 'continuous-deployment.yml',
+			},
+			serviceRole: codeBuildRole.roleArn,
+			artifacts: {
+				type: 'CODEPIPELINE',
+			},
+			environment: {
+				type: 'LINUX_CONTAINER',
+				computeType: 'BUILD_GENERAL1_LARGE',
+				image: 'aws/codebuild/standard:2.0',
+				environmentVariables: [
+					{
+						name: 'BIFRAVST_STACK_ID',
+						value: bifravstStackId,
+					},
+				],
+			},
+		})
+		project.node.addDependency(codeBuildRole)
+
 		const codePipelineRole = new IAM.Role(this, 'CodePipelineRole', {
 			assumedBy: new IAM.ServicePrincipal('codepipeline.amazonaws.com'),
 			inlinePolicies: {
 				controlCodeBuild: new IAM.PolicyDocument({
 					statements: [
 						new IAM.PolicyStatement({
-							resources: [project.attrArn],
+							resources: [project.attrArn, appProject.attrArn],
 							actions: ['codebuild:*'],
 						}),
 					],
@@ -185,31 +211,6 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 
 		// App CD
-		const appProject = new CodeBuild.CfnProject(this, 'AppCodeBuildProject', {
-			name: `${id}-app`,
-			description:
-				'This project sets up the continuous deployment of the Bifravst app',
-			source: {
-				type: 'CODEPIPELINE',
-				buildSpec: 'continuous-deployment-app.yml',
-			},
-			serviceRole: codeBuildRole.roleArn,
-			artifacts: {
-				type: 'CODEPIPELINE',
-			},
-			environment: {
-				type: 'LINUX_CONTAINER',
-				computeType: 'BUILD_GENERAL1_LARGE',
-				image: 'aws/codebuild/standard:2.0',
-				environmentVariables: [
-					{
-						name: 'BIFRAVST_STACK_ID',
-						value: bifravstStackId,
-					},
-				],
-			},
-		})
-		project.node.addDependency(codeBuildRole)
 
 		const appPipeline = new CodePipeline.CfnPipeline(this, 'AppCodePipeline', {
 			roleArn: codePipelineRole.roleArn,
