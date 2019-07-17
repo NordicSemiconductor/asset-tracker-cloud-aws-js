@@ -1,9 +1,8 @@
 import * as CloudFormation from '@aws-cdk/core'
-import { RemovalPolicy } from '@aws-cdk/core'
 import * as Cognito from '@aws-cdk/aws-cognito'
+import * as CloudFront from '@aws-cdk/aws-cloudfront'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
-import { HttpMethods } from '@aws-cdk/aws-s3'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -100,13 +99,13 @@ export class BifravstStack extends CloudFormation.Stack {
 			cors: [
 				{
 					allowedHeaders: ['*'],
-					allowedMethods: [HttpMethods.GET],
+					allowedMethods: [S3.HttpMethods.GET],
 					allowedOrigins: ['*'],
 					exposedHeaders: ['Date'],
 					maxAge: 3600,
 				},
 			],
-			removalPolicy: RemovalPolicy.DESTROY,
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 			websiteIndexDocument: 'index.html',
 			websiteErrorDocument: 'error.html',
 		})
@@ -116,8 +115,54 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:websiteBucketName`,
 		})
 
+		const distribution = new CloudFront.CfnDistribution(
+			this,
+			'websiteDistribution',
+			{
+				distributionConfig: {
+					enabled: true,
+					priceClass: 'PriceClass_100',
+					defaultRootObject: 'index.html',
+					defaultCacheBehavior: {
+						allowedMethods: ['HEAD', 'GET', 'OPTIONS'],
+						cachedMethods: ['HEAD', 'GET'],
+						compress: true,
+						forwardedValues: {
+							queryString: true,
+							headers: [
+								'Access-Control-Request-Headers',
+								'Access-Control-Request-Method',
+								'Origin',
+							],
+						},
+						smoothStreaming: false,
+						targetOriginId: 'S3',
+						viewerProtocolPolicy: 'redirect-to-https',
+					},
+					ipv6Enabled: true,
+					viewerCertificate: {
+						cloudFrontDefaultCertificate: true,
+					},
+					origins: [
+						{
+							domainName: `${websiteBucket.bucketName}.s3-website.${this.region}.amazonaws.com`,
+							id: 'S3',
+							customOriginConfig: {
+								originProtocolPolicy: 'http-only',
+							},
+						},
+					],
+				},
+			},
+		)
+
+		new CloudFormation.CfnOutput(this, 'cloudfrontDistributionId', {
+			value: distribution.ref,
+			exportName: `${this.stackName}:cloudFrontDistributionId`,
+		})
+
 		new CloudFormation.CfnOutput(this, 'websiteDomainName', {
-			value: `${websiteBucket.bucketName}.s3.${this.region}.amazonaws.com`,
+			value: distribution.attrDomainName,
 			exportName: `${this.stackName}:websiteDomainName`,
 		})
 	}

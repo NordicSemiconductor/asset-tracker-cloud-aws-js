@@ -27,6 +27,7 @@
     "aws-sdk": "^2.493.0"
   },
   "devDependencies": {
+    "@aws-cdk/aws-cloudfront": "^1.0.0",
     "@aws-cdk/aws-codebuild": "^1.0.0",
     "@aws-cdk/aws-codepipeline": "^1.0.0",
     "@aws-cdk/aws-cognito": "^1.0.0",
