@@ -79,7 +79,7 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 				'This project sets up the continuous deployment of the Bifravst app',
 			source: {
 				type: 'CODEPIPELINE',
-				buildSpec: 'continuous-deployment.yml',
+				buildSpec: 'continuous-deployment-app.yml',
 			},
 			serviceRole: codeBuildRole.roleArn,
 			artifacts: {
@@ -91,7 +91,7 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 				image: 'aws/codebuild/standard:2.0',
 				environmentVariables: [
 					{
-						name: 'BIFRAVST_STACK_ID',
+						name: 'STACK_ID',
 						value: bifravstStackId,
 					},
 				],
@@ -237,12 +237,33 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 								},
 							],
 							configuration: {
+								Branch: branch,
+								Owner: owner,
+								Repo: repo,
+								OAuthToken: githubToken.stringValue,
+							},
+							runOrder: 1,
+						},
+						{
+							name: 'AppSourceAction',
+							actionTypeId: {
+								category: 'Source',
+								owner: 'ThirdParty',
+								version: '1',
+								provider: 'GitHub',
+							},
+							outputArtifacts: [
+								{
+									name: 'AppSourceOutput',
+								},
+							],
+							configuration: {
 								Branch: app.branch,
 								Owner: app.owner,
 								Repo: app.repo,
 								OAuthToken: githubToken.stringValue,
 							},
-							runOrder: 1,
+							runOrder: 2,
 						},
 					],
 				},
@@ -251,7 +272,10 @@ export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
 					actions: [
 						{
 							name: 'DeployAction',
-							inputArtifacts: [{ name: 'SourceOutput' }],
+							inputArtifacts: [
+								{ name: 'SourceOutput' },
+								{ name: 'AppSourceOutput' },
+							],
 							actionTypeId: {
 								category: 'Build',
 								owner: 'AWS',

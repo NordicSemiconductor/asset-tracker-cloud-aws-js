@@ -1,0 +1,16 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+    commands:
+    - npm install -g npm@
+    - npm ci --no-audit
+    - npx tsc
+  build:
+    commands:
+    - node dist/scripts/print-react-app-configuration.js > $CODEBUILD_SRC_DIR_AppSourceOutput/.env.production.local
+    - cat $CODEBUILD_SRC_DIR_AppSourceOutput/.env.production.local
+    - export $(cat $CODEBUILD_SRC_DIR_AppSourceOutput/.env.production.local | xargs)
+    - cd $CODEBUILD_SRC_DIR_AppSourceOutput/; npm ci --no-audit; npm run build;
+    - aws s3 cp $CODEBUILD_SRC_DIR_AppSourceOutput/build s3://$REACT_APP_WEBSITE_BUCKET --recursive --metadata-directive REPLACE --cache-control 'public,max-age=600' --expires ''
