@@ -24,7 +24,11 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.493.0"
+    "aws-iot-device-sdk": "^2.2.1",
+    "aws-sdk": "^2.493.0",
+    "cfn-response": "^1.0.1",
+    "chalk": "^2.4.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@aws-cdk/aws-cloudfront": "^1.0.0",
@@ -38,9 +42,15 @@
     "@aws-cdk/core": "^1.0.0",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-angular": "^8.1.0",
+    "@nrfcloud/package-layered-lambdas": "^1.2.0",
+    "@types/aws-iot-device-sdk": "^2.2.0",
+    "@types/aws-lambda": "^8.10.30",
     "@types/aws-sdk": "^2.7.0",
+    "@types/cfn-response": "^1.0.0",
+    "@types/chalk": "^2.2.0",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.6",
+    "@types/uuid": "^3.4.5",
     "@typescript-eslint/eslint-plugin": "^1.12.0",
     "@typescript-eslint/parser": "^1.12.0",
     "cdk": "^1.0.0",

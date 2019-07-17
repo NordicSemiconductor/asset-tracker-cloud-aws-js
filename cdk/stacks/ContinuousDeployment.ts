@@ -8,7 +8,7 @@ import * as S3 from '@aws-cdk/aws-s3'
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
  */
-export class BifravstContinuousDeploymentStack extends CloudFormation.Stack {
+export class ContinuousDeploymentStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		id: string,

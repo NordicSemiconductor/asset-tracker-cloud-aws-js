@@ -1,7 +1,7 @@
 import * as CloudFormation from '@aws-cdk/core'
-import { BifravstContinuousDeploymentStack } from './BifravstContinuousDeploymentStack'
+import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
 
-export class BifravstContinuousDeploymentApp extends CloudFormation.App {
+export class ContinuousDeploymentApp extends CloudFormation.App {
 	public constructor(props: {
 		stackId: string
 		bifravstStackId: string
@@ -16,6 +16,6 @@ export class BifravstContinuousDeploymentApp extends CloudFormation.App {
 	}) {
 		super()
 
-		new BifravstContinuousDeploymentStack(this, props.stackId, props)
+		new ContinuousDeploymentStack(this, props.stackId, props)
 	}
 }
