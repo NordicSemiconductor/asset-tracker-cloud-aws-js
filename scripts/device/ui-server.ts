@@ -2,11 +2,13 @@ import * as path from 'path'
 import * as http from 'http'
 import { promises as fs } from 'fs'
 import chalk from 'chalk'
+import { portForDevice } from './portForDevice'
 
 export const uiServer = async (args: {
+	deviceId: string
 	onUpdate: (update: object) => void
 }) => {
-	const port = 1024 + Math.round(Math.random() * (65535 - 1024))
+	const port = portForDevice({ deviceId: args.deviceId })
 	const uiPage = await fs.readFile(
 		path.resolve(process.cwd(), 'data', 'device-ui.html'),
 		'utf-8',

@@ -10,6 +10,10 @@ import { uiServer } from './device/ui-server'
  */
 const main = async (args: { deviceId: string }) => {
 	const clientId = args.deviceId
+	if (!clientId || !clientId.length) {
+		throw new Error('Must provide a device id!')
+	}
+	console.log(chalk.magenta('Fetching IoT endpoint address ...'))
 	const { endpointAddress } = await new Iot({
 		region: process.env.AWS_DEFAULT_REGION,
 	})
@@ -54,6 +58,7 @@ const main = async (args: { deviceId: string }) => {
 
 		connection.register(clientId, {}, async () => {
 			await uiServer({
+				deviceId: clientId,
 				onUpdate: update => {
 					console.log({ clientId, state: { state: { reported: update } } })
 					connection.update(clientId, { state: { reported: update } })
