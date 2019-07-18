@@ -1,6 +1,6 @@
 import * as os from 'os'
 import { promises as fs } from 'fs'
-import * as uuid from 'uuid'
+import { randomWords } from '@bifravst/random-words'
 import { caFileLocations } from './caFileLocations'
 import { deviceFileLocations } from './deviceFileLocations'
 import { run } from '../process/run'
@@ -22,7 +22,7 @@ export const generateDeviceCertificate = async (args: {
 		throw new Error(`${certsDir} does not exist.`)
 	}
 
-	const deviceId = uuid.v4()
+	const deviceId = (await randomWords()).join('-')
 	log(`Generating certificate for device ${deviceId}`)
 	const caFiles = caFileLocations(certsDir)
 	const deviceFiles = deviceFileLocations(certsDir, deviceId)
