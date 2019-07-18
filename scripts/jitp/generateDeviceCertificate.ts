@@ -13,7 +13,7 @@ export const generateDeviceCertificate = async (args: {
 	certsDir: string
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
-}) => {
+}): Promise<{ deviceId: string }> => {
 	const { certsDir, log, debug } = args
 
 	try {
@@ -78,5 +78,5 @@ export const generateDeviceCertificate = async (args: {
 		'utf-8',
 	)
 
-	log(`Done: ${deviceId}`)
+	return { deviceId }
 }

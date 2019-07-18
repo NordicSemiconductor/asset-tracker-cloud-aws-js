@@ -1,4 +1,5 @@
 import { stackOutputToCRAEnvironment } from './cloudformation/stackOutputToCRAEnvironment'
+import chalk from 'chalk'
 
 /**
  * Prints the stack outputs as create-react-app environment variables
@@ -10,7 +11,7 @@ stackOutputToCRAEnvironment({
 	.then(env => {
 		process.stdout.write(env)
 	})
-	.catch(err => {
-		console.error(err)
+	.catch(error => {
+		console.error(chalk.red(error))
 		process.exit(1)
 	})

@@ -26,13 +26,19 @@ const main = async (args: { deviceId: string }) => {
 	const certsDir = path.resolve(process.cwd(), 'certificates')
 	const deviceFiles = deviceFileLocations(certsDir, args.deviceId)
 
+	console.time(chalk.green(chalk.inverse(' connected ')))
+
+	const note = chalk.magenta(
+		`Still connecting ... First connect takes around 30 seconds`,
+	)
+	console.time(note)
+	const connectingNote = setInterval(() => {
+		console.timeLog(note)
+	}, 5000)
+
 	const connection = new device({
-		privateKey: path.resolve(process.cwd(), 'certificates', deviceFiles.key),
-		clientCert: path.resolve(
-			process.cwd(),
-			'certificates',
-			deviceFiles.certWithCA,
-		),
+		privateKey: deviceFiles.key,
+		clientCert: deviceFiles.certWithCA,
 		caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 		clientId: args.deviceId.trim(),
 		host: endpointAddress,
@@ -40,7 +46,8 @@ const main = async (args: { deviceId: string }) => {
 	})
 
 	connection.on('connect', async () => {
-		console.log(chalk.green(chalk.inverse(' connected ')))
+		console.timeEnd(chalk.green(chalk.inverse(' connected ')))
+		clearInterval(connectingNote)
 	})
 
 	connection.on('close', () => {
@@ -53,6 +60,6 @@ const main = async (args: { deviceId: string }) => {
 }
 
 main({ deviceId: process.argv[process.argv.length - 1] }).catch(error => {
-	console.error(error)
+	console.error(chalk.red(error))
 	process.exit(1)
 })

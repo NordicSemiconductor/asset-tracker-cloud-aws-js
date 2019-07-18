@@ -15,7 +15,14 @@ registerCA({
 	debug: (...message: any[]) => {
 		console.log(...message.map(m => chalk.cyan(m)))
 	},
-}).catch(error => {
-	console.error(error)
-	process.exit(1)
 })
+	.then(({ certificateId }) => {
+		console.log(
+			chalk.green(`CA certificate ${chalk.yellow(certificateId)} registered.`),
+		)
+		console.log(chalk.green('You can now generate device certificates.'))
+	})
+	.catch(error => {
+		console.error(chalk.red(error))
+		process.exit(1)
+	})

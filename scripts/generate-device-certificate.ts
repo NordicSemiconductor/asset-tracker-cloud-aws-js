@@ -13,7 +13,16 @@ generateDeviceCertificate({
 	debug: (...message: any[]) => {
 		console.log(...message.map(m => chalk.cyan(m)))
 	},
-}).catch(error => {
-	console.error(error)
-	process.exit(1)
 })
+	.then(({ deviceId }) => {
+		console.log(
+			chalk.green(
+				`Certificate for device ${chalk.yellow(deviceId)} generated.`,
+			),
+		)
+		console.log(chalk.green('You can now connect to the broker.'))
+	})
+	.catch(error => {
+		console.error(chalk.red(error))
+		process.exit(1)
+	})

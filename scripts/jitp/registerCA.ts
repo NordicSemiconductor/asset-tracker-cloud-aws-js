@@ -14,7 +14,7 @@ export const registerCA = async (args: {
 	region?: string
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
-}) => {
+}): Promise<{ certificateId: string }> => {
 	const { certsDir, stackId, region, log, debug } = args
 	const iot = new Iot({ region })
 	const cf = new CloudFormation({ region })
@@ -148,7 +148,7 @@ export const registerCA = async (args: {
 		})
 		.promise()
 
-	await iot
+	const res = await iot
 		.registerCACertificate({
 			caCertificate,
 			verificationCertificate,
@@ -190,7 +190,15 @@ export const registerCA = async (args: {
 		})
 		.promise()
 
+	if (!res || !res.certificateId) {
+		throw new Error('Failed to register CA!')
+	}
+
 	log(
 		`Registered CA and enabled auto-registration to group ${stackOutput.thingGroupName}`,
 	)
+
+	return {
+		certificateId: res.certificateId,
+	}
 }
