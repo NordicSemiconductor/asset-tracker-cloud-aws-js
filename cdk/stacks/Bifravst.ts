@@ -79,6 +79,27 @@ export class BifravstStack extends CloudFormation.Stack {
 				},
 				'sts:AssumeRoleWithWebIdentity',
 			),
+			inlinePolicies: {
+				manageThings: new IAM.PolicyDocument({
+					statements: [
+						new IAM.PolicyStatement({
+							resources: ['*'],
+							actions: ['iot:listThings', 'iot:describeThing'],
+						}),
+					],
+				}),
+				attachPolicy: new IAM.PolicyDocument({
+					statements: [
+						new IAM.PolicyStatement({
+							resources: ['arn:aws:iot:*:*:client/user-*'],
+							actions: [
+								'iot:attachPrincipalPolicy',
+								'iot:listPrincipalPolicies',
+							],
+						}),
+					],
+				}),
+			},
 		})
 
 		const unauthenticatedUserRole = new IAM.Role(
@@ -123,6 +144,44 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:userPoolClientId`,
 		})
 
+		// IoT Policy for Cognito user
+
+		new Iot.CfnPolicy(this, 'userIotPolicy', {
+			policyName: `${id}-userIotPolicy`,
+			policyDocument: {
+				Version: '2012-10-17',
+				Statement: [
+					{
+						Effect: 'Allow',
+						Action: ['iot:Connect'],
+						Resource: ['*'],
+					},
+					{
+						Effect: 'Allow',
+						Action: ['iot:Receive'],
+						Resource: ['*'],
+					},
+					{
+						Effect: 'Allow',
+						Action: ['iot:Subscribe'],
+						Resource: ['*'],
+					},
+					{
+						Effect: 'Allow',
+						Action: ['iot:Publish'],
+						Resource: ['*'],
+					},
+				],
+			},
+		})
+
+		new CloudFormation.CfnOutput(this, 'iotPolicy', {
+			value: `${id}-userIotPolicy`,
+			exportName: `${this.stackName}:iotPolicy`,
+		})
+
+		// Web App
+
 		const webAppHosting = new WebAppHosting(this, 'webAppHosting')
 		new CloudFormation.CfnOutput(this, 'webAppBucketName', {
 			value: webAppHosting.bucket.bucketName,
@@ -138,6 +197,8 @@ export class BifravstStack extends CloudFormation.Stack {
 			value: webAppHosting.distribution.attrDomainName,
 			exportName: `${this.stackName}:webAppDomainName`,
 		})
+
+		// Device UI
 
 		const deviceUIHosting = new WebAppHosting(this, 'deviceUIHosting')
 
