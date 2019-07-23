@@ -99,6 +99,23 @@ export class BifravstStack extends CloudFormation.Stack {
 						}),
 					],
 				}),
+				iot: new IAM.PolicyDocument({
+					statements: [
+						new IAM.PolicyStatement({
+							actions: [
+								'iot:Receive',
+								'iot:UpdateThingShadow',
+								'iot:GetThingShadow',
+								'iot:Subscribe',
+							],
+							resources: ['*'],
+						}),
+						new IAM.PolicyStatement({
+							actions: ['iot:Connect'],
+							resources: ['arn:aws:iot:*:*:client/user-*'],
+						}),
+					],
+				}),
 			},
 		})
 
@@ -154,11 +171,15 @@ export class BifravstStack extends CloudFormation.Stack {
 					{
 						Effect: 'Allow',
 						Action: ['iot:Connect'],
-						Resource: ['*'],
+						Resource: ['arn:aws:iot:*:*:client/user-*'],
 					},
 					{
 						Effect: 'Allow',
-						Action: ['iot:Receive'],
+						Action: [
+							'iot:Receive',
+							'iot:UpdateThingShadow',
+							'iot:GetThingShadow',
+						],
 						Resource: ['*'],
 					},
 					{
