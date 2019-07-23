@@ -5,12 +5,12 @@ import {
 } from '@aws-cdk/aws-cloudformation'
 import * as Cognito from '@aws-cdk/aws-cognito'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import * as CloudFront from '@aws-cdk/aws-cloudfront'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as Iot from '@aws-cdk/aws-iot'
 import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
+import { WebAppHosting } from '../resources/WebAppHosting'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -123,76 +123,37 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:userPoolClientId`,
 		})
 
-		const websiteBucket = new S3.Bucket(this, 'websitBucket', {
-			publicReadAccess: true,
-			cors: [
-				{
-					allowedHeaders: ['*'],
-					allowedMethods: [S3.HttpMethods.GET],
-					allowedOrigins: ['*'],
-					exposedHeaders: ['Date'],
-					maxAge: 3600,
-				},
-			],
-			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
-			websiteIndexDocument: 'index.html',
-			websiteErrorDocument: 'error.html',
+		const webAppHosting = new WebAppHosting(this, 'webAppHosting')
+		new CloudFormation.CfnOutput(this, 'webAppBucketName', {
+			value: webAppHosting.bucket.bucketName,
+			exportName: `${this.stackName}:webAppBucketName`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'websiteBucketName', {
-			value: websiteBucket.bucketName,
-			exportName: `${this.stackName}:websiteBucketName`,
+		new CloudFormation.CfnOutput(this, 'cloudFrontDistributionIdWebApp', {
+			value: webAppHosting.distribution.ref,
+			exportName: `${this.stackName}:cloudFrontDistributionIdWebApp`,
 		})
 
-		const distribution = new CloudFront.CfnDistribution(
-			this,
-			'websiteDistribution',
-			{
-				distributionConfig: {
-					enabled: true,
-					priceClass: 'PriceClass_100',
-					defaultRootObject: 'index.html',
-					defaultCacheBehavior: {
-						allowedMethods: ['HEAD', 'GET', 'OPTIONS'],
-						cachedMethods: ['HEAD', 'GET'],
-						compress: true,
-						forwardedValues: {
-							queryString: true,
-							headers: [
-								'Access-Control-Request-Headers',
-								'Access-Control-Request-Method',
-								'Origin',
-							],
-						},
-						smoothStreaming: false,
-						targetOriginId: 'S3',
-						viewerProtocolPolicy: 'redirect-to-https',
-					},
-					ipv6Enabled: true,
-					viewerCertificate: {
-						cloudFrontDefaultCertificate: true,
-					},
-					origins: [
-						{
-							domainName: `${websiteBucket.bucketName}.s3-website.${this.region}.amazonaws.com`,
-							id: 'S3',
-							customOriginConfig: {
-								originProtocolPolicy: 'http-only',
-							},
-						},
-					],
-				},
-			},
-		)
-
-		new CloudFormation.CfnOutput(this, 'cloudfrontDistributionId', {
-			value: distribution.ref,
-			exportName: `${this.stackName}:cloudFrontDistributionId`,
+		new CloudFormation.CfnOutput(this, 'webAppDomainName', {
+			value: webAppHosting.distribution.attrDomainName,
+			exportName: `${this.stackName}:webAppDomainName`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'websiteDomainName', {
-			value: distribution.attrDomainName,
-			exportName: `${this.stackName}:websiteDomainName`,
+		const deviceUIHosting = new WebAppHosting(this, 'deviceUIHosting')
+
+		new CloudFormation.CfnOutput(this, 'deviceUiBucketName', {
+			value: deviceUIHosting.bucket.bucketName,
+			exportName: `${this.stackName}:deviceUi`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'cloudFrontDistributionIdDeviceUi', {
+			value: deviceUIHosting.distribution.ref,
+			exportName: `${this.stackName}:cloudFrontDistributionIdDeviceUi`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'deviceUiDomainName', {
+			value: deviceUIHosting.distribution.attrDomainName,
+			exportName: `${this.stackName}:deviceUiDomainName`,
 		})
 
 		const iotJitpRole = new IAM.Role(this, 'iotJitpRole', {
@@ -299,4 +260,20 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:thingGroupName`,
 		})
 	}
+}
+
+export type StackOutputs = {
+	mqttEndpoint: string
+	userPoolId: string
+	identityPoolId: string
+	userPoolClientId: string
+	webAppBucketName: string
+	cloudFrontDistributionIdWebApp: string
+	webAppDomainName: string
+	deviceUiBucketName: string
+	cloudFrontDistributionIdDeviceUi: string
+	deviceUiDomainName: string
+	jitpRoleArn: string
+	thingPolicyArn: string
+	thingGroupName: string
 }

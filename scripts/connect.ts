@@ -4,6 +4,11 @@ import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from './jitp/deviceFileLocations'
 import chalk from 'chalk'
 import { uiServer } from './device/ui-server'
+import { stackOutput } from './cloudformation/stackOutput'
+import { StackOutputs } from '../cdk/stacks/Bifravst'
+
+const stackId = process.env.STACK_ID || 'bifravst'
+const region = process.env.AWS_DEFAULT_REGION
 
 /**
  * Connect to the AWS IoT broker using a generated device certificate
@@ -13,21 +18,30 @@ const main = async (args: { deviceId: string }) => {
 	if (!clientId || !clientId.length) {
 		throw new Error('Must provide a device id!')
 	}
-	console.log(chalk.magenta('Fetching IoT endpoint address ...'))
-	const { endpointAddress } = await new Iot({
-		region: process.env.AWS_DEFAULT_REGION,
-	})
-		.describeEndpoint({ endpointType: 'iot:Data-ATS' })
-		.promise()
 
-	if (!endpointAddress) {
-		throw new Error(`Failed to resolved AWS IoT endpoint`)
-	}
-
-	console.log(
-		chalk.blue(`IoT broker hostname: ${chalk.yellow(endpointAddress)}`),
-	)
 	console.log(chalk.blue(`Device ID: ${chalk.yellow(clientId)}`))
+
+	const [endpointAddress, deviceUiUrl] = await Promise.all([
+		(async () => {
+			console.log(chalk.magenta('Fetching IoT endpoint address ...'))
+			const { endpointAddress } = await new Iot({
+				region,
+			})
+				.describeEndpoint({ endpointType: 'iot:Data-ATS' })
+				.promise()
+			if (!endpointAddress) {
+				throw new Error(`Failed to resolved AWS IoT endpoint`)
+			}
+			console.log(
+				chalk.blue(`IoT broker hostname: ${chalk.yellow(endpointAddress)}`),
+			)
+			return endpointAddress
+		})(),
+		stackOutput<StackOutputs>({
+			region,
+			stackId,
+		}).then(({ deviceUiDomainName }) => `https://${deviceUiDomainName}`),
+	])
 
 	const certsDir = path.resolve(process.cwd(), 'certificates')
 	const deviceFiles = deviceFileLocations(certsDir, clientId)
@@ -49,7 +63,6 @@ const main = async (args: { deviceId: string }) => {
 		clientId,
 		host: endpointAddress,
 		region: endpointAddress.split('.')[2],
-		debug: true,
 	})
 
 	connection.on('connect', async () => {
@@ -58,6 +71,7 @@ const main = async (args: { deviceId: string }) => {
 
 		connection.register(clientId, {}, async () => {
 			await uiServer({
+				deviceUiUrl,
 				deviceId: clientId,
 				onUpdate: update => {
 					console.log({ clientId, state: { state: { reported: update } } })

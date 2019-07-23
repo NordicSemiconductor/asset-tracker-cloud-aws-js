@@ -12,10 +12,16 @@ const pjson = JSON.parse(
 new ContinuousDeploymentApp({
 	stackId: `${STACK_ID}-continuous-deployment`,
 	bifravstStackId: STACK_ID,
-	...extractRepoAndOwner(pjson.repository.url),
-	branch: pjson.deploy.branch || 'saga',
-	app: {
-		...extractRepoAndOwner(pjson.deploy.app.repository),
-		branch: pjson.deploy.app.branch || 'saga',
+	bifravstAWS: {
+		...extractRepoAndOwner(pjson.repository.url),
+		branch: pjson.deploy.branch || 'saga',
+	},
+	webApp: {
+		...extractRepoAndOwner(pjson.deploy.webApp.repository),
+		branch: pjson.deploy.webApp.branch || 'saga',
+	},
+	deviceUI: {
+		...extractRepoAndOwner(pjson.deploy.deviceUI.repository),
+		branch: pjson.deploy.deviceUI.branch || 'saga',
 	},
 }).synth()

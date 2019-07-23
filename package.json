@@ -91,8 +91,12 @@
   },
   "deploy": {
     "branch": "saga",
-    "app": {
+    "webApp": {
       "repository": "https://github.com/bifravst/app.git",
+      "branch": "saga"
+    },
+    "deviceUI": {
+      "repository": "https://github.com/bifravst/device-ui.git",
       "branch": "saga"
     }
   },

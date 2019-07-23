@@ -1,29 +1,33 @@
-import * as path from 'path'
 import * as http from 'http'
-import { promises as fs } from 'fs'
 import chalk from 'chalk'
 import { portForDevice } from './portForDevice'
 
 export const uiServer = async (args: {
 	deviceId: string
+	deviceUiUrl: string
 	onUpdate: (update: object) => void
 }) => {
 	const port = portForDevice({ deviceId: args.deviceId })
-	const uiPage = await fs.readFile(
-		path.resolve(process.cwd(), 'data', 'device-ui.html'),
-		'utf-8',
-	)
 
 	const requestHandler: http.RequestListener = async (request, response) => {
+		if (request.method === 'OPTIONS') {
+			response.writeHead(200, {
+				'Access-Control-Allow-Methods': 'GET,OPTIONS,POST',
+				'Access-Control-Allow-Headers': 'Content-Type',
+				'Access-Control-Allow-Origin': '*',
+			})
+			response.end()
+			return
+		}
 		let body = ''
 		switch (request.url) {
-			case '/':
-			case '/index.html':
+			case '/id':
 				response.writeHead(200, {
-					'Content-Length': Buffer.byteLength(uiPage),
-					'Content-Type': 'text/html',
+					'Content-Length': args.deviceId.length,
+					'Content-Type': 'text/plain',
+					'Access-Control-Allow-Origin': '*',
 				})
-				response.end(uiPage)
+				response.end(args.deviceId)
 				break
 			case '/update':
 				request.on('data', chunk => {
@@ -31,9 +35,12 @@ export const uiServer = async (args: {
 				})
 				request.on('end', () => {
 					try {
+						console.log(body)
 						const update = JSON.parse(body)
 						args.onUpdate(update)
-						response.statusCode = 202
+						response.writeHead(202, {
+							'Access-Control-Allow-Origin': '*',
+						})
 						response.end()
 					} catch (err) {
 						console.log(err)
@@ -41,10 +48,14 @@ export const uiServer = async (args: {
 						response.writeHead(400, {
 							'Content-Length': Buffer.byteLength(errData),
 							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
 						})
 						response.end(errData)
 					}
 				})
+				break
+			case '/subscribe':
+				// FIXME: Add websockets
 				break
 			default:
 				response.statusCode = 404
@@ -56,8 +67,11 @@ export const uiServer = async (args: {
 
 	server.listen(port, () => {
 		console.log(
+			chalk.cyan(`To control this device open your browser on:`),
 			chalk.green(
-				`To control this device open your browser on http://localhost:${port}`,
+				`${args.deviceUiUrl}?endpoint=${encodeURIComponent(
+					`http://localhost:${port}`,
+				)}`,
 			),
 		)
 	})

@@ -1,0 +1,17 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 10
+    commands:
+    - npm install -g npm@
+    - npm ci --no-audit
+    - npx tsc
+  build:
+    commands:
+    - node dist/scripts/print-react-app-configuration.js > $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+    - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+    - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
+    - cd $CODEBUILD_SRC_DIR_WebApp/; npm ci --no-audit; npm run build;
+    - aws s3 cp $CODEBUILD_SRC_DIR_WebApp/build s3://$REACT_APP_DEVICE_UI_BUCKET_NAME --recursive --metadata-directive REPLACE --cache-control 'public,max-age=600' --expires ''
+    - aws cloudfront create-invalidation --distribution-id $REACT_APP_CLOUDFRONT_DISTRIBUTION_ID_DEVICE_UI --paths /,/index.html

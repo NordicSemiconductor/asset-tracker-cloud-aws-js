@@ -7,5 +7,5 @@ export const portForDevice = ({ deviceId }: { deviceId: string }): number => {
 		hash = (hash << 5) - hash + deviceId.charCodeAt(i)
 		hash |= 0 // Convert to 32bit integer
 	}
-	return 1024 + Math.round((hash / Math.pow(2, 31)) * (65535 - 1024))
+	return 1024 + Math.round((Math.abs(hash) / Math.pow(2, 31)) * (65535 - 1024))
 }

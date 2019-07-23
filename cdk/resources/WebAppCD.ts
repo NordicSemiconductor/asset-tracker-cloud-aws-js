@@ -4,17 +4,15 @@ import * as CodeBuild from '@aws-cdk/aws-codebuild'
 import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
-import { WebAppCD } from '../resources/WebAppCD'
 
 /**
- * This is the CloudFormation stack sets up the continuous deployment of the project.
+ * This sets up the continuous delivery for a web-app
  */
-export class ContinuousDeploymentStack extends CloudFormation.Stack {
+export class WebAppCD extends CloudFormation.Construct {
 	public constructor(
-		parent: CloudFormation.App,
+		parent: CloudFormation.Stack,
 		id: string,
 		properties: {
-			bifravstStackId: string
 			bifravstAWS: {
 				owner: string
 				repo: string
@@ -25,16 +23,20 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				repo: string
 				branch: string
 			}
-			deviceUI: {
-				owner: string
-				repo: string
-				branch: string
-			}
+			bifravstStackId: string
+			githubToken: SSM.IStringParameter
+			buildSpec: string
 		},
 	) {
 		super(parent, id)
 
-		const { bifravstAWS, deviceUI, webApp, bifravstStackId } = properties
+		const {
+			bifravstStackId,
+			bifravstAWS,
+			webApp,
+			githubToken,
+			buildSpec,
+		} = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
@@ -50,24 +52,11 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 		})
 
-		codeBuildRole.addToPolicy(
-			new IAM.PolicyStatement({
-				resources: [codeBuildRole.roleArn],
-				actions: ['iam:PassRole', 'iam:GetRole'],
-			}),
-		)
-
-		const bucket = new S3.Bucket(this, 'bucket', {
-			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
-		})
-
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: id,
-			description:
-				'This project sets up the continuous deployment of the Bifravst project',
 			source: {
 				type: 'CODEPIPELINE',
-				buildSpec: 'continuous-deployment.yml',
+				buildSpec,
 			},
 			serviceRole: codeBuildRole.roleArn,
 			artifacts: {
@@ -77,11 +66,21 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				type: 'LINUX_CONTAINER',
 				computeType: 'BUILD_GENERAL1_LARGE',
 				image: 'aws/codebuild/standard:2.0',
+				environmentVariables: [
+					{
+						name: 'STACK_ID',
+						value: bifravstStackId,
+					},
+				],
 			},
 		})
 		project.node.addDependency(codeBuildRole)
 
-		const codePipelineRole = new IAM.Role(this, 'CodePipelineRole', {
+		const bucket = new S3.Bucket(this, 'bucket', {
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+		})
+
+		const pipelineRole = new IAM.Role(this, 'CodePipelineRole', {
 			assumedBy: new IAM.ServicePrincipal('codepipeline.amazonaws.com'),
 			inlinePolicies: {
 				controlCodeBuild: new IAM.PolicyDocument({
@@ -103,17 +102,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 		})
 
-		const githubToken = SSM.StringParameter.fromStringParameterAttributes(
-			this,
-			'ghtoken',
-			{
-				parameterName: '/codebuild/github-token',
-				version: 1,
-			},
-		)
-
 		const pipeline = new CodePipeline.CfnPipeline(this, 'CodePipeline', {
-			roleArn: codePipelineRole.roleArn,
+			roleArn: pipelineRole.roleArn,
 			artifactStore: {
 				type: 'S3',
 				location: bucket.bucketName,
@@ -143,14 +133,34 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 								OAuthToken: githubToken.stringValue,
 							},
 						},
+						{
+							name: 'WebAppSourceCode',
+							actionTypeId: {
+								category: 'Source',
+								owner: 'ThirdParty',
+								version: '1',
+								provider: 'GitHub',
+							},
+							outputArtifacts: [
+								{
+									name: 'WebApp',
+								},
+							],
+							configuration: {
+								Branch: webApp.branch,
+								Owner: webApp.owner,
+								Repo: webApp.repo,
+								OAuthToken: githubToken.stringValue,
+							},
+						},
 					],
 				},
 				{
 					name: 'Deploy',
 					actions: [
 						{
-							name: 'DeployBifravst',
-							inputArtifacts: [{ name: 'BifravstAWS' }],
+							name: 'DeployWebApp',
+							inputArtifacts: [{ name: 'BifravstAWS' }, { name: 'WebApp' }],
 							actionTypeId: {
 								category: 'Build',
 								owner: 'AWS',
@@ -159,6 +169,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 							},
 							configuration: {
 								ProjectName: project.name,
+								PrimarySource: 'BifravstAWS',
 							},
 							outputArtifacts: [
 								{
@@ -170,7 +181,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				},
 			],
 		})
-		pipeline.node.addDependency(codePipelineRole)
+		pipeline.node.addDependency(pipelineRole)
 
 		new CodePipeline.CfnWebhook(this, 'webhook', {
 			name: `${id}-InvokePipelineFromGitHubChange`,
@@ -180,7 +191,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			filters: [
 				{
 					jsonPath: '$.ref',
-					matchEquals: `refs/heads/${bifravstAWS.branch}`,
+					matchEquals: `refs/heads/${webApp.branch}`,
 				},
 			],
 			authentication: 'GITHUB_HMAC',
@@ -188,24 +199,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				secretToken: githubToken.stringValue,
 			},
 			registerWithThirdParty: false,
-		})
-
-		// Sets up the continuous deployment for the web app
-		new WebAppCD(this, 'webAppCD', {
-			bifravstAWS,
-			webApp,
-			githubToken,
-			bifravstStackId,
-			buildSpec: 'continuous-deployment-web-app.yml',
-		})
-
-		// Sets up the continuous deployment for the device UI
-		new WebAppCD(this, 'deviceUICD', {
-			bifravstAWS,
-			webApp: deviceUI,
-			githubToken,
-			bifravstStackId,
-			buildSpec: 'continuous-deployment-device-ui-app.yml',
 		})
 	}
 }
