@@ -25,7 +25,7 @@ export class WebAppHosting extends CloudFormation.Resource {
 			],
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 			websiteIndexDocument: 'index.html',
-			websiteErrorDocument: 'error.html',
+			websiteErrorDocument: 'index.html',
 		})
 
 		this.distribution = new CloudFront.CfnDistribution(
