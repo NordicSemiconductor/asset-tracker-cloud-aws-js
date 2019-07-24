@@ -211,9 +211,9 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:webAppBucketName`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'cloudFrontDistributionIdWebApp', {
+		new CloudFormation.CfnOutput(this, 'cloudfrontDistributionIdWebApp', {
 			value: webAppHosting.distribution.ref,
-			exportName: `${this.stackName}:cloudFrontDistributionIdWebApp`,
+			exportName: `${this.stackName}:cloudfrontDistributionIdWebApp`,
 		})
 
 		new CloudFormation.CfnOutput(this, 'webAppDomainName', {
@@ -230,9 +230,9 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:deviceUi`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'cloudFrontDistributionIdDeviceUi', {
+		new CloudFormation.CfnOutput(this, 'cloudfrontDistributionIdDeviceUi', {
 			value: deviceUIHosting.distribution.ref,
-			exportName: `${this.stackName}:cloudFrontDistributionIdDeviceUi`,
+			exportName: `${this.stackName}:cloudfrontDistributionIdDeviceUi`,
 		})
 
 		new CloudFormation.CfnOutput(this, 'deviceUiDomainName', {
@@ -351,10 +351,10 @@ export type StackOutputs = {
 	identityPoolId: string
 	userPoolClientId: string
 	webAppBucketName: string
-	cloudFrontDistributionIdWebApp: string
+	cloudfrontDistributionIdWebApp: string
 	webAppDomainName: string
 	deviceUiBucketName: string
-	cloudFrontDistributionIdDeviceUi: string
+	cloudfrontDistributionIdDeviceUi: string
 	deviceUiDomainName: string
 	jitpRoleArn: string
 	thingPolicyArn: string
