@@ -88,6 +88,9 @@ export class BifravstStack extends CloudFormation.Stack {
 						}),
 					],
 				}),
+				// This allows users to attach IoT policies to them-selves.
+				// They will attach the userIotPolicy (see below) so they can connect
+				// to the AWS IoT broker via MQTT.
 				attachPolicy: new IAM.PolicyDocument({
 					statements: [
 						new IAM.PolicyStatement({
@@ -163,8 +166,7 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		// IoT Policy for Cognito user
 
-		new Iot.CfnPolicy(this, 'userIotPolicy', {
-			policyName: `${id}-userIotPolicy`,
+		const userIotPolicy = new Iot.CfnPolicy(this, 'userIotPolicy', {
 			policyDocument: {
 				Version: '2012-10-17',
 				Statement: [
@@ -196,9 +198,9 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 		})
 
-		new CloudFormation.CfnOutput(this, 'iotPolicy', {
-			value: `${id}-userIotPolicy`,
-			exportName: `${this.stackName}:iotPolicy`,
+		new CloudFormation.CfnOutput(this, 'userIotPolicyArn', {
+			value: userIotPolicy.attrArn,
+			exportName: `${this.stackName}:userIotPolicyArn`,
 		})
 
 		// Web App
@@ -258,7 +260,6 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		const iotThingPolicy = new Iot.CfnPolicy(this, 'thingPolicy', {
-			policyName: `${id}-thingPolicy`,
 			policyDocument: {
 				Version: '2012-10-17',
 				Statement: [
@@ -358,4 +359,5 @@ export type StackOutputs = {
 	jitpRoleArn: string
 	thingPolicyArn: string
 	thingGroupName: string
+	userIotPolicyArn: string
 }
