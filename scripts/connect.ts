@@ -74,7 +74,7 @@ const main = async (args: { deviceId: string }) => {
 				deviceUiUrl,
 				deviceId: clientId,
 				onUpdate: update => {
-					console.log({ clientId, state: { state: { reported: update } } })
+					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(update)))
 					connection.update(clientId, { state: { reported: update } })
 				},
 			})
@@ -88,15 +88,8 @@ const main = async (args: { deviceId: string }) => {
 			console.log(chalk.magenta('reconnecting...'))
 		})
 
-		connection.on('status', function(thingName, stat, _, stateObject) {
-			console.log(
-				'received ' +
-					stat +
-					' on ' +
-					thingName +
-					': ' +
-					JSON.stringify(stateObject),
-			)
+		connection.on('status', (_, stat) => {
+			console.log(chalk.magenta('>'), chalk.cyan(stat))
 		})
 
 		connection.on('delta', function(thingName, stateObject) {

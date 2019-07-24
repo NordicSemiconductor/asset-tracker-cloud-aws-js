@@ -35,7 +35,6 @@ export const uiServer = async (args: {
 				})
 				request.on('end', () => {
 					try {
-						console.log(body)
 						const update = JSON.parse(body)
 						args.onUpdate(update)
 						response.writeHead(202, {
