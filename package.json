@@ -74,6 +74,10 @@
       "prettier --write",
       "eslint --ext .js,.ts",
       "git add"
+    ],
+    "*.{md,json,yaml,yml}": [
+      "prettier --write",
+      "git add"
     ]
   },
   "engines": {
