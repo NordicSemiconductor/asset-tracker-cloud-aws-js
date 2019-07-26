@@ -5,6 +5,7 @@ import { Iot } from 'aws-sdk'
 import { stackOutput } from '../scripts/cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
+import { stackOutputToCRAEnvironment } from '../scripts/cloudformation/stackOutputToCRAEnvironment'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION
@@ -50,6 +51,36 @@ const bifravstCLI = async () => {
 				certsDir,
 				caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 			})
+		})
+		.on('--help', function() {
+			console.log('')
+			console.log(
+				chalk.yellow(
+					'Connect to the AWS IoT broker using a generated device certificate.',
+				),
+			)
+			console.log('')
+		})
+
+	program
+		.command('react-config')
+		.action(async () => {
+			ran = true
+			process.stdout.write(
+				await stackOutputToCRAEnvironment({
+					stackId,
+					region,
+				}),
+			)
+		})
+		.on('--help', function() {
+			console.log('')
+			console.log(
+				chalk.yellow(
+					'Prints the stack outputs as create-react-app environment variables.',
+				),
+			)
+			console.log('')
 		})
 
 	program.parse(process.argv)
