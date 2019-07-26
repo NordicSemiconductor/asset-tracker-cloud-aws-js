@@ -6,6 +6,7 @@ import { stackOutput } from '../scripts/cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
 import { stackOutputToCRAEnvironment } from '../scripts/cloudformation/stackOutputToCRAEnvironment'
+import { registerCA } from '../scripts/jitp/registerCA'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION
@@ -52,7 +53,7 @@ const bifravstCLI = async () => {
 				caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 			})
 		})
-		.on('--help', function() {
+		.on('--help', () => {
 			console.log('')
 			console.log(
 				chalk.yellow(
@@ -73,7 +74,7 @@ const bifravstCLI = async () => {
 				}),
 			)
 		})
-		.on('--help', function() {
+		.on('--help', () => {
 			console.log('')
 			console.log(
 				chalk.yellow(
@@ -83,6 +84,38 @@ const bifravstCLI = async () => {
 			console.log('')
 		})
 
+	program
+		.command('register-ca')
+		.action(async () => {
+			ran = true
+			try {
+				const { certificateId } = await registerCA({
+					stackId: process.env.STACK_ID || 'bifravst',
+					certsDir: path.resolve(process.cwd(), 'certificates'),
+					region: process.env.AWS_DEFAULT_REGION,
+					log: (...message: any[]) => {
+						console.log(...message.map(m => chalk.magenta(m)))
+					},
+					debug: (...message: any[]) => {
+						console.log(...message.map(m => chalk.cyan(m)))
+					},
+				})
+				console.log(
+					chalk.green(
+						`CA certificate ${chalk.yellow(certificateId)} registered.`,
+					),
+				)
+				console.log(chalk.green('You can now generate device certificates.'))
+			} catch (e) {
+				console.error(chalk.red(e))
+				process.exit(1)
+			}
+		})
+		.on('--help', () => {
+			console.log('')
+			console.log(chalk.yellow('Registers a CA for Just-in-time provisioning.'))
+			console.log('')
+		})
 	program.parse(process.argv)
 
 	if (!ran) {
