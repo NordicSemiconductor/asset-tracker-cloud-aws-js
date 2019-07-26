@@ -6,6 +6,7 @@
     "test": "test -n \"$SKIP_TESTS\" && true || jest",
     "postinstall": "npx tsc"
   },
+  "bin": "cli.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bifravst/aws.git"
@@ -27,7 +28,8 @@
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.500.0",
     "cfn-response": "^1.0.1",
-    "chalk": "^2.4.2"
+    "chalk": "^2.4.2",
+    "commander": "^2.20.0"
   },
   "devDependencies": {
     "@aws-cdk/aws-cloudfront": "^1.2.0",
@@ -48,6 +50,7 @@
     "@types/aws-sdk": "^2.7.0",
     "@types/cfn-response": "^1.0.0",
     "@types/chalk": "^2.2.0",
+    "@types/commander": "^2.12.2",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.8",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
