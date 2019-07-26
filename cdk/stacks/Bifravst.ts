@@ -11,6 +11,7 @@ import * as Iot from '@aws-cdk/aws-iot'
 import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { WebAppHosting } from '../resources/WebAppHosting'
+import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -342,6 +343,8 @@ export class BifravstStack extends CloudFormation.Stack {
 			value: ThingGroupName,
 			exportName: `${this.stackName}:thingGroupName`,
 		})
+
+		new RepublishDesiredConfig(this, 'republishDesiredConfig')
 	}
 }
 
