@@ -1,8 +1,8 @@
 import { promises as fs } from 'fs'
 import { thingShadow } from 'aws-iot-device-sdk'
-import { deviceFileLocations } from '../scripts/jitp/deviceFileLocations'
+import { deviceFileLocations } from './jitp/deviceFileLocations'
 import chalk from 'chalk'
-import { uiServer } from '../scripts/device/ui-server'
+import { uiServer } from './device/ui-server'
 
 /**
  * Connect to the AWS IoT broker using a generated device certificate

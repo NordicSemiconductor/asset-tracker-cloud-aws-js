@@ -2,11 +2,13 @@ import * as program from 'commander'
 import { connect } from './connect'
 import chalk from 'chalk'
 import { Iot } from 'aws-sdk'
-import { stackOutput } from '../scripts/cloudformation/stackOutput'
+import { stackOutput } from './cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
-import { stackOutputToCRAEnvironment } from '../scripts/cloudformation/stackOutputToCRAEnvironment'
-import { registerCA } from '../scripts/jitp/registerCA'
+import { stackOutputToCRAEnvironment } from './cloudformation/stackOutputToCRAEnvironment'
+import { registerCA } from './jitp/registerCA'
+import { generateDeviceCertificate } from './jitp/generateDeviceCertificate'
+import { randomWords } from '@bifravst/random-words'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION
@@ -116,6 +118,41 @@ const bifravstCLI = async () => {
 			console.log(chalk.yellow('Registers a CA for Just-in-time provisioning.'))
 			console.log('')
 		})
+
+	program
+		.command('generate-cert')
+		.option(
+			'-d, --deviceId <deviceId>',
+			'Device ID, if left blank a random ID will be generated',
+		)
+		.action(async ({ deviceId }) => {
+			ran = true
+			const id = deviceId || (await randomWords({ numWords: 3 })).join('-')
+			await generateDeviceCertificate({
+				deviceId: id,
+				certsDir: path.resolve(process.cwd(), 'certificates'),
+				log: (...message: any[]) => {
+					console.log(...message.map(m => chalk.magenta(m)))
+				},
+				debug: (...message: any[]) => {
+					console.log(...message.map(m => chalk.cyan(m)))
+				},
+			})
+			console.log(
+				chalk.green(`Certificate for device ${chalk.yellow(id)} generated.`),
+			)
+			console.log(chalk.green('You can now connect to the broker.'))
+		})
+		.on('--help', () => {
+			console.log('')
+			console.log(
+				chalk.yellow(
+					'Generate a certificate for a device, signed with the CA.',
+				),
+			)
+			console.log('')
+		})
+
 	program.parse(process.argv)
 
 	if (!ran) {
