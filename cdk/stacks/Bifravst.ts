@@ -12,6 +12,7 @@ import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { WebAppHosting } from '../resources/WebAppHosting'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
+import { AvatarStorage } from '../resources/AvatarStorage'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -85,7 +86,11 @@ export class BifravstStack extends CloudFormation.Stack {
 					statements: [
 						new IAM.PolicyStatement({
 							resources: ['*'],
-							actions: ['iot:listThings', 'iot:describeThing'],
+							actions: [
+								'iot:listThings',
+								'iot:describeThing',
+								'iot:updateThing',
+							],
 						}),
 					],
 				}),
@@ -345,6 +350,13 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		new RepublishDesiredConfig(this, 'republishDesiredConfig')
+
+		const avatarStorage = new AvatarStorage(this, 'avatars', { userRole })
+
+		new CloudFormation.CfnOutput(this, 'avatarBucketName', {
+			value: avatarStorage.bucket.bucketName,
+			exportName: `${this.stackName}:avatarBucketName`,
+		})
 	}
 }
 
@@ -363,4 +375,5 @@ export type StackOutputs = {
 	thingPolicyArn: string
 	thingGroupName: string
 	userIotPolicyArn: string
+	avatarBucket: string
 }
