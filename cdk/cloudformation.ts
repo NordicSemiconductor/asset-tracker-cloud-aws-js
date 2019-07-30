@@ -13,6 +13,8 @@ const STACK_ID = process.env.STACK_ID || 'bifravst'
 
 export type BifravstLambdas = {
 	createThingGroup: string
+	AthenaWorkGroup: string
+	AthenaDDLResource: string
 }
 
 const main = async () => {
@@ -51,6 +53,8 @@ const main = async () => {
 		Bucket: sourceCodeBucketName,
 		lambdas: {
 			createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
+			AthenaWorkGroup: path.resolve(rootDir, 'cdk', 'AthenaWorkGroup.ts'),
+			AthenaDDLResource: path.resolve(rootDir, 'cdk', 'AthenaDDLResource.ts'),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),
 	})

@@ -13,6 +13,8 @@ import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { WebAppHosting } from '../resources/WebAppHosting'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
+import { HistoricalData } from '../resources/HistoricalData'
+import { logToCloudWatch } from '../resources/logToCloudWatch'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -324,14 +326,7 @@ export class BifravstStack extends CloudFormation.Stack {
 							resources: ['*'],
 							actions: ['iot:createThingGroup', 'iot:attachPolicy'],
 						}),
-						new IAM.PolicyStatement({
-							resources: ['*'],
-							actions: [
-								'logs:CreateLogGroup',
-								'logs:CreateLogStream',
-								'logs:PutLogEvents',
-							],
-						}),
+						logToCloudWatch,
 					],
 				}),
 			),
@@ -356,6 +351,28 @@ export class BifravstStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'avatarBucketName', {
 			value: avatarStorage.bucket.bucketName,
 			exportName: `${this.stackName}:avatarBucketName`,
+		})
+
+		const hd = new HistoricalData(this, 'historicalData', {
+			baseLayer,
+			lambdas: props.lambdas,
+			sourceCodeBucket,
+			userRole,
+		})
+
+		new CloudFormation.CfnOutput(this, 'athenaWorkGroupName', {
+			value: hd.WorkGroupName,
+			exportName: `${this.stackName}:athenaWorkGroupName`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'athenaDataBaseName', {
+			value: hd.DataBaseName,
+			exportName: `${this.stackName}:athenaDataBaseName`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'athenaRawDataTableName', {
+			value: hd.RawDataTableName,
+			exportName: `${this.stackName}:athenaRawDataTableName`,
 		})
 	}
 }

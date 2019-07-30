@@ -21,6 +21,7 @@ export class RepublishDesiredConfig extends CloudFormation.Resource {
 							actions: ['iot:Publish'],
 							resources: [
 								`arn:aws:iot:${parent.account}:${parent.region}:topic/$aws/things/*/shadow/get/accepted/${topicSuffix}`,
+								`arn:aws:iot:${parent.account}:${parent.region}:topic/errors`,
 							],
 						}),
 					],
@@ -43,6 +44,12 @@ export class RepublishDesiredConfig extends CloudFormation.Resource {
 						},
 					},
 				],
+				errorAction: {
+					republish: {
+						roleArn: role.roleArn,
+						topic: 'errors',
+					},
+				},
 			},
 		})
 	}
