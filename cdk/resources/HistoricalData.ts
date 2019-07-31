@@ -13,7 +13,6 @@ import { logToCloudWatch } from './logToCloudWatch'
 
 const WorkGroupName = 'bifravst'
 const DataBaseName = 'historicaldata'
-const RawDataTableName = 'rawthingupdates'
 
 /**
  * Provides resources for historical data
@@ -41,7 +40,6 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		this.WorkGroupName = WorkGroupName
 		this.DataBaseName = DataBaseName
-		this.RawDataTableName = RawDataTableName
 
 		const bucket = new S3.Bucket(this, 'bucket', {
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
@@ -197,9 +195,11 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Create table for raw queries
 
-		new CustomResource(this, 'RawDataTable', {
+		this.RawDataTableName = 'rawthingupdates2'
+
+		new CustomResource(this, `Table${this.RawDataTableName}`, {
 			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, 'RawDataTableLambda', {
+				new Lambda.Function(this, `Table${this.RawDataTableName}Lambda`, {
 					...lambdaDefaults,
 					code: Lambda.Code.bucket(
 						sourceCodeBucket,
@@ -216,15 +216,15 @@ export class HistoricalData extends CloudFormation.Resource {
 			properties: {
 				WorkGroupName,
 				Create:
-					`CREATE EXTERNAL TABLE IF NOT EXISTS ${DataBaseName}.${RawDataTableName} (` +
-					'`reported` struct<acc:struct<ts:string, v:array<float>>, bat:struct<ts:string, v:int>, gps:struct<ts:string, v:struct<acc:int, alt:float, hdg:float, lat:float, lng:float, spd:float>>>,`timestamp` timestamp, `deviceId` string\n' +
+					`CREATE EXTERNAL TABLE IF NOT EXISTS ${DataBaseName}.${this.RawDataTableName} (` +
+					'`reported` struct<acc:struct<ts:string, v:array<float>>, bat:struct<ts:string, v:int>, gps:struct<ts:string, v:struct<acc:float, alt:float, hdg:float, lat:float, lng:float, spd:float>>>,`timestamp` timestamp, `deviceId` string\n' +
 					')' +
 					"ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'\n" +
 					'WITH SERDEPROPERTIES (' +
 					"'serialization.format' = '1'\n" +
 					`) LOCATION 's3://${bucket.bucketName}/raw/'` +
 					"TBLPROPERTIES ('has_encrypted_data'='false');",
-				Delete: `DROP TABLE IF EXISTS ${DataBaseName}.${RawDataTableName}`,
+				Delete: `DROP TABLE IF EXISTS ${DataBaseName}.${this.RawDataTableName}`,
 			},
 		}).node.addDependency(db)
 	}
