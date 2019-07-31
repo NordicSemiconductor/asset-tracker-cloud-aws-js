@@ -11,9 +11,9 @@ import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
 
-const WorkGroupName = 'Bifravst'
-const DataBaseName = WorkGroupName
-const RawDataTableName = 'raw_thing_updates'
+const WorkGroupName = 'bifravst'
+const DataBaseName = 'historicaldata'
+const RawDataTableName = 'rawthingupdates'
 
 /**
  * Provides resources for historical data
@@ -139,17 +139,22 @@ export class HistoricalData extends CloudFormation.Resource {
 					's3:PutObject',
 				],
 			}),
+			// For managing Athena
+			new IAM.PolicyStatement({
+				resources: ['*'],
+				actions: ['glue:*'],
+			}),
 		]
 
-		const wg = new CustomResource(this, 'WorkGroup', {
+		const wg = new CustomResource(this, 'AthenaWorkGroup', {
 			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, `${id}-WorkGroup`, {
+				new Lambda.Function(this, 'AthenaWorkGroupLambda', {
 					...lambdaDefaults,
 					code: Lambda.Code.bucket(
 						sourceCodeBucket,
 						lambdas.lambdaZipFileNames.AthenaWorkGroup,
 					),
-					description: 'Used in CloudFormation to create an Athena workgroup',
+					description: 'Used in CloudFormation to create the Athena workgroup',
 					initialPolicy: [
 						...lambdaDefaults.initialPolicy,
 						new IAM.PolicyStatement({
@@ -167,15 +172,15 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Creates the database
 
-		const db = new CustomResource(this, 'DataBase', {
+		const db = new CustomResource(this, 'AthenaDB', {
 			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, `${id}-DataBase`, {
+				new Lambda.Function(this, 'AthenaDBLambda', {
 					...lambdaDefaults,
 					code: Lambda.Code.bucket(
 						sourceCodeBucket,
 						lambdas.lambdaZipFileNames.AthenaDDLResource,
 					),
-					description: 'Used in CloudFormation to create an Athena database',
+					description: 'Used in CloudFormation to create the Athena database',
 					initialPolicy: [
 						...lambdaDefaults.initialPolicy,
 						...athenaDDLResourcePolicies,
@@ -194,14 +199,14 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		new CustomResource(this, 'RawDataTable', {
 			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, `${id}-RawDataTable`, {
+				new Lambda.Function(this, 'RawDataTableLambda', {
 					...lambdaDefaults,
 					code: Lambda.Code.bucket(
 						sourceCodeBucket,
 						lambdas.lambdaZipFileNames.AthenaDDLResource,
 					),
 					description:
-						'Used in CloudFormation to create the RawThingUpdates Athena table',
+						'Used in CloudFormation to create the Athena table that queries raw thing updates',
 					initialPolicy: [
 						...lambdaDefaults.initialPolicy,
 						...athenaDDLResourcePolicies,
