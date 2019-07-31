@@ -36,6 +36,7 @@ export const handler = (
 	} else if (RequestType === 'Delete') {
 		athena
 			.startQueryExecution({
+				WorkGroup: WorkGroupName,
 				QueryString: Delete,
 			})
 			.promise()
