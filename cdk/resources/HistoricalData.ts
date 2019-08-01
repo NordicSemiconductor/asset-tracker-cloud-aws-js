@@ -73,6 +73,40 @@ export class HistoricalData extends CloudFormation.Resource {
 					'athena:stopQueryExecution',
 					'athena:getQueryExecution',
 					'athena:getQueryResults',
+					'glue:GetTable',
+				],
+			}),
+		)
+
+		// Users need to read from data bucket
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
+				actions: [
+					's3:GetBucketLocation',
+					's3:GetObject',
+					's3:ListBucket',
+					's3:ListBucketMultipartUploads',
+					's3:ListMultipartUploadParts',
+				],
+			}),
+		)
+
+		// Users need to be able to write to the results bucket
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: [
+					queryResultsBucket.bucketArn,
+					`${queryResultsBucket.bucketArn}/*`,
+				],
+				actions: [
+					's3:GetBucketLocation',
+					's3:GetObject',
+					's3:ListBucket',
+					's3:ListBucketMultipartUploads',
+					's3:ListMultipartUploadParts',
+					's3:AbortMultipartUpload',
+					's3:PutObject',
 				],
 			}),
 		)
