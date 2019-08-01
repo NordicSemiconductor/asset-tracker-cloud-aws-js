@@ -1,7 +1,7 @@
 import * as program from 'commander'
 import { connect } from './connect'
 import chalk from 'chalk'
-import { Iot } from 'aws-sdk'
+import { Iot, CodePipeline } from 'aws-sdk'
 import { stackOutput } from './cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
@@ -9,6 +9,7 @@ import { stackOutputToCRAEnvironment } from './cloudformation/stackOutputToCRAEn
 import { registerCA } from './jitp/registerCA'
 import { generateDeviceCertificate } from './jitp/generateDeviceCertificate'
 import { randomWords } from '@bifravst/random-words'
+import { distanceInWords } from 'date-fns'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION
@@ -150,6 +151,66 @@ const bifravstCLI = async () => {
 					'Generate a certificate for a device, signed with the CA.',
 				),
 			)
+			console.log('')
+		})
+
+	program
+		.command('cd')
+		.action(async () => {
+			ran = true
+			const cp = new CodePipeline({
+				region,
+			})
+			const pipelines = [
+				'bifravst-continuous-deployment',
+				'bifravst-continuous-deployment-deviceUICD',
+				'bifravst-continuous-deployment-webAppCD',
+			] as const
+			const statuses = await Promise.all(
+				pipelines.map(async name =>
+					cp
+						.listPipelineExecutions({
+							pipelineName: name,
+							maxResults: 1,
+						})
+						.promise()
+						.then(({ pipelineExecutionSummaries }) => ({
+							pipelineName: name,
+							summary: {
+								status: 'Unknown',
+								lastUpdateTime: new Date(),
+								...(pipelineExecutionSummaries &&
+									pipelineExecutionSummaries[0]),
+							},
+						}))
+						.catch(() => ({
+							pipelineName: name,
+							summary: {
+								status: 'Unknown',
+								lastUpdateTime: new Date(),
+							},
+						})),
+				),
+			)
+			statuses.forEach(({ pipelineName, summary }) => {
+				console.log(
+					({
+						Succeeded: chalk.green.inverse('  OK  '),
+						InProgress: chalk.yellow.inverse(' In Progress '),
+						Superseded: chalk.gray('[Superseded]'),
+						Failed: chalk.red.inverse('  ERR '),
+						Unknown: chalk.bgRedBright('  ?? '),
+					} as { [key: string]: any })[summary.status || 'Unknown'],
+					chalk.cyan(pipelineName),
+					chalk.gray(
+						`${distanceInWords(new Date(), summary.lastUpdateTime)} ago`,
+					),
+				)
+			})
+		})
+		.on('--help', () => {
+			console.log('')
+			console.log(chalk.yellow('Show continuous deployment status'))
 			console.log('')
 		})
 

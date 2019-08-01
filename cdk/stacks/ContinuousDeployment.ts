@@ -191,7 +191,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 
 		// Sets up the continuous deployment for the web app
-		new WebAppCD(this, 'webAppCD', {
+		new WebAppCD(this, `${id}-webAppCD`, {
 			bifravstAWS,
 			webApp,
 			githubToken,
@@ -200,7 +200,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 
 		// Sets up the continuous deployment for the device UI
-		new WebAppCD(this, 'deviceUICD', {
+		new WebAppCD(this, `${id}-deviceUICD`, {
 			bifravstAWS,
 			webApp: deviceUI,
 			githubToken,
