@@ -58,7 +58,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		)
 
 		const bucket = new S3.Bucket(this, 'bucket', {
-			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
 		})
 
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
