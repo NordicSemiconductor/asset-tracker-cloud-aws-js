@@ -20,8 +20,8 @@ export class RepublishDesiredConfig extends CloudFormation.Resource {
 						new IAM.PolicyStatement({
 							actions: ['iot:Publish'],
 							resources: [
-								`arn:aws:iot:${parent.account}:${parent.region}:topic/$aws/things/*/shadow/get/accepted/${topicSuffix}`,
-								`arn:aws:iot:${parent.account}:${parent.region}:topic/errors`,
+								`arn:aws:iot:${parent.region}:${parent.account}:topic/$aws/things/*/shadow/get/accepted/${topicSuffix}`,
+								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
 							],
 						}),
 					],
