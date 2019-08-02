@@ -49,6 +49,22 @@ export class HistoricalData extends CloudFormation.Resource {
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
 		})
 
+		const writeToResultBucket = new IAM.PolicyStatement({
+			resources: [
+				queryResultsBucket.bucketArn,
+				`${queryResultsBucket.bucketArn}/*`,
+			],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+				's3:AbortMultipartUpload',
+				's3:PutObject',
+			],
+		})
+
 		userRole.addToPolicy(
 			new IAM.PolicyStatement({
 				resources: ['*'],
@@ -60,6 +76,22 @@ export class HistoricalData extends CloudFormation.Resource {
 				],
 			}),
 		)
+
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: ['*'],
+				actions: ['glue:GetTable'],
+			}),
+		)
+
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
+				actions: ['s3:GetBucketLocation', 's3:GetObject', 's3:ListBucket'],
+			}),
+		)
+
+		userRole.addToPolicy(writeToResultBucket)
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
 			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),
@@ -122,21 +154,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				resources: ['*'],
 				actions: ['athena:startQueryExecution'],
 			}),
-			new IAM.PolicyStatement({
-				resources: [
-					queryResultsBucket.bucketArn,
-					`${queryResultsBucket.bucketArn}/*`,
-				],
-				actions: [
-					's3:GetBucketLocation',
-					's3:GetObject',
-					's3:ListBucket',
-					's3:ListBucketMultipartUploads',
-					's3:ListMultipartUploadParts',
-					's3:AbortMultipartUpload',
-					's3:PutObject',
-				],
-			}),
+			writeToResultBucket,
 			// For managing Athena
 			new IAM.PolicyStatement({
 				resources: ['*'],
