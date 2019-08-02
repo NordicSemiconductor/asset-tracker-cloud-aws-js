@@ -12,7 +12,14 @@ export class WebAppCD extends CloudFormation.Construct {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
-		properties: {
+		{
+			bifravstStackId,
+			bifravstAWS,
+			webApp,
+			githubToken,
+			buildSpec,
+			description,
+		}: {
 			bifravstAWS: {
 				owner: string
 				repo: string
@@ -26,17 +33,10 @@ export class WebAppCD extends CloudFormation.Construct {
 			bifravstStackId: string
 			githubToken: SSM.IStringParameter
 			buildSpec: string
+			description: string
 		},
 	) {
 		super(parent, id)
-
-		const {
-			bifravstStackId,
-			bifravstAWS,
-			webApp,
-			githubToken,
-			buildSpec,
-		} = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
@@ -54,6 +54,7 @@ export class WebAppCD extends CloudFormation.Construct {
 
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: id,
+			description,
 			source: {
 				type: 'CODEPIPELINE',
 				buildSpec,

@@ -63,8 +63,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: id,
-			description:
-				'This project sets up the continuous deployment of the Bifravst project',
+			description: 'Continuous deploys the Bifravst project',
 			source: {
 				type: 'CODEPIPELINE',
 				buildSpec: 'continuous-deployment.yml',
@@ -192,6 +191,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 
 		// Sets up the continuous deployment for the web app
 		new WebAppCD(this, `${id}-webAppCD`, {
+			description: 'Continuously deploys the Bifravst Web App',
 			bifravstAWS,
 			webApp,
 			githubToken,
@@ -201,6 +201,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 
 		// Sets up the continuous deployment for the device UI
 		new WebAppCD(this, `${id}-deviceUICD`, {
+			description: 'Continuously deploys the Bifravst Device UI',
 			bifravstAWS,
 			webApp: deviceUI,
 			githubToken,
