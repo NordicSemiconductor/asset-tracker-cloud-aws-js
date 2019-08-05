@@ -103,7 +103,7 @@ export class BifravstStack extends CloudFormation.Stack {
 				attachPolicy: new IAM.PolicyDocument({
 					statements: [
 						new IAM.PolicyStatement({
-							resources: ['arn:aws:iot:*:*:client/user-*'],
+							resources: ['*'],
 							actions: [
 								'iot:attachPrincipalPolicy',
 								'iot:listPrincipalPolicies',
