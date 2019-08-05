@@ -72,6 +72,11 @@ const main = async () => {
 			createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
 			AthenaWorkGroup: path.resolve(rootDir, 'cdk', 'AthenaWorkGroup.ts'),
 			AthenaDDLResource: path.resolve(rootDir, 'cdk', 'AthenaDDLResource.ts'),
+			concatenateRawDeviceMessages: path.resolve(
+				rootDir,
+				'historicalData',
+				'concatenateRawDeviceMessages.ts',
+			),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),
 	})

@@ -2,11 +2,14 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as IoT from '@aws-cdk/aws-iot'
+import * as Events from '@aws-cdk/aws-events'
+import * as EventTargets from '@aws-cdk/aws-events-targets'
 import {
 	CustomResource,
 	CustomResourceProvider,
 } from '@aws-cdk/aws-cloudformation'
 import * as Lambda from '@aws-cdk/aws-lambda'
+
 import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
@@ -175,8 +178,61 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		})
 
+		// Concatenate the log files
+
+		const concatenateRawDeviceMessagesFunction = new Lambda.Function(
+			this,
+			'concatenateRawDeviceMessages',
+			{
+				layers: [baseLayer],
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_10_X,
+				timeout: CloudFormation.Duration.seconds(900),
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.concatenateRawDeviceMessages,
+				),
+				description:
+					'Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
+						actions: [
+							's3:ListBucket',
+							's3:GetObject',
+							's3:PutObject',
+							's3:DeleteObject',
+						],
+					}),
+				],
+				environment: {
+					HISTORICAL_DATA_BUCKET: bucket.bucketName,
+				},
+			},
+		)
+
+		new LambdaLogGroup(this, 'concatenateRawDeviceMessagesFunctionLogGroup', {
+			lambda: concatenateRawDeviceMessagesFunction,
+		})
+
+		const rule = new Events.Rule(this, 'invokeMessageCounterRule', {
+			schedule: Events.Schedule.expression('rate(1 hour)'),
+			description:
+				'Invoke the lambda which concatenates the raw device messages',
+			enabled: true,
+			targets: [
+				new EventTargets.LambdaFunction(concatenateRawDeviceMessagesFunction),
+			],
+		})
+
+		concatenateRawDeviceMessagesFunction.addPermission('InvokeByEvents', {
+			principal: new IAM.ServicePrincipal('events.amazonaws.com'),
+			sourceArn: rule.ruleArn,
+		})
+
 		// Creates the workgroup
-		const lambdaDefaults = {
+		const customResourceLambdaDefaults = {
 			layers: [baseLayer],
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_8_10,
@@ -295,7 +351,7 @@ export class HistoricalData extends CloudFormation.Resource {
 					"ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'\n" +
 					'WITH SERDEPROPERTIES (' +
 					"'serialization.format' = '1'\n" +
-					`) LOCATION 's3://${bucket.bucketName}/raw/'` +
+					`) LOCATION 's3://${bucket.bucketName}/'` +
 					"TBLPROPERTIES ('has_encrypted_data'='false');",
 				Delete: `DROP TABLE IF EXISTS ${DataBaseName}.${this.RawDataTableName}`,
 			},

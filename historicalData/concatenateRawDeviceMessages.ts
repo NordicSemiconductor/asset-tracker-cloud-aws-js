@@ -3,9 +3,7 @@ import * as dateFns from 'date-fns'
 import * as path from 'path'
 
 const s3 = new S3()
-const Bucket =
-	process.env.HISTORICAL_DATA_BUCKET ||
-	'bifravst-historicaldatabucket262e8e16-ugmlhvrfb6o0'
+const Bucket = process.env.HISTORICAL_DATA_BUCKET || ''
 
 const collectFiles = async ({
 	files,
@@ -108,7 +106,7 @@ const concatenateFiles = async ({
 const dateRx = new RegExp(/^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})/)
 
 /**
- * This lambda runs every day and concatenates the raw message logs
+ * Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.
  */
 export const handler = async () => {
 	// Concatenate hours
