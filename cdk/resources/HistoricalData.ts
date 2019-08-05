@@ -78,6 +78,7 @@ export class HistoricalData extends CloudFormation.Resource {
 					'athena:getQueryExecution',
 					'athena:getQueryResults',
 					'glue:GetTable',
+					'glue:GetDatabase',
 				],
 			}),
 		)
@@ -112,13 +113,6 @@ export class HistoricalData extends CloudFormation.Resource {
 					's3:AbortMultipartUpload',
 					's3:PutObject',
 				],
-			}),
-		)
-
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				resources: ['*'],
-				actions: ['glue:GetTable'],
 			}),
 		)
 
