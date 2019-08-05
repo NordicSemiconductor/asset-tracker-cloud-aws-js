@@ -34,10 +34,6 @@ jobs:
           key: v1-dependencies-{{ checksum "package-lock.json" }}
 
       - run:
-          name: Compile TypeScript
-          command: npx tsc
-
-      - run:
           name: Run Unit Tests
           command: npm test
 

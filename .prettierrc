@@ -26,6 +26,16 @@
       }
     },
     {
+      "files": "*.js",
+      "options": {
+        "parser": "babel",
+        "singleQuote": true,
+        "trailingComma": "all",
+        "useTabs": true,
+        "semi": false
+      }
+    },
+    {
       "files": "*.yml,*yaml",
       "options": {
         "parser": "yaml",
