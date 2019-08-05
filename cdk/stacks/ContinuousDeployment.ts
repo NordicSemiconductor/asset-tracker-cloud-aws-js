@@ -4,7 +4,7 @@ import * as CodeBuild from '@aws-cdk/aws-codebuild'
 import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
-import { WebAppCD } from '../resources/WebAppCD'
+import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
@@ -80,13 +80,117 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 		project.node.addDependency(codeBuildRole)
 
+		const githubToken = SSM.StringParameter.fromStringParameterAttributes(
+			this,
+			'ghtoken',
+			{
+				parameterName: '/codebuild/github-token',
+				version: 1,
+			},
+		)
+
+		const sourceCodeAction = ({
+			name,
+			outputName,
+			Branch,
+			Owner,
+			Repo,
+			githubToken,
+		}: {
+			name: string
+			outputName: string
+			Branch: string
+			Owner: string
+			Repo: string
+			githubToken: SSM.IStringParameter
+		}) => ({
+			outputName,
+			action: {
+				name,
+				actionTypeId: {
+					category: 'Source',
+					owner: 'ThirdParty',
+					version: '1',
+					provider: 'GitHub',
+				},
+				outputArtifacts: [
+					{
+						name: outputName,
+					},
+				],
+				configuration: {
+					Branch,
+					Owner,
+					Repo,
+					OAuthToken: githubToken.stringValue,
+				},
+			},
+		})
+
+		const bifravstSourceCodeAction = sourceCodeAction({
+			name: 'BifravstAWSSourceCode',
+			outputName: 'BifravstAWS',
+			Branch: bifravstAWS.branch,
+			Owner: bifravstAWS.owner,
+			Repo: bifravstAWS.repo,
+			githubToken,
+		})
+
+		const webAppSourceCodeAction = sourceCodeAction({
+			name: 'WebAppSourceCode',
+			outputName: 'WebApp',
+			Branch: webApp.branch,
+			Owner: webApp.owner,
+			Repo: webApp.repo,
+			githubToken,
+		})
+
+		const deviceUISourceCodeAction = sourceCodeAction({
+			name: 'DeviceUISourceCode',
+			outputName: 'DeviceUI',
+			Branch: deviceUI.branch,
+			Owner: deviceUI.owner,
+			Repo: deviceUI.repo,
+			githubToken,
+		})
+
+		// Sets up the continuous deployment for the web app
+		const webAppCd = new WebAppCD(this, `${id}-webAppCD`, {
+			description: 'Continuously deploys the Bifravst Web App',
+			sourceCodeActions: {
+				bifravst: bifravstSourceCodeAction,
+				webApp: webAppSourceCodeAction,
+			},
+			bifravstStackId,
+			buildSpec: 'continuous-deployment-web-app.yml',
+		})
+
+		// Sets up the continuous deployment for the device UI
+		const deviceUICD = new WebAppCD(this, `${id}-deviceUICD`, {
+			description: 'Continuously deploys the Bifravst Device UI',
+			sourceCodeActions: {
+				bifravst: bifravstSourceCodeAction,
+				webApp: deviceUISourceCodeAction,
+			},
+			bifravstStackId,
+			buildSpec: 'continuous-deployment-device-ui-app.yml',
+		})
+
+		// Set up the continuous deployment for Bifravst.
+		// This will also run the deployment of the WebApp and DeviceUI after a deploy
+		// (in case some outputs have changed and need to be made available to the apps).
+
 		const codePipelineRole = new IAM.Role(this, 'CodePipelineRole', {
 			assumedBy: new IAM.ServicePrincipal('codepipeline.amazonaws.com'),
 			inlinePolicies: {
 				controlCodeBuild: new IAM.PolicyDocument({
 					statements: [
 						new IAM.PolicyStatement({
-							resources: [project.attrArn],
+							resources: [
+								project.attrArn,
+								webAppCd.codeBuildProject.attrArn,
+								deviceUICD.codeBuildProject.attrArn,
+							],
 							actions: ['codebuild:*'],
 						}),
 					],
@@ -102,15 +206,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 		})
 
-		const githubToken = SSM.StringParameter.fromStringParameterAttributes(
-			this,
-			'ghtoken',
-			{
-				parameterName: '/codebuild/github-token',
-				version: 1,
-			},
-		)
-
 		const pipeline = new CodePipeline.CfnPipeline(this, 'CodePipeline', {
 			roleArn: codePipelineRole.roleArn,
 			artifactStore: {
@@ -122,26 +217,9 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				{
 					name: 'Source',
 					actions: [
-						{
-							name: 'BifravstAWSSourceCode',
-							actionTypeId: {
-								category: 'Source',
-								owner: 'ThirdParty',
-								version: '1',
-								provider: 'GitHub',
-							},
-							outputArtifacts: [
-								{
-									name: 'BifravstAWS',
-								},
-							],
-							configuration: {
-								Branch: bifravstAWS.branch,
-								Owner: bifravstAWS.owner,
-								Repo: bifravstAWS.repo,
-								OAuthToken: githubToken.stringValue,
-							},
-						},
+						bifravstSourceCodeAction.action,
+						webAppSourceCodeAction.action,
+						deviceUISourceCodeAction.action,
 					],
 				},
 				{
@@ -149,21 +227,65 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					actions: [
 						{
 							name: 'DeployBifravst',
-							inputArtifacts: [{ name: 'BifravstAWS' }],
-							actionTypeId: {
-								category: 'Build',
-								owner: 'AWS',
-								version: '1',
-								provider: 'CodeBuild',
-							},
+							inputArtifacts: [
+								{
+									name: bifravstSourceCodeAction.outputName,
+								},
+							],
+							actionTypeId: BuildActionCodeBuild,
 							configuration: {
 								ProjectName: project.name,
 							},
 							outputArtifacts: [
 								{
-									name: 'BuildId',
+									name: 'BifravstBuildId',
 								},
 							],
+							runOrder: 1,
+						},
+						{
+							name: 'DeployWebApp',
+							inputArtifacts: [
+								{
+									name: bifravstSourceCodeAction.outputName,
+								},
+								{
+									name: webAppSourceCodeAction.outputName,
+								},
+							],
+							actionTypeId: BuildActionCodeBuild,
+							configuration: {
+								ProjectName: webAppCd.codeBuildProject.name,
+								PrimarySource: bifravstSourceCodeAction.outputName,
+							},
+							outputArtifacts: [
+								{
+									name: 'WebAppBuildId',
+								},
+							],
+							runOrder: 2,
+						},
+						{
+							name: 'DeployDeviceUI',
+							inputArtifacts: [
+								{
+									name: bifravstSourceCodeAction.outputName,
+								},
+								{
+									name: deviceUISourceCodeAction.outputName,
+								},
+							],
+							actionTypeId: BuildActionCodeBuild,
+							configuration: {
+								ProjectName: deviceUICD.codeBuildProject.name,
+								PrimarySource: bifravstSourceCodeAction.outputName,
+							},
+							outputArtifacts: [
+								{
+									name: 'DeviceUIBuildId',
+								},
+							],
+							runOrder: 2,
 						},
 					],
 				},
@@ -187,26 +309,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				secretToken: githubToken.stringValue,
 			},
 			registerWithThirdParty: false,
-		})
-
-		// Sets up the continuous deployment for the web app
-		new WebAppCD(this, `${id}-webAppCD`, {
-			description: 'Continuously deploys the Bifravst Web App',
-			bifravstAWS,
-			webApp,
-			githubToken,
-			bifravstStackId,
-			buildSpec: 'continuous-deployment-web-app.yml',
-		})
-
-		// Sets up the continuous deployment for the device UI
-		new WebAppCD(this, `${id}-deviceUICD`, {
-			description: 'Continuously deploys the Bifravst Device UI',
-			bifravstAWS,
-			webApp: deviceUI,
-			githubToken,
-			bifravstStackId,
-			buildSpec: 'continuous-deployment-device-ui-app.yml',
 		})
 	}
 }

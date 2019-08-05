@@ -2,36 +2,40 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as CodeBuild from '@aws-cdk/aws-codebuild'
 import * as CodePipeline from '@aws-cdk/aws-codepipeline'
-import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
+
+export const BuildActionCodeBuild = {
+	category: 'Build',
+	owner: 'AWS',
+	version: '1',
+	provider: 'CodeBuild',
+}
 
 /**
  * This sets up the continuous delivery for a web-app
  */
 export class WebAppCD extends CloudFormation.Construct {
+	public readonly codeBuildProject: CodeBuild.CfnProject
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
 		{
 			bifravstStackId,
-			bifravstAWS,
-			webApp,
-			githubToken,
 			buildSpec,
 			description,
+			sourceCodeActions,
 		}: {
-			bifravstAWS: {
-				owner: string
-				repo: string
-				branch: string
-			}
-			webApp: {
-				owner: string
-				repo: string
-				branch: string
+			sourceCodeActions: {
+				bifravst: {
+					action: CodePipeline.CfnPipeline.ActionDeclarationProperty
+					outputName: string
+				}
+				webApp: {
+					action: CodePipeline.CfnPipeline.ActionDeclarationProperty
+					outputName: string
+				}
 			}
 			bifravstStackId: string
-			githubToken: SSM.IStringParameter
 			buildSpec: string
 			description: string
 		},
@@ -52,7 +56,7 @@ export class WebAppCD extends CloudFormation.Construct {
 			},
 		})
 
-		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
+		this.codeBuildProject = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: id,
 			description,
 			source: {
@@ -75,7 +79,7 @@ export class WebAppCD extends CloudFormation.Construct {
 				],
 			},
 		})
-		project.node.addDependency(codeBuildRole)
+		this.codeBuildProject.node.addDependency(codeBuildRole)
 
 		const bucket = new S3.Bucket(this, 'bucket', {
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
@@ -87,7 +91,7 @@ export class WebAppCD extends CloudFormation.Construct {
 				controlCodeBuild: new IAM.PolicyDocument({
 					statements: [
 						new IAM.PolicyStatement({
-							resources: [project.attrArn],
+							resources: [this.codeBuildProject.attrArn],
 							actions: ['codebuild:*'],
 						}),
 					],
@@ -114,46 +118,8 @@ export class WebAppCD extends CloudFormation.Construct {
 				{
 					name: 'Source',
 					actions: [
-						{
-							name: 'BifravstAWSSourceCode',
-							actionTypeId: {
-								category: 'Source',
-								owner: 'ThirdParty',
-								version: '1',
-								provider: 'GitHub',
-							},
-							outputArtifacts: [
-								{
-									name: 'BifravstAWS',
-								},
-							],
-							configuration: {
-								Branch: bifravstAWS.branch,
-								Owner: bifravstAWS.owner,
-								Repo: bifravstAWS.repo,
-								OAuthToken: githubToken.stringValue,
-							},
-						},
-						{
-							name: 'WebAppSourceCode',
-							actionTypeId: {
-								category: 'Source',
-								owner: 'ThirdParty',
-								version: '1',
-								provider: 'GitHub',
-							},
-							outputArtifacts: [
-								{
-									name: 'WebApp',
-								},
-							],
-							configuration: {
-								Branch: webApp.branch,
-								Owner: webApp.owner,
-								Repo: webApp.repo,
-								OAuthToken: githubToken.stringValue,
-							},
-						},
+						sourceCodeActions.bifravst.action,
+						sourceCodeActions.webApp.action,
 					],
 				},
 				{
@@ -161,16 +127,18 @@ export class WebAppCD extends CloudFormation.Construct {
 					actions: [
 						{
 							name: 'DeployWebApp',
-							inputArtifacts: [{ name: 'BifravstAWS' }, { name: 'WebApp' }],
-							actionTypeId: {
-								category: 'Build',
-								owner: 'AWS',
-								version: '1',
-								provider: 'CodeBuild',
-							},
+							inputArtifacts: [
+								{
+									name: sourceCodeActions.bifravst.outputName,
+								},
+								{
+									name: sourceCodeActions.webApp.outputName,
+								},
+							],
+							actionTypeId: BuildActionCodeBuild,
 							configuration: {
-								ProjectName: project.name,
-								PrimarySource: 'BifravstAWS',
+								ProjectName: this.codeBuildProject.name,
+								PrimarySource: sourceCodeActions.bifravst.outputName,
 							},
 							outputArtifacts: [
 								{
@@ -192,12 +160,12 @@ export class WebAppCD extends CloudFormation.Construct {
 			filters: [
 				{
 					jsonPath: '$.ref',
-					matchEquals: `refs/heads/${webApp.branch}`,
+					matchEquals: `refs/heads/${sourceCodeActions.webApp.action.configuration.Branch}`,
 				},
 			],
 			authentication: 'GITHUB_HMAC',
 			authenticationConfiguration: {
-				secretToken: githubToken.stringValue,
+				secretToken: sourceCodeActions.webApp.action.configuration.OAuthToken,
 			},
 			registerWithThirdParty: false,
 		})
