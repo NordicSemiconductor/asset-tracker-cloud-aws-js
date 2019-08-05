@@ -8,13 +8,17 @@ import {
 	packLayeredLambdas,
 	WebpackMode,
 } from '@nrfcloud/package-layered-lambdas'
+import { supportedRegions } from './regions'
+import chalk from 'chalk'
 
 const STACK_ID = process.env.STACK_ID || 'bifravst'
+const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || ''
 
 export type BifravstLambdas = {
 	createThingGroup: string
 	AthenaWorkGroup: string
 	AthenaDDLResource: string
+	concatenateRawDeviceMessages: string
 }
 
 const main = async () => {
@@ -27,6 +31,19 @@ const main = async () => {
 
 	if (!endpointAddress) {
 		throw new Error(`Failed to resolved AWS IoT endpoint`)
+	}
+
+	if (!supportedRegions.includes(region)) {
+		console.log(
+			chalk.yellow.inverse.bold(' WARNING '),
+			chalk.yellow(
+				`Your region ${region} is not in the list of supported regions!`,
+			),
+		)
+		console.log(
+			chalk.yellow.inverse.bold(' WARNING '),
+			chalk.yellow(`CDK might not be able to successfully deploy.`),
+		)
 	}
 
 	// Pack the lambdas
