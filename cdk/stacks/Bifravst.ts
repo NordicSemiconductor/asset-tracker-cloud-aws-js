@@ -15,6 +15,8 @@ import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import { HistoricalData } from '../resources/HistoricalData'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
+import { supportedRegions } from '../regions'
+import chalk from 'chalk'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -28,6 +30,19 @@ export class BifravstStack extends CloudFormation.Stack {
 		},
 	) {
 		super(parent, id)
+
+		if (!supportedRegions.includes(this.region)) {
+			console.log(
+				chalk.yellow.inverse.bold(' WARNING '),
+				chalk.yellow(
+					`Your region ${this.region} is not in the list of supported regions!`,
+				),
+			)
+			console.log(
+				chalk.yellow.inverse.bold(' WARNING '),
+				chalk.yellow(`CDK might not be able to successfully deploy.`),
+			)
+		}
 
 		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
 			this,
