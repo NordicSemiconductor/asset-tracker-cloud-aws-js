@@ -310,7 +310,7 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Create table for raw queries
 
-		this.RawDataTableName = 'rawthingupdates2'
+		this.RawDataTableName = 'rawthingupdates4'
 
 		const RawDataTableLambda = new Lambda.Function(
 			this,
@@ -330,7 +330,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		)
 
-		new LambdaLogGroup(this, 'RawDataTableLambdaLogGroup', {
+		new LambdaLogGroup(this, `Table${this.RawDataTableName}LambdaLogGroup`, {
 			lambda: RawDataTableLambda,
 		})
 
