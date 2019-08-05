@@ -10,6 +10,7 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
+import { LambdaLogGroup } from './LambdaLogGroup'
 
 const WorkGroupName = 'bifravst'
 const DataBaseName = 'historicaldata'
@@ -196,24 +197,32 @@ export class HistoricalData extends CloudFormation.Resource {
 			}),
 		]
 
+		const AthenaWorkGroupLambda = new Lambda.Function(
+			this,
+			'AthenaWorkGroupLambda',
+			{
+				...customResourceLambdaDefaults,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.AthenaWorkGroup,
+				),
+				description: 'Used in CloudFormation to create the Athena workgroup',
+				initialPolicy: [
+					...customResourceLambdaDefaults.initialPolicy,
+					new IAM.PolicyStatement({
+						resources: ['*'],
+						actions: ['athena:createWorkGroup', 'athena:deleteWorkGroup'],
+					}),
+				],
+			},
+		)
+
+		new LambdaLogGroup(this, 'AthenaWorkGroupLambdaLogGroup', {
+			lambda: AthenaWorkGroupLambda,
+		})
+
 		const wg = new CustomResource(this, 'AthenaWorkGroup', {
-			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, 'AthenaWorkGroupLambda', {
-					...lambdaDefaults,
-					code: Lambda.Code.bucket(
-						sourceCodeBucket,
-						lambdas.lambdaZipFileNames.AthenaWorkGroup,
-					),
-					description: 'Used in CloudFormation to create the Athena workgroup',
-					initialPolicy: [
-						...lambdaDefaults.initialPolicy,
-						new IAM.PolicyStatement({
-							resources: ['*'],
-							actions: ['athena:createWorkGroup', 'athena:deleteWorkGroup'],
-						}),
-					],
-				}),
-			),
+			provider: CustomResourceProvider.lambda(AthenaWorkGroupLambda),
 			properties: {
 				WorkGroupName,
 				QueryResultsBucketName: queryResultsBucket.bucketName,
@@ -222,21 +231,25 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Creates the database
 
-		const db = new CustomResource(this, 'AthenaDB', {
-			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, 'AthenaDBLambda', {
-					...lambdaDefaults,
-					code: Lambda.Code.bucket(
-						sourceCodeBucket,
-						lambdas.lambdaZipFileNames.AthenaDDLResource,
-					),
-					description: 'Used in CloudFormation to create the Athena database',
-					initialPolicy: [
-						...lambdaDefaults.initialPolicy,
-						...athenaDDLResourcePolicies,
-					],
-				}),
+		const AthenaDBLambda = new Lambda.Function(this, 'AthenaDBLambda', {
+			...customResourceLambdaDefaults,
+			code: Lambda.Code.bucket(
+				sourceCodeBucket,
+				lambdas.lambdaZipFileNames.AthenaDDLResource,
 			),
+			description: 'Used in CloudFormation to create the Athena database',
+			initialPolicy: [
+				...customResourceLambdaDefaults.initialPolicy,
+				...athenaDDLResourcePolicies,
+			],
+		})
+
+		new LambdaLogGroup(this, 'AthenaDBLambdaLogGroup', {
+			lambda: AthenaDBLambda,
+		})
+
+		const db = new CustomResource(this, 'AthenaDB', {
+			provider: CustomResourceProvider.lambda(AthenaDBLambda),
 			properties: {
 				WorkGroupName,
 				Create: `CREATE DATABASE ${DataBaseName}`,
@@ -249,22 +262,30 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		this.RawDataTableName = 'rawthingupdates2'
 
+		const RawDataTableLambda = new Lambda.Function(
+			this,
+			`Table${this.RawDataTableName}Lambda`,
+			{
+				...customResourceLambdaDefaults,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.AthenaDDLResource,
+				),
+				description:
+					'Used in CloudFormation to create the Athena table that queries raw thing updates',
+				initialPolicy: [
+					...customResourceLambdaDefaults.initialPolicy,
+					...athenaDDLResourcePolicies,
+				],
+			},
+		)
+
+		new LambdaLogGroup(this, 'RawDataTableLambdaLogGroup', {
+			lambda: RawDataTableLambda,
+		})
+
 		new CustomResource(this, `Table${this.RawDataTableName}`, {
-			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, `Table${this.RawDataTableName}Lambda`, {
-					...lambdaDefaults,
-					code: Lambda.Code.bucket(
-						sourceCodeBucket,
-						lambdas.lambdaZipFileNames.AthenaDDLResource,
-					),
-					description:
-						'Used in CloudFormation to create the Athena table that queries raw thing updates',
-					initialPolicy: [
-						...lambdaDefaults.initialPolicy,
-						...athenaDDLResourcePolicies,
-					],
-				}),
-			),
+			provider: CustomResourceProvider.lambda(RawDataTableLambda),
 			properties: {
 				WorkGroupName,
 				Create:

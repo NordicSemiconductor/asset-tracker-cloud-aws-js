@@ -310,27 +310,31 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const ThingGroupName = `${id}Things`
 
+		const thingGroupLambda = new Lambda.Function(
+			this,
+			`${id}-ThingGroupLambda`,
+			{
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					props.lambdas.lambdaZipFileNames.createThingGroup,
+				),
+				layers: [baseLayer],
+				description: 'Used in CloudFormation to create a thing group',
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_8_10,
+				timeout: CloudFormation.Duration.seconds(15),
+				initialPolicy: [
+					new IAM.PolicyStatement({
+						resources: ['*'],
+						actions: ['iot:createThingGroup', 'iot:attachPolicy'],
+					}),
+					logToCloudWatch,
+				],
+			},
+		)
+
 		new CustomResource(this, 'ThingGroup', {
-			provider: CustomResourceProvider.lambda(
-				new Lambda.Function(this, `${id}-ThingGroupLambda`, {
-					code: Lambda.Code.bucket(
-						sourceCodeBucket,
-						props.lambdas.lambdaZipFileNames.createThingGroup,
-					),
-					layers: [baseLayer],
-					description: 'Used in CloudFormation to create a thing group',
-					handler: 'index.handler',
-					runtime: Lambda.Runtime.NODEJS_8_10,
-					timeout: CloudFormation.Duration.seconds(15),
-					initialPolicy: [
-						new IAM.PolicyStatement({
-							resources: ['*'],
-							actions: ['iot:createThingGroup', 'iot:attachPolicy'],
-						}),
-						logToCloudWatch,
-					],
-				}),
-			),
+			provider: CustomResourceProvider.lambda(thingGroupLambda),
 			properties: {
 				ThingGroupName,
 				ThingGroupProperties: {
@@ -338,6 +342,10 @@ export class BifravstStack extends CloudFormation.Stack {
 				},
 				PolicyName: iotThingPolicy.ref,
 			},
+		})
+
+		new LambdaLogGroup(this, 'thingGroupLambdaLogGroup', {
+			lambda: thingGroupLambda,
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {
