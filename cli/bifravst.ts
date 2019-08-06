@@ -9,6 +9,7 @@ import { generateCertCommand } from './commands/generate-cert'
 import { connectCommand } from './commands/connect'
 import { reactConfigCommand } from './commands/react-config'
 import { registerCaCommand } from './commands/register-ca'
+import { historicalDataCommand } from './commands/historical-data'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -17,7 +18,14 @@ const iot = new Iot({
 })
 
 const config = async () => {
-	const [endpoint, { deviceUiDomainName }] = await Promise.all([
+	const [
+		endpoint,
+		{
+			deviceUiDomainName,
+			historicalDataQueryResultsBucketName,
+			historicalDataBucketName,
+		},
+	] = await Promise.all([
 		iot
 			.describeEndpoint({ endpointType: 'iot:Data-ATS' })
 			.promise()
@@ -31,11 +39,18 @@ const config = async () => {
 	return {
 		endpoint,
 		deviceUiUrl: `https://${deviceUiDomainName}`,
+		historicalDataQueryResultsBucketName,
+		historicalDataBucketName,
 	}
 }
 
 const bifravstCLI = async () => {
-	const { endpoint, deviceUiUrl } = await config()
+	const {
+		endpoint,
+		deviceUiUrl,
+		historicalDataQueryResultsBucketName,
+		historicalDataBucketName,
+	} = await config()
 	const certsDir = path.resolve(process.cwd(), 'certificates')
 
 	program.description('Bifravst Command Line Interface')
@@ -46,6 +61,11 @@ const bifravstCLI = async () => {
 		connectCommand({ endpoint, deviceUiUrl, certsDir }),
 		reactConfigCommand({ stackId, region }),
 		cdCommand({ region }),
+		historicalDataCommand({
+			region,
+			QueryResultsBucketName: historicalDataQueryResultsBucketName,
+			DataBucketName: historicalDataBucketName,
+		}),
 	] as const
 
 	let ran = false

@@ -4,11 +4,21 @@ import { stackOutput } from './stackOutput'
 /**
  * Prints the stack outputs as create-react-app environment variables
  */
-export const stackOutputToCRAEnvironment = async (args: {
+export const stackOutputToCRAEnvironment = async ({
+	stackId,
+	region,
+	defaults,
+}: {
 	stackId: string
-	region?: string
+	region: string
+	defaults: {
+		[key: string]: string
+	}
 }) =>
 	objectToEnv({
-		...(await stackOutput(args)),
-		region: args.region,
+		...defaults,
+		...(await stackOutput({
+			stackId,
+			region,
+		})),
 	})

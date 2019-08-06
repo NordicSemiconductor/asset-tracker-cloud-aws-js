@@ -27,6 +27,7 @@
   "dependencies": {
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.504.0",
+    "backoff": "^2.5.0",
     "cfn-response": "^1.0.1",
     "chalk": "^2.4.2",
     "commander": "^2.20.0",
@@ -51,6 +52,7 @@
     "@types/aws-iot-device-sdk": "^2.2.0",
     "@types/aws-lambda": "^8.10.31",
     "@types/aws-sdk": "^2.7.0",
+    "@types/backoff": "^2.5.1",
     "@types/cfn-response": "^1.0.0",
     "@types/chalk": "^2.2.0",
     "@types/commander": "^2.12.2",

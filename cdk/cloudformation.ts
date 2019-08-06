@@ -16,8 +16,6 @@ const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || ''
 
 export type BifravstLambdas = {
 	createThingGroup: string
-	AthenaWorkGroup: string
-	AthenaDDLResource: string
 	concatenateRawDeviceMessages: string
 }
 
@@ -70,8 +68,6 @@ const main = async () => {
 		Bucket: sourceCodeBucketName,
 		lambdas: {
 			createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
-			AthenaWorkGroup: path.resolve(rootDir, 'cdk', 'AthenaWorkGroup.ts'),
-			AthenaDDLResource: path.resolve(rootDir, 'cdk', 'AthenaDDLResource.ts'),
 			concatenateRawDeviceMessages: path.resolve(
 				rootDir,
 				'historicalData',

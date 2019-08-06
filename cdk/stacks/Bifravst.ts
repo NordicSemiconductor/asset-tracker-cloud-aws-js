@@ -369,19 +369,14 @@ export class BifravstStack extends CloudFormation.Stack {
 			userRole,
 		})
 
-		new CloudFormation.CfnOutput(this, 'athenaWorkGroupName', {
-			value: hd.WorkGroupName,
-			exportName: `${this.stackName}:athenaWorkGroupName`,
+		new CloudFormation.CfnOutput(this, 'historicalDataBucketName', {
+			value: hd.bucket.bucketName,
+			exportName: `${this.stackName}:historicalDataBucketName`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'athenaDataBaseName', {
-			value: hd.DataBaseName,
-			exportName: `${this.stackName}:athenaDataBaseName`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'athenaRawDataTableName', {
-			value: hd.RawDataTableName,
-			exportName: `${this.stackName}:athenaRawDataTableName`,
+		new CloudFormation.CfnOutput(this, 'historicalDataQueryResultsBucketName', {
+			value: hd.queryResultsBucket.bucketName,
+			exportName: `${this.stackName}:historicalDataQueryResultsBucketName`,
 		})
 	}
 }
@@ -402,4 +397,6 @@ export type StackOutputs = {
 	thingGroupName: string
 	userIotPolicyArn: string
 	avatarBucket: string
+	historicalDataBucketName: string
+	historicalDataQueryResultsBucketName: string
 }
