@@ -1,5 +1,5 @@
 import * as program from 'commander'
-import { connect } from './connect'
+import { connect } from './device/connect'
 import chalk from 'chalk'
 import { Iot, CodePipeline } from 'aws-sdk'
 import { stackOutput } from './cloudformation/stackOutput'
