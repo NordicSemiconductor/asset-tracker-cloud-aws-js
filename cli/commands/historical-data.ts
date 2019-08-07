@@ -1,5 +1,9 @@
 import { ComandDefinition } from './CommandDefinition'
-import { athenaQuery } from '../../historicalData/athenaQuery'
+import {
+	athenaQuery,
+	createAthenaTableSQL,
+	parseAthenaResult,
+} from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
@@ -7,7 +11,6 @@ import {
 	WorkGroupName,
 } from '../../historicalData/settings'
 import chalk from 'chalk'
-import { createAthenaTableSQL } from '../../historicalData/createAthenaTableSQL'
 import { deviceMessagesFields } from '../../historicalData/deviceMessages'
 
 export const historicalDataCommand = ({
@@ -94,8 +97,10 @@ export const historicalDataCommand = ({
 				}
 			},
 		})
-		const dbs = await query({
-			QueryString: `SHOW DATABASES`,
+		const dbs = parseAthenaResult({
+			ResultSet: await query({
+				QueryString: `SHOW DATABASES`,
+			}),
 		})
 		if (!dbs.find(({ database_name: db }) => db === DataBaseName)) {
 			if (setup) {

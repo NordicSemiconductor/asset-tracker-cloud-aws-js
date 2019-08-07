@@ -3,7 +3,7 @@ import {
 	AthenaTableField,
 	AthenaTableScalarFieldType,
 	AthenaTableStructFieldType,
-} from './createAthenaTableSQL'
+} from '@bifravst/athena-helpers'
 
 /**
  * This defines the table structure for querying device data
