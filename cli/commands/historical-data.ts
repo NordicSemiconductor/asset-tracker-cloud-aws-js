@@ -91,10 +91,19 @@ export const historicalDataCommand = ({
 		const query = athenaQuery({
 			athena,
 			WorkGroup: WorkGroupName,
-			logDebug: message => {
+			debugLog: (...args: any) => {
 				if (debug) {
-					console.debug(chalk.gray('[Athena]'), chalk.blue(message))
+					console.debug(
+						chalk.gray('[Athena]'),
+						...args.map((a: any) => chalk.blue(JSON.stringify(a))),
+					)
 				}
+			},
+			errorLog: (...args: any) => {
+				console.error(
+					chalk.red.inverse('[Athena]'),
+					...args.map((a: any) => chalk.red(JSON.stringify(a))),
+				)
 			},
 		})
 		const dbs = parseAthenaResult({
