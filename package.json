@@ -6,7 +6,9 @@
     "test": "test -n \"$SKIP_TESTS\" && true || jest",
     "postinstall": "node scripts/warnIfWrongNodeVersion.js && npx tsc"
   },
-  "bin": "cli.js",
+  "bin": {
+    "bifravst": "cli/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bifravst/aws.git"

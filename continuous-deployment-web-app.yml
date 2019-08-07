@@ -9,7 +9,7 @@ phases:
       - npx tsc
   build:
     commands:
-      - ./cli.js react-config > $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+      - ./cli/index.js react-config > $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
       - cd $CODEBUILD_SRC_DIR_WebApp/; npm ci --no-audit; npm run build;
