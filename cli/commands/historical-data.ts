@@ -148,13 +148,15 @@ export const historicalDataCommand = ({
 		} catch (error) {
 			if (setup) {
 				console.log(chalk.magenta(`Creating table...`))
+				const createSQL = createAthenaTableSQL({
+					database: DataBaseName,
+					table: TableName,
+					s3Location: `s3://${DataBucketName}/`,
+					fields: deviceMessagesFields,
+				})
+				console.log(createSQL)
 				await query({
-					QueryString: createAthenaTableSQL({
-						database: DataBaseName,
-						table: TableName,
-						s3Location: `s3://${DataBucketName}/`,
-						fields: deviceMessagesFields,
-					}),
+					QueryString: createSQL,
 				})
 			} else {
 				console.log(

@@ -27,7 +27,7 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "MIT",
   "dependencies": {
-    "@bifravst/athena-helpers": "^2.0.0",
+    "@bifravst/athena-helpers": "^3.0.0",
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.504.0",
     "backoff": "^2.5.0",
