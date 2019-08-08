@@ -3,6 +3,16 @@ import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import chalk from 'chalk'
 import { uiServer } from './ui-server'
+import { connection as WSConnection } from 'websocket'
+
+const defaultConfig = {
+	act: false, // Whether to enable the active mode
+	actwt: 60, //In active mode: wait this amount of seconds until sending the next update. The actual interval will be this time plus the time it takes to get a GPS fix.
+	mvres: 300, // (movement resolution) In passive mode: Time in seconds to wait after detecting movement before sending the next update
+	mvt: 3600, // (movement timeout) In passive mode: Send update at least this often (in seconds)
+	gpst: 60, // GPS timeout (in seconds): timeout for GPS fix
+	acct: 1, // Accelerometer threshold: minimal absolute value for and accelerometer reading to be considered movement.
+} as const
 
 /**
  * Connect to the AWS IoT broker using a generated device certificate
@@ -16,6 +26,7 @@ export const connect = async (args: {
 }) => {
 	const { deviceId, deviceUiUrl, certsDir, endpoint, caCert } = args
 	const deviceFiles = deviceFileLocations(certsDir, deviceId)
+	let cfg = defaultConfig
 
 	console.log(chalk.blue('Device ID:   '), chalk.yellow(deviceId))
 	console.log(chalk.blue('endpoint:    '), chalk.yellow(endpoint))
@@ -64,6 +75,8 @@ export const connect = async (args: {
 		region: endpoint.split('.')[2],
 	})
 
+	let wsConnection: WSConnection
+
 	connection.on('connect', async () => {
 		console.timeEnd(chalk.green(chalk.inverse(' connected ')))
 		clearInterval(connectingNote)
@@ -76,7 +89,17 @@ export const connect = async (args: {
 					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(update)))
 					connection.update(deviceId, { state: { reported: update } })
 				},
+				onWsConnection: c => {
+					console.log(chalk.magenta('[ws]'), chalk.cyan('connected'))
+					wsConnection = c
+					connection.get(deviceId)
+				},
 			})
+			console.log(
+				chalk.magenta('>'),
+				chalk.cyan(JSON.stringify({ state: { reported: { cfg } } })),
+			)
+			connection.update(deviceId, { state: { reported: { cfg } } })
 		})
 
 		connection.on('close', () => {
@@ -87,17 +110,39 @@ export const connect = async (args: {
 			console.log(chalk.magenta('reconnecting...'))
 		})
 
-		connection.on('status', (_, stat) => {
+		connection.on('status', (_, stat, __, stateObject) => {
 			console.log(chalk.magenta('>'), chalk.cyan(stat))
+			console.log(chalk.magenta('>'), chalk.cyan(JSON.stringify(stateObject)))
+			if (stat === 'accepted') {
+				if (wsConnection) {
+					cfg = {
+						...cfg,
+						...(stateObject.desired && stateObject.desired.cfg),
+					}
+					console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
+					wsConnection.send(JSON.stringify(cfg))
+				}
+			}
 		})
 
-		connection.on('delta', function(thingName, stateObject) {
+		connection.on('delta', (_, stateObject) => {
+			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(stateObject)))
+			cfg = {
+				...cfg,
+				...(stateObject.state && stateObject.state.cfg),
+			}
+			if (wsConnection) {
+				console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
+				wsConnection.send(JSON.stringify(cfg))
+			}
 			console.log(
-				'received delta on ' + thingName + ': ' + JSON.stringify(stateObject),
+				chalk.magenta('>'),
+				chalk.cyan(JSON.stringify({ state: { reported: { cfg } } })),
 			)
+			connection.update(deviceId, { state: { reported: { cfg } } })
 		})
 
-		connection.on('timeout', function(thingName, clientToken) {
+		connection.on('timeout', (thingName, clientToken) => {
 			console.log(
 				'received timeout on ' + thingName + ' with token: ' + clientToken,
 			)

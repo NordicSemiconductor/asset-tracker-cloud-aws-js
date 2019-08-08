@@ -1,13 +1,20 @@
 import * as http from 'http'
 import chalk from 'chalk'
 import { portForDevice } from './portForDevice'
+import { server as WebSocketServer, connection } from 'websocket'
 
-export const uiServer = async (args: {
+export const uiServer = async ({
+	deviceId,
+	deviceUiUrl,
+	onUpdate,
+	onWsConnection,
+}: {
 	deviceId: string
 	deviceUiUrl: string
 	onUpdate: (update: object) => void
+	onWsConnection: (connection: connection) => void
 }) => {
-	const port = portForDevice({ deviceId: args.deviceId })
+	const port = portForDevice({ deviceId: deviceId })
 
 	const requestHandler: http.RequestListener = async (request, response) => {
 		if (request.method === 'OPTIONS') {
@@ -23,11 +30,11 @@ export const uiServer = async (args: {
 		switch (request.url) {
 			case '/id':
 				response.writeHead(200, {
-					'Content-Length': args.deviceId.length,
+					'Content-Length': deviceId.length,
 					'Content-Type': 'text/plain',
 					'Access-Control-Allow-Origin': '*',
 				})
-				response.end(args.deviceId)
+				response.end(deviceId)
 				break
 			case '/update':
 				request.on('data', chunk => {
@@ -36,7 +43,7 @@ export const uiServer = async (args: {
 				request.on('end', () => {
 					try {
 						const update = JSON.parse(body)
-						args.onUpdate(update)
+						onUpdate(update)
 						response.writeHead(202, {
 							'Access-Control-Allow-Origin': '*',
 						})
@@ -68,10 +75,18 @@ export const uiServer = async (args: {
 		console.log(
 			chalk.cyan(`To control this device open your browser on:`),
 			chalk.green(
-				`${args.deviceUiUrl}?endpoint=${encodeURIComponent(
+				`${deviceUiUrl}?endpoint=${encodeURIComponent(
 					`http://localhost:${port}`,
 				)}`,
 			),
 		)
+	})
+
+	const wsServer = new WebSocketServer({
+		httpServer: server,
+	})
+	wsServer.on('request', request => {
+		const connection = request.accept(undefined, request.origin)
+		onWsConnection(connection)
 	})
 }
