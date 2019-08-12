@@ -8,14 +8,21 @@ import { run } from '../process/run'
  * Generates a certificate for a device, signed with the CA
  * @see https://docs.aws.amazon.com/iot/latest/developerguide/device-certs-your-own.html
  */
-export const generateDeviceCertificate = async (args: {
+export const generateDeviceCertificate = async ({
+	endpoint,
+	certsDir,
+	log,
+	debug,
+	deviceId,
+	caCert,
+}: {
+	endpoint: string
 	certsDir: string
 	deviceId: string
+	caCert: string
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
 }): Promise<{ deviceId: string }> => {
-	const { certsDir, log, debug, deviceId } = args
-
 	try {
 		await fs.stat(certsDir)
 	} catch {
@@ -24,7 +31,10 @@ export const generateDeviceCertificate = async (args: {
 
 	log(`Generating certificate for device ${deviceId}`)
 	const caFiles = caFileLocations(certsDir)
-	const deviceFiles = deviceFileLocations(certsDir, deviceId)
+	const deviceFiles = deviceFileLocations({
+		certsDir,
+		deviceId,
+	})
 
 	await run({
 		command: 'openssl',
@@ -68,12 +78,27 @@ export const generateDeviceCertificate = async (args: {
 		log: debug,
 	})
 
+	const certWithCa = (await Promise.all([
+		fs.readFile(deviceFiles.cert),
+		fs.readFile(caFiles.cert),
+	])).join(os.EOL)
+
+	await fs.writeFile(deviceFiles.certWithCA, certWithCa, 'utf-8')
+
+	// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
 	await fs.writeFile(
-		deviceFiles.certWithCA,
-		(await Promise.all([
-			fs.readFile(deviceFiles.cert),
-			fs.readFile(caFiles.cert),
-		])).join(os.EOL),
+		deviceFiles.json,
+		JSON.stringify(
+			{
+				caCert: await fs.readFile(caCert, 'utf-8'),
+				clientCert: certWithCa,
+				privateKey: await fs.readFile(deviceFiles.key, 'utf-8'),
+				clientId: deviceId,
+				brokerHostname: endpoint,
+			},
+			null,
+			2,
+		),
 		'utf-8',
 	)
 

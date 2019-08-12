@@ -25,7 +25,7 @@ export const connect = async (args: {
 	caCert: string
 }) => {
 	const { deviceId, deviceUiUrl, certsDir, endpoint, caCert } = args
-	const deviceFiles = deviceFileLocations(certsDir, deviceId)
+	const deviceFiles = deviceFileLocations({ certsDir, deviceId })
 	let cfg = defaultConfig
 
 	console.log(chalk.blue('Device ID:   '), chalk.yellow(deviceId))

@@ -57,7 +57,7 @@ const bifravstCLI = async () => {
 
 	const commands = [
 		registerCaCommand({ stackId, certsDir, region }),
-		generateCertCommand(),
+		generateCertCommand({ endpoint }),
 		connectCommand({ endpoint, deviceUiUrl, certsDir }),
 		reactConfigCommand({ stackId, region }),
 		cdCommand({ region }),

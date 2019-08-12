@@ -12,12 +12,6 @@ export const connectCommand = ({
 	certsDir: string
 }): ComandDefinition => ({
 	command: 'connect <deviceId>',
-	options: [
-		{
-			flags: '-e, --endpoint <endpoint>',
-			description: 'MQTT broker endpoint',
-		},
-	],
 	action: async (deviceId: string) =>
 		connect({
 			deviceId,
