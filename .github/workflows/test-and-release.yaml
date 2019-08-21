@@ -1,0 +1,26 @@
+name: Test and Release
+
+on: push
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install latest npm
+        run: sudo npm install -g npm@
+      - name: Install dependencies
+        run: npm ci --no-audit
+      - name: Test
+        run: npm test
+      - name: relase
+        continue-on-error: true
+        env:
+          GK_LOCK_DEFAULT_BRANCH: saga
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm i --no-save semantic-release@next
+          npx semantic-release
