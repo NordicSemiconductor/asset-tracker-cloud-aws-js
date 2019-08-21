@@ -17,7 +17,6 @@ jobs:
       - name: Semantic release
         continue-on-error: true
         env:
-          GK_LOCK_DEFAULT_BRANCH: saga
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
