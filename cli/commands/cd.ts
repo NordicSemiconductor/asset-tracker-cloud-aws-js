@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import { CodePipeline } from 'aws-sdk'
-import { distanceInWords } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { ComandDefinition } from './CommandDefinition'
 
 export const cdCommand = ({
@@ -54,7 +54,7 @@ export const cdCommand = ({
 				} as { [key: string]: any })[summary.status || 'Unknown'],
 				chalk.cyan(pipelineName),
 				chalk.gray(
-					`${distanceInWords(new Date(), summary.lastUpdateTime)} ago`,
+					formatDistanceToNow(summary.lastUpdateTime, { addSuffix: true }),
 				),
 			)
 		})
