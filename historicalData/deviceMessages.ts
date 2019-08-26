@@ -18,7 +18,7 @@ export const deviceMessagesFields: {
 				type: AthenaTableStructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.int,
+						type: AthenaTableScalarFieldType.bigint,
 					},
 					v: {
 						type: AthenaTableArrayFieldType.array,
@@ -30,7 +30,7 @@ export const deviceMessagesFields: {
 				type: AthenaTableStructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.int,
+						type: AthenaTableScalarFieldType.bigint,
 					},
 					v: {
 						type: AthenaTableScalarFieldType.int,
@@ -41,7 +41,7 @@ export const deviceMessagesFields: {
 				type: AthenaTableStructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.int,
+						type: AthenaTableScalarFieldType.bigint,
 					},
 					v: {
 						type: AthenaTableStructFieldType.struct,

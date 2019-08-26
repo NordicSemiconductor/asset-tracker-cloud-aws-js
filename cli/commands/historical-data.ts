@@ -154,7 +154,7 @@ export const historicalDataCommand = ({
 					s3Location: `s3://${DataBucketName}/`,
 					fields: deviceMessagesFields,
 				})
-				console.log(createSQL)
+				console.log(chalk.magenta(createSQL))
 				await query({
 					QueryString: createSQL,
 				})
