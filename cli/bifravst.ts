@@ -11,6 +11,7 @@ import { reactConfigCommand } from './commands/react-config'
 import { infoCommand } from './commands/info'
 import { registerCaCommand } from './commands/register-ca'
 import { historicalDataCommand } from './commands/historical-data'
+import { flashCertificate } from './commands/flash-cert'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -58,6 +59,7 @@ const bifravstCLI = async () => {
 
 	const commands = [
 		registerCaCommand({ stackId, certsDir, region }),
+		flashCertificate({ certsDir }),
 		generateCertCommand({ endpoint }),
 		connectCommand({ endpoint, deviceUiUrl, certsDir }),
 		reactConfigCommand({ stackId, region }),
