@@ -17,17 +17,17 @@ export const flashCertificate = ({
 			description: 'Serial port, defaults to /dev/ttyACM0',
 		},
 		{
-			flags: '-t, --sectag <secTag>',
+			flags: '-t, --sectag <sectag>',
 			description: 'sec tag, defaults to 42',
 		},
 	],
 	action: async (
 		deviceId: string,
-		{ port, secTag }: { port?: string; secTag?: string },
+		{ port, sectag }: { port?: string; sectag?: string },
 	) => {
 		const deviceFiles = deviceFileLocations({ certsDir, deviceId })
 		const PORT = port || '/dev/ttyACM0'
-		const SEC_TAG = parseInt(secTag || '', 10) || 42
+		const SEC_TAG = parseInt(sectag || '', 10) || 42
 		const device = new ModemPort(PORT, {
 			writeCallback: (data: string) => {
 				console.log(chalk.magenta(data.trim()))
