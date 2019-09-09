@@ -112,7 +112,7 @@ export const handler = async () => {
 	// Concatenate hours
 	await concatenateFiles({
 		Prefix: 'raw/updates/',
-		notAfterDate: dateFns.format(new Date(), "yyyy-MM-DD'T'HH"),
+		notAfterDate: dateFns.format(new Date(), "yyyy-MM-dd'T'HH"),
 		fileNameToDate: filename => {
 			const [date] = path.parse(filename).name.split('-')
 			const m = dateRx.exec(date)
@@ -120,14 +120,14 @@ export const handler = async () => {
 				const [, year, month, day, hour] = m
 				return `${year}-${month}-${day}T${hour}`
 			}
-			return dateFns.format(new Date(), "yyyy-MM-DD'T'HH") // No date found
+			return dateFns.format(new Date(), "yyyy-MM-dd'T'HH") // No date found
 		},
 		dateToFileName: date => `hours/${date}.txt`,
 	})
 	// Concatenate days
 	await concatenateFiles({
 		Prefix: 'hours/',
-		notAfterDate: dateFns.format(new Date(), 'yyyy-MM-DD'),
+		notAfterDate: dateFns.format(new Date(), 'yyyy-MM-dd'),
 		fileNameToDate: filename => {
 			const [year, month, day] = path
 				.parse(filename)
