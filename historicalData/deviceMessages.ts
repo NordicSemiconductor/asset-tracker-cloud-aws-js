@@ -68,6 +68,65 @@ export const deviceMessagesFields: {
 					},
 				},
 			},
+			dev: {
+				type: AthenaTableStructFieldType.struct,
+				fields: {
+					ts: {
+						type: AthenaTableScalarFieldType.bigint,
+					},
+					v: {
+						type: AthenaTableStructFieldType.struct,
+						fields: {
+							band: {
+								type: AthenaTableScalarFieldType.int,
+							},
+							nw: {
+								type: AthenaTableScalarFieldType.string,
+							},
+							iccid: {
+								type: AthenaTableScalarFieldType.string,
+							},
+							modV: {
+								type: AthenaTableScalarFieldType.string,
+							},
+							brdV: {
+								type: AthenaTableScalarFieldType.string,
+							},
+							appV: {
+								type: AthenaTableScalarFieldType.string,
+							},
+						},
+					},
+				},
+			},
+			roam: {
+				type: AthenaTableStructFieldType.struct,
+				fields: {
+					ts: {
+						type: AthenaTableScalarFieldType.bigint,
+					},
+					v: {
+						type: AthenaTableStructFieldType.struct,
+						fields: {
+							rsrp: {
+								type: AthenaTableScalarFieldType.int,
+							},
+							area: {
+								type: AthenaTableScalarFieldType.int,
+							},
+							mccmnc: {
+								type: AthenaTableScalarFieldType.int,
+							},
+							cell: {
+								type: AthenaTableScalarFieldType.int,
+							},
+							ip: {
+								type: AthenaTableScalarFieldType.string,
+							},
+						},
+					},
+				},
+			},
 		},
 	},
 	timestamp: {
