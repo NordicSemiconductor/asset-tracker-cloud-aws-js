@@ -1,4 +1,4 @@
-import { BifravstApp } from './apps/Bifravst'
+import { TestApp } from './apps/Test'
 import { prepareResources } from './prepare-resources'
 
 const STACK_ID = process.env.STACK_ID || 'bifravst'
@@ -9,7 +9,7 @@ prepareResources({
 	region,
 	rootDir: process.cwd(),
 })
-	.then(args => new BifravstApp(args).synth())
+	.then(args => new TestApp(args).synth())
 	.catch(err => {
 		console.error(err)
 		process.exit(1)

@@ -66,6 +66,7 @@ const bifravstCLI = async () => {
 		infoCommand({ stackId, region }),
 		cdCommand({ region }),
 		historicalDataCommand({
+			stackId,
 			region,
 			QueryResultsBucketName: historicalDataQueryResultsBucketName,
 			DataBucketName: historicalDataBucketName,

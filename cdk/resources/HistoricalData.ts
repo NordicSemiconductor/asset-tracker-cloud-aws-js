@@ -5,11 +5,10 @@ import * as IoT from '@aws-cdk/aws-iot'
 import * as Events from '@aws-cdk/aws-events'
 import * as EventTargets from '@aws-cdk/aws-events-targets'
 import * as Lambda from '@aws-cdk/aws-lambda'
-
-import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
+import { BifravstLambdas } from '../prepare-resources'
 
 /**
  * Provides resources for historical data

@@ -1,10 +1,6 @@
 import { ComandDefinition } from './CommandDefinition'
 import { stackOutputToCRAEnvironment } from '../cloudformation/stackOutputToCRAEnvironment'
-import {
-	DataBaseName,
-	TableName,
-	WorkGroupName,
-} from '../../historicalData/settings'
+import { DataBaseName, TableName } from '../../historicalData/settings'
 
 export const reactConfigCommand = ({
 	stackId,
@@ -21,7 +17,7 @@ export const reactConfigCommand = ({
 				region,
 				defaults: {
 					region,
-					historicaldataWorkgroupName: WorkGroupName,
+					historicaldataWorkgroupName: stackId,
 					historicaldataDatabaseName: DataBaseName,
 					historicaldataTableName: TableName,
 				},

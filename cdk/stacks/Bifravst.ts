@@ -8,14 +8,13 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as Iot from '@aws-cdk/aws-iot'
-import { BifravstLambdas } from '../cloudformation'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
-import { WebAppHosting } from '../resources/WebAppHosting'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import { HistoricalData } from '../resources/HistoricalData'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
 import { LambdaLogGroup } from '../resources/LambdaLogGroup'
+import { BifravstLambdas } from '../prepare-resources'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -58,8 +57,18 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
 			userPool: userPool,
-			enabledAuthFlows: [Cognito.AuthFlow.USER_PASSWORD],
+			enabledAuthFlows: [
+				Cognito.AuthFlow.USER_PASSWORD,
+				Cognito.AuthFlow.ADMIN_NO_SRP,
+			],
 		})
+		const developerProviderName = 'developerAuthenticated'
+
+		new CloudFormation.CfnOutput(this, 'developerProviderName', {
+			value: developerProviderName,
+			exportName: `${this.stackName}:developerProviderName`,
+		})
+
 		const identityPool = new Cognito.CfnIdentityPool(this, 'identityPool', {
 			identityPoolName: id,
 			allowUnauthenticatedIdentities: false,
@@ -69,6 +78,7 @@ export class BifravstStack extends CloudFormation.Stack {
 					providerName: userPool.userPoolProviderName,
 				},
 			],
+			developerProviderName,
 		})
 
 		const userRole = new IAM.Role(this, 'userRole', {
@@ -212,43 +222,6 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:userIotPolicyArn`,
 		})
 
-		// Web App
-
-		const webAppHosting = new WebAppHosting(this, 'webAppHosting')
-		new CloudFormation.CfnOutput(this, 'webAppBucketName', {
-			value: webAppHosting.bucket.bucketName,
-			exportName: `${this.stackName}:webAppBucketName`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'cloudfrontDistributionIdWebApp', {
-			value: webAppHosting.distribution.ref,
-			exportName: `${this.stackName}:cloudfrontDistributionIdWebApp`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'webAppDomainName', {
-			value: webAppHosting.distribution.attrDomainName,
-			exportName: `${this.stackName}:webAppDomainName`,
-		})
-
-		// Device UI
-
-		const deviceUIHosting = new WebAppHosting(this, 'deviceUIHosting')
-
-		new CloudFormation.CfnOutput(this, 'deviceUiBucketName', {
-			value: deviceUIHosting.bucket.bucketName,
-			exportName: `${this.stackName}:deviceUi`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'cloudfrontDistributionIdDeviceUi', {
-			value: deviceUIHosting.distribution.ref,
-			exportName: `${this.stackName}:cloudfrontDistributionIdDeviceUi`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'deviceUiDomainName', {
-			value: deviceUIHosting.distribution.attrDomainName,
-			exportName: `${this.stackName}:deviceUiDomainName`,
-		})
-
 		const iotJitpRole = new IAM.Role(this, 'iotJitpRole', {
 			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),
 			managedPolicies: [
@@ -385,6 +358,7 @@ export type StackOutputs = {
 	mqttEndpoint: string
 	userPoolId: string
 	identityPoolId: string
+	developerProviderName: string
 	userPoolClientId: string
 	webAppBucketName: string
 	cloudfrontDistributionIdWebApp: string

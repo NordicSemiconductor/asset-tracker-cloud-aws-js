@@ -5,19 +5,17 @@ import {
 	parseAthenaResult,
 } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
-import {
-	DataBaseName,
-	TableName,
-	WorkGroupName,
-} from '../../historicalData/settings'
+import { DataBaseName, TableName } from '../../historicalData/settings'
 import chalk from 'chalk'
 import { deviceMessagesFields } from '../../historicalData/deviceMessages'
 
 export const historicalDataCommand = ({
+	stackId,
 	region,
 	QueryResultsBucketName,
 	DataBucketName,
 }: {
+	stackId: string
 	region: string
 	QueryResultsBucketName: string
 	DataBucketName: string
@@ -53,14 +51,14 @@ export const historicalDataCommand = ({
 		if (
 			!WorkGroups ||
 			!WorkGroups.find(
-				({ Name, State }) => State === 'ENABLED' && Name === WorkGroupName,
+				({ Name, State }) => State === 'ENABLED' && Name === stackId,
 			)
 		) {
 			if (setup) {
 				console.log(chalk.magenta(`Creating workgroup...`))
 				await athena
 					.createWorkGroup({
-						Name: WorkGroupName,
+						Name: stackId,
 						Description: 'Workgroup for Bifravst',
 						Configuration: {
 							ResultConfiguration: {
@@ -72,9 +70,7 @@ export const historicalDataCommand = ({
 			} else {
 				console.log(
 					chalk.red.inverse(' ERROR '),
-					chalk.red(
-						`Athena workgroup ${chalk.blue(WorkGroupName)} does not exist!`,
-					),
+					chalk.red(`Athena workgroup ${chalk.blue(stackId)} does not exist!`),
 				)
 				console.log(
 					chalk.red.inverse(' ERROR '),
@@ -85,12 +81,12 @@ export const historicalDataCommand = ({
 		}
 		console.log(
 			chalk.green.inverse(' OK '),
-			chalk.gray(`Athena workgroup ${chalk.blue(WorkGroupName)} exists.`),
+			chalk.gray(`Athena workgroup ${chalk.blue(stackId)} exists.`),
 		)
 
 		const query = athenaQuery({
 			athena,
-			WorkGroup: WorkGroupName,
+			WorkGroup: stackId,
 			debugLog: (...args: any) => {
 				if (debug) {
 					console.debug(
