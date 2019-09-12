@@ -70,7 +70,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		const identityPool = new Cognito.CfnIdentityPool(this, 'identityPool', {
-			identityPoolName: id,
+			identityPoolName: id.replace(/-/, '_'),
 			allowUnauthenticatedIdentities: false,
 			cognitoIdentityProviders: [
 				{
