@@ -23,7 +23,7 @@ export class WebAppHosting extends CloudFormation.Resource {
 					maxAge: 3600,
 				},
 			],
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 			websiteIndexDocument: 'index.html',
 			websiteErrorDocument: 'index.html',
 		})

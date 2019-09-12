@@ -34,11 +34,11 @@ export class HistoricalData extends CloudFormation.Resource {
 		super(parent, id)
 
 		this.bucket = new S3.Bucket(this, 'bucket', {
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
 
 		this.queryResultsBucket = new S3.Bucket(this, 'queryResults', {
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
 
 		const writeToResultBucket = new IAM.PolicyStatement({

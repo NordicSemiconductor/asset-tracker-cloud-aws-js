@@ -10,7 +10,7 @@ export class LambdaSourceCodeStorageStack extends Stack {
 	public constructor(parent: App, id: string) {
 		super(parent, id)
 		this.bucket = new Bucket(this, 'cf-sourcecode', {
-			removalPolicy: RemovalPolicy.RETAIN,
+			removalPolicy: RemovalPolicy.DESTROY,
 		})
 
 		new CfnOutput(this, 'bucketName', {

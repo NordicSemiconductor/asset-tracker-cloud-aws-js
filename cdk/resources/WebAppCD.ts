@@ -82,7 +82,7 @@ export class WebAppCD extends CloudFormation.Construct {
 		this.codeBuildProject.node.addDependency(codeBuildRole)
 
 		const bucket = new S3.Bucket(this, 'bucket', {
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
 
 		const pipelineRole = new IAM.Role(this, 'CodePipelineRole', {

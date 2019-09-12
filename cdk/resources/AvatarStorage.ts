@@ -25,7 +25,7 @@ export class AvatarStorage extends CloudFormation.Resource {
 					maxAge: 3600,
 				},
 			],
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
 
 		userRole.addToPolicy(
