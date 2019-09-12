@@ -1,6 +1,8 @@
 import { ComandDefinition } from './CommandDefinition'
-import { stackOutputToCRAEnvironment } from '../cloudformation/stackOutputToCRAEnvironment'
 import { DataBaseName, TableName } from '../../historicalData/settings'
+import { objectToEnv } from '../cloudformation/objectToEnv'
+import { stackOutput } from '../cloudformation/stackOutput'
+import { stackId as webStackId } from '../../cdk/stacks/WebApps'
 
 export const reactConfigCommand = ({
 	stackId,
@@ -12,15 +14,21 @@ export const reactConfigCommand = ({
 	command: 'react-config',
 	action: async () => {
 		process.stdout.write(
-			await stackOutputToCRAEnvironment({
-				stackId,
+			objectToEnv({
 				region,
-				defaults: {
+				historicaldataWorkgroupName: stackId,
+				historicaldataDatabaseName: DataBaseName,
+				historicaldataTableName: TableName,
+				...(await stackOutput({
+					stackId,
 					region,
-					historicaldataWorkgroupName: stackId,
-					historicaldataDatabaseName: DataBaseName,
-					historicaldataTableName: TableName,
-				},
+				})),
+				...(await stackOutput({
+					stackId: webStackId({
+						bifravstStackName: stackId,
+					}),
+					region,
+				})),
 			}),
 		)
 	},

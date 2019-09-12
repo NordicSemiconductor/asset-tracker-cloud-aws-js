@@ -1,7 +1,7 @@
 import { App } from '@aws-cdk/core'
 import { BifravstStack } from '../stacks/Bifravst'
 import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
-import { WebAppsStack } from '../stacks/WebApps'
+import { stackId, WebAppsStack } from '../stacks/WebApps'
 import { BifravstLambdas } from '../prepare-resources'
 
 export class BifravstApp extends App {
@@ -14,6 +14,6 @@ export class BifravstApp extends App {
 	}) {
 		super()
 		new BifravstStack(this, args.stackId, args)
-		new WebAppsStack(this, `${args.stackId}-webapps`)
+		new WebAppsStack(this, stackId({ bifravstStackName: args.stackId }))
 	}
 }
