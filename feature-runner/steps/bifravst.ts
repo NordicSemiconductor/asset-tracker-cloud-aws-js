@@ -3,7 +3,7 @@ import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
 import { generateDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
 import * as path from 'path'
-import { device } from 'aws-iot-device-sdk'
+import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 
 export const bifravstStepRunners = ({
@@ -12,7 +12,7 @@ export const bifravstStepRunners = ({
 	mqttEndpoint: string
 }): StepRunner<BifravstWorld>[] => [
 	{
-		willRun: regexMatcher(/^(a cat exists|I generate a certificate)$/),
+		willRun: regexMatcher(/^(?:a cat exists|I generate a certificate)$/),
 		run: async (_, __, runner) => {
 			if (!runner.store['cat:id']) {
 				const catName = (await randomWords({ numWords: 3 })).join('-')
@@ -31,16 +31,19 @@ export const bifravstStepRunners = ({
 		},
 	},
 	{
-		willRun: regexMatcher(/^I connect the cat tracker$/),
-		run: async (_, __, runner) => {
-			const catId = runner.store['cat:id']
+		willRun: regexMatcher(
+			/^(?:I connect the cat tracker(?: ([^ ]+))?|the cat tracker(?: ([^ ]+))? is connected)$/,
+		),
+		run: async ([deviceId1, deviceId2], __, runner) => {
+			const catId = deviceId1 || deviceId2 || runner.store['cat:id']
+			await runner.progress('IoT', catId)
 			if (!runner.store[`cat:connection:${catId}`]) {
 				const deviceFiles = deviceFileLocations({
 					certsDir: path.resolve(process.cwd(), 'certificates'),
 					deviceId: catId,
 				})
 				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
-				const connection = new device({
+				const connection = new thingShadow({
 					privateKey: deviceFiles.key,
 					clientCert: deviceFiles.certWithCA,
 					caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
@@ -58,6 +61,39 @@ export const bifravstStepRunners = ({
 				})
 			}
 			return [catId, mqttEndpoint]
+		},
+	},
+	{
+		willRun: regexMatcher(
+			/^the cat tracker(?: ([^ ]+)) updates its reported state with$/,
+		),
+		run: async ([deviceId], step, runner) => {
+			if (!step.interpolatedArgument) {
+				throw new Error('Must provide argument!')
+			}
+			const reported = JSON.parse(step.interpolatedArgument)
+			const catId = deviceId || runner.store['cat:id']
+			const connection = runner.store[`cat:connection:${catId}`]
+			await runner.progress('IoT > reported', JSON.stringify(reported))
+			const updatePromise = await new Promise(resolve => {
+				connection.on(
+					'status',
+					(
+						_thingName: string,
+						stat: string,
+						_clientToken: string,
+						stateObject: object,
+					) => {
+						if (stat === 'accepted') {
+							resolve(stateObject)
+						}
+					},
+				)
+				connection.register(deviceId, {}, async () => {
+					connection.update(deviceId, { state: { reported } })
+				})
+			})
+			return await updatePromise
 		},
 	},
 ]

@@ -9,12 +9,21 @@ import * as program from 'commander'
 import chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { bifravstStepRunners } from './steps/bifravst'
+import {
+	DataBaseName,
+	TableName,
+	WorkGroupName,
+} from '../historicalData/settings'
+import { athenaStepRunners } from './steps/athena'
 
 let ran = false
 
 export type BifravstWorld = StackOutputs & {
 	region: string
 	userIotPolicyName: string
+	historicaldataWorkgroupName: string
+	historicaldataDatabaseName: string
+	historicaldataTableName: string
 }
 
 program
@@ -47,6 +56,11 @@ program
 			const world: BifravstWorld = {
 				...stackConfig,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
+				historicaldataWorkgroupName: WorkGroupName({
+					bifravstStackName: stackName,
+				}),
+				historicaldataDatabaseName: DataBaseName,
+				historicaldataTableName: TableName,
 				region:
 					process.env.AWS_DEFAULT_REGION ||
 					process.env.AWS_REGION ||
@@ -77,7 +91,17 @@ program
 							emailAsUsername: true,
 						}),
 					)
-					.addStepRunners(awsSdkStepRunners(world))
+					.addStepRunners(
+						awsSdkStepRunners({
+							region: world.region,
+							constructorArgs: {
+								IotData: {
+									endpoint: world.mqttEndpoint,
+								},
+							},
+						}),
+					)
+					.addStepRunners(athenaStepRunners(world))
 					.addStepRunners(bifravstStepRunners(world))
 					.run()
 				if (!success) {
