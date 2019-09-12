@@ -15,6 +15,9 @@ export class TestApp extends App {
 		lambdas: LayeredLambdas<BifravstLambdas>
 	}) {
 		super()
-		new BifravstStack(this, args.stackId, args)
+		new BifravstStack(this, args.stackId, {
+			...args,
+			isTest: true,
+		})
 	}
 }

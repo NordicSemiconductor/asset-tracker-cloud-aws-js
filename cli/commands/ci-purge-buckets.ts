@@ -1,6 +1,5 @@
 import { ComandDefinition } from './CommandDefinition'
 import { stackOutput } from '../cloudformation/stackOutput'
-import { stackId as webStackId } from '../../cdk/stacks/WebApps'
 import { stackId as sourcecodeStackId } from '../../cdk/stacks/LambdaSourceCodeStorage'
 import { S3 } from 'aws-sdk'
 
@@ -23,12 +22,6 @@ export const purgeBucketsCommand = ({
 		} = {
 			...(await stackOutput({
 				stackId,
-				region,
-			})),
-			...(await stackOutput({
-				stackId: webStackId({
-					bifravstStackName: stackId,
-				}),
 				region,
 			})),
 			...(await stackOutput({

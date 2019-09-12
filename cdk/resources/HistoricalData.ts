@@ -24,17 +24,21 @@ export class HistoricalData extends CloudFormation.Resource {
 			baseLayer,
 			lambdas,
 			userRole,
+			isTest,
 		}: {
 			sourceCodeBucket: S3.IBucket
 			baseLayer: Lambda.ILayerVersion
 			lambdas: LayeredLambdas<BifravstLambdas>
 			userRole: IAM.IRole
+			isTest: boolean
 		},
 	) {
 		super(parent, id)
 
 		this.bucket = new S3.Bucket(this, 'bucket', {
-			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+			removalPolicy: isTest
+				? CloudFormation.RemovalPolicy.DESTROY
+				: CloudFormation.RemovalPolicy.RETAIN,
 		})
 
 		this.queryResultsBucket = new S3.Bucket(this, 'queryResults', {

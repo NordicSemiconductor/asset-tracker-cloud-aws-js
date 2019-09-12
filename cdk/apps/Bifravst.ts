@@ -13,7 +13,10 @@ export class BifravstApp extends App {
 		lambdas: LayeredLambdas<BifravstLambdas>
 	}) {
 		super()
-		new BifravstStack(this, args.stackId, args)
+		new BifravstStack(this, args.stackId, {
+			...args,
+			isTest: false,
+		})
 		new WebAppsStack(this, stackId({ bifravstStackName: args.stackId }))
 	}
 }

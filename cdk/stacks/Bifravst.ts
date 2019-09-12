@@ -25,6 +25,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			sourceCodeBucketName: string
 			baseLayerZipFileName: string
 			lambdas: LayeredLambdas<BifravstLambdas>
+			isTest: boolean
 		},
 	) {
 		super(parent, id)
@@ -340,6 +341,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			lambdas: props.lambdas,
 			sourceCodeBucket,
 			userRole,
+			isTest: props.isTest,
 		})
 
 		new CloudFormation.CfnOutput(this, 'historicalDataBucketName', {
