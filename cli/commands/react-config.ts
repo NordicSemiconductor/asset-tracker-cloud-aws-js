@@ -1,5 +1,9 @@
 import { ComandDefinition } from './CommandDefinition'
-import { DataBaseName, TableName } from '../../historicalData/settings'
+import {
+	DataBaseName,
+	TableName,
+	WorkGroupName,
+} from '../../historicalData/settings'
 import { objectToEnv } from '../cloudformation/objectToEnv'
 import { stackOutput } from '../cloudformation/stackOutput'
 import { stackId as webStackId } from '../../cdk/stacks/WebApps'
@@ -16,7 +20,9 @@ export const reactConfigCommand = ({
 		process.stdout.write(
 			objectToEnv({
 				region,
-				historicaldataWorkgroupName: stackId,
+				historicaldataWorkgroupName: WorkGroupName({
+					bifravstStackName: stackId,
+				}),
 				historicaldataDatabaseName: DataBaseName,
 				historicaldataTableName: TableName,
 				...(await stackOutput({
