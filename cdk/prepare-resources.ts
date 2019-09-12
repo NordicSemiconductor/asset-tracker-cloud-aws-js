@@ -9,6 +9,7 @@ import {
 } from '@nrfcloud/package-layered-lambdas'
 import { supportedRegions } from './regions'
 import chalk from 'chalk'
+import { getIotEndpoint } from './helper/getIotEndpoint'
 
 export type BifravstLambdas = {
 	createThingGroup: string
@@ -25,15 +26,11 @@ export const prepareResources = async ({
 	rootDir: string
 }) => {
 	// Detect the AWS IoT endpoint
-	const { endpointAddress } = await new Iot({
-		region,
-	})
-		.describeEndpoint({ endpointType: 'iot:Data-ATS' })
-		.promise()
-
-	if (!endpointAddress) {
-		throw new Error(`Failed to resolved AWS IoT endpoint`)
-	}
+	const endpointAddress = await getIotEndpoint(
+		new Iot({
+			region,
+		}),
+	)
 
 	if (!supportedRegions.includes(region)) {
 		console.log(

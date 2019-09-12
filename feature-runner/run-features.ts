@@ -8,13 +8,20 @@ import {
 import * as program from 'commander'
 import chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
+import { bifravstStepRunners } from './steps/bifravst'
 
 let ran = false
+
+export type BifravstWorld = StackOutputs & {
+	region: string
+	userIotPolicyName: string
+}
 
 program
 	.arguments('<featureDir>')
 	.option('-r, --print-results', 'Print results')
 	.option('-p, --progress', 'Print progress')
+	.option('-X, --no-retry', 'Do not retry steps')
 	.option(
 		'-s, --stack <stack>',
 		'Stack name',
@@ -23,22 +30,21 @@ program
 	.action(
 		async (
 			featureDir: string,
-			{
-				printResults,
-				stack: stackName,
-				progress,
-			}: { printResults: boolean; stack: string; progress: boolean },
+			options: {
+				printResults: boolean
+				stack: string
+				progress: boolean
+				retry: boolean
+			},
 		) => {
 			ran = true
+			const { printResults, stack: stackName, progress, retry } = options
 
 			const stackConfig = (await fetchStackConfiguration(
 				stackName,
 			)) as StackOutputs
 
-			const world: StackOutputs & {
-				region: string
-				userIotPolicyName: string
-			} = {
+			const world: BifravstWorld = {
 				...stackConfig,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				region:
@@ -60,6 +66,7 @@ program
 						printProgress: progress,
 					}),
 				],
+				retry,
 			})
 
 			try {
@@ -71,6 +78,7 @@ program
 						}),
 					)
 					.addStepRunners(awsSdkStepRunners(world))
+					.addStepRunners(bifravstStepRunners(world))
 					.run()
 				if (!success) {
 					process.exit(1)

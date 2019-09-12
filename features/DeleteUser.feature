@@ -1,3 +1,4 @@
+@Last
 Feature: Delete a user
     As a user
     I can delete my account again

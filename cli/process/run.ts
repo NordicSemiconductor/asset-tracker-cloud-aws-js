@@ -5,10 +5,10 @@ export const run = async (args: {
 	command: string
 	args?: string[]
 	input?: string
-	log: (...message: any[]) => void
+	log?: (...message: any[]) => void
 }): Promise<string> =>
 	new Promise((resolve, reject) => {
-		args.log(`${args.command} ${args.args && args.args.join(' ')}`)
+		args.log && args.log(`${args.command} ${args.args && args.args.join(' ')}`)
 		const p = spawn(args.command, args.args)
 		const result = [] as string[]
 		const errors = [] as string[]

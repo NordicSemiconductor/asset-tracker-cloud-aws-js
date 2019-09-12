@@ -20,8 +20,8 @@ export const generateDeviceCertificate = async ({
 	certsDir: string
 	deviceId: string
 	caCert: string
-	log: (...message: any[]) => void
-	debug: (...message: any[]) => void
+	log?: (...message: any[]) => void
+	debug?: (...message: any[]) => void
 }): Promise<{ deviceId: string }> => {
 	try {
 		await fs.stat(certsDir)
@@ -29,7 +29,7 @@ export const generateDeviceCertificate = async ({
 		throw new Error(`${certsDir} does not exist.`)
 	}
 
-	log(`Generating certificate for device ${deviceId}`)
+	log && log(`Generating certificate for device ${deviceId}`)
 	const caFiles = caFileLocations(certsDir)
 	const deviceFiles = deviceFileLocations({
 		certsDir,

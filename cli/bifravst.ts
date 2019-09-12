@@ -12,6 +12,7 @@ import { infoCommand } from './commands/info'
 import { registerCaCommand } from './commands/register-ca'
 import { historicalDataCommand } from './commands/historical-data'
 import { flashCertificate } from './commands/flash-cert'
+import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -28,10 +29,7 @@ const config = async () => {
 			historicalDataBucketName,
 		},
 	] = await Promise.all([
-		iot
-			.describeEndpoint({ endpointType: 'iot:Data-ATS' })
-			.promise()
-			.then(({ endpointAddress }) => `${endpointAddress}`),
+		getIotEndpoint(iot),
 		stackOutput<StackOutputs>({
 			region,
 			stackId,
