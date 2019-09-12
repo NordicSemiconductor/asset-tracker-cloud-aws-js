@@ -74,23 +74,26 @@ export const bifravstStepRunners = ({
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId || runner.store['cat:id']
 			const connection = runner.store[`cat:connection:${catId}`]
-			await runner.progress('IoT > reported', JSON.stringify(reported))
 			const updatePromise = await new Promise(resolve => {
 				connection.on(
 					'status',
-					(
+					async (
 						_thingName: string,
 						stat: string,
 						_clientToken: string,
 						stateObject: object,
 					) => {
+						await runner.progress('IoT < status', stat)
+						await runner.progress('IoT < status', JSON.stringify(stateObject))
 						if (stat === 'accepted') {
 							resolve(stateObject)
 						}
 					},
 				)
-				connection.register(deviceId, {}, async () => {
-					connection.update(deviceId, { state: { reported } })
+				connection.register(catId, {}, async () => {
+					await runner.progress('IoT > reported', catId)
+					await runner.progress('IoT > reported', JSON.stringify(reported))
+					connection.update(catId, { state: { reported } })
 				})
 			})
 			return await updatePromise
