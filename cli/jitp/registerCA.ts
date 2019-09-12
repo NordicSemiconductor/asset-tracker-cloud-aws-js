@@ -87,7 +87,7 @@ export const registerCA = async (args: {
 			'-out',
 			caFiles.cert,
 			'-subj',
-			`/OU=bifravst`,
+			`/OU=${stackId}`,
 		],
 		log: debug,
 	})
