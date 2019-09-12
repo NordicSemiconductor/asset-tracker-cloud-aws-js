@@ -65,7 +65,7 @@ export const bifravstStepRunners = ({
 	},
 	{
 		willRun: regexMatcher(
-			/^the cat tracker(?: ([^ ]+)) updates its reported state with$/,
+			/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
 		),
 		run: async ([deviceId], step, runner) => {
 			if (!step.interpolatedArgument) {
