@@ -164,6 +164,79 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		})
 
+		// Batch messages
+
+		const processBatchMessagesFunction = new Lambda.Function(
+			this,
+			'processBatchMessagesLambda',
+			{
+				layers: [baseLayer],
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_10_X,
+				timeout: CloudFormation.Duration.seconds(10),
+				memorySize: 1792,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.processBatchMessages,
+				),
+				description: 'Processes batch messages and stores them on S3',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						resources: [this.bucket.bucketArn, `${this.bucket.bucketArn}/*`],
+						actions: [
+							's3:ListBucket',
+							's3:GetObject',
+							's3:PutObject',
+							's3:DeleteObject',
+						],
+					}),
+				],
+				environment: {
+					HISTORICAL_DATA_BUCKET: this.bucket.bucketName,
+				},
+			},
+		)
+
+		new LambdaLogGroup(this, 'processBatchMessagesFunctionLogGroup', {
+			lambda: processBatchMessagesFunction,
+		})
+
+		const processBatchMessagesRule = new IoT.CfnTopicRule(
+			this,
+			'processBatchMessagesIotRule',
+			{
+				topicRulePayload: {
+					awsIotSqlVersion: '2016-03-23',
+					description: 'Processes all batch messages and stores them on S3',
+					ruleDisabled: false,
+					sql:
+						"SELECT * as message, clientid() as deviceId, newuuid() as messageId, timestamp() as timestamp FROM '+/batch'",
+					actions: [
+						{
+							lambda: {
+								functionArn: processBatchMessagesFunction.functionArn,
+							},
+						},
+					],
+					errorAction: {
+						republish: {
+							roleArn: topicRuleRole.roleArn,
+							topic: 'errors',
+						},
+					},
+				},
+			},
+		)
+
+		processBatchMessagesFunction.addPermission(
+			'processBatchMessagesInvokeByIot',
+			{
+				principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
+				sourceArn: processBatchMessagesRule.attrArn,
+			},
+		)
+
 		// Concatenate the log files
 
 		const concatenateRawDeviceMessagesFunction = new Lambda.Function(
@@ -174,6 +247,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_10_X,
 				timeout: CloudFormation.Duration.seconds(900),
+				memorySize: 1792,
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
 					lambdas.lambdaZipFileNames.concatenateRawDeviceMessages,

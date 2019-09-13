@@ -14,6 +14,7 @@ import { getIotEndpoint } from './helper/getIotEndpoint'
 export type BifravstLambdas = {
 	createThingGroup: string
 	concatenateRawDeviceMessages: string
+	processBatchMessages: string
 }
 
 export const prepareResources = async ({
@@ -72,6 +73,11 @@ export const prepareResources = async ({
 				rootDir,
 				'historicalData',
 				'concatenateRawDeviceMessages.ts',
+			),
+			processBatchMessages: path.resolve(
+				rootDir,
+				'historicalData',
+				'processBatchMessages.ts',
 			),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),

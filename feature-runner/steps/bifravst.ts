@@ -51,23 +51,30 @@ export const bifravstStepRunners = ({
 					deviceId: catId,
 				})
 				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
-				const connection = new thingShadow({
-					privateKey: deviceFiles.key,
-					clientCert: deviceFiles.certWithCA,
-					caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-					clientId: catId,
-					host: mqttEndpoint,
-					region: mqttEndpoint.split('.')[2],
-				})
-				// eslint-disable-next-line require-atomic-updates
-				runner.store[`cat:connection:${catId}`] = connection
 
-				await new Promise((resolve, reject) => {
-					connection.on('connect', resolve)
-					connection.on('error', reject)
+				return new Promise((resolve, reject) => {
+					const timeout = setTimeout(reject, 60 * 1000)
+					const connection = new thingShadow({
+						privateKey: deviceFiles.key,
+						clientCert: deviceFiles.certWithCA,
+						caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+						clientId: catId,
+						host: mqttEndpoint,
+						region: mqttEndpoint.split('.')[2],
+					})
+
+					connection.on('connect', () => {
+						// eslint-disable-next-line require-atomic-updates
+						runner.store[`cat:connection:${catId}`] = connection
+						clearTimeout(timeout)
+						resolve([catId, mqttEndpoint])
+					})
+					connection.on('error', () => {
+						clearTimeout(timeout)
+						reject()
+					})
 				})
 			}
-			return [catId, mqttEndpoint]
 		},
 	},
 	{
@@ -99,9 +106,9 @@ export const bifravstStepRunners = ({
 						}
 					},
 				)
-				connection.on('error', () => {
+				connection.on('error', (err: any) => {
 					clearTimeout(timeout)
-					reject()
+					reject(err)
 				})
 				connection.register(catId, {}, async () => {
 					await runner.progress('IoT > reported', catId)
@@ -110,6 +117,39 @@ export const bifravstStepRunners = ({
 				})
 			})
 			return await updatePromise
+		},
+	},
+	{
+		willRun: regexMatcher(
+			/^the cat tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
+		),
+		run: async ([deviceId, topic], step, runner) => {
+			const catId = deviceId || runner.store['cat:id']
+			if (!step.interpolatedArgument) {
+				throw new Error('Must provide argument!')
+			}
+			const message = JSON.parse(step.interpolatedArgument)
+			const connection = runner.store[`cat:connection:${catId}`]
+			const publishPromise = await new Promise((resolve, reject) => {
+				const timeout = setTimeout(reject, 10 * 1000)
+				connection.on('error', (err: any) => {
+					clearTimeout(timeout)
+					reject(err)
+				})
+				connection.publish(
+					topic,
+					JSON.stringify(message),
+					undefined,
+					(err: any) => {
+						if (err) {
+							return reject(err)
+						}
+						clearTimeout(timeout)
+						resolve()
+					},
+				)
+			})
+			return await publishPromise
 		},
 	},
 ]
