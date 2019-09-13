@@ -26,7 +26,7 @@ jobs:
         run: |
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
-          node cli historical-data --setup
+          node cli historical-data --setup -d
           node cli register-ca
       - name: End-to-End Tests
         env:

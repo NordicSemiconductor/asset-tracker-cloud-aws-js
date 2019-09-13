@@ -62,17 +62,19 @@ export const historicalDataCommand = ({
 		) {
 			if (setup) {
 				console.log(chalk.magenta(`Creating workgroup...`))
-				await athena
-					.createWorkGroup({
-						Name: WorkGroup,
-						Description: 'Workgroup for Bifravst',
-						Configuration: {
-							ResultConfiguration: {
-								OutputLocation: `s3://${QueryResultsBucketName}/`,
-							},
+				const createWorkGroupArgs = {
+					Name: WorkGroup,
+					Description: 'Workgroup for Bifravst',
+					Configuration: {
+						ResultConfiguration: {
+							OutputLocation: `s3://${QueryResultsBucketName}/`,
 						},
-					})
-					.promise()
+					},
+				}
+				if (debug) {
+					console.debug(chalk.gray('[Athena]'), createWorkGroupArgs)
+				}
+				await athena.createWorkGroup(createWorkGroupArgs).promise()
 			} else {
 				console.log(
 					chalk.red.inverse(' ERROR '),
