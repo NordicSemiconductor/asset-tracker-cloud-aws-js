@@ -1,6 +1,6 @@
-import { ComandDefinition } from './CommandDefinition'
-import { stackOutput } from '../cloudformation/stackOutput'
-import { stackId as sourcecodeStackId } from '../../cdk/stacks/LambdaSourceCodeStorage'
+import { ComandDefinition } from '../CommandDefinition'
+import { stackOutput } from '../../cloudformation/stackOutput'
+import { stackId as sourcecodeStackId } from '../../../cdk/stacks/LambdaSourceCodeStorage'
 import { S3 } from 'aws-sdk'
 
 export const purgeBucketsCommand = ({

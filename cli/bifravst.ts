@@ -13,7 +13,7 @@ import { registerCaCommand } from './commands/register-ca'
 import { historicalDataCommand } from './commands/historical-data'
 import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
-import { purgeBucketsCommand } from './commands/ci-purge-buckets'
+import { purgeBucketsCommand } from './commands/ci/purge-buckets'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
