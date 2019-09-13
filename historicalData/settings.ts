@@ -2,13 +2,13 @@ export const DataBaseName = ({
 	bifravstStackName,
 }: {
 	bifravstStackName: string
-}) => `${bifravstStackName}_historicaldata`
+}) => `${bifravstStackName.replace(/-/g, '_')}_historicaldata`
 
 export const TableName = ({
 	bifravstStackName,
 }: {
 	bifravstStackName: string
-}) => `${bifravstStackName}_devicedata`
+}) => `${bifravstStackName.replace(/-/g, '_')}_devicedata`
 
 export const WorkGroupName = ({
 	bifravstStackName,
