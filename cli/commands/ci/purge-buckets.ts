@@ -16,8 +16,6 @@ export const purgeBucketsCommand = ({
 			historicalDataQueryResultsBucketName,
 			avatarBucketName,
 			historicalDataBucketName,
-			webAppBucketName,
-			deviceUiBucketName,
 			bucketName,
 		} = {
 			...(await stackOutput({
@@ -35,8 +33,6 @@ export const purgeBucketsCommand = ({
 			historicalDataQueryResultsBucketName,
 			avatarBucketName,
 			historicalDataBucketName,
-			webAppBucketName,
-			deviceUiBucketName,
 			bucketName,
 		]
 		const s3 = new S3({ region })
