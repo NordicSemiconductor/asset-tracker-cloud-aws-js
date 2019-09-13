@@ -4,6 +4,7 @@ import { athenaQuery, parseAthenaResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import * as jsonata from 'jsonata'
 import { expect } from 'chai'
+import { exponential } from 'backoff'
 
 export const athenaStepRunners = ({
 	region,
@@ -30,6 +31,15 @@ export const athenaStepRunners = ({
 				errorLog: async (...args: any) => {
 					await runner.progress('[athena:error]', JSON.stringify(args))
 				},
+				backoff: (() => {
+					const b = exponential({
+						randomisationFactor: 0,
+						initialDelay: 1000,
+						maxDelay: 5000,
+					})
+					b.failAfter(14) // 62000
+					return b
+				})(),
 			})
 			await runner.progress('[athena]', step.interpolatedArgument)
 			const ResultSet = await q({ QueryString: step.interpolatedArgument })
