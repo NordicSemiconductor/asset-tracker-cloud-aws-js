@@ -26,6 +26,9 @@ export type BifravstWorld = StackOutputs & {
 	historicaldataTableName: string
 }
 
+const region =
+	process.env.AWS_DEFAULT_REGION || process.env.AWS_REGION || 'eu-central-1'
+
 program
 	.arguments('<featureDir>')
 	.option('-r, --print-results', 'Print results')
@@ -49,9 +52,10 @@ program
 			ran = true
 			const { printResults, stack: stackName, progress, retry } = options
 
-			const stackConfig = (await fetchStackConfiguration(
-				stackName,
-			)) as StackOutputs
+			const stackConfig = (await fetchStackConfiguration({
+				StackName: stackName,
+				region,
+			})) as StackOutputs
 
 			const world: BifravstWorld = {
 				...stackConfig,
@@ -61,10 +65,7 @@ program
 				}),
 				historicaldataDatabaseName: DataBaseName,
 				historicaldataTableName: TableName,
-				region:
-					process.env.AWS_DEFAULT_REGION ||
-					process.env.AWS_REGION ||
-					'eu-central-1',
+				region,
 			}
 
 			console.log(chalk.yellow.bold(' World:'))

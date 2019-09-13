@@ -31,12 +31,12 @@
     "@bifravst/athena-helpers": "^4.0.1",
     "@bifravst/modemtalk": "^1.0.1",
     "aws-iot-device-sdk": "^2.2.1",
-    "aws-sdk": "^2.527.0",
+    "aws-sdk": "^2.528.0",
     "backoff": "^2.5.0",
     "cfn-response": "^1.0.1",
     "chalk": "^2.4.2",
     "commander": "^3.0.1",
-    "date-fns": "^2.1.0"
+    "date-fns": "^2.2.1"
   },
   "devDependencies": {
     "@aws-cdk/aws-athena": "^1.8.0",
@@ -52,7 +52,7 @@
     "@aws-cdk/core": "^1.8.0",
     "@bifravst/code-style": "^3.0.1",
     "@bifravst/random-words": "^3.0.1",
-    "@coderbyheart/bdd-feature-runner-aws": "^2.6.0",
+    "@coderbyheart/bdd-feature-runner-aws": "^3.0.0",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-angular": "^8.1.0",
     "@nrfcloud/package-layered-lambdas": "^1.2.0",
@@ -72,8 +72,8 @@
     "compare-versions": "^3.5.1",
     "husky": "^3.0.5",
     "jest": "^24.9.0",
-    "ts-jest": "^24.0.2",
-    "websocket": "^1.0.29"
+    "ts-jest": "^24.1.0",
+    "websocket": "^1.0.30"
   },
   "husky": {
     "hooks": {
