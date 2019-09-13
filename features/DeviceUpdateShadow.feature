@@ -25,6 +25,14 @@ Feature: Device: Update Shadow
          "bat": {
             "v": 3781,
             "ts": 1567942204010
+          },
+          "cfg": {
+            "act": false,
+            "actwt": 60,
+            "mvres": 60,
+            "mvt": 3600,
+            "gpst": 1000,
+            "acct": 5
           }
        }
        """

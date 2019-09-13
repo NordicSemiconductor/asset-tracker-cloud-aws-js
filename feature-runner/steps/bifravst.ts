@@ -22,6 +22,14 @@ export const bifravstStepRunners = ({
 					deviceId: catName,
 					certsDir: path.resolve(process.cwd(), 'certificates'),
 					caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+					log: (...message: any[]) => {
+						// eslint-disable-next-line @typescript-eslint/no-floating-promises
+						runner.progress('IoT (cert)', ...message)
+					},
+					debug: (...message: any[]) => {
+						// eslint-disable-next-line @typescript-eslint/no-floating-promises
+						runner.progress('IoT (cert)', ...message)
+					},
 				})
 
 				// eslint-disable-next-line require-atomic-updates
@@ -54,10 +62,9 @@ export const bifravstStepRunners = ({
 				// eslint-disable-next-line require-atomic-updates
 				runner.store[`cat:connection:${catId}`] = connection
 
-				await new Promise(resolve => {
-					connection.on('connect', async () => {
-						resolve()
-					})
+				await new Promise((resolve, reject) => {
+					connection.on('connect', resolve)
+					connection.on('error', reject)
 				})
 			}
 			return [catId, mqttEndpoint]
@@ -74,7 +81,8 @@ export const bifravstStepRunners = ({
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId || runner.store['cat:id']
 			const connection = runner.store[`cat:connection:${catId}`]
-			const updatePromise = await new Promise(resolve => {
+			const updatePromise = await new Promise((resolve, reject) => {
+				const timeout = setTimeout(reject, 10 * 1000)
 				connection.on(
 					'status',
 					async (
@@ -86,10 +94,15 @@ export const bifravstStepRunners = ({
 						await runner.progress('IoT < status', stat)
 						await runner.progress('IoT < status', JSON.stringify(stateObject))
 						if (stat === 'accepted') {
+							clearTimeout(timeout)
 							resolve(stateObject)
 						}
 					},
 				)
+				connection.on('error', () => {
+					clearTimeout(timeout)
+					reject()
+				})
 				connection.register(catId, {}, async () => {
 					await runner.progress('IoT > reported', catId)
 					await runner.progress('IoT > reported', JSON.stringify(reported))
