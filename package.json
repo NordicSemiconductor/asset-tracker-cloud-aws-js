@@ -4,7 +4,7 @@
   "description": "AWS-based implementation of Bifravst",
   "scripts": {
     "test": "jest",
-    "test:e2e": "node dist/feature-runner/run-features.js ./features --print-results",
+    "test:e2e": "node dist/feature-runner/run-features.js ./features --print-results --progress",
     "postinstall": "node scripts/warnIfWrongNodeVersion.js && npx tsc"
   },
   "bin": {
