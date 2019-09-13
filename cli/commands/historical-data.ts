@@ -53,6 +53,8 @@ export const historicalDataCommand = ({
 		const { WorkGroups } = await athena.listWorkGroups().promise()
 
 		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
+		const dbName = DataBaseName({ bifravstStackName: stackId })
+		const tableName = TableName({ bifravstStackName: stackId })
 
 		if (
 			!WorkGroups ||
@@ -117,18 +119,16 @@ export const historicalDataCommand = ({
 				QueryString: `SHOW DATABASES`,
 			}),
 		})
-		if (!dbs.find(({ database_name: db }) => db === DataBaseName)) {
+		if (!dbs.find(({ database_name: db }) => db === dbName)) {
 			if (setup) {
 				console.log(chalk.magenta(`Creating database...`))
 				await query({
-					QueryString: `CREATE DATABASE ${DataBaseName}`,
+					QueryString: `CREATE DATABASE ${dbName}`,
 				})
 			} else {
 				console.log(
 					chalk.red.inverse(' ERROR '),
-					chalk.red(
-						`Athena database ${chalk.blue(DataBaseName)} does not exist!`,
-					),
+					chalk.red(`Athena database ${chalk.blue(dbName)} does not exist!`),
 				)
 				console.log(
 					chalk.red.inverse(' ERROR '),
@@ -139,24 +139,24 @@ export const historicalDataCommand = ({
 		}
 		console.log(
 			chalk.green.inverse(' OK '),
-			chalk.gray(`Athena database ${chalk.blue(DataBaseName)} exists.`),
+			chalk.gray(`Athena database ${chalk.blue(dbName)} exists.`),
 		)
 
 		if (recreate) {
 			console.log(chalk.magenta(`Dropping table...`))
-			await query({ QueryString: `DROP TABLE ${DataBaseName}.${TableName}` })
+			await query({ QueryString: `DROP TABLE ${dbName}.${tableName}` })
 		}
 
 		try {
 			await query({
-				QueryString: `DESCRIBE ${DataBaseName}.${TableName}`,
+				QueryString: `DESCRIBE ${dbName}.${tableName}`,
 			})
 		} catch (error) {
 			if (setup) {
 				console.log(chalk.magenta(`Creating table...`))
 				const createSQL = createAthenaTableSQL({
-					database: DataBaseName,
-					table: TableName,
+					database: dbName,
+					table: tableName,
 					s3Location: `s3://${DataBucketName}/`,
 					fields: deviceMessagesFields,
 				})
@@ -169,7 +169,7 @@ export const historicalDataCommand = ({
 					chalk.red.inverse(' ERROR '),
 					chalk.red(
 						`Athena table ${chalk.blue(
-							`${DataBaseName}.${TableName}`,
+							`${dbName}.${tableName}`,
 						)} does not exist!`,
 					),
 				)
@@ -184,7 +184,7 @@ export const historicalDataCommand = ({
 		console.log(
 			chalk.green.inverse(' OK '),
 			chalk.gray(
-				`Athena table ${chalk.blue(`${DataBaseName}.${TableName}`)} exists.`,
+				`Athena table ${chalk.blue(`${dbName}.${tableName}`)} exists.`,
 			),
 		)
 	},

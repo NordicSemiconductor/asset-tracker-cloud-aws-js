@@ -63,8 +63,12 @@ program
 				historicaldataWorkgroupName: WorkGroupName({
 					bifravstStackName: stackName,
 				}),
-				historicaldataDatabaseName: DataBaseName,
-				historicaldataTableName: TableName,
+				historicaldataDatabaseName: DataBaseName({
+					bifravstStackName: stackName,
+				}),
+				historicaldataTableName: TableName({
+					bifravstStackName: stackName,
+				}),
 				region,
 			}
 

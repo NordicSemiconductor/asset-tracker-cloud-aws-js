@@ -55,6 +55,7 @@ jobs:
           STACK_ID: bifravst-${{ github.sha }}
           CI: 1
         run: |
+          node cli drop-athena-resources
           node cli purge-buckets
           npx cdk -a 'node dist/cdk/cloudformation-test.js' destroy -f '*'
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' destroy -f '*'

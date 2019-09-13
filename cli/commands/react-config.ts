@@ -23,8 +23,12 @@ export const reactConfigCommand = ({
 				historicaldataWorkgroupName: WorkGroupName({
 					bifravstStackName: stackId,
 				}),
-				historicaldataDatabaseName: DataBaseName,
-				historicaldataTableName: TableName,
+				historicaldataDatabaseName: DataBaseName({
+					bifravstStackName: stackId,
+				}),
+				historicaldataTableName: TableName({
+					bifravstStackName: stackId,
+				}),
 				...(await stackOutput({
 					stackId,
 					region,

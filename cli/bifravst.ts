@@ -14,6 +14,7 @@ import { historicalDataCommand } from './commands/historical-data'
 import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/ci/purge-buckets'
+import { dropAthenaResourcesCommand } from './commands/ci/drop-athena-resources'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -75,6 +76,10 @@ const bifravstCLI = async () => {
 	if (process.env.CI) {
 		commands.push(
 			purgeBucketsCommand({
+				stackId,
+				region,
+			}),
+			dropAthenaResourcesCommand({
 				stackId,
 				region,
 			}),
