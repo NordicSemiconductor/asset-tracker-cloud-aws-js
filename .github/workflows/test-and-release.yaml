@@ -23,6 +23,7 @@ jobs:
           AWS_DEFAULT_REGION: eu-central-1
           AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
           STACK_ID: bifravst-${{ github.sha }}
+          CI: 1
         run: |
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never

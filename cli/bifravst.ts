@@ -27,31 +27,24 @@ const config = async () => {
 	const [
 		endpoint,
 		{ historicalDataQueryResultsBucketName, historicalDataBucketName },
-		{ deviceUiDomainName },
 	] = await Promise.all([
 		getIotEndpoint(iot),
 		stackOutput<StackOutputs>({
 			region,
 			stackId,
 		}),
-		stackOutput<StackOutputs>({
-			region,
-			stackId: webStackId({ bifravstStackName: stackId }),
-		}),
 	])
 
 	return {
 		endpoint,
-		deviceUiUrl: `https://${deviceUiDomainName}`,
 		historicalDataQueryResultsBucketName,
 		historicalDataBucketName,
 	}
 }
 
-const bifravstCLI = async () => {
+const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	const {
 		endpoint,
-		deviceUiUrl,
 		historicalDataQueryResultsBucketName,
 		historicalDataBucketName,
 	} = await config()
@@ -63,7 +56,6 @@ const bifravstCLI = async () => {
 		registerCaCommand({ stackId, certsDir, region }),
 		flashCertificate({ certsDir }),
 		generateCertCommand({ endpoint }),
-		connectCommand({ endpoint, deviceUiUrl, certsDir }),
 		reactConfigCommand({ stackId, region }),
 		infoCommand({ stackId, region }),
 		cdCommand({ region }),
@@ -75,7 +67,19 @@ const bifravstCLI = async () => {
 		}),
 	]
 
-	if (process.env.CI) {
+	if (!isCI) {
+		const { deviceUiDomainName } = await stackOutput<StackOutputs>({
+			region,
+			stackId: webStackId({ bifravstStackName: stackId }),
+		})
+		commands.push(
+			connectCommand({
+				endpoint,
+				deviceUiUrl: `https://${deviceUiDomainName}`,
+				certsDir,
+			}),
+		)
+	} else {
 		commands.push(
 			purgeBucketsCommand({
 				stackId,
@@ -125,7 +129,9 @@ const bifravstCLI = async () => {
 	}
 }
 
-bifravstCLI().catch(err => {
+bifravstCLI({
+	isCI: !!process.env.CI,
+}).catch(err => {
 	console.error(chalk.red(err))
 	process.exit(1)
 })
