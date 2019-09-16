@@ -15,6 +15,7 @@ import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/ci/purge-buckets'
 import { dropAthenaResourcesCommand } from './commands/ci/drop-athena-resources'
+import { stackId as webStackId } from '../cdk/stacks/WebApps'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -25,16 +26,17 @@ const iot = new Iot({
 const config = async () => {
 	const [
 		endpoint,
-		{
-			deviceUiDomainName,
-			historicalDataQueryResultsBucketName,
-			historicalDataBucketName,
-		},
+		{ historicalDataQueryResultsBucketName, historicalDataBucketName },
+		{ deviceUiDomainName },
 	] = await Promise.all([
 		getIotEndpoint(iot),
 		stackOutput<StackOutputs>({
 			region,
 			stackId,
+		}),
+		stackOutput<StackOutputs>({
+			region,
+			stackId: webStackId({ bifravstStackName: stackId }),
 		}),
 	])
 
