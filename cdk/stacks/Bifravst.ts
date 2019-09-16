@@ -15,6 +15,7 @@ import { HistoricalData } from '../resources/HistoricalData'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
 import { LambdaLogGroup } from '../resources/LambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
+import { DFUStorage } from '../resources/DFUStorage'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -356,6 +357,21 @@ export class BifravstStack extends CloudFormation.Stack {
 			value: hd.queryResultsBucket.bucketName,
 			exportName: `${this.stackName}:historicalDataQueryResultsBucketName`,
 		})
+
+		// DFU
+		const dfuBucket = new DFUStorage(this, 'dfuStorage', { userRole })
+
+		new CloudFormation.CfnOutput(this, 'dfuBucketName', {
+			value: dfuBucket.bucket.bucketName,
+			exportName: `${this.stackName}:dfuBucketName`,
+		})
+
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: [`arn:aws:iot:${this.region}:${this.account}:job/*`],
+				actions: ['iot:*'],
+			}),
+		)
 	}
 }
 
@@ -375,7 +391,8 @@ export type StackOutputs = {
 	thingPolicyArn: string
 	thingGroupName: string
 	userIotPolicyArn: string
-	avatarBucket: string
+	avatarBucketName: string
+	dfuBucketName: string
 	historicalDataBucketName: string
 	historicalDataQueryResultsBucketName: string
 }
