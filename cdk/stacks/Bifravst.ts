@@ -372,6 +372,19 @@ export class BifravstStack extends CloudFormation.Stack {
 				actions: ['iot:*'],
 			}),
 		)
+
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: ['*'],
+				actions: [
+					'iot:ListJobs',
+					'iot:CreateJob',
+					'iot:ListJobExecutionsForThing',
+					'iot:CancelJobExecution',
+					'iot:DeleteJobExecution',
+				],
+			}),
+		)
 	}
 }
 
