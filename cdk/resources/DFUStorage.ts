@@ -19,7 +19,11 @@ export class DFUStorage extends CloudFormation.Resource {
 			cors: [
 				{
 					allowedHeaders: ['*'],
-					allowedMethods: [S3.HttpMethods.GET, S3.HttpMethods.PUT],
+					allowedMethods: [
+						S3.HttpMethods.GET,
+						S3.HttpMethods.PUT,
+						S3.HttpMethods.DELETE,
+					],
 					allowedOrigins: ['*'],
 					exposedHeaders: ['Date'],
 					maxAge: 3600,
