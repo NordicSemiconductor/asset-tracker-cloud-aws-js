@@ -31,7 +31,12 @@ export class DFUStorage extends CloudFormation.Resource {
 		userRole.addToPolicy(
 			new IAM.PolicyStatement({
 				resources: [`${this.bucket.bucketArn}/*`, this.bucket.bucketArn],
-				actions: ['s3:ListBucket', 's3:PutObject', 's3:DeleteObject'],
+				actions: [
+					's3:ListBucket',
+					's3:PutObject',
+					's3:GetObject',
+					's3:DeleteObject',
+				],
 			}),
 		)
 	}
