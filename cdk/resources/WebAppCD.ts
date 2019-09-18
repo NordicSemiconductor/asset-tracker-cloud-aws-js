@@ -76,6 +76,10 @@ export class WebAppCD extends CloudFormation.Construct {
 						name: 'STACK_ID',
 						value: bifravstStackId,
 					},
+					{
+						name: 'SOURCE_REPO_URL',
+						value: `https://github.com/${sourceCodeActions.webApp.action.configuration.Owner}/${sourceCodeActions.webApp.action.configuration.Repo}.git`,
+					},
 				],
 			},
 		})
