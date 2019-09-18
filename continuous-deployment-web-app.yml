@@ -14,6 +14,7 @@ phases:
       - echo $SOURCE_REPO_URL
       - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
       - git ls-remote --tags $SOURCE_REPO_URL
+      - printenv
       - echo REACT_APP_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
         $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -d'/' -f3 | cut -d'^' -f1` >>
         $CODEBUILD_SRC_DIR_WebApp/.env.production.local
