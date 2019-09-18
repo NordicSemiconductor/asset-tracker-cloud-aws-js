@@ -11,9 +11,9 @@ phases:
     commands:
       - ./cli/index.js react-config >
         $CODEBUILD_SRC_DIR_WebApp/.env.production.local
-      - echo REACT_APP_VERSION=`git -C $CODEBUILD_SRC_DIR_WebApp describe --tags
-        $(git -C $CODEBUILD_SRC_DIR_WebApp rev-list --tags --max-count=1)` >>
-        $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+      - echo REACT_APP_VERSION=`git ls-remote --tags $CODEBUILD_SOURCE_REPO_URL
+        | grep $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -d'/' -f3 | cut -d'^'
+        -f1` >> $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
       - cd $CODEBUILD_SRC_DIR_WebApp/; npm ci --no-audit; npm run build;
