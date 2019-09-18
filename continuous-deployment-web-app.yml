@@ -4,7 +4,6 @@ phases:
     runtime-versions:
       nodejs: 10
     commands:
-      - apt-get install jq
       - npm install -g npm@
       - npm ci --no-audit
       - npx tsc
@@ -12,8 +11,8 @@ phases:
     commands:
       - ./cli/index.js react-config >
         $CODEBUILD_SRC_DIR_WebApp/.env.production.local
-      - echo REACT_APP_VERSION=`cat package.json | jq -r '.version'` >>
-        $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+      - echo REACT_APP_VERSION=`git describe --tags $(git rev-list --tags
+        --max-count=1)` >> $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
       - cd $CODEBUILD_SRC_DIR_WebApp/; npm ci --no-audit; npm run build;
