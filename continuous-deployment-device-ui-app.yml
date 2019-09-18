@@ -11,7 +11,8 @@ phases:
     commands:
       - ./cli/index.js react-config >
         $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local
-      - echo REACT_APP_VERSION=`git describe --tags $(git rev-list --tags
+      - echo REACT_APP_VERSION=`git -C $CODEBUILD_SRC_DIR_DeviceUI describe
+        --tags $(git -C $CODEBUILD_SRC_DIR_DeviceUI describe rev-list --tags
         --max-count=1)` >> $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - cat $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local | xargs)
