@@ -12,20 +12,11 @@ phases:
     commands:
       - ./cli/index.js react-config >
         $CODEBUILD_SRC_DIR_WebApp/.env.production.local
-      - echo $SOURCE_REPO_URL
-      - echo $CODEBUILD_INITIATOR
-      - echo $CODEBUILD_INITIATOR | cut -d'/' -f2
       - export INITIATOR_PIPELINE_NAME=`echo $CODEBUILD_INITIATOR | cut -d'/'
         -f2`
-      - echo $INITIATOR_PIPELINE_NAME
-      - aws codepipeline get-pipeline-state --name $INITIATOR_PIPELINE_NAME  |
-        jq -r '.stageStates[0].actionStates[] | select(.actionName ==
-        "WebAppSourceCode").currentRevision.revisionId'
       - export SOURCE_VERSION=`aws codepipeline get-pipeline-state --name
         $INITIATOR_PIPELINE_NAME  | jq -r '.stageStates[0].actionStates[] |
         select(.actionName == "WebAppSourceCode").currentRevision.revisionId'`
-      - echo $SOURCE_VERSION
-      - git ls-remote --tags $SOURCE_REPO_URL
       - echo REACT_APP_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
         $SOURCE_VERSION | cut -d'/' -f3 | cut -d'^' -f1` >>
         $CODEBUILD_SRC_DIR_WebApp/.env.production.local
