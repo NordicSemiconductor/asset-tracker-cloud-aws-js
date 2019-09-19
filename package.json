@@ -28,7 +28,7 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@bifravst/athena-helpers": "^4.0.2",
+    "@bifravst/athena-helpers": "^5.0.0",
     "@bifravst/modemtalk": "^1.0.1",
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.531.0",
