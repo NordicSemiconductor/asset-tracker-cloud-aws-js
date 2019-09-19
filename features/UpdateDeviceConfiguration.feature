@@ -5,6 +5,7 @@ Feature: Update Device Configuration
   Background:
 
     Given I am run after the "Device: Update Shadow" feature
+    And I am run after the "Attach Iot Policy to user" feature
 
   Scenario: Update the device configuration as a user
 

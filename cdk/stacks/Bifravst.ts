@@ -140,6 +140,21 @@ export class BifravstStack extends CloudFormation.Stack {
 						}),
 					],
 				}),
+				deleteThing: new IAM.PolicyDocument({
+					statements: [
+						new IAM.PolicyStatement({
+							actions: [
+								'iot:ListThingPrincipals',
+								'iot:DetachPrincipalPolicy',
+								'iot:DetachThingPrincipal',
+								'iot:updateCertificate',
+								'iot:deleteCertificate',
+								'iot:deleteThing',
+							],
+							resources: ['*'],
+						}),
+					],
+				}),
 			},
 		})
 
