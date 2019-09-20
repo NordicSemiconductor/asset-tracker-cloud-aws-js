@@ -5,7 +5,7 @@ import * as IAM from '@aws-cdk/aws-iam'
 /**
  * Storage firmware files
  */
-export class DFUStorage extends CloudFormation.Resource {
+export class FOTAStorage extends CloudFormation.Resource {
 	public readonly bucket: S3.IBucket
 	public constructor(
 		parent: CloudFormation.Stack,
