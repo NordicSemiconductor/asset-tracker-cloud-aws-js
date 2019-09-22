@@ -6,7 +6,7 @@ import {
 	packBaseLayer,
 	packLayeredLambdas,
 	WebpackMode,
-} from '@nrfcloud/package-layered-lambdas'
+} from '@bifravst/package-layered-lambdas'
 import { supportedRegions } from './regions'
 import chalk from 'chalk'
 import { getIotEndpoint } from './helper/getIotEndpoint'

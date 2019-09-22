@@ -1,6 +1,6 @@
 import { App } from '@aws-cdk/core'
 import { BifravstStack } from '../stacks/Bifravst'
-import { LayeredLambdas } from '@nrfcloud/package-layered-lambdas'
+import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { stackId, WebAppsStack } from '../stacks/WebApps'
 import { BifravstLambdas } from '../prepare-resources'
 
