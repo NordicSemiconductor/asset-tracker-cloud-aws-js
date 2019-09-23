@@ -100,17 +100,6 @@ export const connect = async (args: {
 				chalk.cyan(JSON.stringify({ state: { reported: { cfg } } })),
 			)
 			connection.update(deviceId, { state: { reported: { cfg } } })
-
-			// Subscribe to notify-next
-			// we can't use Shadow and Jobs implementation at the same time
-			console.log(
-				chalk.gray(`Subscribing to jobs`),
-				chalk.gray(`$aws/things/${deviceId}/jobs/notify-next`),
-			)
-			connection.subscribe(`$aws/things/${deviceId}/jobs/notify-next`)
-			connection.on('message', (message, topic) => {
-				console.log(topic, message)
-			})
 		})
 
 		connection.on('close', () => {
