@@ -17,9 +17,10 @@ phases:
       - export SOURCE_VERSION=`aws codepipeline get-pipeline-state --name
         $INITIATOR_PIPELINE_NAME  | jq -r '.stageStates[0].actionStates[] |
         select(.actionName == "WebAppSourceCode").currentRevision.revisionId'`
-      - echo REACT_APP_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
-        $SOURCE_VERSION | cut -d'/' -f3 | cut -d'^' -f1` >>
-        $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+      - export REACT_APP_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
+        $SOURCE_VERSION | cut -d'/' -f3 | cut -d'^' -f1`
+      - echo ${REACT_APP_VERSION:-$SOURCE_VERSION} >>
+        $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local
       - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
       - cd $CODEBUILD_SRC_DIR_WebApp/; npm ci --no-audit; npm run build;
