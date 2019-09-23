@@ -53,7 +53,7 @@
     "@bifravst/code-style": "^4.0.2",
     "@bifravst/package-layered-lambdas": "^2.0.0",
     "@bifravst/random-words": "^4.0.0",
-    "@coderbyheart/bdd-feature-runner-aws": "^4.0.0",
+    "@coderbyheart/bdd-feature-runner-aws": "^5.0.0",
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-angular": "^8.2.0",
     "@types/aws-iot-device-sdk": "^2.2.0",
@@ -66,6 +66,7 @@
     "@types/commander": "^2.12.2",
     "@types/jest": "^24.0.18",
     "@types/node": "^12.7.5",
+    "@types/uuid": "^3.4.5",
     "@types/websocket": "0.0.40",
     "cdk": "^1.9.0",
     "change-case": "^3.1.0",
@@ -73,6 +74,7 @@
     "husky": "^3.0.5",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
+    "uuid": "^3.3.3",
     "websocket": "^1.0.30"
   },
   "husky": {

@@ -13,9 +13,8 @@ export const athenaStepRunners = ({
 	region: string
 	historicaldataWorkgroupName: string
 }): StepRunner<BifravstWorld>[] => [
-	{
-		willRun: regexMatcher(/^I run this query in the Athena workgroup ([^ ]+)$/),
-		run: async (_, step, runner) => {
+	regexMatcher(/^I run this query in the Athena workgroup ([^ ]+)$/)(
+		async (_, step, runner) => {
 			if (!step.interpolatedArgument) {
 				throw new Error('Must provide argument!')
 			}
@@ -51,24 +50,21 @@ export const athenaStepRunners = ({
 			runner.store['athena:query:result'] = data
 			return data
 		},
-	},
-	{
-		willRun: regexMatcher(
-			/^(?:"([^"]+)" of )?the Athena query result should (equal|match) this JSON$/,
-		),
-		run: async ([exp, equalOrMatch], step, runner) => {
-			if (!step.interpolatedArgument) {
-				throw new Error('Must provide argument!')
-			}
-			const j = JSON.parse(step.interpolatedArgument)
-			const queryRes = runner.store['athena:query:result']
-			const fragment = exp ? jsonata(exp).evaluate(queryRes) : queryRes
-			if (equalOrMatch === 'match') {
-				expect(fragment).to.containSubset(j)
-			} else {
-				expect(fragment).to.deep.equal(j)
-			}
-			return [fragment]
-		},
-	},
+	),
+	regexMatcher(
+		/^(?:"([^"]+)" of )?the Athena query result should (equal|match) this JSON$/,
+	)(async ([exp, equalOrMatch], step, runner) => {
+		if (!step.interpolatedArgument) {
+			throw new Error('Must provide argument!')
+		}
+		const j = JSON.parse(step.interpolatedArgument)
+		const queryRes = runner.store['athena:query:result']
+		const fragment = exp ? jsonata(exp).evaluate(queryRes) : queryRes
+		if (equalOrMatch === 'match') {
+			expect(fragment).to.containSubset(j)
+		} else {
+			expect(fragment).to.deep.equal(j)
+		}
+		return [fragment]
+	}),
 ]

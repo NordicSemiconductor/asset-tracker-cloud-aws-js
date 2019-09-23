@@ -19,6 +19,7 @@ import { athenaStepRunners } from './steps/athena'
 let ran = false
 
 export type BifravstWorld = StackOutputs & {
+	accountId: string
 	region: string
 	userIotPolicyName: string
 	historicaldataWorkgroupName: string
@@ -28,6 +29,7 @@ export type BifravstWorld = StackOutputs & {
 
 const region =
 	process.env.AWS_DEFAULT_REGION || process.env.AWS_REGION || 'eu-central-1'
+const accountId = process.env.AWS_ACCOUNT || ''
 
 program
 	.arguments('<featureDir>')
@@ -70,6 +72,7 @@ program
 					bifravstStackName: stackName,
 				}),
 				region,
+				accountId,
 			}
 
 			console.log(chalk.yellow.bold(' World:'))
