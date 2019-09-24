@@ -51,14 +51,33 @@ Feature: Device Firmware Upgrade over the air
       "{jobId}"
       """
 
-  Scenario: Fetch the job as a device
+  Scenario: Fetch the job as a device and mark as in progress
 
     When the cat tracker fetches the next job into "job"
-    Then "job.execution" should match this JSON
+    Then "job" should match this JSON
       """
       {
         "jobId": "{jobId}",
         "status": "QUEUED"
+      }
+      """
+    And the cat tracker marks the job in "job" as in progress
+
+  Scenario: describe the job
+
+    When I execute "describeJobExecution" of the AWS Iot SDK with
+      """
+      {
+        "jobId": "{jobId}",
+        "thingName": "{cat:id}"
+      }
+      """
+    Then "awsSdk.res.execution" should match this JSON
+      """
+      {
+        "jobId": "{jobId}",
+        "status": "IN_PROGRESS",
+        "versionNumber": 2
       }
       """
 
