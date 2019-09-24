@@ -15,7 +15,7 @@ Feature: Attach Iot Policy to user
              "principal": "{cognito:IdentityId}"
            }
            """
-        Then "policies" of the execution result should match this JSON
+        Then "awsSdk.res.policies" should match this JSON
            """
             []
            """
@@ -35,7 +35,7 @@ Feature: Attach Iot Policy to user
              "principal": "{cognito:IdentityId}"
            }
            """
-      Then "policies" of the execution result should equal this JSON
+      Then "awsSdk.res.policies" should equal this JSON
            """
             [{"policyName":"{userIotPolicyName}","policyArn":"{userIotPolicyArn}"}]
            """

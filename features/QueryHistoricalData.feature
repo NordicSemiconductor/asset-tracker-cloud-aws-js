@@ -15,7 +15,7 @@ Feature: Query Data
        FROM {historicaldataDatabaseName}.{historicaldataTableName}
        WHERE deviceId='{cat:id}' AND reported.bat IS NOT NULL LIMIT 1
        """
-    Then the Athena query result should match this JSON
+    Then "athenaQueryResult" should match this JSON
        """
        [{"value": 3781}]
        """

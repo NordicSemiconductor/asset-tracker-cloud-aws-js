@@ -13,9 +13,9 @@ Feature: Delete cats
       """
       {"thingName": "{cat:id}"}
       """
-    Then "$count(principals)" of the execution result should equal 1
-    Given I store "principals[0]" of the execution result as "certificateArn"
-    Given I store "$split(principals[0], '/')[1]" of the execution result as "certificateId"
+    Then "$count(awsSdk.res.principals)" should equal 1
+    Given I store "awsSdk.res.principals[0]" into "certificateArn"
+    Given I store "$split(awsSdk.res.principals[0], '/')[1]" into "certificateId"
     Given I execute "detachThingPrincipal" of the AWS Iot SDK with
       """
       {

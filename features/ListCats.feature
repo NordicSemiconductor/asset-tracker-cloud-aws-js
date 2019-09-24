@@ -10,7 +10,7 @@ Feature: List cats
   Scenario: The user should be able to list cats
 
     When I execute "listThings" of the AWS Iot SDK
-    Then "things[thingName='{cat:id}'].thingName" of the execution result should equal this JSON
-           """
-           "{cat:id}"
-           """
+    Then "awsSdk.res.things[thingName='{cat:id}'].thingName" should equal this JSON
+      """
+      "{cat:id}"
+      """

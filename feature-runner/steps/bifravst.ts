@@ -1,24 +1,20 @@
 import {
-	regexMatcher,
 	regexGroupMatcher,
-	StepRunner,
+	regexMatcher,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
 import { generateDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
 import * as path from 'path'
-import { thingShadow, device } from 'aws-iot-device-sdk'
+import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
-import * as uuid from 'uuid'
-import * as jsonata from 'jsonata'
-import { expect } from 'chai'
 
 export const bifravstStepRunners = ({
 	mqttEndpoint,
 }: {
 	mqttEndpoint: string
-}): StepRunner<BifravstWorld>[] => [
-	regexMatcher(/^(?:a cat exists|I generate a certificate)$/)(
+}) => [
+	regexMatcher<BifravstWorld>(/^(?:a cat exists|I generate a certificate)$/)(
 		async (_, __, runner) => {
 			if (!runner.store['cat:id']) {
 				const catName = (await randomWords({ numWords: 3 })).join('-')
@@ -48,7 +44,7 @@ export const bifravstStepRunners = ({
 			return runner.store['cat:id']
 		},
 	),
-	regexMatcher(
+	regexMatcher<BifravstWorld>(
 		/^(?:I connect the cat tracker(?: ([^ ]+))?|the cat tracker(?: ([^ ]+))? is connected)$/,
 	)(async ([deviceId1, deviceId2], __, runner) => {
 		const catId = deviceId1 || deviceId2 || runner.store['cat:id']
@@ -84,7 +80,7 @@ export const bifravstStepRunners = ({
 			})
 		}
 	}),
-	regexMatcher(
+	regexMatcher<BifravstWorld>(
 		/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
 	)(async ([deviceId], step, runner) => {
 		if (!step.interpolatedArgument) {
@@ -123,7 +119,7 @@ export const bifravstStepRunners = ({
 		})
 		return await updatePromise
 	}),
-	regexMatcher(
+	regexMatcher<BifravstWorld>(
 		/^the cat tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
 	)(async ([deviceId, topic], step, runner) => {
 		const catId = deviceId || runner.store['cat:id']
@@ -153,12 +149,6 @@ export const bifravstStepRunners = ({
 		})
 		return await publishPromise
 	}),
-	regexGroupMatcher(/I store a UUIDv4 as "(?<storeName>[^"]+)"/)(
-		async ({ storeName }, _, runner) => {
-			runner.store[storeName] = uuid.v4()
-			return runner.store[storeName]
-		},
-	),
 	regexGroupMatcher(
 		/^the cat tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 	)(async ({ deviceId, storeName }, _, runner) => {
@@ -222,21 +212,5 @@ export const bifravstStepRunners = ({
 				reject(error)
 			})
 		})
-	}),
-	regexGroupMatcher(
-		/^(?:"(?<exp>[^"]+)" of )?"(?<storeName>[^"]+)" (?<equalOrMatch>equal|match) this JSON$/,
-	)(async ({ exp, equalOrMatch, storeName }, step, runner) => {
-		if (!step.interpolatedArgument) {
-			throw new Error('Must provide argument!')
-		}
-		const j = JSON.parse(step.interpolatedArgument)
-		const result = runner.store[storeName]
-		const fragment = exp ? jsonata(exp).evaluate(result) : result
-		if (equalOrMatch === 'match') {
-			expect(fragment).to.containSubset(j)
-		} else {
-			expect(fragment).to.deep.equal(j)
-		}
-		return [fragment]
 	}),
 ]

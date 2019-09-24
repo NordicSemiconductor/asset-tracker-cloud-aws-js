@@ -46,7 +46,7 @@ Feature: Device Firmware Upgrade over the air
         "targetSelection": "SNAPSHOT"
       }
       """
-    Then "jobId" of the execution result should equal this JSON
+    Then "awsSdk.res.jobId" should equal this JSON
       """
       "{jobId}"
       """
@@ -54,7 +54,7 @@ Feature: Device Firmware Upgrade over the air
   Scenario: Fetch the job as a device
 
     When the cat tracker fetches the next job into "job"
-    Then "execution" of "job" should match this JSON
+    Then "job.execution" should match this JSON
       """
       {
         "jobId": "{jobId}",
@@ -79,7 +79,7 @@ Feature: Device Firmware Upgrade over the air
         "thingName": "{cat:id}"
       }
       """
-    Then "execution" of the execution result should match this JSON
+    Then "awsSdk.res.execution" should match this JSON
       """
       {
         "jobId": "{jobId}",

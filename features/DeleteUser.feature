@@ -23,7 +23,7 @@ Feature: Delete a user
              "principal": "{cognito:IdentityId}"
            }
            """
-    Then "policies" of the execution result should equal this JSON
+    Then "awsSdk.res.policies" should equal this JSON
            """
             []
            """
@@ -37,7 +37,7 @@ Feature: Delete a user
 #             "AccessToken": "..."
 #           }
 #           """
-#    Then the execution result should equal this JSON
+#    Then "awsSdk.result" should equal this JSON
 #           """
 #           {}
 #           """

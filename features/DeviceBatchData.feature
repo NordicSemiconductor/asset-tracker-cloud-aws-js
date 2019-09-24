@@ -49,7 +49,7 @@ Feature: Device: Batch Data
        FROM {historicaldataDatabaseName}.{historicaldataTableName}
        WHERE deviceId='{cat:id}' AND reported.gps IS NOT NULL LIMIT 2
        """
-    Then the Athena query result should match this JSON
+    Then "athenaQueryResult" should match this JSON
     # The values are string because they have not yet run through the formatter
        """
        [

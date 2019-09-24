@@ -4,6 +4,7 @@ import {
 	ConsoleReporter,
 	cognitoStepRunners,
 	awsSdkStepRunners,
+	storageStepRunners,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import * as program from 'commander'
 import chalk from 'chalk'
@@ -15,6 +16,7 @@ import {
 	WorkGroupName,
 } from '../historicalData/settings'
 import { athenaStepRunners } from './steps/athena'
+import { uuidHelper } from './steps/uuidHelper'
 
 let ran = false
 
@@ -80,7 +82,7 @@ program
 			console.log(world)
 			console.log()
 
-			const runner = new FeatureRunner<StackOutputs>(world, {
+			const runner = new FeatureRunner<BifravstWorld>(world, {
 				dir: featureDir,
 				reporters: [
 					new ConsoleReporter({
@@ -94,7 +96,7 @@ program
 			try {
 				const { success } = await runner
 					.addStepRunners(
-						cognitoStepRunners<StackOutputs & { region: string }>({
+						cognitoStepRunners({
 							...world,
 							emailAsUsername: true,
 						}),
@@ -111,6 +113,8 @@ program
 					)
 					.addStepRunners(athenaStepRunners(world))
 					.addStepRunners(bifravstStepRunners(world))
+					.addStepRunners([uuidHelper])
+					.addStepRunners(storageStepRunners())
 					.run()
 				if (!success) {
 					process.exit(1)

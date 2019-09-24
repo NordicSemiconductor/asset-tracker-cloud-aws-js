@@ -13,8 +13,8 @@ Feature: Read Device Shadow
        """
        {"thingName": "{cat:id}"}
        """
-    And I parse "payload" of the execution result into "shadow"
-    Then "state.reported" of "shadow" should match this JSON
+    And I parse "awsSdk.res.payload" into "shadow"
+    Then "shadow.state.reported" should match this JSON
        """
        {
           "dev": {
@@ -30,7 +30,7 @@ Feature: Read Device Shadow
          }
        }
        """
-    And "state.desired" of "shadow" should match this JSON
+    And "shadow.state.desired" should match this JSON
        """
        {
           "cfg": {
