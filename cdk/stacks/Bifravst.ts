@@ -131,6 +131,7 @@ export class BifravstStack extends CloudFormation.Stack {
 								'iot:UpdateThingShadow',
 								'iot:GetThingShadow',
 								'iot:Subscribe',
+								'iot:Publish',
 							],
 							resources: ['*'],
 						}),
