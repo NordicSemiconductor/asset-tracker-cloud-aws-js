@@ -29,14 +29,13 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@bifravst/athena-helpers": "^5.2.0",
-    "@nordicsemiconductor/modemtalk": "^1.1.2",
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.537.0",
     "backoff": "^2.5.0",
     "cfn-response": "^1.0.1",
     "chalk": "^2.4.2",
     "commander": "^3.0.2",
-    "date-fns": "^2.3.0"
+    "modemtalk": "^1.1.5-pre.1"
   },
   "devDependencies": {
     "@aws-cdk/aws-athena": "^1.9.0",

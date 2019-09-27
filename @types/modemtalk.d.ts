@@ -1,1 +1,1 @@
-declare module '@bifravst/modemtalk'
+declare module 'modemtalk'
