@@ -2,6 +2,15 @@ name: Test and Release
 
 on: push
 
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: eu-central-1
+  AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+  STACK_ID: bifravst-${{ github.sha }}
+  CI: 1
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -16,8 +25,6 @@ jobs:
           sudo npm install -g npm@
           npm config set update-notifier false
       - name: Authenticate with NPM
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           echo "//npm.pkg.github.com/:_authToken=$GH_TOKEN" > ~/.npmrc
       - name: Install dependencies
@@ -25,44 +32,22 @@ jobs:
       - name: Test
         run: npm test
       - name: Set up stack for End-to-End tests
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
-          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-          STACK_ID: bifravst-${{ github.sha }}
-          CI: 1
         run: |
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup -d
           node cli register-ca
       - name: End-to-End Tests
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
-          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-          STACK_ID: bifravst-${{ github.sha }}
         run: |
           npm run test:e2e
       - name: Semantic release
         if: success()
         continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           npm i --no-save semantic-release@next
           npx semantic-release
       - name: Clean up End-to-End test resources
         if: always()
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
-          AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-          STACK_ID: bifravst-${{ github.sha }}
-          CI: 1
         run: |
           node cli drop-athena-resources
           node cli purge-buckets
