@@ -1,4 +1,4 @@
-# AWS-based implementation of _Bifravst :rainbow:_
+# AWS-based implementation of _Bifravst :smirk_cat::rainbow:_
 
 [![GitHub Actions](https://github.com/bifravst/aws/workflows/Test%20and%20Release/badge.svg)](https://github.com/bifravst/aws/actions)
 [![Greenkeeper badge](https://badges.greenkeeper.io/bifravst/aws.svg)](https://greenkeeper.io/)
