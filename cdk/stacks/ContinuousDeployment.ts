@@ -61,6 +61,15 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
 
+		const githubToken = SSM.StringParameter.fromStringParameterAttributes(
+			this,
+			'ghtoken',
+			{
+				parameterName: '/codebuild/github-token',
+				version: 1,
+			},
+		)
+
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: id,
 			description: 'Continuous deploys the Bifravst project',
@@ -76,18 +85,16 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				type: 'LINUX_CONTAINER',
 				computeType: 'BUILD_GENERAL1_LARGE',
 				image: 'aws/codebuild/standard:2.0',
+				environmentVariables: [
+					{
+						name: 'GH_TOKEN',
+						value: githubToken.stringValue,
+					},
+				],
 			},
 		})
-		project.node.addDependency(codeBuildRole)
 
-		const githubToken = SSM.StringParameter.fromStringParameterAttributes(
-			this,
-			'ghtoken',
-			{
-				parameterName: '/codebuild/github-token',
-				version: 1,
-			},
-		)
+		project.node.addDependency(codeBuildRole)
 
 		const sourceCodeAction = ({
 			name,
@@ -163,6 +170,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 			bifravstStackId,
 			buildSpec: 'continuous-deployment-web-app.yml',
+			githubToken,
 		})
 
 		// Sets up the continuous deployment for the device UI
@@ -174,6 +182,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 			bifravstStackId,
 			buildSpec: 'continuous-deployment-device-ui-app.yml',
+			githubToken,
 		})
 
 		// Set up the continuous deployment for Bifravst.

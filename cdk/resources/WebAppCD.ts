@@ -3,6 +3,7 @@ import * as IAM from '@aws-cdk/aws-iam'
 import * as CodeBuild from '@aws-cdk/aws-codebuild'
 import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as S3 from '@aws-cdk/aws-s3'
+import * as SSM from '@aws-cdk/aws-ssm'
 
 export const BuildActionCodeBuild = {
 	category: 'Build',
@@ -24,6 +25,7 @@ export class WebAppCD extends CloudFormation.Construct {
 			buildSpec,
 			description,
 			sourceCodeActions,
+			githubToken,
 		}: {
 			sourceCodeActions: {
 				bifravst: {
@@ -38,6 +40,7 @@ export class WebAppCD extends CloudFormation.Construct {
 			bifravstStackId: string
 			buildSpec: string
 			description: string
+			githubToken: SSM.IStringParameter
 		},
 	) {
 		super(parent, id)
@@ -79,6 +82,10 @@ export class WebAppCD extends CloudFormation.Construct {
 					{
 						name: 'SOURCE_REPO_URL',
 						value: `https://github.com/${sourceCodeActions.webApp.action.configuration.Owner}/${sourceCodeActions.webApp.action.configuration.Repo}.git`,
+					},
+					{
+						name: 'GH_TOKEN',
+						value: githubToken.stringValue,
 					},
 				],
 			},
