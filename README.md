@@ -7,4 +7,4 @@
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier/)
 [![ESLint: TypeScript](https://img.shields.io/badge/ESLint-TypeScript-blue.svg)](https://github.com/typescript-eslint/typescript-eslint)
 
-Read the documentation at Read the documentation at https://bifravst.github.io/.
+Read the documentation at https://bifravst.github.io/.
