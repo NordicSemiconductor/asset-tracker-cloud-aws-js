@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest",
     "test:e2e": "node dist/feature-runner/run-features.js ./features --print-results --progress",
-    "postinstall": "node scripts/warnIfWrongNodeVersion.js && npx tsc"
+    "postinstall": "check-node-version --package --print && npx tsc"
   },
   "bin": {
     "bifravst": "cli/index.js"
@@ -70,6 +70,7 @@
     "@types/websocket": "0.0.40",
     "cdk": "^1.10.0",
     "change-case": "^3.1.0",
+    "check-node-version": "^4.0.1",
     "compare-versions": "^3.5.1",
     "husky": "^3.0.7",
     "jest": "^24.9.0",
