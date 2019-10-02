@@ -16,6 +16,7 @@ import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/ci/purge-buckets'
 import { dropAthenaResourcesCommand } from './commands/ci/drop-athena-resources'
 import { stackId as webStackId } from '../cdk/stacks/WebApps'
+import { cdUpdateTokenCommand } from './commands/cd-update-token'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -78,6 +79,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				deviceUiUrl: `https://${deviceUiDomainName}`,
 				certsDir,
 			}),
+			cdUpdateTokenCommand({ region }),
 		)
 	} else {
 		commands.push(
