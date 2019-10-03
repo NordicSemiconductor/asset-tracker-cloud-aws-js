@@ -4,7 +4,7 @@ import {
 	FeatureRunner,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import { BifravstWorld } from '../run-features'
-import { randomWords } from '@bifravst/random-words'
+import { randomWords } from '@nordicplayground/random-words'
 import { generateDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
 import * as path from 'path'
 import { device, thingShadow } from 'aws-iot-device-sdk'

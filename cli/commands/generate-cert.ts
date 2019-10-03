@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import { ComandDefinition } from './CommandDefinition'
-import { randomWords } from '@bifravst/random-words'
+import { randomWords } from '@nordicplayground/random-words'
 import * as path from 'path'
 import { generateDeviceCertificate } from '../jitp/generateDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
