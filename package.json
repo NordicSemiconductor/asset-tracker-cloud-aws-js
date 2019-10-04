@@ -7,9 +7,6 @@
     "test:e2e": "node dist/feature-runner/run-features.js ./features --print-results --progress",
     "postinstall": "check-node-version --package --print && npx tsc"
   },
-  "bin": {
-    "bifravst": "cli/index.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bifravst/aws.git"
