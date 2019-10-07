@@ -21,6 +21,7 @@ Feature: Update Device Configuration
                 "mvres": 60,
                 "mvt": 3600,
                 "gpst": 1000,
+                "celt": 600,
                 "acct": 5
               }
             }
