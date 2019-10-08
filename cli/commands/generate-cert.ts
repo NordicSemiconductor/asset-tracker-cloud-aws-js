@@ -4,6 +4,7 @@ import { randomWords } from '@bifravst/random-words'
 import * as path from 'path'
 import { generateDeviceCertificate } from '../jitp/generateDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { promises as fs } from 'fs'
 
 export const generateCertCommand = ({
 	endpoint,
@@ -21,10 +22,8 @@ export const generateCertCommand = ({
 		const id = deviceId || (await randomWords({ numWords: 3 })).join('-')
 		const certsDir = path.resolve(process.cwd(), 'certificates')
 		await generateDeviceCertificate({
-			endpoint,
 			deviceId: id,
 			certsDir,
-			caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 			log: (...message: any[]) => {
 				console.log(...message.map(m => chalk.magenta(m)))
 			},
@@ -35,6 +34,32 @@ export const generateCertCommand = ({
 		console.log(
 			chalk.green(`Certificate for device ${chalk.yellow(id)} generated.`),
 		)
+
+		const certificate = deviceFileLocations({
+			certsDir,
+			deviceId,
+		})
+
+		// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
+		await fs.writeFile(
+			certificate.json,
+			JSON.stringify(
+				{
+					caCert: await fs.readFile(
+						path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+						'utf-8',
+					),
+					clientCert: certificate.certWithCA,
+					privateKey: await fs.readFile(certificate.key, 'utf-8'),
+					clientId: deviceId,
+					brokerHostname: endpoint,
+				},
+				null,
+				2,
+			),
+			'utf-8',
+		)
+
 		console.log()
 		console.log(chalk.green('You can now connect to the broker.'))
 		console.log()

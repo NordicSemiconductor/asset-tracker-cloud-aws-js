@@ -47,10 +47,8 @@ export const bifravstStepRunners = ({
 					const catName = (await randomWords({ numWords: 3 })).join('-')
 
 					await generateDeviceCertificate({
-						endpoint: mqttEndpoint,
 						deviceId: catName,
 						certsDir: path.resolve(process.cwd(), 'certificates'),
-						caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 						log: (...message: any[]) => {
 							// eslint-disable-next-line @typescript-eslint/no-floating-promises
 							runner.progress('IoT (cert)', ...message)
