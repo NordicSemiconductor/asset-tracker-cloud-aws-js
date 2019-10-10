@@ -2,8 +2,7 @@ import { promises as fs } from 'fs'
 import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import chalk from 'chalk'
-import { uiServer } from '@bifravst/device-ui-server'
-import { connection as WSConnection } from 'websocket'
+import { uiServer, WebSocketConnection } from '@bifravst/device-ui-server'
 
 const defaultConfig = {
 	act: false, // Whether to enable the active mode
@@ -76,7 +75,7 @@ export const connect = async (args: {
 		region: endpoint.split('.')[2],
 	})
 
-	let wsConnection: WSConnection
+	let wsConnection: WebSocketConnection
 
 	connection.on('connect', async () => {
 		console.timeEnd(chalk.green(chalk.inverse(' connected ')))
