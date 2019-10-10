@@ -2,7 +2,7 @@ import { promises as fs } from 'fs'
 import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import chalk from 'chalk'
-import { uiServer } from './ui-server'
+import { uiServer } from '@bifravst/device-ui-server'
 import { connection as WSConnection } from 'websocket'
 
 const defaultConfig = {
