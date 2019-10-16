@@ -4,6 +4,7 @@ import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
 	UpdatesTableName,
+	DocumentsTableName,
 	WorkGroupName,
 } from '../../../historicalData/settings'
 
@@ -20,7 +21,8 @@ export const dropAthenaResourcesCommand = ({
 
 		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
 		const dbName = DataBaseName({ bifravstStackName: stackId })
-		const tableName = UpdatesTableName({ bifravstStackName: stackId })
+		const updatesTableName = UpdatesTableName({ bifravstStackName: stackId })
+		const documentsTableName = DocumentsTableName({ bifravstStackName: stackId })
 
 		const query = athenaQuery({
 			athena,
@@ -33,7 +35,8 @@ export const dropAthenaResourcesCommand = ({
 			},
 		})
 
-		await query({ QueryString: `DROP TABLE ${dbName}.${tableName}` })
+		await query({ QueryString: `DROP TABLE ${dbName}.${updatesTableName}` })
+		await query({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
 
 		await query({
 			QueryString: `DROP DATABASE ${dbName}`,
