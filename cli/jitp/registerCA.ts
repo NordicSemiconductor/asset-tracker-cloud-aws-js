@@ -171,7 +171,7 @@ export const registerCA = async (args: {
 								ThingName: {
 									Ref: 'AWS::IoT::Certificate::CommonName',
 								},
-								ThingGroups: [stackOutput.thingGroupName],
+								ThingGroups: [stackOutput?.thingGroupName],
 							},
 						},
 						cert: {
@@ -185,7 +185,7 @@ export const registerCA = async (args: {
 						},
 					},
 				}),
-				roleArn: stackOutput.jitpRoleArn,
+				roleArn: stackOutput?.jitpRoleArn,
 			},
 		})
 		.promise()
@@ -195,7 +195,7 @@ export const registerCA = async (args: {
 	}
 
 	log(
-		`Registered CA and enabled auto-registration to group ${stackOutput.thingGroupName}`,
+		`Registered CA and enabled auto-registration to group ${stackOutput?.thingGroupName}`,
 	)
 
 	return {
