@@ -7,7 +7,8 @@ import {
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
-	TableName,
+	UpdatesTableName,
+	DocumentsTableName,
 	WorkGroupName,
 } from '../../historicalData/settings'
 import chalk from 'chalk'
@@ -54,7 +55,8 @@ export const historicalDataCommand = ({
 
 		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
 		const dbName = DataBaseName({ bifravstStackName: stackId })
-		const tableName = TableName({ bifravstStackName: stackId })
+		const updatesTableName = UpdatesTableName({ bifravstStackName: stackId })
+		const documentsTableName = DocumentsTableName({ bifravstStackName: stackId })
 
 		if (
 			!WorkGroups ||
@@ -144,47 +146,62 @@ export const historicalDataCommand = ({
 
 		if (recreate) {
 			console.log(chalk.magenta(`Dropping table...`))
-			await query({ QueryString: `DROP TABLE ${dbName}.${tableName}` })
+			await query({ QueryString: `DROP TABLE ${dbName}.${updatesTableName}` })
+			await query({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
 		}
 
-		try {
-			await query({
-				QueryString: `DESCRIBE ${dbName}.${tableName}`,
-			})
-		} catch (error) {
-			if (setup) {
-				console.log(chalk.magenta(`Creating table...`))
-				const createSQL = createAthenaTableSQL({
-					database: dbName,
-					table: tableName,
-					s3Location: `s3://${DataBucketName}/`,
-					fields: deviceMessagesFields,
-				})
-				console.log(chalk.magenta(createSQL))
+		const checkTable = async ({ tableName, setup, s3Location }: { s3Location: string, tableName: string, setup: boolean }) => {
+			try {
 				await query({
-					QueryString: createSQL,
+					QueryString: `DESCRIBE ${dbName}.${tableName}`,
 				})
-			} else {
-				console.log(
-					chalk.red.inverse(' ERROR '),
-					chalk.red(
-						`Athena table ${chalk.blue(
-							`${dbName}.${tableName}`,
-						)} does not exist!`,
-					),
-				)
-				console.log(
-					chalk.red.inverse(' ERROR '),
-					chalk.red(`Pass --setup to create it.`),
-				)
-				return
+			} catch (error) {
+				if (setup) {
+					console.log(chalk.magenta(`Creating table...`))
+					const createSQL = createAthenaTableSQL({
+						database: dbName,
+						table: tableName,
+						s3Location,
+						fields: deviceMessagesFields,
+					})
+					console.log(chalk.magenta(createSQL))
+					await query({
+						QueryString: createSQL,
+					})
+				} else {
+					console.log(
+						chalk.red.inverse(' ERROR '),
+						chalk.red(
+							`Athena table ${chalk.blue(
+								`${dbName}.${tableName}`,
+							)} does not exist!`,
+						),
+					)
+					console.log(
+						chalk.red.inverse(' ERROR '),
+						chalk.red(`Pass --setup to create it.`),
+					)
+					return
+				}
 			}
 		}
+
+		await checkTable({
+			tableName: updatesTableName,
+			setup,
+			s3Location: `s3://${DataBucketName}/updates/`
+		})
+
+		await checkTable({
+			tableName: documentsTableName,
+			setup,
+			s3Location: `s3://${DataBucketName}/documents/`
+		})
 
 		console.log(
 			chalk.green.inverse(' OK '),
 			chalk.gray(
-				`Athena table ${chalk.blue(`${dbName}.${tableName}`)} exists.`,
+				`Athena table ${chalk.blue(`${dbName}.${updatesTableName}`)} exists.`,
 			),
 		)
 	},

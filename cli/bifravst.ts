@@ -17,6 +17,7 @@ import { purgeBucketsCommand } from './commands/ci/purge-buckets'
 import { dropAthenaResourcesCommand } from './commands/ci/drop-athena-resources'
 import { stackId as webStackId } from '../cdk/stacks/WebApps'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
+import { cellLocation } from './commands/cell-location'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -65,6 +66,10 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			region,
 			QueryResultsBucketName: historicalDataQueryResultsBucketName,
 			DataBucketName: historicalDataBucketName,
+		}),
+		cellLocation({
+			stackId,
+			region,
 		}),
 	]
 

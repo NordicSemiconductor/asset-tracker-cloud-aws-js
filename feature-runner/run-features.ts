@@ -12,7 +12,7 @@ import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { bifravstStepRunners } from './steps/bifravst'
 import {
 	DataBaseName,
-	TableName,
+	UpdatesTableName,
 	WorkGroupName,
 } from '../historicalData/settings'
 import { athenaStepRunners } from './steps/athena'
@@ -70,7 +70,7 @@ program
 				historicaldataDatabaseName: DataBaseName({
 					bifravstStackName: stackName,
 				}),
-				historicaldataTableName: TableName({
+				historicaldataTableName: UpdatesTableName({
 					bifravstStackName: stackName,
 				}),
 				region,

@@ -3,7 +3,7 @@ import { athenaQuery } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
-	TableName,
+	UpdatesTableName,
 	WorkGroupName,
 } from '../../../historicalData/settings'
 
@@ -20,7 +20,7 @@ export const dropAthenaResourcesCommand = ({
 
 		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
 		const dbName = DataBaseName({ bifravstStackName: stackId })
-		const tableName = TableName({ bifravstStackName: stackId })
+		const tableName = UpdatesTableName({ bifravstStackName: stackId })
 
 		const query = athenaQuery({
 			athena,

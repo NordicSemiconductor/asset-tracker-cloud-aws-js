@@ -21,7 +21,7 @@ export const handler = async (event: {
 		Object.keys(message).map(async key =>
 			Promise.all(
 				message[key].map(async body => {
-					const Key = `raw/updates/${format(timestamp, 'yyyy/MM/dd')}/${format(
+					const Key = `updates/raw/${format(timestamp, 'yyyy/MM/dd')}/${format(
 						timestamp,
 						"yyyyMMdd'T'HHmmss",
 					)}-${deviceId}-${messageId}-${++id}.json`

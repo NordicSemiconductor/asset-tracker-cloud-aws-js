@@ -1,7 +1,7 @@
 import { ComandDefinition } from './CommandDefinition'
 import {
 	DataBaseName,
-	TableName,
+	UpdatesTableName,
 	WorkGroupName,
 } from '../../historicalData/settings'
 import { objectToEnv } from '../cloudformation/objectToEnv'
@@ -26,7 +26,7 @@ export const reactConfigCommand = ({
 				historicaldataDatabaseName: DataBaseName({
 					bifravstStackName: stackId,
 				}),
-				historicaldataTableName: TableName({
+				historicaldataTableName: UpdatesTableName({
 					bifravstStackName: stackId,
 				}),
 				...(await stackOutput({

@@ -4,11 +4,17 @@ export const DataBaseName = ({
 	bifravstStackName: string
 }) => `${bifravstStackName.replace(/-/g, '_')}_historicaldata`
 
-export const TableName = ({
+export const UpdatesTableName = ({
 	bifravstStackName,
 }: {
 	bifravstStackName: string
-}) => `${bifravstStackName.replace(/-/g, '_')}_devicedata`
+}) => `${bifravstStackName.replace(/-/g, '_')}_deviceupdates`
+
+export const DocumentsTableName = ({
+	bifravstStackName,
+}: {
+	bifravstStackName: string
+}) => `${bifravstStackName.replace(/-/g, '_')}_devicedocuments`
 
 export const WorkGroupName = ({
 	bifravstStackName,

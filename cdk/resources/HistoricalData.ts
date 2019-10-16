@@ -137,7 +137,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		})
 
-		new IoT.CfnTopicRule(this, 'storeMessages', {
+		new IoT.CfnTopicRule(this, 'storeUpdates', {
 			topicRulePayload: {
 				awsIotSqlVersion: '2016-03-23',
 				description: 'Store all updates to thing shadow documents on S3',
@@ -150,7 +150,34 @@ export class HistoricalData extends CloudFormation.Resource {
 						s3: {
 							bucketName: this.bucket.bucketName,
 							key:
-								'raw/updates/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${clientid()}-${newuuid()}.json',
+								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${clientid()}-${newuuid()}.json',
+							roleArn: topicRuleRole.roleArn,
+						},
+					},
+				],
+				errorAction: {
+					republish: {
+						roleArn: topicRuleRole.roleArn,
+						topic: 'errors',
+					},
+				},
+			},
+		})
+
+		new IoT.CfnTopicRule(this, 'storeDocuments', {
+			topicRulePayload: {
+				awsIotSqlVersion: '2016-03-23',
+				description: 'Store all updated thing shadow documents on S3',
+				ruleDisabled: false,
+				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
+				sql:
+					'SELECT current.state.reported AS reported, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'$aws/things/+/shadow/documents\'',
+				actions: [
+					{
+						s3: {
+							bucketName: this.bucket.bucketName,
+							key:
+								'documents/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${clientid()}-${newuuid()}.json',
 							roleArn: topicRuleRole.roleArn,
 						},
 					},
@@ -195,6 +222,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				environment: {
 					HISTORICAL_DATA_BUCKET: this.bucket.bucketName,
 				},
+				reservedConcurrentExecutions: 1
 			},
 		)
 
