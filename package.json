@@ -48,6 +48,8 @@
     "@aws-cdk/aws-iot": "^1.13.1",
     "@aws-cdk/aws-s3": "^1.13.1",
     "@aws-cdk/aws-ssm": "^1.13.1",
+    "@aws-cdk/aws-stepfunctions": "^1.13.1",
+    "@aws-cdk/aws-stepfunctions-tasks": "^1.13.1",
     "@aws-cdk/core": "^1.13.1",
     "@bifravst/code-style": "^5.0.1",
     "@bifravst/package-layered-lambdas": "^2.1.1",

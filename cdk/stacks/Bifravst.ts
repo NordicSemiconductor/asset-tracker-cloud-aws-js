@@ -16,6 +16,7 @@ import { logToCloudWatch } from '../resources/logToCloudWatch'
 import { LambdaLogGroup } from '../resources/LambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
+import { CellGeolocation } from '../resources/CellGeolocation'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -401,6 +402,10 @@ export class BifravstStack extends CloudFormation.Stack {
 				],
 			}),
 		)
+
+		// Cell Geolocation
+
+		new CellGeolocation(this, 'cellGeolocation')
 	}
 }
 
