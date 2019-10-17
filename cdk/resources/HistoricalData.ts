@@ -171,7 +171,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				ruleDisabled: false,
 				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
 				sql:
-					'SELECT current.state.reported AS reported, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'$aws/things/+/shadow/documents\'',
+					'SELECT current.state.reported AS reported, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'$aws/things/+/shadow/update/documents\'',
 				actions: [
 					{
 						s3: {
