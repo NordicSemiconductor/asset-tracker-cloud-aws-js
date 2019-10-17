@@ -6,7 +6,7 @@ import { ConcatenateFilesFn } from './concatenateFiles';
 
 const dateRx = new RegExp(/^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})/)
 
-export const concatenateRawDeviceMessages = async ({ concatenateFilesInBucket, collectFilesInBucket, documentType }: {
+export const concatenateRawMessages = async ({ concatenateFilesInBucket, collectFilesInBucket, documentType }: {
 	concatenateFilesInBucket: ConcatenateFilesFn,
 	collectFilesInBucket: CollectFilesFn,
 	documentType: 'updates' | 'documents'

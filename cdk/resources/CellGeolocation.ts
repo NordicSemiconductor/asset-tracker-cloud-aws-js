@@ -1,7 +1,15 @@
 import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as IoT from '@aws-cdk/aws-iot'
+import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as StepFunctions from '@aws-cdk/aws-stepfunctions';
+import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks';
+import * as Lambda from '@aws-cdk/aws-lambda';
+import * as S3 from '@aws-cdk/aws-s3';
+import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
+import { logToCloudWatch } from './logToCloudWatch'
+import { lambdaLogGroup as lambdaLogGroup } from './lambdaLogGroup'
+import { BifravstLambdas } from '../prepare-resources'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -10,14 +18,149 @@ export class CellGeolocation extends CloudFormation.Resource {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
+		{
+			sourceCodeBucket,
+			baseLayer,
+			lambdas,
+		}: {
+			sourceCodeBucket: S3.IBucket
+			baseLayer: Lambda.ILayerVersion
+			lambdas: LayeredLambdas<BifravstLambdas>
+		},
 	) {
 		super(parent, id)
 
+		const cacheTable = new DynamoDB.Table(this, 'cache', {
+			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
+			partitionKey: {
+				name: 'cellId',
+				type: DynamoDB.AttributeType.STRING,
+			},
+		})
+
+		const geolocateCellFromCache = new Lambda.Function(
+			this,
+			'geolocateCellFromCache',
+			{
+				layers: [baseLayer],
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_10_X,
+				timeout: CloudFormation.Duration.seconds(10),
+				memorySize: 1792,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.geolocateCellFromCache,
+				),
+				description: 'Geolocate cells from cache',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						actions: [
+							'dynamodb:GetItem',
+						],
+						resources: [
+							cacheTable.tableArn
+						]
+					})
+				],
+				environment: {
+					CACHE_TABLE: cacheTable.tableName,
+				},
+			},
+		)
+
+		lambdaLogGroup(this, 'geolocateCellFromCache', geolocateCellFromCache)
+
+		const cacheCellGeolocation = new Lambda.Function(
+			this,
+			'cacheCellGeolocation',
+			{
+				layers: [baseLayer],
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_10_X,
+				timeout: CloudFormation.Duration.minutes(1),
+				memorySize: 1792,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.geolocateCellFromCache,
+				),
+				description: 'Caches cell geolocations',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						actions: [
+							'dynamodb:PutItem',
+						],
+						resources: [
+							cacheTable.tableArn
+						]
+					})
+				],
+				environment: {
+					CACHE_TABLE: cacheTable.tableName,
+				},
+			},
+		)
+
+		lambdaLogGroup(this, 'cacheCellGeolocation', cacheCellGeolocation)
+
+		const geolocateCellFromUnwiredLabs = new Lambda.Function(
+			this,
+			'geolocateCellFromUnwiredLabs',
+			{
+				layers: [baseLayer],
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_10_X,
+				timeout: CloudFormation.Duration.seconds(10),
+				memorySize: 1792,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.geolocateCellFromUnwiredLabs,
+				),
+				description: 'Resolve cell geolocation using the UnwiredLabs API',
+				initialPolicy: [
+					logToCloudWatch,
+				],
+				environment: {
+				},
+			},
+		)
+
+		lambdaLogGroup(this, 'geolocateCellFromUnwiredLabs', geolocateCellFromUnwiredLabs)
+
+		const isGeolocated = StepFunctions.Condition.booleanEquals('$.celgeo.located', true)
+
+		// FIXME: add step to resolve from device locations
 		const stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
-			definition: new StepFunctions.Pass(parent, `Done`, {
-				result: StepFunctions.Result.fromBoolean(true),
-				resultPath: '$.result',
-			}),
+			definition: new StepFunctions.Task(this, 'Resolve from cache', {
+				task: new StepFunctionTasks.InvokeFunction(geolocateCellFromCache),
+				resultPath: '$.celgeo'
+			})
+				.next(
+					new StepFunctions.Choice(this, 'Cache found?')
+						.when(
+							isGeolocated,
+							new StepFunctions.Succeed(this, 'Done (using Cache)'),
+						)
+						.otherwise(
+							new StepFunctions.Task(this, 'Resolve using UnwiredLabs API', {
+								task: new StepFunctionTasks.InvokeFunction(geolocateCellFromUnwiredLabs),
+								resultPath: '$.celgeo'
+							})
+								.next(
+									new StepFunctions.Choice(this, 'Resolved from UnwiredLabs API?')
+										.when(
+											isGeolocated,
+											new StepFunctions.Task(this, 'Cache result from UnwiredLabs API', {
+												task: new StepFunctionTasks.InvokeFunction(cacheCellGeolocation),
+												inputPath: '$.celgeo',
+												resultPath: '$.storedInCache'
+											})
+												.next(new StepFunctions.Succeed(this, 'Done (using UnwiredLabs API)'))
+										)
+								)
+						)
+				),
 			timeout: CloudFormation.Duration.minutes(5)
 		})
 
@@ -43,7 +186,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 							]
 						})
 					]
-				})
+				}),
 			},
 		})
 
@@ -80,5 +223,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				},
 			},
 		})
+
+		// FIXME: add rule to store geo locations with cells
 	}
 }

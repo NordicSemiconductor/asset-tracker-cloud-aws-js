@@ -1,0 +1,1 @@
+export const cellId = ({ area, mccmnc, cell }: { area: number, mccmnc: number, cell: number }) => `${cell}-${mccmnc}-${area}`

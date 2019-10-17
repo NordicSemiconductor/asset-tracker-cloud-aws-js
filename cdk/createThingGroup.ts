@@ -23,12 +23,21 @@ export const handler = (
 				if (!thingGroupArn) {
 					throw new Error(`Failed to create thing group ${ThingGroupName}!`)
 				}
-				return iot
+				await iot
 					.attachPolicy({
 						policyName: PolicyName,
 						target: thingGroupArn,
 					})
 					.promise()
+
+				// Attach all existing Things to the group
+				const { things } = await iot.listThings({
+				}).promise()
+
+				await Promise.all((things || []).map(({ thingName }) => iot.addThingToThingGroup({
+					thingName,
+					thingGroupArn
+				}).promise()))
 			})
 			.then(() => {
 				response.send(

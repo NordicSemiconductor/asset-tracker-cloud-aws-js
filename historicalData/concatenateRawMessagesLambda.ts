@@ -2,7 +2,7 @@ import { S3 } from 'aws-sdk';
 
 import { collectFiles } from './collectFiles';
 import { concatenateFiles } from './concatenateFiles';
-import { concatenateRawDeviceMessages } from './concatenateRawDeviceMessages';
+import { concatenateRawMessages } from './concatenateRawMessages';
 
 const s3 = new S3()
 const Bucket = process.env.HISTORICAL_DATA_BUCKET || ''
@@ -14,12 +14,12 @@ const concatenateFilesInBucket = concatenateFiles({ s3, Bucket })
  * Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.
  */
 const handler = async () => {
-	await concatenateRawDeviceMessages({
+	await concatenateRawMessages({
 		collectFilesInBucket,
 		concatenateFilesInBucket,
 		documentType: "documents"
 	})
-	await concatenateRawDeviceMessages({
+	await concatenateRawMessages({
 		collectFilesInBucket,
 		concatenateFilesInBucket,
 		documentType: "updates"

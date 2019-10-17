@@ -13,8 +13,10 @@ import { getIotEndpoint } from './helper/getIotEndpoint'
 
 export type BifravstLambdas = {
 	createThingGroup: string
-	concatenateRawDeviceMessages: string
+	concatenateRawMessages: string
 	processBatchMessages: string
+	geolocateCellFromCache: string
+	geolocateCellFromUnwiredLabs: string
 }
 
 export const prepareResources = async ({
@@ -69,15 +71,26 @@ export const prepareResources = async ({
 		Bucket: sourceCodeBucketName,
 		lambdas: {
 			createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
-			concatenateRawDeviceMessages: path.resolve(
+			concatenateRawMessages: path.resolve(
 				rootDir,
 				'historicalData',
-				'concatenateRawDeviceMessages.ts',
+				'concatenateRawMessages.ts',
 			),
 			processBatchMessages: path.resolve(
 				rootDir,
 				'historicalData',
 				'processBatchMessages.ts',
+			),
+			geolocateCellFromCache: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'fromCache.ts',
+			),
+			geolocateCellFromUnwiredLabs: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'apis',
+				'unwiredlabs.ts',
 			),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),

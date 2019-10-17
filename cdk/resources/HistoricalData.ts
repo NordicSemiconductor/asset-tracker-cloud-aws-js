@@ -7,14 +7,14 @@ import * as EventTargets from '@aws-cdk/aws-events-targets'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
-import { LambdaLogGroup } from './LambdaLogGroup'
+import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 
 /**
  * Provides resources for historical data
  */
 export class HistoricalData extends CloudFormation.Resource {
-	public readonly bucket: S3.IBucket
+	public readonly dataBucket: S3.IBucket
 	public readonly queryResultsBucket: S3.IBucket
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -35,7 +35,7 @@ export class HistoricalData extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		this.bucket = new S3.Bucket(this, 'bucket', {
+		this.dataBucket = new S3.Bucket(this, 'bucket', {
 			removalPolicy: isTest
 				? CloudFormation.RemovalPolicy.DESTROY
 				: CloudFormation.RemovalPolicy.RETAIN,
@@ -45,78 +45,6 @@ export class HistoricalData extends CloudFormation.Resource {
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
 
-		const writeToResultBucket = new IAM.PolicyStatement({
-			resources: [
-				this.queryResultsBucket.bucketArn,
-				`${this.queryResultsBucket.bucketArn}/*`,
-			],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-				's3:AbortMultipartUpload',
-				's3:PutObject',
-			],
-		})
-
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				resources: ['*'],
-				actions: [
-					'athena:startQueryExecution',
-					'athena:stopQueryExecution',
-					'athena:getQueryExecution',
-					'athena:getQueryResults',
-					'glue:GetTable',
-					'glue:GetDatabase',
-				],
-			}),
-		)
-
-		// Users need to read from data bucket
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				resources: [this.bucket.bucketArn, `${this.bucket.bucketArn}/*`],
-				actions: [
-					's3:GetBucketLocation',
-					's3:GetObject',
-					's3:ListBucket',
-					's3:ListBucketMultipartUploads',
-					's3:ListMultipartUploadParts',
-				],
-			}),
-		)
-
-		// Users need to be able to write to the results bucket
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				resources: [
-					this.queryResultsBucket.bucketArn,
-					`${this.queryResultsBucket.bucketArn}/*`,
-				],
-				actions: [
-					's3:GetBucketLocation',
-					's3:GetObject',
-					's3:ListBucket',
-					's3:ListBucketMultipartUploads',
-					's3:ListMultipartUploadParts',
-					's3:AbortMultipartUpload',
-					's3:PutObject',
-				],
-			}),
-		)
-
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				resources: [this.bucket.bucketArn, `${this.bucket.bucketArn}/*`],
-				actions: ['s3:GetBucketLocation', 's3:GetObject', 's3:ListBucket'],
-			}),
-		)
-
-		userRole.addToPolicy(writeToResultBucket)
-
 		const topicRuleRole = new IAM.Role(this, 'Role', {
 			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),
 			inlinePolicies: {
@@ -124,7 +52,7 @@ export class HistoricalData extends CloudFormation.Resource {
 					statements: [
 						new IAM.PolicyStatement({
 							actions: ['s3:PutObject'],
-							resources: [`${this.bucket.bucketArn}/*`],
+							resources: [`${this.dataBucket.bucketArn}/*`],
 						}),
 						new IAM.PolicyStatement({
 							actions: ['iot:Publish'],
@@ -148,36 +76,9 @@ export class HistoricalData extends CloudFormation.Resource {
 				actions: [
 					{
 						s3: {
-							bucketName: this.bucket.bucketName,
+							bucketName: this.dataBucket.bucketName,
 							key:
-								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${clientid()}-${newuuid()}.json',
-							roleArn: topicRuleRole.roleArn,
-						},
-					},
-				],
-				errorAction: {
-					republish: {
-						roleArn: topicRuleRole.roleArn,
-						topic: 'errors',
-					},
-				},
-			},
-		})
-
-		new IoT.CfnTopicRule(this, 'storeDocuments', {
-			topicRulePayload: {
-				awsIotSqlVersion: '2016-03-23',
-				description: 'Store all updated thing shadow documents on S3',
-				ruleDisabled: false,
-				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
-				sql:
-					'SELECT current.state.reported AS reported, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'$aws/things/+/shadow/update/documents\'',
-				actions: [
-					{
-						s3: {
-							bucketName: this.bucket.bucketName,
-							key:
-								'documents/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${clientid()}-${newuuid()}.json',
+								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${regexp_replace(clientid(), "\/", "")}-${newuuid()}.json',
 							roleArn: topicRuleRole.roleArn,
 						},
 					},
@@ -193,9 +94,9 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Batch messages
 
-		const processBatchMessagesFunction = new Lambda.Function(
+		const processBatchMessages = new Lambda.Function(
 			this,
-			'processBatchMessagesLambda',
+			'processBatchMessages',
 			{
 				layers: [baseLayer],
 				handler: 'index.handler',
@@ -210,7 +111,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				initialPolicy: [
 					logToCloudWatch,
 					new IAM.PolicyStatement({
-						resources: [this.bucket.bucketArn, `${this.bucket.bucketArn}/*`],
+						resources: [this.dataBucket.bucketArn, `${this.dataBucket.bucketArn}/*`],
 						actions: [
 							's3:ListBucket',
 							's3:GetObject',
@@ -220,15 +121,13 @@ export class HistoricalData extends CloudFormation.Resource {
 					}),
 				],
 				environment: {
-					HISTORICAL_DATA_BUCKET: this.bucket.bucketName,
+					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
 				},
 				reservedConcurrentExecutions: 1
 			},
 		)
 
-		new LambdaLogGroup(this, 'processBatchMessagesFunctionLogGroup', {
-			lambda: processBatchMessagesFunction,
-		})
+		lambdaLogGroup(this, 'processBatchMessages', processBatchMessages)
 
 		const processBatchMessagesRule = new IoT.CfnTopicRule(
 			this,
@@ -243,7 +142,7 @@ export class HistoricalData extends CloudFormation.Resource {
 					actions: [
 						{
 							lambda: {
-								functionArn: processBatchMessagesFunction.functionArn,
+								functionArn: processBatchMessages.functionArn,
 							},
 						},
 					],
@@ -257,7 +156,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		)
 
-		processBatchMessagesFunction.addPermission(
+		processBatchMessages.addPermission(
 			'processBatchMessagesInvokeByIot',
 			{
 				principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
@@ -267,9 +166,9 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Concatenate the log files
 
-		const concatenateRawDeviceMessagesFunction = new Lambda.Function(
+		const concatenateRawMessages = new Lambda.Function(
 			this,
-			'concatenateRawDeviceMessages',
+			'concatenateRawMessages',
 			{
 				layers: [baseLayer],
 				handler: 'index.handler',
@@ -278,14 +177,14 @@ export class HistoricalData extends CloudFormation.Resource {
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.concatenateRawDeviceMessages,
+					lambdas.lambdaZipFileNames.concatenateRawMessages,
 				),
 				description:
 					'Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.',
 				initialPolicy: [
 					logToCloudWatch,
 					new IAM.PolicyStatement({
-						resources: [this.bucket.bucketArn, `${this.bucket.bucketArn}/*`],
+						resources: [this.dataBucket.bucketArn, `${this.dataBucket.bucketArn}/*`],
 						actions: [
 							's3:ListBucket',
 							's3:GetObject',
@@ -295,14 +194,12 @@ export class HistoricalData extends CloudFormation.Resource {
 					}),
 				],
 				environment: {
-					HISTORICAL_DATA_BUCKET: this.bucket.bucketName,
+					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
 				},
 			},
 		)
 
-		new LambdaLogGroup(this, 'concatenateRawDeviceMessagesFunctionLogGroup', {
-			lambda: concatenateRawDeviceMessagesFunction,
-		})
+		lambdaLogGroup(this, 'concatenateRawMessages', concatenateRawMessages)
 
 		const rule = new Events.Rule(this, 'invokeMessageCounterRule', {
 			schedule: Events.Schedule.expression('rate(1 hour)'),
@@ -310,13 +207,82 @@ export class HistoricalData extends CloudFormation.Resource {
 				'Invoke the lambda which concatenates the raw device messages',
 			enabled: true,
 			targets: [
-				new EventTargets.LambdaFunction(concatenateRawDeviceMessagesFunction),
+				new EventTargets.LambdaFunction(concatenateRawMessages),
 			],
 		})
 
-		concatenateRawDeviceMessagesFunction.addPermission('InvokeByEvents', {
+		concatenateRawMessages.addPermission('InvokeByEvents', {
 			principal: new IAM.ServicePrincipal('events.amazonaws.com'),
 			sourceArn: rule.ruleArn,
 		})
+
+		// User permissions
+		permissions({ historicalData: this }).forEach(policy => userRole.addToPolicy(policy))
 	}
+}
+
+export const permissions = ({ historicalData }: { historicalData: HistoricalData }): IAM.PolicyStatement[] => {
+	const dataBucket = historicalData.dataBucket
+	const queryResultsBucket = historicalData.queryResultsBucket
+
+	return [
+		new IAM.PolicyStatement({
+			resources: ['*'],
+			actions: [
+				'athena:startQueryExecution',
+				'athena:stopQueryExecution',
+				'athena:getQueryExecution',
+				'athena:getQueryResults',
+				'glue:GetTable',
+				'glue:GetDatabase',
+			],
+		}),
+		// Users need to read from data bucket
+		new IAM.PolicyStatement({
+			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+			],
+		}),
+
+		new IAM.PolicyStatement({
+			resources: [
+				queryResultsBucket.bucketArn,
+				`${queryResultsBucket.bucketArn}/*`,
+			],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+				's3:AbortMultipartUpload',
+				's3:PutObject',
+			],
+		}),
+		new IAM.PolicyStatement({
+			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
+			actions: ['s3:GetBucketLocation', 's3:GetObject', 's3:ListBucket'],
+		}),
+		// Users need to be able to write to the results bucket
+		new IAM.PolicyStatement({
+			resources: [
+				queryResultsBucket.bucketArn,
+				`${queryResultsBucket.bucketArn}/*`,
+			],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+				's3:AbortMultipartUpload',
+				's3:PutObject',
+			],
+		})
+	]
 }

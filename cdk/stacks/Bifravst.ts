@@ -13,7 +13,7 @@ import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import { HistoricalData } from '../resources/HistoricalData'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
-import { LambdaLogGroup } from '../resources/LambdaLogGroup'
+import { lambdaLogGroup } from '../resources/lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
 import { CellGeolocation } from '../resources/CellGeolocation'
@@ -303,33 +303,35 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:thingPolicyArn`,
 		})
 
-		const ThingGroupName = `${id}Things`
+		const ThingGroupName = id
 
-		const thingGroupLambda = new Lambda.Function(
+		const createThingGroup = new Lambda.Function(
 			this,
-			`${id}-ThingGroupLambda`,
+			'createThingGroup',
 			{
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
 					props.lambdas.lambdaZipFileNames.createThingGroup,
 				),
 				layers: [baseLayer],
-				description: 'Used in CloudFormation to create a thing group',
+				description: 'Used in CloudFormation to create the thing group for the devices',
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_8_10,
 				timeout: CloudFormation.Duration.seconds(15),
 				initialPolicy: [
 					new IAM.PolicyStatement({
 						resources: ['*'],
-						actions: ['iot:createThingGroup', 'iot:attachPolicy'],
+						actions: ['iot:createThingGroup', 'iot:attachPolicy', 'iot:ListThings', 'iot:AddThingToThingGroup'],
 					}),
 					logToCloudWatch,
 				],
 			},
 		)
 
-		new CustomResource(this, 'ThingGroup', {
-			provider: CustomResourceProvider.lambda(thingGroupLambda),
+		lambdaLogGroup(this, 'createThingGroup', createThingGroup)
+
+		new CustomResource(this, 'ThingGroupResource', {
+			provider: CustomResourceProvider.lambda(createThingGroup),
 			properties: {
 				ThingGroupName,
 				ThingGroupProperties: {
@@ -337,10 +339,6 @@ export class BifravstStack extends CloudFormation.Stack {
 				},
 				PolicyName: iotThingPolicy.ref,
 			},
-		})
-
-		new LambdaLogGroup(this, 'thingGroupLambdaLogGroup', {
-			lambda: thingGroupLambda,
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {
@@ -366,7 +364,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		new CloudFormation.CfnOutput(this, 'historicalDataBucketName', {
-			value: hd.bucket.bucketName,
+			value: hd.dataBucket.bucketName,
 			exportName: `${this.stackName}:historicalDataBucketName`,
 		})
 
@@ -405,7 +403,11 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		// Cell Geolocation
 
-		new CellGeolocation(this, 'cellGeolocation')
+		new CellGeolocation(this, 'cellGeolocation', {
+			baseLayer,
+			lambdas: props.lambdas,
+			sourceCodeBucket,
+		})
 	}
 }
 
