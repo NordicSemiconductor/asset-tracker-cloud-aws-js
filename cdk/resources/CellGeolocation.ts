@@ -55,7 +55,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
 				sql:
 					`SELECT current.state.reported.roam.v AS roaming, clientid() as deviceId 
-					FROM '$aws/things/+/shadow/documents' 
+					FROM '$aws/things/+/shadow/update/documents' 
 					WHERE current.state.reported.roam.v.cell <> NULL 
 					AND current.state.reported.roam.v.mccmnc <> NULL 
 					AND current.state.reported.roam.v.area <> NULL` +
