@@ -36,6 +36,41 @@ export class CellGeolocation extends CloudFormation.Resource {
 				name: 'cellId',
 				type: DynamoDB.AttributeType.STRING,
 			},
+			pointInTimeRecovery: true,
+			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+		})
+
+		const deviceCellGeoLocations = new DynamoDB.Table(this, 'deviceCellGeoLocations', {
+			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
+			partitionKey: {
+				name: 'uuid',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'timestamp',
+				type: DynamoDB.AttributeType.NUMBER
+			},
+			pointInTimeRecovery: true,
+			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+		})
+
+		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
+
+		deviceCellGeoLocations.addGlobalSecondaryIndex({
+			indexName: LOCATIONS_TABLE_CELLID_INDEX,
+			partitionKey: {
+				name: 'cellId',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'timestamp',
+				type: DynamoDB.AttributeType.NUMBER
+			},
+			projectionType: DynamoDB.ProjectionType.INCLUDE,
+			nonKeyAttributes: [
+				'lat',
+				'lng'
+			]
 		})
 
 		const geolocateCellFromCache = new Lambda.Function(
@@ -70,6 +105,41 @@ export class CellGeolocation extends CloudFormation.Resource {
 		)
 
 		lambdaLogGroup(this, 'geolocateCellFromCache', geolocateCellFromCache)
+
+		const geolocateCellFromDevices = new Lambda.Function(
+			this,
+			'geolocateCellFromDevices',
+			{
+				layers: [baseLayer],
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_10_X,
+				timeout: CloudFormation.Duration.seconds(10),
+				memorySize: 1792,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.geolocateCellFromDeviceLocations,
+				),
+				description: 'Geolocate cells from device locations',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						actions: [
+							'dynamodb:Query',
+						],
+						resources: [
+							deviceCellGeoLocations.tableArn,
+							`${deviceCellGeoLocations.tableArn}/*`,
+						]
+					})
+				],
+				environment: {
+					LOCATIONS_TABLE: deviceCellGeoLocations.tableName,
+					LOCATIONS_TABLE_CELLID_INDEX
+				},
+			},
+		)
+
+		lambdaLogGroup(this, 'geolocateCellFromDevices', geolocateCellFromDevices)
 
 		const cacheCellGeolocation = new Lambda.Function(
 			this,
@@ -143,20 +213,39 @@ export class CellGeolocation extends CloudFormation.Resource {
 							new StepFunctions.Succeed(this, 'Done (using Cache)'),
 						)
 						.otherwise(
-							new StepFunctions.Task(this, 'Resolve using UnwiredLabs API', {
-								task: new StepFunctionTasks.InvokeFunction(geolocateCellFromUnwiredLabs),
+							new StepFunctions.Task(this, 'Geolocation using Device Locations', {
+								task: new StepFunctionTasks.InvokeFunction(geolocateCellFromDevices),
 								resultPath: '$.celgeo'
 							})
 								.next(
-									new StepFunctions.Choice(this, 'Resolved from UnwiredLabs API?')
+									new StepFunctions.Choice(this, 'Geolocated using Device Locations?')
 										.when(
 											isGeolocated,
-											new StepFunctions.Task(this, 'Cache result from UnwiredLabs API', {
+											new StepFunctions.Task(this, 'Cache result from Device Locations', {
 												task: new StepFunctionTasks.InvokeFunction(cacheCellGeolocation),
 												inputPath: '$.celgeo',
 												resultPath: '$.storedInCache'
 											})
-												.next(new StepFunctions.Succeed(this, 'Done (using UnwiredLabs API)'))
+												.next(new StepFunctions.Succeed(this, 'Done (using Device Locations)'))
+
+										)
+										.otherwise(
+											new StepFunctions.Task(this, 'Resolve using UnwiredLabs API', {
+												task: new StepFunctionTasks.InvokeFunction(geolocateCellFromUnwiredLabs),
+												resultPath: '$.celgeo'
+											})
+												.next(
+													new StepFunctions.Choice(this, 'Resolved from UnwiredLabs API?')
+														.when(
+															isGeolocated,
+															new StepFunctions.Task(this, 'Cache result from UnwiredLabs API', {
+																task: new StepFunctionTasks.InvokeFunction(cacheCellGeolocation),
+																inputPath: '$.celgeo',
+																resultPath: '$.storedInCache'
+															})
+																.next(new StepFunctions.Succeed(this, 'Done (using UnwiredLabs API)'))
+														)
+												)
 										)
 								)
 						)
@@ -173,6 +262,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 							actions: ['iot:Publish'],
 							resources: [
 								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
+								`arn:aws:iot:${parent.region}:${parent.account}:topic/celgeo`,
 							],
 						}),
 					],
@@ -187,6 +277,18 @@ export class CellGeolocation extends CloudFormation.Resource {
 						})
 					]
 				}),
+				dynamodb: new IAM.PolicyDocument({
+					statements: [
+						new IAM.PolicyStatement({
+							actions: [
+								'dynamodb:PutItem',
+							],
+							resources: [
+								deviceCellGeoLocations.tableArn
+							]
+						})
+					]
+				})
 			},
 		})
 
@@ -195,18 +297,18 @@ export class CellGeolocation extends CloudFormation.Resource {
 				awsIotSqlVersion: '2016-03-23',
 				description: 'Executes a step function which will geolocate the cell location provided by the device',
 				ruleDisabled: false,
-				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
-				sql:
-					`SELECT current.state.reported.roam.v AS roaming, clientid() as deviceId 
-					FROM '$aws/things/+/shadow/update/documents' 
-					WHERE current.state.reported.roam.v.cell <> NULL 
-					AND current.state.reported.roam.v.mccmnc <> NULL 
-					AND current.state.reported.roam.v.area <> NULL` +
+				sql: [
+					'SELECT current.state.reported.roam.v AS roaming, clientid() as deviceId',
+					`FROM '$aws/things/+/shadow/update/documents'`,
+					'WHERE current.state.reported.roam.v.cell <> NULL',
+					'AND current.state.reported.roam.v.mccmnc <> NULL',
+					'AND current.state.reported.roam.v.area <> NULL',
 					// Only trigger if the reported cell changed
-					` AND previous.state.reported.roam.v.cell <> current.state.reported.roam.v.cell` +
+					'AND previous.state.reported.roam.v.cell <> current.state.reported.roam.v.cell',
 					// Only trigger if the current geolocation in the state is not for the new cell
 					// it might not have been updated yet
-					` AND current.state.desired.celgeo.v.cell <> current.state.reported.roam.v.cell`,
+					'AND current.state.desired.celgeo.v.cell <> current.state.reported.roam.v.cell'
+				].join(' '),
 				actions: [
 					{
 						stepFunctions: {
@@ -222,6 +324,62 @@ export class CellGeolocation extends CloudFormation.Resource {
 					},
 				},
 			},
+		})
+
+		new IoT.CfnTopicRule(this, 'storeCellGeolocationsFromDevices', {
+			topicRulePayload: {
+				awsIotSqlVersion: '2016-03-23',
+				description: 'Stores the geolocations for cells from devices',
+				ruleDisabled: false,
+				sql: [
+					'SELECT',
+					'newuuid() as uuid,',
+					'current.state.reported.roam.v.cell as cell,',
+					'current.state.reported.roam.v.mccmnc as mccmnc,',
+					'current.state.reported.roam.v.area as area,',
+					// see cellGeolocation/cellId.ts for format of cellId
+					'concat(current.state.reported.roam.v.cell,',
+					'"-",',
+					'current.state.reported.roam.v.mccmnc,',
+					'"-",',
+					'current.state.reported.roam.v.area) AS cellId,',
+					'current.state.reported.gps.v.lat AS lat,',
+					'current.state.reported.gps.v.lng AS lng,',
+					'concat("device:", clientid()) as source,',
+					'timestamp() as timestamp',
+					`FROM '$aws/things/+/shadow/update/documents'`,
+					'WHERE',
+					// only if it actually has roaming information
+					'current.state.reported.roam.v.area <> NULL',
+					'AND current.state.reported.roam.v.mccmnc <> NULL',
+					'AND current.state.reported.roam.v.cell <> NULL',
+					// only if the location has changed
+					'AND (previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
+					'OR previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng)'
+				].join(' '),
+				actions: [
+					{
+						republish: {
+							roleArn: topicRuleRole.roleArn,
+							topic: 'celgeo',
+						}
+					},
+					{
+						dynamoDBv2: {
+							putItem: {
+								tableName: deviceCellGeoLocations.tableName
+							},
+							roleArn: topicRuleRole.roleArn,
+						}
+					}
+				],
+				errorAction: {
+					republish: {
+						roleArn: topicRuleRole.roleArn,
+						topic: 'errors',
+					},
+				},
+			}
 		})
 
 		// FIXME: add rule to store geo locations with cells

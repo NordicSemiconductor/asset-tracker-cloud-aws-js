@@ -16,6 +16,7 @@ export type BifravstLambdas = {
 	concatenateRawMessages: string
 	processBatchMessages: string
 	geolocateCellFromCache: string
+	geolocateCellFromDeviceLocations: string
 	geolocateCellFromUnwiredLabs: string
 }
 
@@ -85,6 +86,11 @@ export const prepareResources = async ({
 				rootDir,
 				'cellGeolocation',
 				'fromCache.ts',
+			),
+			geolocateCellFromDeviceLocations: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'fromDeviceLocations.ts',
 			),
 			geolocateCellFromUnwiredLabs: path.resolve(
 				rootDir,
