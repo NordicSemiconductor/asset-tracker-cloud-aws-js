@@ -22,10 +22,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 			sourceCodeBucket,
 			baseLayer,
 			lambdas,
+			enableUnwiredApi,
 		}: {
 			sourceCodeBucket: S3.IBucket
 			baseLayer: Lambda.ILayerVersion
 			lambdas: LayeredLambdas<BifravstLambdas>
+			enableUnwiredApi: boolean
 		},
 	) {
 		super(parent, id)
@@ -38,39 +40,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 			pointInTimeRecovery: true,
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
-		})
-
-		const deviceCellGeoLocations = new DynamoDB.Table(this, 'deviceCellGeoLocations', {
-			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
-			partitionKey: {
-				name: 'uuid',
-				type: DynamoDB.AttributeType.STRING,
-			},
-			sortKey: {
-				name: 'timestamp',
-				type: DynamoDB.AttributeType.NUMBER
-			},
-			pointInTimeRecovery: true,
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
-		})
-
-		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
-
-		deviceCellGeoLocations.addGlobalSecondaryIndex({
-			indexName: LOCATIONS_TABLE_CELLID_INDEX,
-			partitionKey: {
-				name: 'cellId',
-				type: DynamoDB.AttributeType.STRING,
-			},
-			sortKey: {
-				name: 'timestamp',
-				type: DynamoDB.AttributeType.NUMBER
-			},
-			projectionType: DynamoDB.ProjectionType.INCLUDE,
-			nonKeyAttributes: [
-				'lat',
-				'lng'
-			]
 		})
 
 		const geolocateCellFromCache = new Lambda.Function(
@@ -105,6 +74,39 @@ export class CellGeolocation extends CloudFormation.Resource {
 		)
 
 		lambdaLogGroup(this, 'geolocateCellFromCache', geolocateCellFromCache)
+
+		const deviceCellGeoLocations = new DynamoDB.Table(this, 'deviceCellGeoLocations', {
+			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
+			partitionKey: {
+				name: 'uuid',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'timestamp',
+				type: DynamoDB.AttributeType.NUMBER
+			},
+			pointInTimeRecovery: true,
+			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+		})
+
+		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
+
+		deviceCellGeoLocations.addGlobalSecondaryIndex({
+			indexName: LOCATIONS_TABLE_CELLID_INDEX,
+			partitionKey: {
+				name: 'cellId',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'timestamp',
+				type: DynamoDB.AttributeType.NUMBER
+			},
+			projectionType: DynamoDB.ProjectionType.INCLUDE,
+			nonKeyAttributes: [
+				'lat',
+				'lng'
+			]
+		})
 
 		const geolocateCellFromDevices = new Lambda.Function(
 			this,
@@ -174,33 +176,42 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		lambdaLogGroup(this, 'cacheCellGeolocation', cacheCellGeolocation)
 
-		const geolocateCellFromUnwiredLabs = new Lambda.Function(
-			this,
-			'geolocateCellFromUnwiredLabs',
-			{
-				layers: [baseLayer],
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_10_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.geolocateCellFromUnwiredLabs,
-				),
-				description: 'Resolve cell geolocation using the UnwiredLabs API',
-				initialPolicy: [
-					logToCloudWatch,
-				],
-				environment: {
+		// Optional step
+		let geolocateCellFromUnwiredLabs: Lambda.IFunction | undefined = undefined;
+		if (enableUnwiredApi) {
+			geolocateCellFromUnwiredLabs = new Lambda.Function(
+				this,
+				'geolocateCellFromUnwiredLabs',
+				{
+					layers: [baseLayer],
+					handler: 'index.handler',
+					runtime: Lambda.Runtime.NODEJS_10_X,
+					timeout: CloudFormation.Duration.seconds(10),
+					memorySize: 1792,
+					code: Lambda.Code.bucket(
+						sourceCodeBucket,
+						lambdas.lambdaZipFileNames.geolocateCellFromUnwiredLabs,
+					),
+					description: 'Resolve cell geolocation using the UnwiredLabs API',
+					initialPolicy: [
+						logToCloudWatch,
+						new IAM.PolicyStatement({
+							actions: [
+								'ssm:GetParametersByPath',
+							],
+							resources: [
+								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/bifravst/cellGeoLocation/unwiredlabs`,
+							]
+						})
+					],
 				},
-			},
-		)
+			)
 
-		lambdaLogGroup(this, 'geolocateCellFromUnwiredLabs', geolocateCellFromUnwiredLabs)
+			lambdaLogGroup(this, 'geolocateCellFromUnwiredLabs', geolocateCellFromUnwiredLabs)
+		}
 
 		const isGeolocated = StepFunctions.Condition.booleanEquals('$.celgeo.located', true)
 
-		// FIXME: add step to resolve from device locations
 		const stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			definition: new StepFunctions.Task(this, 'Resolve from cache', {
 				task: new StepFunctionTasks.InvokeFunction(geolocateCellFromCache),
@@ -230,11 +241,17 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 										)
 										.otherwise(
-											new StepFunctions.Task(this, 'Resolve using UnwiredLabs API', {
-												task: new StepFunctionTasks.InvokeFunction(geolocateCellFromUnwiredLabs),
-												resultPath: '$.celgeo'
-											})
-												.next(
+											(() => {
+												if (!geolocateCellFromUnwiredLabs) {
+													return new StepFunctions.Fail(this, 'Failed (No API)', {
+														error: 'NO_API',
+														cause: 'No third party API is configured to resolve the cell geolocation'
+													})
+												}
+												return new StepFunctions.Task(this, 'Resolve using UnwiredLabs API', {
+													task: new StepFunctionTasks.InvokeFunction(geolocateCellFromUnwiredLabs),
+													resultPath: '$.celgeo'
+												}).next(
 													new StepFunctions.Choice(this, 'Resolved from UnwiredLabs API?')
 														.when(
 															isGeolocated,
@@ -245,7 +262,14 @@ export class CellGeolocation extends CloudFormation.Resource {
 															})
 																.next(new StepFunctions.Succeed(this, 'Done (using UnwiredLabs API)'))
 														)
+														.otherwise(
+															new StepFunctions.Fail(this, 'Failed (no resolution)', {
+																error: 'FAILED',
+																cause: 'The cell geolocation could not be resolved'
+															})
+														)
 												)
+											})()
 										)
 								)
 						)
@@ -381,7 +405,5 @@ export class CellGeolocation extends CloudFormation.Resource {
 				},
 			}
 		})
-
-		// FIXME: add rule to store geo locations with cells
 	}
 }

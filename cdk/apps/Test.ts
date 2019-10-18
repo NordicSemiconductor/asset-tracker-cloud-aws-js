@@ -18,6 +18,7 @@ export class TestApp extends App {
 		new BifravstStack(this, args.stackId, {
 			...args,
 			isTest: true,
+			enableUnwiredApi: false, // FIXME: implement e2e test
 		})
 	}
 }

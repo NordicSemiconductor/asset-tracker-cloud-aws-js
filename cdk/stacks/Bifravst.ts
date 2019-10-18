@@ -22,12 +22,20 @@ export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		id: string,
-		props: {
+		{
+			mqttEndpoint,
+			sourceCodeBucketName,
+			baseLayerZipFileName,
+			lambdas,
+			isTest,
+			enableUnwiredApi,
+		}: {
 			mqttEndpoint: string
 			sourceCodeBucketName: string
 			baseLayerZipFileName: string
 			lambdas: LayeredLambdas<BifravstLambdas>
 			isTest: boolean
+			enableUnwiredApi: boolean
 		},
 	) {
 		super(parent, id)
@@ -36,12 +44,12 @@ export class BifravstStack extends CloudFormation.Stack {
 			this,
 			'SourceCodeBucket',
 			{
-				bucketName: props.sourceCodeBucketName,
+				bucketName: sourceCodeBucketName,
 			},
 		)
 
 		const baseLayer = new Lambda.LayerVersion(this, `${id}-layer`, {
-			code: Lambda.Code.bucket(sourceCodeBucket, props.baseLayerZipFileName),
+			code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
 			compatibleRuntimes: [
 				Lambda.Runtime.NODEJS_10_X,
 				Lambda.Runtime.NODEJS_8_10,
@@ -49,7 +57,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		new CloudFormation.CfnOutput(this, 'mqttEndpoint', {
-			value: props.mqttEndpoint,
+			value: mqttEndpoint,
 			exportName: `${this.stackName}:mqttEndpoint`,
 		})
 
@@ -311,7 +319,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			{
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
-					props.lambdas.lambdaZipFileNames.createThingGroup,
+					lambdas.lambdaZipFileNames.createThingGroup,
 				),
 				layers: [baseLayer],
 				description: 'Used in CloudFormation to create the thing group for the devices',
@@ -357,10 +365,10 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const hd = new HistoricalData(this, 'historicalData', {
 			baseLayer,
-			lambdas: props.lambdas,
+			lambdas: lambdas,
 			sourceCodeBucket,
 			userRole,
-			isTest: props.isTest,
+			isTest: isTest,
 		})
 
 		new CloudFormation.CfnOutput(this, 'historicalDataBucketName', {
@@ -405,8 +413,9 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		new CellGeolocation(this, 'cellGeolocation', {
 			baseLayer,
-			lambdas: props.lambdas,
+			lambdas: lambdas,
 			sourceCodeBucket,
+			enableUnwiredApi,
 		})
 	}
 }

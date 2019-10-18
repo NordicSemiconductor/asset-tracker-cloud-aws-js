@@ -10,7 +10,8 @@ export class BifravstApp extends App {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
 		baseLayerZipFileName: string
-		lambdas: LayeredLambdas<BifravstLambdas>
+		lambdas: LayeredLambdas<BifravstLambdas>,
+		enableUnwiredApi: boolean
 	}) {
 		super()
 		new BifravstStack(this, args.stackId, {

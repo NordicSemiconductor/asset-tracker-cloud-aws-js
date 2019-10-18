@@ -34,8 +34,9 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
         if (err.name ===
             'ResourceNotFoundException') {
             console.log(`No cached entry found for ${id}.`)
+        } else {
+            console.error(JSON.stringify({ error: err }))
         }
-
     } finally {
         return {
             ...cell,
