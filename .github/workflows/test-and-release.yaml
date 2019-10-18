@@ -34,6 +34,7 @@ jobs:
         run: npm test
       - name: Set up stack for End-to-End tests
         run: |
+          npx cdk bootstrap
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup -d
