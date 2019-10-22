@@ -370,7 +370,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'current.state.reported.gps.v.lat AS lat,',
 					'current.state.reported.gps.v.lng AS lng,',
 					'concat("device:", clientid()) as source,',
-					'timestamp() as timestamp',
+					'parse_time("yyyy-MM-dd\'T\'HH:mm:ss.S\'Z\'", timestamp()) as timestamp',
 					`FROM '$aws/things/+/shadow/update/documents'`,
 					'WHERE',
 					// only if it actually has roaming information
