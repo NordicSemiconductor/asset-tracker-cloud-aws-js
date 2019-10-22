@@ -83,7 +83,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 			sortKey: {
 				name: 'timestamp',
-				type: DynamoDB.AttributeType.NUMBER
+				type: DynamoDB.AttributeType.STRING
 			},
 			pointInTimeRecovery: true,
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
@@ -99,7 +99,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 			sortKey: {
 				name: 'timestamp',
-				type: DynamoDB.AttributeType.NUMBER
+				type: DynamoDB.AttributeType.STRING
 			},
 			projectionType: DynamoDB.ProjectionType.INCLUDE,
 			nonKeyAttributes: [
