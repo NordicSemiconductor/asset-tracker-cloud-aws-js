@@ -410,12 +410,27 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		// Cell Geolocation
 
-		new CellGeolocation(this, 'cellGeolocation', {
+		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			baseLayer,
 			lambdas: lambdas,
 			sourceCodeBucket,
 			enableUnwiredApi,
 		})
+
+		new CloudFormation.CfnOutput(this, 'cellGeoLocationsCacheTable', {
+			value: cellgeo.cacheTable.tableName,
+			exportName: `${this.stackName}:cellGeoLocationsCacheTable`,
+		})
+
+		userRole.addToPolicy(new IAM.PolicyStatement({
+			actions: [
+				'dynamodb:Query'
+			],
+			resources: [
+				cellgeo.cacheTable.tableArn,
+				`${cellgeo.cacheTable.tableArn}/*`
+			]
+		}))
 	}
 }
 

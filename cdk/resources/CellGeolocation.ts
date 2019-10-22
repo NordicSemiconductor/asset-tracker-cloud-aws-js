@@ -15,6 +15,8 @@ import { BifravstLambdas } from '../prepare-resources'
  * Provides the resources for geolocating LTE/NB-IoT network cells
  */
 export class CellGeolocation extends CloudFormation.Resource {
+	public readonly cacheTable: DynamoDB.Table
+
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
@@ -32,7 +34,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		const cacheTable = new DynamoDB.Table(this, 'cache', {
+		this.cacheTable = new DynamoDB.Table(this, 'cache', {
 			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
 			partitionKey: {
 				name: 'cellId',
@@ -63,12 +65,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 							'dynamodb:GetItem',
 						],
 						resources: [
-							cacheTable.tableArn
+							this.cacheTable.tableArn
 						]
 					})
 				],
 				environment: {
-					CACHE_TABLE: cacheTable.tableName,
+					CACHE_TABLE: this.cacheTable.tableName,
 				},
 			},
 		)
@@ -164,12 +166,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 							'dynamodb:PutItem',
 						],
 						resources: [
-							cacheTable.tableArn
+							this.cacheTable.tableArn
 						]
 					})
 				],
 				environment: {
-					CACHE_TABLE: cacheTable.tableName,
+					CACHE_TABLE: this.cacheTable.tableName,
 				},
 			},
 		)
