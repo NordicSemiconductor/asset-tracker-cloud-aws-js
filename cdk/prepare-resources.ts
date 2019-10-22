@@ -75,7 +75,7 @@ export const prepareResources = async ({
 			concatenateRawMessages: path.resolve(
 				rootDir,
 				'historicalData',
-				'concatenateRawMessages.ts',
+				'concatenateRawMessagesLambda.ts',
 			),
 			processBatchMessages: path.resolve(
 				rootDir,
