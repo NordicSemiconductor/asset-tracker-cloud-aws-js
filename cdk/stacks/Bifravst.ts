@@ -335,9 +335,9 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 		)
 
-		lambdaLogGroup(this, 'createThingGroup', createThingGroup)
+		const logGroup = lambdaLogGroup(this, 'createThingGroup', createThingGroup)
 
-		new CustomResource(this, 'ThingGroupResource', {
+		const thingGroupResource = new CustomResource(this, 'ThingGroupResource', {
 			provider: CustomResourceProvider.lambda(createThingGroup),
 			properties: {
 				ThingGroupName,
@@ -347,6 +347,7 @@ export class BifravstStack extends CloudFormation.Stack {
 				PolicyName: iotThingPolicy.ref,
 			},
 		})
+		thingGroupResource.node.addDependency(logGroup)
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {
 			value: ThingGroupName,
