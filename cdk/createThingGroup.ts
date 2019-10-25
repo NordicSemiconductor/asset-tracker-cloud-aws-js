@@ -50,7 +50,7 @@ export const handler = async (
 				const { things } = await iot.listThings({
 				}).promise()
 
-				if (AddExisitingThingsToGroup) {
+				if (AddExisitingThingsToGroup === '1') {
 					// Add exisiting Things to the new group
 					await Promise.all((things || []).map(({ thingName }) => iot.addThingToThingGroup({
 						thingName,
