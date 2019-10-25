@@ -14,7 +14,7 @@ export const handler = async (
 
 	const {
 		RequestType,
-		ResourceProperties: { ThingGroupName, ThingGroupProperties, PolicyName },
+		ResourceProperties: { ThingGroupName, ThingGroupProperties, PolicyName, AddExisitingThingsToGroup },
 	} = event
 
 	let resolve: (result?: unknown) => void
@@ -50,10 +50,13 @@ export const handler = async (
 				const { things } = await iot.listThings({
 				}).promise()
 
-				await Promise.all((things || []).map(({ thingName }) => iot.addThingToThingGroup({
-					thingName,
-					thingGroupArn
-				}).promise()))
+				if (AddExisitingThingsToGroup) {
+					// Add exisiting Things to the new group
+					await Promise.all((things || []).map(({ thingName }) => iot.addThingToThingGroup({
+						thingName,
+						thingGroupArn
+					}).promise()))
+				}
 			})
 			.then(() => {
 				response.send(
