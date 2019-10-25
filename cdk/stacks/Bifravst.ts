@@ -324,7 +324,7 @@ export class BifravstStack extends CloudFormation.Stack {
 				description: 'Used in CloudFormation to create the thing group for the devices',
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_10_X,
-				timeout: CloudFormation.Duration.seconds(15),
+				timeout: CloudFormation.Duration.minutes(1),
 				initialPolicy: [
 					new IAM.PolicyStatement({
 						resources: ['*'],

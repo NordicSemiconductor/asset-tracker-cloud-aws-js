@@ -11,6 +11,7 @@ export const handler = async (
 	console.log(JSON.stringify({
 		event
 	}))
+
 	const {
 		RequestType,
 		ResourceProperties: { ThingGroupName, ThingGroupProperties, PolicyName },
