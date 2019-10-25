@@ -13,7 +13,6 @@ import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import { HistoricalData } from '../resources/HistoricalData'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
-import { lambdaLogGroup } from '../resources/lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
 import { CellGeolocation } from '../resources/CellGeolocation'
@@ -335,9 +334,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 		)
 
-		const logGroup = lambdaLogGroup(this, 'createThingGroup', createThingGroup)
-
-		const thingGroupResource = new CustomResource(this, 'ThingGroupResource', {
+		new CustomResource(this, 'ThingGroupResource', {
 			provider: CustomResourceProvider.lambda(createThingGroup),
 			properties: {
 				ThingGroupName,
@@ -347,7 +344,6 @@ export class BifravstStack extends CloudFormation.Stack {
 				PolicyName: iotThingPolicy.ref,
 			},
 		})
-		thingGroupResource.node.addDependency(logGroup)
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {
 			value: ThingGroupName,
