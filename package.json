@@ -2,6 +2,8 @@
   "name": "@bifravst/aws",
   "version": "0.0.0-development",
   "description": "AWS-based implementation of Bifravst",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
     "test:e2e": "node dist/feature-runner/run-features.js ./features --print-results --progress",
@@ -97,13 +99,18 @@
   },
   "release": {
     "branch": "saga",
-    "remoteTags": true,
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/github"
-    ]
+    "remoteTags": true
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "files": [
+    "package-lock.json",
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "deploy": {
     "branch": "saga",
     "webApp": {
