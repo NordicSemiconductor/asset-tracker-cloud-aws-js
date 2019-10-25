@@ -342,7 +342,7 @@ export class BifravstStack extends CloudFormation.Stack {
 					thingGroupDescription: 'Group created for Bifravst Things',
 				},
 				PolicyName: iotThingPolicy.ref,
-				AddExisitingThingsToGroup: !isTest
+				AddExisitingThingsToGroup: isTest ? 0 : 1
 			},
 		})
 
