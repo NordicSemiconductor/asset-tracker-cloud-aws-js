@@ -8,6 +8,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: eu-central-1
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+  STACK_ID: bifravst-${{ github.sha }}
   CI: 1
 
 jobs:
@@ -33,8 +34,6 @@ jobs:
         run: npm test
       - name: Set up stack for End-to-End tests
         run: |
-          echo -n bifravst-`uuidgen` > .stackId
-          export STACK_ID=`cat .stackId`
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk bootstrap
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
@@ -42,7 +41,6 @@ jobs:
           node cli register-ca
       - name: End-to-End Tests
         run: |
-          export STACK_ID=`cat .stackId`
           npm run test:e2e
       - name: Semantic release
         if: success()
@@ -53,7 +51,6 @@ jobs:
       - name: Clean up End-to-End test resources
         if: always()
         run: |
-          export STACK_ID=`cat .stackId`
           node cli drop-athena-resources
           node cli purge-buckets
           npx cdk -a 'node dist/cdk/cloudformation-test.js' destroy -f '*'
