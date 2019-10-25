@@ -4,16 +4,31 @@ import { Context, CloudFormationCustomResourceEvent } from 'aws-lambda'
 
 const iot = new Iot()
 
-export const handler = (
+export const handler = async (
 	event: CloudFormationCustomResourceEvent,
 	context: Context,
 ) => {
+	console.log(JSON.stringify({
+		event
+	}))
 	const {
 		RequestType,
 		ResourceProperties: { ThingGroupName, ThingGroupProperties, PolicyName },
 	} = event
+
+	let resolve: (result?: unknown) => void
+	let reject: (reason?: any) => void
+	const p = new Promise((onResult, onError) => {
+		resolve = onResult
+		reject = onError
+	})
+	const doneWithPromise = (error?: Error, result?: any) => {
+		context.done(error, result)
+		if (error) reject(error)
+		resolve(result)
+	}
 	if (RequestType === 'Create') {
-		iot
+		await iot
 			.createThingGroup({
 				thingGroupName: ThingGroupName,
 				thingGroupProperties: ThingGroupProperties,
@@ -42,25 +57,41 @@ export const handler = (
 			.then(() => {
 				response.send(
 					event,
-					context,
+					{
+						...context,
+						done: doneWithPromise
+					},
 					response.SUCCESS,
 					{ ThingGroupName },
 					ThingGroupName,
 				)
+				return p
 			})
 			.catch(err => {
-				response.send(event, context, response.FAILED, {
-					Error: `${err.message}  (${err})`,
-				})
+				response.send(
+					event,
+					{
+						...context,
+						done: doneWithPromise
+					},
+					response.FAILED,
+					{
+						Error: `${err.message}  (${err})`,
+					})
+				return p
 			})
 	} else {
 		console.log(`${RequestType} not supported.`)
 		response.send(
 			event,
-			context,
+			{
+				...context,
+				done: doneWithPromise
+			},
 			response.SUCCESS,
 			{ ThingGroupName },
 			ThingGroupName,
 		)
+		return p
 	}
 }
