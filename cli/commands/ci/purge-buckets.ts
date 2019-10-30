@@ -1,6 +1,5 @@
 import { ComandDefinition } from '../CommandDefinition'
 import { stackOutput } from '../../cloudformation/stackOutput'
-import { stackId as sourcecodeStackId } from '../../../cdk/stacks/LambdaSourceCodeStorage'
 import { S3 } from 'aws-sdk'
 
 export const purgeBucketsCommand = ({
@@ -16,16 +15,9 @@ export const purgeBucketsCommand = ({
 			historicalDataQueryResultsBucketName,
 			avatarBucketName,
 			historicalDataBucketName,
-			bucketName,
 		} = {
 			...(await stackOutput({
 				stackId,
-				region,
-			})),
-			...(await stackOutput({
-				stackId: sourcecodeStackId({
-					bifravstStackName: stackId,
-				}),
 				region,
 			})),
 		} as { [key: string]: string }
@@ -33,7 +25,6 @@ export const purgeBucketsCommand = ({
 			historicalDataQueryResultsBucketName,
 			avatarBucketName,
 			historicalDataBucketName,
-			bucketName,
 		]
 		const s3 = new S3({ region })
 		await Promise.all(
