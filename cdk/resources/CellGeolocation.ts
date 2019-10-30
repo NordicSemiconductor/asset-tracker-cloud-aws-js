@@ -324,7 +324,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				description: 'Executes a step function which will geolocate the cell location provided by the device',
 				ruleDisabled: false,
 				sql: [
-					'SELECT current.state.reported.roam.v AS roaming, clientid() as deviceId',
+					'SELECT current.state.reported.roam.v AS roaming, topic(3) as deviceId',
 					`FROM '$aws/things/+/shadow/update/documents'`,
 					'WHERE current.state.reported.roam.v.cell <> NULL',
 					'AND current.state.reported.roam.v.mccmnc <> NULL',
@@ -371,7 +371,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'current.state.reported.roam.v.area) AS cellId,',
 					'current.state.reported.gps.v.lat AS lat,',
 					'current.state.reported.gps.v.lng AS lng,',
-					'concat("device:", clientid()) as source,',
+					'concat("device:", topic(3)) as source,',
 					'parse_time("yyyy-MM-dd\'T\'HH:mm:ss.S\'Z\'", timestamp()) as timestamp',
 					`FROM '$aws/things/+/shadow/update/documents'`,
 					'WHERE',
