@@ -11,6 +11,8 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { lambdaLogGroup as lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 
+export const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
+
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
  */
@@ -90,8 +92,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			pointInTimeRecovery: true,
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
 		})
-
-		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
 
 		deviceCellGeoLocations.addGlobalSecondaryIndex({
 			indexName: LOCATIONS_TABLE_CELLID_INDEX,
