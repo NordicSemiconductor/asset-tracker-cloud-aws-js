@@ -2,7 +2,7 @@ import {
     DynamoDBClient,
     QueryCommand,
 } from '@aws-sdk/client-dynamodb-v2-node';
-import { cellId } from './cellId';
+import { cellId } from '@bifravst/cell-geolocation-helpers';
 import { CelGeoResponse } from './CelGeoResponse';
 import { CelGeoInput } from './CelGeoInput';
 
