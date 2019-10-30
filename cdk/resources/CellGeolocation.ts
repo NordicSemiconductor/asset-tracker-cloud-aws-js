@@ -288,7 +288,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 							actions: ['iot:Publish'],
 							resources: [
 								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
-								`arn:aws:iot:${parent.region}:${parent.account}:topic/celgeo`,
 							],
 						}),
 					],
@@ -331,9 +330,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'AND current.state.reported.roam.v.area <> NULL',
 					// Only trigger if the reported cell changed
 					'AND previous.state.reported.roam.v.cell <> current.state.reported.roam.v.cell',
-					// Only trigger if the current geolocation in the state is not for the new cell
-					// it might not have been updated yet
-					'AND current.state.desired.celgeo.v.cell <> current.state.reported.roam.v.cell'
 				].join(' '),
 				actions: [
 					{
@@ -384,12 +380,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'OR previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng)'
 				].join(' '),
 				actions: [
-					{
-						republish: {
-							roleArn: topicRuleRole.roleArn,
-							topic: 'celgeo',
-						}
-					},
 					{
 						dynamoDBv2: {
 							putItem: {
