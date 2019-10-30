@@ -15,7 +15,7 @@ import { HistoricalData } from '../resources/HistoricalData'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
 import { BifravstLambdas } from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
-import { CellGeolocation, LOCATIONS_TABLE_CELLID_INDEX } from '../resources/CellGeolocation'
+import { CellGeolocation } from '../resources/CellGeolocation'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -418,11 +418,6 @@ export class BifravstStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'cellGeoLocationsCacheTable', {
 			value: cellgeo.cacheTable.tableName,
 			exportName: `${this.stackName}:cellGeoLocationsCacheTable`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'cellGeoLocationsCacheTableCellIdIndex', {
-			value: LOCATIONS_TABLE_CELLID_INDEX,
-			exportName: `${this.stackName}:cellGeoLocationsCacheTableCellIdIndex`,
 		})
 
 		userRole.addToPolicy(new IAM.PolicyStatement({
