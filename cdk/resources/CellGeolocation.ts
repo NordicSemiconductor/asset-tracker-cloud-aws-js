@@ -223,7 +223,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					new StepFunctions.Choice(this, 'Cache found?')
 						.when(
 							isGeolocated,
-							new StepFunctions.Succeed(this, 'Done (using Cache)'),
+							new StepFunctions.Succeed(this, 'Done (already cached)'),
 						)
 						.otherwise(
 							new StepFunctions.Task(this, 'Geolocation using Device Locations', {
@@ -239,7 +239,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 												inputPath: '$.celgeo',
 												resultPath: '$.storedInCache'
 											})
-												.next(new StepFunctions.Succeed(this, 'Done (using Device Locations)'))
+												.next(new StepFunctions.Succeed(this, 'Done (resolved using Device Locations)'))
 
 										)
 										.otherwise(
@@ -262,7 +262,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 																inputPath: '$.celgeo',
 																resultPath: '$.storedInCache'
 															})
-																.next(new StepFunctions.Succeed(this, 'Done (using UnwiredLabs API)'))
+																.next(new StepFunctions.Succeed(this, 'Done (resolved using UnwiredLabs API)'))
 														)
 														.otherwise(
 															new StepFunctions.Fail(this, 'Failed (no resolution)', {
