@@ -18,6 +18,7 @@ export type BifravstLambdas = {
 	geolocateCellFromCache: string
 	geolocateCellFromDeviceLocations: string
 	geolocateCellFromUnwiredLabs: string
+	cacheCellGeolocation: string
 }
 
 export const prepareResources = async ({
@@ -97,6 +98,11 @@ export const prepareResources = async ({
 				'cellGeolocation',
 				'apis',
 				'unwiredlabs.ts',
+			),
+			cacheCellGeolocation: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'updateCache.ts',
 			),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),

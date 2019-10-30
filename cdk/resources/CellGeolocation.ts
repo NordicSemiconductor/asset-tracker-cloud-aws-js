@@ -156,7 +156,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.geolocateCellFromCache,
+					lambdas.lambdaZipFileNames.cacheCellGeolocation,
 				),
 				description: 'Caches cell geolocations',
 				initialPolicy: [

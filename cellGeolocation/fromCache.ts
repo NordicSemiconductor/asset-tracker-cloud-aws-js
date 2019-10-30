@@ -19,7 +19,8 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
                     cellId: {
                         S: id
                     }
-                }
+                },
+                ProjectionExpression: 'lat,lng'
             }),
         );
         if (Item) {
