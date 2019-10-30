@@ -36,7 +36,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		this.cacheTable = new DynamoDB.Table(this, 'cache', {
+		this.cacheTable = new DynamoDB.Table(this, 'cellGeolocationCache', {
 			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
 			partitionKey: {
 				name: 'cellId',

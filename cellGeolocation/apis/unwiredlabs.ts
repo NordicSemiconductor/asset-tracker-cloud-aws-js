@@ -86,9 +86,12 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
                 located: true,
             }
         }
+        return {
+            ...cell,
+            located: false,
+        }
     } catch (err) {
         console.error(JSON.stringify({ error: err }))
-    } finally {
         return {
             ...cell,
             located: false,

@@ -31,6 +31,10 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
                 lng: parseFloat(Item.lng.N as string)
             }
         }
+        return {
+            ...cell,
+            located: false,
+        }
     } catch (err) {
         if (err.name ===
             'ResourceNotFoundException') {
@@ -38,7 +42,6 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
         } else {
             console.error(JSON.stringify({ error: err }))
         }
-    } finally {
         return {
             ...cell,
             located: false,
