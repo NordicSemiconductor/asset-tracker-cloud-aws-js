@@ -422,11 +422,10 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		userRole.addToPolicy(new IAM.PolicyStatement({
 			actions: [
-				'dynamodb:Query'
+				'dynamodb:GetItem'
 			],
 			resources: [
 				cellgeo.cacheTable.tableArn,
-				`${cellgeo.cacheTable.tableArn}/*`
 			]
 		}))
 	}
