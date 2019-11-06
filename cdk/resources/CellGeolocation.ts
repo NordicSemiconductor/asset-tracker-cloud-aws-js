@@ -329,7 +329,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'AND current.state.reported.roam.v.mccmnc <> NULL',
 					'AND current.state.reported.roam.v.area <> NULL',
 					// Only trigger if the reported cell changed
-					'AND previous.state.reported.roam.v.cell <> current.state.reported.roam.v.cell',
+					'AND (',
+					'isUndefined(previous.state.reported.roam.v.cell)',
+					'OR',
+					'previous.state.reported.roam.v.cell <> current.state.reported.roam.v.cell',
+					')',
 				].join(' '),
 				actions: [
 					{
@@ -375,9 +379,19 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'current.state.reported.roam.v.area <> NULL',
 					'AND current.state.reported.roam.v.mccmnc <> NULL',
 					'AND current.state.reported.roam.v.cell <> NULL',
+					// and if it has GPS location
+					'AND current.state.reported.gps.v.lat <> NULL',
+					'AND current.state.reported.gps.v.lng <> NULL',
 					// only if the location has changed
-					'AND (previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
-					'OR previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng)'
+					'AND (',
+					'isUndefined(previous.state.reported.gps.v.lat)',
+					'OR',
+					'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
+					'OR',
+					'isUndefined(previous.state.reported.gps.v.lng)',
+					'OR',
+					'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
+					')'
 				].join(' '),
 				actions: [
 					{

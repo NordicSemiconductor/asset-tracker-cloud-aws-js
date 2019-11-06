@@ -5,4 +5,4 @@ Feature: Connect a Cat Tracker
   Scenario: Generate a certificate and connect
 
     When I generate a certificate
-    And I connect the cat tracker
+    Then I connect the cat tracker

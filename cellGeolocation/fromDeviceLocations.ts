@@ -11,6 +11,9 @@ const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''
 const dynamodb = new DynamoDBClient({})
 
 export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoResponse> => {
+    console.log({
+        cell
+    })
     const { Items } = await dynamodb.send(
         new QueryCommand({
             TableName,

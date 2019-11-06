@@ -451,4 +451,5 @@ export type StackOutputs = {
 	fotaBucketName: string
 	historicalDataBucketName: string
 	historicalDataQueryResultsBucketName: string
+	cellGeoLocationsCacheTable: string
 }

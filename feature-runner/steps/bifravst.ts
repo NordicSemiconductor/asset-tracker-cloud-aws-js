@@ -1,7 +1,6 @@
 import {
 	regexGroupMatcher,
 	regexMatcher,
-	FeatureRunner,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
@@ -10,14 +9,6 @@ import * as path from 'path'
 import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
-
-const terminateConnection = (runner: FeatureRunner<any>, catId: string) => {
-	const connection = runner.store[`cat:connection:${catId}`]
-	runner.store[`cat:connection:${catId}`] = undefined
-	if (connection) {
-		connection.end()
-	}
-}
 
 const connect = (mqttEndpoint: string) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
@@ -34,12 +25,28 @@ const connect = (mqttEndpoint: string) => (clientId: string) => {
 	})
 }
 
+const shadow = (mqttEndpoint: string) => (clientId: string) => {
+	const deviceFiles = deviceFileLocations({
+		certsDir: path.resolve(process.cwd(), 'certificates'),
+		deviceId: clientId,
+	})
+	return new thingShadow({
+		privateKey: deviceFiles.key,
+		clientCert: deviceFiles.certWithCA,
+		caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+		clientId,
+		host: mqttEndpoint,
+		region: mqttEndpoint.split('.')[2],
+	})
+}
+
 export const bifravstStepRunners = ({
 	mqttEndpoint,
 }: {
 	mqttEndpoint: string
 }) => {
 	const connectToBroker = connect(mqttEndpoint)
+	const shadowOnBroker = shadow(mqttEndpoint)
 	return [
 		regexMatcher<BifravstWorld>(/^(?:a cat exists|I generate a certificate)$/)(
 			async (_, __, runner) => {
@@ -70,40 +77,39 @@ export const bifravstStepRunners = ({
 			},
 		),
 		regexMatcher<BifravstWorld>(
-			/^(?:I connect the cat tracker(?: ([^ ]+))?|the cat tracker(?: ([^ ]+))? is connected)$/,
-		)(async ([deviceId1, deviceId2], __, runner) => {
-			const catId = deviceId1 || deviceId2 || runner.store['cat:id']
+			/^I connect the cat tracker(?: ([^ ]+))?$/,
+		)(async ([deviceId], __, runner) => {
+			const catId = deviceId || runner.store['cat:id']
 			await runner.progress('IoT', catId)
-			if (!runner.store[`cat:connection:${catId}`]) {
-				const deviceFiles = deviceFileLocations({
-					certsDir: path.resolve(process.cwd(), 'certificates'),
-					deviceId: catId,
-				})
-				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
+			const deviceFiles = deviceFileLocations({
+				certsDir: path.resolve(process.cwd(), 'certificates'),
+				deviceId: catId,
+			})
+			await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
 
-				return new Promise((resolve, reject) => {
-					const timeout = setTimeout(reject, 60 * 1000)
-					const connection = new thingShadow({
-						privateKey: deviceFiles.key,
-						clientCert: deviceFiles.certWithCA,
-						caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-						clientId: catId,
-						host: mqttEndpoint,
-						region: mqttEndpoint.split('.')[2],
-					})
-
-					connection.on('connect', () => {
-						// eslint-disable-next-line require-atomic-updates
-						runner.store[`cat:connection:${catId}`] = connection
-						clearTimeout(timeout)
-						resolve([catId, mqttEndpoint])
-					})
-					connection.on('error', () => {
-						clearTimeout(timeout)
-						reject()
-					})
+			return new Promise((resolve, reject) => {
+				const timeout = setTimeout(reject, 60 * 1000)
+				const connection = new thingShadow({
+					privateKey: deviceFiles.key,
+					clientCert: deviceFiles.certWithCA,
+					caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+					clientId: catId,
+					host: mqttEndpoint,
+					region: mqttEndpoint.split('.')[2],
 				})
-			}
+
+				connection.on('connect', () => {
+					// eslint-disable-next-line require-atomic-updates
+					clearTimeout(timeout)
+					resolve([catId, mqttEndpoint])
+					connection.end()
+				})
+				connection.on('error', () => {
+					clearTimeout(timeout)
+					reject()
+					connection.end()
+				})
+			})
 		}),
 		regexMatcher<BifravstWorld>(
 			/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
@@ -113,7 +119,7 @@ export const bifravstStepRunners = ({
 			}
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId || runner.store['cat:id']
-			const connection = runner.store[`cat:connection:${catId}`]
+			const connection = shadowOnBroker(catId)
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
 				connection.on(
@@ -129,12 +135,15 @@ export const bifravstStepRunners = ({
 						if (stat === 'accepted') {
 							clearTimeout(timeout)
 							resolve(stateObject)
+							connection.end()
 						}
 					},
 				)
 				connection.on('error', (err: any) => {
+					console.error(err)
 					clearTimeout(timeout)
 					reject(err)
+					connection.end()
 				})
 				connection.register(catId, {}, async () => {
 					await runner.progress('IoT > reported', catId)
@@ -152,7 +161,7 @@ export const bifravstStepRunners = ({
 				throw new Error('Must provide argument!')
 			}
 			const message = JSON.parse(step.interpolatedArgument)
-			const connection = runner.store[`cat:connection:${catId}`]
+			const connection = connectToBroker(catId)
 			const publishPromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
 				connection.on('error', (err: any) => {
@@ -178,7 +187,6 @@ export const bifravstStepRunners = ({
 			/^the cat tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId || runner.store['cat:id']
-			terminateConnection(runner, catId)
 
 			return new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 60 * 1000)
@@ -215,14 +223,17 @@ export const bifravstStepRunners = ({
 							// eslint-disable-next-line require-atomic-updates
 							runner.store[storeName] = execution
 							resolve(execution)
+							connection.end()
 						} else {
 							reject(new Error(`Did not receive a next job!`))
+							connection.end()
 						}
 					})
 				})
 				connection.on('error', error => {
 					clearTimeout(timeout)
 					reject(error)
+					connection.end()
 				})
 			})
 		}),
@@ -232,7 +243,6 @@ export const bifravstStepRunners = ({
 			const catId = deviceId || runner.store['cat:id']
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
-			terminateConnection(runner, catId)
 
 			return new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 60 * 1000)
@@ -268,6 +278,7 @@ export const bifravstStepRunners = ({
 				connection.on('error', error => {
 					clearTimeout(timeout)
 					reject(error)
+					connection.end()
 				})
 			})
 		}),
