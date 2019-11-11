@@ -55,7 +55,7 @@
     "@aws-cdk/aws-stepfunctions-tasks": "^1.15.0",
     "@aws-cdk/core": "^1.15.0",
     "@bifravst/code-style": "^5.0.1",
-    "@bifravst/package-layered-lambdas": "^2.1.1",
+    "@bifravst/package-layered-lambdas": "^2.1.2",
     "@coderbyheart/bdd-feature-runner-aws": "^9.0.2",
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-angular": "^8.2.0",
