@@ -7,7 +7,7 @@ import {
 	storageStepRunners,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import * as program from 'commander'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { bifravstStepRunners } from './steps/bifravst'
 import {

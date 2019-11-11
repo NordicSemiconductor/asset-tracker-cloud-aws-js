@@ -1,6 +1,6 @@
 import { CodePipeline, SSM } from 'aws-sdk'
 import { ComandDefinition } from './CommandDefinition'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 
 export const cdUpdateTokenCommand = ({
 	region,
@@ -57,7 +57,7 @@ export const cdUpdateTokenCommand = ({
 												configuration: {
 													...action.configuration,
 													...(action.configuration &&
-													action.configuration.OAuthToken
+														action.configuration.OAuthToken
 														? { OAuthToken: token }
 														: {}),
 												},

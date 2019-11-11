@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs'
 import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { uiServer, WebSocketConnection } from '@bifravst/device-ui-server'
 
 const defaultConfig = {

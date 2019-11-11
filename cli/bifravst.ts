@@ -1,5 +1,5 @@
 import * as program from 'commander'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { Iot } from 'aws-sdk'
 import { stackOutput } from './cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'

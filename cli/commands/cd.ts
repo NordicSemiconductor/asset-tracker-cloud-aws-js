@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { CodePipeline } from 'aws-sdk'
 import { formatDistanceToNow } from 'date-fns'
 import { ComandDefinition } from './CommandDefinition'

@@ -8,7 +8,7 @@ import {
 	WebpackMode,
 } from '@bifravst/package-layered-lambdas'
 import { supportedRegions } from './regions'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { getIotEndpoint } from './helper/getIotEndpoint'
 
 export type BifravstLambdas = {

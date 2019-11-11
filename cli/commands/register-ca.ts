@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { ComandDefinition } from './CommandDefinition'
 import { registerCA } from '../jitp/registerCA'
 

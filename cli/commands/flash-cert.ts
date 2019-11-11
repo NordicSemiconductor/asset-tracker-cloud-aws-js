@@ -1,6 +1,6 @@
 import { ComandDefinition } from './CommandDefinition'
 import { ModemPort } from 'modemtalk'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
 import * as path from 'path'

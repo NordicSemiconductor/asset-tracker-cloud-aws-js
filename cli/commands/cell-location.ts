@@ -9,7 +9,7 @@ import {
 	DocumentsTableName,
 	WorkGroupName,
 } from '../../historicalData/settings'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import * as backoff from 'backoff'
 
 export const cellLocation = ({
