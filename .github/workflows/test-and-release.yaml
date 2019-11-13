@@ -10,6 +10,7 @@ env:
   AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
   STACK_ID: bifravst-${{ github.sha }}
   CI: 1
+  FORCE_COLOR: 3
 
 jobs:
   tests:

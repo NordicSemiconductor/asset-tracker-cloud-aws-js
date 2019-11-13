@@ -88,6 +88,7 @@ program
 					new ConsoleReporter({
 						printResults,
 						printProgress: progress,
+						printProgressTimestamps: true,
 					}),
 				],
 				retry,
