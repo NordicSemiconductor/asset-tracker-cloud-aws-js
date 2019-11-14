@@ -49,7 +49,7 @@ export const generateCertCommand = ({
 						path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 						'utf-8',
 					),
-					clientCert: certificate.certWithCA,
+					clientCert: await fs.readFile(certificate.certWithCA, 'utf-8'),
 					privateKey: await fs.readFile(certificate.key, 'utf-8'),
 					clientId: deviceId,
 					brokerHostname: endpoint,
