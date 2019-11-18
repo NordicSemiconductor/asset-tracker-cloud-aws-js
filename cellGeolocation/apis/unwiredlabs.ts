@@ -17,6 +17,12 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
             throw new Error('No API key configured!')
         }
 
+        const { hostname, path } = parse(endpoint);
+
+        if (!hostname) {
+            throw new Error(`No hostname found in "${endpoint}"!`)
+        }
+
         // See https://eu1.unwiredlabs.com/docs-html/index.html#response
         const { status, lat, lon }: {
             status: 'ok' | 'error',
@@ -31,8 +37,6 @@ export const handler = async ({ roaming: cell }: CelGeoInput): Promise<CelGeoRes
             // address: string (not requested)
             // address_details?: string (not requested)
         } = await new Promise((resolve, reject) => {
-            const { hostname, path } = parse(endpoint);
-
             const options = {
                 host: hostname,
                 path: `${path ? path.replace(/\/*$/, '') : ''}/v2/process.php`,
