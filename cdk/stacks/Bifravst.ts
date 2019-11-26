@@ -50,7 +50,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		const baseLayer = new Lambda.LayerVersion(this, `${id}-layer`, {
 			code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
 			compatibleRuntimes: [
-				Lambda.Runtime.NODEJS_10_X,
+				Lambda.Runtime.NODEJS_12_X,
 			],
 		})
 
@@ -322,7 +322,7 @@ export class BifravstStack extends CloudFormation.Stack {
 				layers: [baseLayer],
 				description: 'Used in CloudFormation to create the thing group for the devices',
 				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_10_X,
+				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				initialPolicy: [
 					new IAM.PolicyStatement({

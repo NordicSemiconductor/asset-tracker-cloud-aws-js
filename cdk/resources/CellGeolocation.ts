@@ -50,7 +50,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			{
 				layers: [baseLayer],
 				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_10_X,
+				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
@@ -116,7 +116,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			{
 				layers: [baseLayer],
 				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_10_X,
+				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
@@ -151,7 +151,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			{
 				layers: [baseLayer],
 				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_10_X,
+				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
 				code: Lambda.Code.bucket(
@@ -187,7 +187,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				{
 					layers: [baseLayer],
 					handler: 'index.handler',
-					runtime: Lambda.Runtime.NODEJS_10_X,
+					runtime: Lambda.Runtime.NODEJS_12_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
 					code: Lambda.Code.bucket(
