@@ -25,11 +25,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 			baseLayer,
 			lambdas,
 			enableUnwiredApi,
+			isTest
 		}: {
 			sourceCodeBucket: S3.IBucket
 			baseLayer: Lambda.ILayerVersion
 			lambdas: LayeredLambdas<BifravstLambdas>
 			enableUnwiredApi: boolean
+			isTest: boolean
 		},
 	) {
 		super(parent, id)
@@ -41,7 +43,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				type: DynamoDB.AttributeType.STRING,
 			},
 			pointInTimeRecovery: true,
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: isTest ? CloudFormation.RemovalPolicy.DESTROY : CloudFormation.RemovalPolicy.RETAIN,
 		})
 
 		const geolocateCellFromCache = new Lambda.Function(
@@ -88,7 +90,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				type: DynamoDB.AttributeType.STRING
 			},
 			pointInTimeRecovery: true,
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: isTest ? CloudFormation.RemovalPolicy.DESTROY : CloudFormation.RemovalPolicy.RETAIN,
 		})
 
 		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'

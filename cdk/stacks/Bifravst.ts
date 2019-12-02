@@ -413,6 +413,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			lambdas: lambdas,
 			sourceCodeBucket,
 			enableUnwiredApi,
+			isTest
 		})
 
 		new CloudFormation.CfnOutput(this, 'cellGeoLocationsCacheTable', {
