@@ -6,7 +6,9 @@ import { getApiSettings } from '../cellGeolocation/apis/getApiSettings'
 const STACK_ID = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || ''
 
-const fetchCellLocationApiSettings = getApiSettings({ ssm: new SSM({ region }) })
+const fetchCellLocationApiSettings = getApiSettings({
+	ssm: new SSM({ region }),
+})
 
 Promise.all([
 	prepareResources({
@@ -14,12 +16,14 @@ Promise.all([
 		region,
 		rootDir: process.cwd(),
 	}),
-	fetchCellLocationApiSettings({ api: 'unwiredlabs' })
+	fetchCellLocationApiSettings({ api: 'unwiredlabs' }),
 ])
-	.then(([args, { apiKey }]) => new BifravstApp({
-		...args,
-		enableUnwiredApi: !!apiKey
-	}).synth())
+	.then(([args, { apiKey }]) =>
+		new BifravstApp({
+			...args,
+			enableUnwiredApi: !!apiKey,
+		}).synth(),
+	)
 	.catch(err => {
 		console.error(err)
 		process.exit(1)

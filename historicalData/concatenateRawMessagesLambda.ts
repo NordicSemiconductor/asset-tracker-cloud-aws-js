@@ -1,8 +1,8 @@
-import { S3 } from 'aws-sdk';
+import { S3 } from 'aws-sdk'
 
-import { collectFiles } from './collectFiles';
-import { concatenateFiles } from './concatenateFiles';
-import { concatenateRawMessages } from './concatenateRawMessages';
+import { collectFiles } from './collectFiles'
+import { concatenateFiles } from './concatenateFiles'
+import { concatenateRawMessages } from './concatenateRawMessages'
 
 const s3 = new S3()
 const Bucket = process.env.HISTORICAL_DATA_BUCKET || ''
@@ -17,12 +17,12 @@ const handler = async () => {
 	await concatenateRawMessages({
 		collectFilesInBucket,
 		concatenateFilesInBucket,
-		documentType: "documents"
+		documentType: 'documents',
 	})
 	await concatenateRawMessages({
 		collectFilesInBucket,
 		concatenateFilesInBucket,
-		documentType: "updates"
+		documentType: 'updates',
 	})
 }
 

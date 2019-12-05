@@ -56,7 +56,9 @@ export const historicalDataCommand = ({
 		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
 		const dbName = DataBaseName({ bifravstStackName: stackId })
 		const updatesTableName = UpdatesTableName({ bifravstStackName: stackId })
-		const documentsTableName = DocumentsTableName({ bifravstStackName: stackId })
+		const documentsTableName = DocumentsTableName({
+			bifravstStackName: stackId,
+		})
 
 		if (
 			!WorkGroups ||
@@ -150,7 +152,15 @@ export const historicalDataCommand = ({
 			await query({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
 		}
 
-		const checkTable = async ({ tableName, setup, s3Location }: { s3Location: string, tableName: string, setup: boolean }) => {
+		const checkTable = async ({
+			tableName,
+			setup,
+			s3Location,
+		}: {
+			s3Location: string
+			tableName: string
+			setup: boolean
+		}) => {
 			try {
 				await query({
 					QueryString: `DESCRIBE ${dbName}.${tableName}`,
@@ -189,13 +199,13 @@ export const historicalDataCommand = ({
 		await checkTable({
 			tableName: updatesTableName,
 			setup,
-			s3Location: `s3://${DataBucketName}/updates/`
+			s3Location: `s3://${DataBucketName}/updates/`,
 		})
 
 		await checkTable({
 			tableName: documentsTableName,
 			setup,
-			s3Location: `s3://${DataBucketName}/documents/`
+			s3Location: `s3://${DataBucketName}/documents/`,
 		})
 
 		console.log(

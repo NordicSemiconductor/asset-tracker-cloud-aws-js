@@ -22,7 +22,9 @@ export const dropAthenaResourcesCommand = ({
 		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
 		const dbName = DataBaseName({ bifravstStackName: stackId })
 		const updatesTableName = UpdatesTableName({ bifravstStackName: stackId })
-		const documentsTableName = DocumentsTableName({ bifravstStackName: stackId })
+		const documentsTableName = DocumentsTableName({
+			bifravstStackName: stackId,
+		})
 
 		const query = athenaQuery({
 			athena,

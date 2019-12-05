@@ -74,10 +74,12 @@ export const generateDeviceCertificate = async ({
 		log: debug,
 	})
 
-	const certWithCa = (await Promise.all([
-		fs.readFile(deviceFiles.cert),
-		fs.readFile(caFiles.cert),
-	])).join(os.EOL)
+	const certWithCa = (
+		await Promise.all([
+			fs.readFile(deviceFiles.cert),
+			fs.readFile(caFiles.cert),
+		])
+	).join(os.EOL)
 
 	await fs.writeFile(deviceFiles.certWithCA, certWithCa, 'utf-8')
 

@@ -90,7 +90,8 @@
     "*.{md,json,yaml,yml}": [
       "prettier --write",
       "git add"
-    ]
+    ],
+    "*.{ts,tsx}": ["prettier --write", "eslint --ext .js,.ts", "git add"]
   },
   "engines": {
     "node": ">=12.0.0",

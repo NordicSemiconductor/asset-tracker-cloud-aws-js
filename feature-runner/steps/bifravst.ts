@@ -76,41 +76,41 @@ export const bifravstStepRunners = ({
 				return runner.store['cat:id']
 			},
 		),
-		regexMatcher<BifravstWorld>(
-			/^I connect the cat tracker(?: ([^ ]+))?$/,
-		)(async ([deviceId], __, runner) => {
-			const catId = deviceId || runner.store['cat:id']
-			await runner.progress('IoT', catId)
-			const deviceFiles = deviceFileLocations({
-				certsDir: path.resolve(process.cwd(), 'certificates'),
-				deviceId: catId,
-			})
-			await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
+		regexMatcher<BifravstWorld>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
+			async ([deviceId], __, runner) => {
+				const catId = deviceId || runner.store['cat:id']
+				await runner.progress('IoT', catId)
+				const deviceFiles = deviceFileLocations({
+					certsDir: path.resolve(process.cwd(), 'certificates'),
+					deviceId: catId,
+				})
+				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
 
-			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(reject, 60 * 1000)
-				const connection = new thingShadow({
-					privateKey: deviceFiles.key,
-					clientCert: deviceFiles.certWithCA,
-					caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-					clientId: catId,
-					host: mqttEndpoint,
-					region: mqttEndpoint.split('.')[2],
-				})
+				return new Promise((resolve, reject) => {
+					const timeout = setTimeout(reject, 60 * 1000)
+					const connection = new thingShadow({
+						privateKey: deviceFiles.key,
+						clientCert: deviceFiles.certWithCA,
+						caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+						clientId: catId,
+						host: mqttEndpoint,
+						region: mqttEndpoint.split('.')[2],
+					})
 
-				connection.on('connect', () => {
-					// eslint-disable-next-line require-atomic-updates
-					clearTimeout(timeout)
-					resolve([catId, mqttEndpoint])
-					connection.end()
+					connection.on('connect', () => {
+						// eslint-disable-next-line require-atomic-updates
+						clearTimeout(timeout)
+						resolve([catId, mqttEndpoint])
+						connection.end()
+					})
+					connection.on('error', () => {
+						clearTimeout(timeout)
+						reject()
+						connection.end()
+					})
 				})
-				connection.on('error', () => {
-					clearTimeout(timeout)
-					reject()
-					connection.end()
-				})
-			})
-		}),
+			},
+		),
 		regexMatcher<BifravstWorld>(
 			/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
 		)(async ([deviceId], step, runner) => {

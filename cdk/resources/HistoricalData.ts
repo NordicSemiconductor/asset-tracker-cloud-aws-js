@@ -10,6 +10,76 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 
+export const permissions = ({
+	historicalData,
+}: {
+	historicalData: HistoricalData
+}): IAM.PolicyStatement[] => {
+	const dataBucket = historicalData.dataBucket
+	const queryResultsBucket = historicalData.queryResultsBucket
+
+	return [
+		new IAM.PolicyStatement({
+			resources: ['*'],
+			actions: [
+				'athena:startQueryExecution',
+				'athena:stopQueryExecution',
+				'athena:getQueryExecution',
+				'athena:getQueryResults',
+				'glue:GetTable',
+				'glue:GetDatabase',
+			],
+		}),
+		// Users need to read from data bucket
+		new IAM.PolicyStatement({
+			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+			],
+		}),
+
+		new IAM.PolicyStatement({
+			resources: [
+				queryResultsBucket.bucketArn,
+				`${queryResultsBucket.bucketArn}/*`,
+			],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+				's3:AbortMultipartUpload',
+				's3:PutObject',
+			],
+		}),
+		new IAM.PolicyStatement({
+			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
+			actions: ['s3:GetBucketLocation', 's3:GetObject', 's3:ListBucket'],
+		}),
+		// Users need to be able to write to the results bucket
+		new IAM.PolicyStatement({
+			resources: [
+				queryResultsBucket.bucketArn,
+				`${queryResultsBucket.bucketArn}/*`,
+			],
+			actions: [
+				's3:GetBucketLocation',
+				's3:GetObject',
+				's3:ListBucket',
+				's3:ListBucketMultipartUploads',
+				's3:ListMultipartUploadParts',
+				's3:AbortMultipartUpload',
+				's3:PutObject',
+			],
+		}),
+	]
+}
+
 /**
  * Provides resources for historical data
  */
@@ -78,7 +148,7 @@ export class HistoricalData extends CloudFormation.Resource {
 						s3: {
 							bucketName: this.dataBucket.bucketName,
 							key:
-								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${regexp_replace(clientid(), "\/", "")}-${newuuid()}.json',
+								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${regexp_replace(clientid(), "/", "")}-${newuuid()}.json',
 							roleArn: topicRuleRole.roleArn,
 						},
 					},
@@ -111,7 +181,10 @@ export class HistoricalData extends CloudFormation.Resource {
 				initialPolicy: [
 					logToCloudWatch,
 					new IAM.PolicyStatement({
-						resources: [this.dataBucket.bucketArn, `${this.dataBucket.bucketArn}/*`],
+						resources: [
+							this.dataBucket.bucketArn,
+							`${this.dataBucket.bucketArn}/*`,
+						],
 						actions: [
 							's3:ListBucket',
 							's3:GetObject',
@@ -123,7 +196,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				environment: {
 					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
 				},
-				reservedConcurrentExecutions: 1
+				reservedConcurrentExecutions: 1,
 			},
 		)
 
@@ -156,13 +229,10 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		)
 
-		processBatchMessages.addPermission(
-			'processBatchMessagesInvokeByIot',
-			{
-				principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
-				sourceArn: processBatchMessagesRule.attrArn,
-			},
-		)
+		processBatchMessages.addPermission('processBatchMessagesInvokeByIot', {
+			principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
+			sourceArn: processBatchMessagesRule.attrArn,
+		})
 
 		// Concatenate the log files
 
@@ -184,7 +254,10 @@ export class HistoricalData extends CloudFormation.Resource {
 				initialPolicy: [
 					logToCloudWatch,
 					new IAM.PolicyStatement({
-						resources: [this.dataBucket.bucketArn, `${this.dataBucket.bucketArn}/*`],
+						resources: [
+							this.dataBucket.bucketArn,
+							`${this.dataBucket.bucketArn}/*`,
+						],
 						actions: [
 							's3:ListBucket',
 							's3:GetObject',
@@ -206,9 +279,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			description:
 				'Invoke the lambda which concatenates the raw device messages',
 			enabled: true,
-			targets: [
-				new EventTargets.LambdaFunction(concatenateRawMessages),
-			],
+			targets: [new EventTargets.LambdaFunction(concatenateRawMessages)],
 		})
 
 		concatenateRawMessages.addPermission('InvokeByEvents', {
@@ -217,72 +288,8 @@ export class HistoricalData extends CloudFormation.Resource {
 		})
 
 		// User permissions
-		permissions({ historicalData: this }).forEach(policy => userRole.addToPolicy(policy))
+		permissions({ historicalData: this }).forEach(policy =>
+			userRole.addToPolicy(policy),
+		)
 	}
-}
-
-export const permissions = ({ historicalData }: { historicalData: HistoricalData }): IAM.PolicyStatement[] => {
-	const dataBucket = historicalData.dataBucket
-	const queryResultsBucket = historicalData.queryResultsBucket
-
-	return [
-		new IAM.PolicyStatement({
-			resources: ['*'],
-			actions: [
-				'athena:startQueryExecution',
-				'athena:stopQueryExecution',
-				'athena:getQueryExecution',
-				'athena:getQueryResults',
-				'glue:GetTable',
-				'glue:GetDatabase',
-			],
-		}),
-		// Users need to read from data bucket
-		new IAM.PolicyStatement({
-			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-			],
-		}),
-
-		new IAM.PolicyStatement({
-			resources: [
-				queryResultsBucket.bucketArn,
-				`${queryResultsBucket.bucketArn}/*`,
-			],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-				's3:AbortMultipartUpload',
-				's3:PutObject',
-			],
-		}),
-		new IAM.PolicyStatement({
-			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
-			actions: ['s3:GetBucketLocation', 's3:GetObject', 's3:ListBucket'],
-		}),
-		// Users need to be able to write to the results bucket
-		new IAM.PolicyStatement({
-			resources: [
-				queryResultsBucket.bucketArn,
-				`${queryResultsBucket.bucketArn}/*`,
-			],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-				's3:AbortMultipartUpload',
-				's3:PutObject',
-			],
-		})
-	]
 }

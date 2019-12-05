@@ -49,9 +49,7 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const baseLayer = new Lambda.LayerVersion(this, `${id}-layer`, {
 			code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
-			compatibleRuntimes: [
-				Lambda.Runtime.NODEJS_12_X,
-			],
+			compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
 		})
 
 		new CloudFormation.CfnOutput(this, 'mqttEndpoint', {
@@ -311,28 +309,30 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const ThingGroupName = id
 
-		const createThingGroup = new Lambda.Function(
-			this,
-			'createThingGroup',
-			{
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.createThingGroup,
-				),
-				layers: [baseLayer],
-				description: 'Used in CloudFormation to create the thing group for the devices',
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.minutes(1),
-				initialPolicy: [
-					new IAM.PolicyStatement({
-						resources: ['*'],
-						actions: ['iot:createThingGroup', 'iot:attachPolicy', 'iot:ListThings', 'iot:AddThingToThingGroup'],
-					}),
-					logToCloudWatch,
-				],
-			},
-		)
+		const createThingGroup = new Lambda.Function(this, 'createThingGroup', {
+			code: Lambda.Code.bucket(
+				sourceCodeBucket,
+				lambdas.lambdaZipFileNames.createThingGroup,
+			),
+			layers: [baseLayer],
+			description:
+				'Used in CloudFormation to create the thing group for the devices',
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.minutes(1),
+			initialPolicy: [
+				new IAM.PolicyStatement({
+					resources: ['*'],
+					actions: [
+						'iot:createThingGroup',
+						'iot:attachPolicy',
+						'iot:ListThings',
+						'iot:AddThingToThingGroup',
+					],
+				}),
+				logToCloudWatch,
+			],
+		})
 
 		new CustomResource(this, 'ThingGroupResource', {
 			provider: CustomResourceProvider.lambda(createThingGroup),
@@ -342,7 +342,7 @@ export class BifravstStack extends CloudFormation.Stack {
 					thingGroupDescription: 'Group created for Bifravst Things',
 				},
 				PolicyName: iotThingPolicy.ref,
-				AddExisitingThingsToGroup: isTest ? 0 : 1
+				AddExisitingThingsToGroup: isTest ? 0 : 1,
 			},
 		})
 
@@ -413,7 +413,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			lambdas: lambdas,
 			sourceCodeBucket,
 			enableUnwiredApi,
-			isTest
+			isTest,
 		})
 
 		new CloudFormation.CfnOutput(this, 'cellGeoLocationsCacheTable', {
@@ -421,14 +421,12 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:cellGeoLocationsCacheTable`,
 		})
 
-		userRole.addToPolicy(new IAM.PolicyStatement({
-			actions: [
-				'dynamodb:GetItem'
-			],
-			resources: [
-				cellgeo.cacheTable.tableArn,
-			]
-		}))
+		userRole.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: ['dynamodb:GetItem'],
+				resources: [cellgeo.cacheTable.tableArn],
+			}),
+		)
 	}
 }
 

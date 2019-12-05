@@ -1,14 +1,18 @@
-import * as dateFns from 'date-fns';
-import * as path from 'path';
+import * as dateFns from 'date-fns'
+import * as path from 'path'
 
-import { CollectFilesFn } from './collectFiles';
-import { ConcatenateFilesFn } from './concatenateFiles';
+import { CollectFilesFn } from './collectFiles'
+import { ConcatenateFilesFn } from './concatenateFiles'
 
 const dateRx = new RegExp(/^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})/)
 
-export const concatenateRawMessages = async ({ concatenateFilesInBucket, collectFilesInBucket, documentType }: {
-	concatenateFilesInBucket: ConcatenateFilesFn,
-	collectFilesInBucket: CollectFilesFn,
+export const concatenateRawMessages = async ({
+	concatenateFilesInBucket,
+	collectFilesInBucket,
+	documentType,
+}: {
+	concatenateFilesInBucket: ConcatenateFilesFn
+	collectFilesInBucket: CollectFilesFn
 	documentType: 'updates' | 'documents'
 }) => {
 	// Concatenate hours

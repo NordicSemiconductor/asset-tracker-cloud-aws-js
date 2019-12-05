@@ -8,13 +8,20 @@ export const handler = async (
 	event: CloudFormationCustomResourceEvent,
 	context: Context,
 ) => {
-	console.log(JSON.stringify({
-		event
-	}))
+	console.log(
+		JSON.stringify({
+			event,
+		}),
+	)
 
 	const {
 		RequestType,
-		ResourceProperties: { ThingGroupName, ThingGroupProperties, PolicyName, AddExisitingThingsToGroup },
+		ResourceProperties: {
+			ThingGroupName,
+			ThingGroupProperties,
+			PolicyName,
+			AddExisitingThingsToGroup,
+		},
 	} = event
 
 	let resolve: (result?: unknown) => void
@@ -47,23 +54,28 @@ export const handler = async (
 					.promise()
 
 				// Attach all existing Things to the group
-				const { things } = await iot.listThings({
-				}).promise()
+				const { things } = await iot.listThings({}).promise()
 
 				if (AddExisitingThingsToGroup === '1') {
 					// Add exisiting Things to the new group
-					await Promise.all((things || []).map(({ thingName }) => iot.addThingToThingGroup({
-						thingName,
-						thingGroupArn
-					}).promise()))
+					await Promise.all(
+						(things || []).map(async ({ thingName }) =>
+							iot
+								.addThingToThingGroup({
+									thingName,
+									thingGroupArn,
+								})
+								.promise(),
+						),
+					)
 				}
 			})
-			.then(() => {
+			.then(async () => {
 				response.send(
 					event,
 					{
 						...context,
-						done: doneWithPromise
+						done: doneWithPromise,
 					},
 					response.SUCCESS,
 					{ ThingGroupName },
@@ -71,17 +83,18 @@ export const handler = async (
 				)
 				return p
 			})
-			.catch(err => {
+			.catch(async err => {
 				response.send(
 					event,
 					{
 						...context,
-						done: doneWithPromise
+						done: doneWithPromise,
 					},
 					response.FAILED,
 					{
 						Error: `${err.message}  (${err})`,
-					})
+					},
+				)
 				return p
 			})
 	} else {
@@ -90,7 +103,7 @@ export const handler = async (
 			event,
 			{
 				...context,
-				done: doneWithPromise
+				done: doneWithPromise,
 			},
 			response.SUCCESS,
 			{ ThingGroupName },

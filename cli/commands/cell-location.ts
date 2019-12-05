@@ -1,8 +1,5 @@
 import { ComandDefinition } from './CommandDefinition'
-import {
-	athenaQuery,
-	parseAthenaResult,
-} from '@bifravst/athena-helpers'
+import { athenaQuery, parseAthenaResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
@@ -41,9 +38,9 @@ export const cellLocation = ({
 					randomisationFactor: 0,
 					initialDelay: 1000,
 					maxDelay: 5000,
-				});
-				b.failAfter(100);
-				return b;
+				})
+				b.failAfter(100)
+				return b
 			})(),
 			debugLog: (...args: any) => {
 				if (debug) {
@@ -71,11 +68,10 @@ export const cellLocation = ({
 				AND reported.gps.v.lat IS NOT NULL 
 				AND reported.gps.v.lng IS NOT NULL`,
 			}),
-			skip: 1
+			skip: 1,
 		})
 
 		console.log(cellLocations)
-
 	},
 	help: 'Resolve the geolocation of a cell',
 })
