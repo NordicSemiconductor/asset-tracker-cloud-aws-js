@@ -31,7 +31,7 @@
     "@bifravst/device-ui-server": "^1.1.0",
     "@bifravst/random-words": "^4.1.3",
     "aws-iot-device-sdk": "^2.2.1",
-    "aws-sdk": "^2.581.0",
+    "aws-sdk": "^2.585.0",
     "backoff": "^2.5.0",
     "cfn-response": "^1.0.1",
     "chalk": "^3.0.0",
@@ -54,8 +54,8 @@
     "@aws-cdk/aws-stepfunctions": "^1.18.0",
     "@aws-cdk/aws-stepfunctions-tasks": "^1.18.0",
     "@aws-cdk/core": "^1.18.0",
-    "@bifravst/code-style": "^6.0.0",
-    "@bifravst/package-layered-lambdas": "^3.0.0",
+    "@bifravst/code-style": "^6.0.1",
+    "@bifravst/package-layered-lambdas": "^3.0.1",
     "@coderbyheart/bdd-feature-runner-aws": "^9.2.0",
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-angular": "^8.2.0",
@@ -71,13 +71,13 @@
     "@types/node": "^12.12.14",
     "@types/uuid": "^3.4.6",
     "cdk": "^1.18.0",
-    "change-case": "^4.0.1",
-    "check-node-version": "^4.0.1",
+    "change-case": "^4.1.0",
+    "check-node-version": "^4.0.2",
     "compare-versions": "^3.5.1",
     "husky": "^3.1.0",
     "jest": "^24.9.0",
     "ts-jest": "^24.2.0",
-    "typescript": "^3.7.2",
+    "typescript": "^3.7.3",
     "uuid": "^3.3.3"
   },
   "husky": {
@@ -91,7 +91,11 @@
       "prettier --write",
       "git add"
     ],
-    "*.{ts,tsx}": ["prettier --write", "eslint --ext .js,.ts", "git add"]
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --ext .js,.ts",
+      "git add"
+    ]
   },
   "engines": {
     "node": ">=12.0.0",
