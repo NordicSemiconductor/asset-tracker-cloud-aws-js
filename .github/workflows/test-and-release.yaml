@@ -48,7 +48,7 @@ jobs:
           npx cdk bootstrap
           npx cdk -a 'node dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup -d
-          node cli register-ca
+          node cli create-ca
       - name: End-to-End Tests
         run: |
           npm run test:e2e
