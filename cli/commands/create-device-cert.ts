@@ -2,16 +2,16 @@ import * as chalk from 'chalk'
 import { ComandDefinition } from './CommandDefinition'
 import { randomWords } from '@bifravst/random-words'
 import * as path from 'path'
-import { generateDeviceCertificate } from '../jitp/generateDeviceCertificate'
+import { createDeviceCertificate } from '../jitp/generateDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
 
-export const generateCertCommand = ({
+export const createDeviceCertCommand = ({
 	endpoint,
 }: {
 	endpoint: string
 }): ComandDefinition => ({
-	command: 'generate-cert',
+	command: 'create-device-cert',
 	options: [
 		{
 			flags: '-d, --deviceId <deviceId>',
@@ -21,7 +21,7 @@ export const generateCertCommand = ({
 	action: async ({ deviceId }: { deviceId: string }) => {
 		const id = deviceId || (await randomWords({ numWords: 3 })).join('-')
 		const certsDir = path.resolve(process.cwd(), 'certificates')
-		await generateDeviceCertificate({
+		await createDeviceCertificate({
 			deviceId: id,
 			certsDir,
 			log: (...message: any[]) => {
@@ -37,7 +37,7 @@ export const generateCertCommand = ({
 
 		const certificate = deviceFileLocations({
 			certsDir,
-			deviceId,
+			deviceId: id,
 		})
 
 		// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
@@ -51,7 +51,7 @@ export const generateCertCommand = ({
 					),
 					clientCert: await fs.readFile(certificate.certWithCA, 'utf-8'),
 					privateKey: await fs.readFile(certificate.key, 'utf-8'),
-					clientId: deviceId,
+					clientId: id,
 					brokerHostname: endpoint,
 				},
 				null,
@@ -61,11 +61,15 @@ export const generateCertCommand = ({
 		)
 
 		console.log()
-		console.log(chalk.green('You can now connect to the broker.'))
+		console.log(
+			chalk.green('You can now connect to the broker:'),
+			chalk.greenBright('node cli connect'),
+			chalk.blueBright(id),
+		)
 		console.log()
 		console.log(
 			chalk.gray('Use the file'),
-			chalk.yellow(deviceFileLocations({ certsDir, deviceId }).json),
+			chalk.yellow(deviceFileLocations({ certsDir, deviceId: id }).json),
 		)
 		console.log(
 			chalk.gray('with the'),

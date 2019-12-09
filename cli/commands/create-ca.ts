@@ -1,8 +1,8 @@
 import * as chalk from 'chalk'
 import { ComandDefinition } from './CommandDefinition'
-import { registerCA } from '../jitp/registerCA'
+import { createCA } from '../jitp/createCA'
 
-export const registerCaCommand = ({
+export const createCACommand = ({
 	stackId,
 	region,
 	certsDir,
@@ -11,9 +11,9 @@ export const registerCaCommand = ({
 	region: string
 	certsDir: string
 }): ComandDefinition => ({
-	command: 'register-ca',
+	command: 'create-ca',
 	action: async () => {
-		const { certificateId } = await registerCA({
+		const { certificateId } = await createCA({
 			stackId,
 			certsDir,
 			region,
@@ -29,5 +29,6 @@ export const registerCaCommand = ({
 		)
 		console.log(chalk.green('You can now generate device certificates.'))
 	},
-	help: 'Registers a CA for Just-in-time provisioning.',
+	help:
+		'Creates a CA certificate and registers it for Just-in-time provisioning.',
 })

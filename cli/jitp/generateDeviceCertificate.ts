@@ -5,10 +5,10 @@ import { deviceFileLocations } from './deviceFileLocations'
 import { run } from '../process/run'
 
 /**
- * Generates a certificate for a device, signed with the CA
+ * Creates a certificate for a device, signed with the CA
  * @see https://docs.aws.amazon.com/iot/latest/developerguide/device-certs-your-own.html
  */
-export const generateDeviceCertificate = async ({
+export const createDeviceCertificate = async ({
 	certsDir,
 	log,
 	debug,

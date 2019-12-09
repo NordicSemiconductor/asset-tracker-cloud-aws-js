@@ -5,10 +5,10 @@ import { run } from '../process/run'
 import { toObject } from '../cloudformation/toObject'
 
 /**
- * Registers a CA for Just-in-time provisioning
+ * Creates a CA certificate and registers it for Just-in-time provisioning
  * @see https://docs.aws.amazon.com/iot/latest/developerguide/device-certs-your-own.html
  */
-export const registerCA = async (args: {
+export const createCA = async (args: {
 	certsDir: string
 	stackId: string
 	region?: string

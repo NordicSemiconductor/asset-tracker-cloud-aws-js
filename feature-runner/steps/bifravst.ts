@@ -4,7 +4,7 @@ import {
 } from '@coderbyheart/bdd-feature-runner-aws'
 import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
-import { generateDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
+import { createDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
 import * as path from 'path'
 import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
@@ -53,7 +53,7 @@ export const bifravstStepRunners = ({
 				if (!runner.store['cat:id']) {
 					const catName = (await randomWords({ numWords: 3 })).join('-')
 
-					await generateDeviceCertificate({
+					await createDeviceCertificate({
 						deviceId: catName,
 						certsDir: path.resolve(process.cwd(), 'certificates'),
 						log: (...message: any[]) => {

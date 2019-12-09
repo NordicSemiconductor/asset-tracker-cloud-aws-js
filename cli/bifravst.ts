@@ -5,11 +5,11 @@ import { stackOutput } from './cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
 import { cdCommand } from './commands/cd'
-import { generateCertCommand } from './commands/generate-cert'
+import { createDeviceCertCommand } from './commands/create-device-cert'
 import { connectCommand } from './commands/connect'
 import { reactConfigCommand } from './commands/react-config'
 import { infoCommand } from './commands/info'
-import { registerCaCommand } from './commands/register-ca'
+import { createCACommand } from './commands/create-ca'
 import { historicalDataCommand } from './commands/historical-data'
 import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
@@ -55,9 +55,9 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	program.description('Bifravst Command Line Interface')
 
 	const commands = [
-		registerCaCommand({ stackId, certsDir, region }),
+		createCACommand({ stackId, certsDir, region }),
 		flashCertificate({ certsDir }),
-		generateCertCommand({ endpoint }),
+		createDeviceCertCommand({ endpoint }),
 		reactConfigCommand({ stackId, region }),
 		infoCommand({ stackId, region }),
 		cdCommand({ region }),
