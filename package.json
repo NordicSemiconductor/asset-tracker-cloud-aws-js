@@ -5,7 +5,7 @@
   "scripts": {
     "test": "jest",
     "test:e2e": "node dist/feature-runner/run-features.js ./features --print-results --progress",
-    "postinstall": "check-node-version --package --print && npx tsc"
+    "postinstall": "check-node-version --package --print"
   },
   "repository": {
     "type": "git",
