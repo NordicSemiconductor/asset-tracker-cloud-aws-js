@@ -62,7 +62,8 @@ jobs:
         if: always()
         run: |
           node cli drop-athena-resources
-          # Purge Buckts does not remove the source-code bucket (because it will be populate again by the CDK command)
+          node cli purge-iot-user-policy-principals
+          # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
           node cli purge-buckets
           npx cdk -a 'node dist/cdk/cloudformation-test.js' destroy -f '*'
           # Delete sourcecode bucket

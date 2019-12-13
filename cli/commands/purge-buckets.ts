@@ -1,5 +1,5 @@
-import { ComandDefinition } from '../CommandDefinition'
-import { stackOutput } from '../../cloudformation/stackOutput'
+import { ComandDefinition } from './CommandDefinition'
+import { stackOutput } from '../cloudformation/stackOutput'
 import { S3 } from 'aws-sdk'
 
 export const purgeBucketsCommand = ({

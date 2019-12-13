@@ -1,4 +1,4 @@
-import { ComandDefinition } from '../CommandDefinition'
+import { ComandDefinition } from './CommandDefinition'
 import { athenaQuery } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
@@ -6,7 +6,7 @@ import {
 	UpdatesTableName,
 	DocumentsTableName,
 	WorkGroupName,
-} from '../../../historicalData/settings'
+} from '../../historicalData/settings'
 
 export const dropAthenaResourcesCommand = ({
 	stackId,

@@ -13,11 +13,14 @@ import { createCACommand } from './commands/create-ca'
 import { historicalDataCommand } from './commands/historical-data'
 import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
-import { purgeBucketsCommand } from './commands/ci/purge-buckets'
-import { dropAthenaResourcesCommand } from './commands/ci/drop-athena-resources'
+import { purgeBucketsCommand } from './commands/purge-buckets'
+import { dropAthenaResourcesCommand } from './commands/drop-athena-resources'
 import { stackId as webStackId } from '../cdk/stacks/WebApps'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
 import { cellLocation } from './commands/cell-location'
+import { ComandDefinition } from './commands/CommandDefinition'
+import * as readline from 'readline'
+import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -44,6 +47,28 @@ const config = async () => {
 	}
 }
 
+const confirmIf = (isCI: boolean) => (
+	confirm: string,
+	command: ComandDefinition,
+): ComandDefinition => ({
+	...command,
+	action: async (...args) => {
+		if (isCI) return command.action(...args)
+		const rl = readline.createInterface({
+			input: process.stdin,
+			output: process.stdout,
+		})
+		await new Promise((resolve, reject) =>
+			rl.question(`${chalk.blueBright(confirm)} (y,N): `, answer => {
+				rl.close()
+				if (answer === 'y') return resolve()
+				reject(new Error(`Answered NO to ${confirm}!`))
+			}),
+		)
+		return command.action(...args)
+	},
+})
+
 const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	const {
 		endpoint,
@@ -51,6 +76,8 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 		historicalDataBucketName,
 	} = await config()
 	const certsDir = path.resolve(process.cwd(), 'certificates')
+
+	const confirmIfCI = confirmIf(isCI)
 
 	program.description('Bifravst Command Line Interface')
 
@@ -71,6 +98,24 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			stackId,
 			region,
 		}),
+		confirmIfCI(
+			'Do you really want to drop all Athena resources?',
+			dropAthenaResourcesCommand({
+				stackId,
+				region,
+			}),
+		),
+		confirmIfCI(
+			'Do you really purge all Bifravst buckets?',
+			purgeBucketsCommand({
+				stackId,
+				region,
+			}),
+		),
+		purgeIotUserPolicyPrincipals({
+			stackId,
+			region,
+		}),
 	]
 
 	if (!isCI) {
@@ -85,17 +130,6 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				certsDir,
 			}),
 			cdUpdateTokenCommand({ region }),
-		)
-	} else {
-		commands.push(
-			purgeBucketsCommand({
-				stackId,
-				region,
-			}),
-			dropAthenaResourcesCommand({
-				stackId,
-				region,
-			}),
 		)
 	}
 
