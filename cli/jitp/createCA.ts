@@ -194,6 +194,8 @@ export const createCA = async (args: {
 		throw new Error('Failed to register CA!')
 	}
 
+	await fs.writeFile(caFiles.id, res.certificateId, 'utf-8')
+
 	log(
 		`Registered CA and enabled auto-registration to group ${stackOutput?.thingGroupName}`,
 	)

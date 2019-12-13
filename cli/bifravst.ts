@@ -21,6 +21,7 @@ import { cellLocation } from './commands/cell-location'
 import { ComandDefinition } from './commands/CommandDefinition'
 import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
+import { purgeCAsCommand } from './commands/purge-cas'
 
 const stackId = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_DEFAULT_REGION || ''
@@ -77,7 +78,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	} = await config()
 	const certsDir = path.resolve(process.cwd(), 'certificates')
 
-	const confirmIfCI = confirmIf(isCI)
+	const confirmIfNotCI = confirmIf(!isCI)
 
 	program.description('Bifravst Command Line Interface')
 
@@ -98,14 +99,14 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			stackId,
 			region,
 		}),
-		confirmIfCI(
+		confirmIfNotCI(
 			'Do you really want to drop all Athena resources?',
 			dropAthenaResourcesCommand({
 				stackId,
 				region,
 			}),
 		),
-		confirmIfCI(
+		confirmIfNotCI(
 			'Do you really purge all Bifravst buckets?',
 			purgeBucketsCommand({
 				stackId,
@@ -116,6 +117,13 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			stackId,
 			region,
 		}),
+		confirmIfNotCI(
+			'Do you really want to purge all Bifravst CAs?',
+			purgeCAsCommand({
+				stackId,
+				region,
+			}),
+		),
 	]
 
 	if (!isCI) {
