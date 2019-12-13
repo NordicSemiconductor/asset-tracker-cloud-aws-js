@@ -48,13 +48,13 @@ const config = async () => {
 	}
 }
 
-const confirmIf = (isCI: boolean) => (
+const confirmIf = (cond: boolean) => (
 	confirm: string,
 	command: ComandDefinition,
 ): ComandDefinition => ({
 	...command,
 	action: async (...args) => {
-		if (isCI) return command.action(...args)
+		if (cond) return command.action(...args)
 		const rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
