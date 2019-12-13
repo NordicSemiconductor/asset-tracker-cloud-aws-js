@@ -19,12 +19,14 @@ const purgeCACertificate = ({
 	if (
 		config?.Resources?.thing?.Properties?.ThingGroups?.includes(thingGroupName)
 	) {
+		console.log(`Marking CA certificate ${certificateId} as INACTIVE ...`)
 		await iot
 			.updateCACertificate({
 				certificateId,
 				newStatus: 'INACTIVE',
 			})
 			.promise()
+		console.log(`Deleting CA certificate ${certificateId}...`)
 		await iot
 			.deleteCACertificate({
 				certificateId,

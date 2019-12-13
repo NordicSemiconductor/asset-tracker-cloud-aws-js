@@ -323,12 +323,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			initialPolicy: [
 				new IAM.PolicyStatement({
 					resources: ['*'],
-					actions: [
-						'iot:createThingGroup',
-						'iot:attachPolicy',
-						'iot:ListThings',
-						'iot:AddThingToThingGroup',
-					],
+					actions: ['iot:*'],
 				}),
 				logToCloudWatch,
 			],

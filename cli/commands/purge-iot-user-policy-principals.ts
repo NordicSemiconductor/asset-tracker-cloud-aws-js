@@ -30,14 +30,17 @@ export const purgeIotUserPolicyPrincipals = ({
 					.promise()
 					.then(async ({ principals, nextMarker }) => {
 						await Promise.all(
-							principals?.map(async principal =>
-								iot
+							principals?.map(async principal => {
+								console.log(
+									`Detaching principal ${principal} from policy ${policyName} ...`,
+								)
+								return iot
 									.detachPrincipalPolicy({
 										policyName,
 										principal,
 									})
-									.promise(),
-							) ?? [],
+									.promise()
+							}) ?? [],
 						)
 						return nextMarker
 					}),

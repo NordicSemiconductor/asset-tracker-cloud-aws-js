@@ -121,6 +121,12 @@ export const handler = async (
 										Promise.all(
 											principals?.map(async principal => {
 												const principalId = principal.split('/').pop() as string
+												console.log(
+													`Detaching certificate ${principal} from thing ${thing} ...`,
+												)
+												console.log(
+													`Marking certificate ${principalId} as INACTIVE`,
+												)
 												return Promise.all([
 													iot
 														.detachThingPrincipal({
@@ -134,24 +140,26 @@ export const handler = async (
 															newStatus: 'INACTIVE',
 														})
 														.promise()
-														.then(async () =>
-															iot
+														.then(async () => {
+															console.log(`Deleting certificate ${principalId}`)
+															return iot
 																.deleteCertificate({
 																	certificateId: principalId,
 																})
-																.promise(),
-														),
+																.promise()
+														}),
 												])
 											}) ?? [],
 										),
 									)
-									.then(async () =>
-										iot
+									.then(async () => {
+										console.log(`Deleting thing ${thing}...`)
+										return iot
 											.deleteThing({
 												thingName: thing,
 											})
-											.promise(),
-									),
+											.promise()
+									}),
 							) ?? [],
 						)
 						return nextToken
