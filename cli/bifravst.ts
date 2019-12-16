@@ -54,7 +54,10 @@ const confirmIf = (cond: boolean) => (
 ): ComandDefinition => ({
 	...command,
 	action: async (...args) => {
-		if (cond) return command.action(...args)
+		if (cond) {
+			console.log(`Auto-confirmed: ${confirm}.`)
+			return command.action(...args)
+		}
 		const rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
@@ -79,6 +82,10 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	const certsDir = path.resolve(process.cwd(), 'certificates')
 
 	const confirmIfNotCI = confirmIf(!isCI)
+
+	if (isCI) {
+		console.log('Running on CI...')
+	}
 
 	program.description('Bifravst Command Line Interface')
 
