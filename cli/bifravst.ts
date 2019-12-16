@@ -48,16 +48,12 @@ const config = async () => {
 	}
 }
 
-const confirmIf = (cond: boolean) => (
+const confirm = (
 	confirm: string,
 	command: ComandDefinition,
 ): ComandDefinition => ({
 	...command,
 	action: async (...args) => {
-		if (cond) {
-			console.log(`Auto-confirmed: ${confirm}.`)
-			return command.action(...args)
-		}
 		const rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
@@ -81,12 +77,6 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	} = await config()
 	const certsDir = path.resolve(process.cwd(), 'certificates')
 
-	const confirmIfNotCI = confirmIf(!isCI)
-
-	if (isCI) {
-		console.log('Running on CI...')
-	}
-
 	program.description('Bifravst Command Line Interface')
 
 	const commands = [
@@ -106,34 +96,30 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			stackId,
 			region,
 		}),
-		confirmIfNotCI(
-			'Do you really want to drop all Athena resources?',
-			dropAthenaResourcesCommand({
-				stackId,
-				region,
-			}),
-		),
-		confirmIfNotCI(
-			'Do you really purge all Bifravst buckets?',
-			purgeBucketsCommand({
-				stackId,
-				region,
-			}),
-		),
+
 		purgeIotUserPolicyPrincipals({
 			stackId,
 			region,
 		}),
-		confirmIfNotCI(
-			'Do you really want to purge all Bifravst CAs?',
+	]
+
+	if (isCI) {
+		console.log('Running on CI...')
+		commands.push(
+			dropAthenaResourcesCommand({
+				stackId,
+				region,
+			}),
+			purgeBucketsCommand({
+				stackId,
+				region,
+			}),
 			purgeCAsCommand({
 				stackId,
 				region,
 			}),
-		),
-	]
-
-	if (!isCI) {
+		)
+	} else {
 		const { deviceUiDomainName } = await stackOutput<StackOutputs>({
 			region,
 			stackId: webStackId({ bifravstStackName: stackId }),
@@ -145,6 +131,27 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				certsDir,
 			}),
 			cdUpdateTokenCommand({ region }),
+			confirm(
+				'Do you really want to drop all Athena resources?',
+				dropAthenaResourcesCommand({
+					stackId,
+					region,
+				}),
+			),
+			confirm(
+				'Do you really purge all Bifravst buckets?',
+				purgeBucketsCommand({
+					stackId,
+					region,
+				}),
+			),
+			confirm(
+				'Do you really want to purge all Bifravst CAs?',
+				purgeCAsCommand({
+					stackId,
+					region,
+				}),
+			),
 		)
 	}
 
