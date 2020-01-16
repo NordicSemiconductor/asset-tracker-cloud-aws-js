@@ -74,7 +74,7 @@
     "change-case": "^4.1.0",
     "check-node-version": "^4.0.2",
     "compare-versions": "^3.5.1",
-    "husky": "^3.1.0",
+    "husky": "^4.0.10",
     "jest": "^24.9.0",
     "ts-jest": "^24.2.0",
     "typescript": "^3.7.3",
