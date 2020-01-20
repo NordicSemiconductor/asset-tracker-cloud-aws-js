@@ -56,7 +56,7 @@
     "@aws-cdk/core": "^1.21.1",
     "@bifravst/code-style": "^6.0.1",
     "@bifravst/package-layered-lambdas": "^3.0.2",
-    "@coderbyheart/bdd-feature-runner-aws": "^9.2.1",
+    "@coderbyheart/bdd-feature-runner-aws": "^9.2.2",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-angular": "^8.3.4",
     "@types/aws-iot-device-sdk": "^2.2.1",
