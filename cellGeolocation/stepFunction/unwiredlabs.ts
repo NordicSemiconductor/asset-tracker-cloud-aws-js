@@ -1,15 +1,37 @@
 import { SSM } from 'aws-sdk'
-import { CelGeoInput } from '../CelGeoInput'
-import { CelGeoResponse } from '../CelGeoResponse'
 import { request as nodeRequest } from 'https'
 import { parse } from 'url'
-import { getApiSettings } from './getApiSettings'
+import { StateDocument, CellGeo } from './types'
+
+export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
+	api,
+}: {
+	api: 'unwiredlabs'
+}) => {
+	const Path = `/bifravst/cellGeoLocation/${api}`
+	const { Parameters } = await ssm
+		.getParametersByPath({
+			Path,
+			Recursive: true,
+		})
+		.promise()
+
+	const apiKey = Parameters?.find(
+		({ Name }) => Name?.replace(`${Path}/`, '') === 'apiKey',
+	)?.Value
+	const endpoint =
+		Parameters?.find(({ Name }) => Name?.replace(`${Path}/`, '') === 'endpoint')
+			?.Value ?? 'https://eu1.unwiredlabs.com/'
+
+	return {
+		apiKey,
+		endpoint,
+	}
+}
 
 const fetchSettings = getApiSettings({ ssm: new SSM() })
 
-export const handler = async ({
-	roaming: cell,
-}: CelGeoInput): Promise<CelGeoResponse> => {
+export const handler = async (state: StateDocument): Promise<CellGeo> => {
 	try {
 		const { apiKey, endpoint } = await fetchSettings({
 			api: 'unwiredlabs',
@@ -83,12 +105,12 @@ export const handler = async ({
 			const payload = JSON.stringify({
 				token: apiKey,
 				radio: 'lte',
-				mcc: Math.floor(cell.mccmnc / 100),
-				mnc: cell.mccmnc % 100,
+				mcc: Math.floor(state.roaming.mccmnc / 100),
+				mnc: state.roaming.mccmnc % 100,
 				cells: [
 					{
-						lac: cell.area,
-						cid: cell.cell,
+						lac: state.roaming.area,
+						cid: state.roaming.cell,
 					},
 				],
 			})
@@ -99,20 +121,17 @@ export const handler = async ({
 
 		if (status === 'ok' && lat && lon) {
 			return {
-				...cell,
 				lat,
 				lng: lon,
 				located: true,
 			}
 		}
 		return {
-			...cell,
 			located: false,
 		}
 	} catch (err) {
 		console.error(JSON.stringify({ error: err }))
 		return {
-			...cell,
 			located: false,
 		}
 	}

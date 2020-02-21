@@ -15,10 +15,12 @@ export type BifravstLambdas = {
 	createThingGroup: string
 	concatenateRawMessages: string
 	processBatchMessages: string
-	geolocateCellFromCache: string
-	geolocateCellFromDeviceLocations: string
-	geolocateCellFromUnwiredLabs: string
-	cacheCellGeolocation: string
+	geolocateCellFromCacheHttpApi: string
+	geolocateCellFromCacheStepFunction: string
+	geolocateCellFromDeviceLocationsStepFunction: string
+	geolocateCellFromUnwiredLabsStepFunction: string
+	cacheCellGeolocationStepFunction: string
+	cacheCellGeolocationFromDeviceIfNewCell: string
 }
 
 export const prepareResources = async ({
@@ -83,26 +85,40 @@ export const prepareResources = async ({
 				'historicalData',
 				'processBatchMessages.ts',
 			),
-			geolocateCellFromCache: path.resolve(
+			geolocateCellFromCacheStepFunction: path.resolve(
 				rootDir,
 				'cellGeolocation',
+				'stepFunction',
 				'fromCache.ts',
 			),
-			geolocateCellFromDeviceLocations: path.resolve(
+			geolocateCellFromDeviceLocationsStepFunction: path.resolve(
 				rootDir,
 				'cellGeolocation',
+				'stepFunction',
 				'fromDeviceLocations.ts',
 			),
-			geolocateCellFromUnwiredLabs: path.resolve(
+			geolocateCellFromUnwiredLabsStepFunction: path.resolve(
 				rootDir,
 				'cellGeolocation',
-				'apis',
+				'stepFunction',
 				'unwiredlabs.ts',
 			),
-			cacheCellGeolocation: path.resolve(
+			cacheCellGeolocationStepFunction: path.resolve(
 				rootDir,
 				'cellGeolocation',
+				'stepFunction',
 				'updateCache.ts',
+			),
+			geolocateCellFromCacheHttpApi: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'httpApi',
+				'fromCache.ts',
+			),
+			cacheCellGeolocationFromDeviceIfNewCell: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'cacheFromDeviceIfNewCell.ts',
 			),
 		},
 		tsConfig: path.resolve(rootDir, 'tsconfig.json'),

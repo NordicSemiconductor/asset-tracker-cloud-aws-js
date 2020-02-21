@@ -1,7 +1,7 @@
 import { BifravstApp } from './apps/Bifravst'
 import { prepareResources } from './prepare-resources'
 import { SSM } from 'aws-sdk'
-import { getApiSettings } from '../cellGeolocation/apis/getApiSettings'
+import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
 
 const STACK_ID = process.env.STACK_ID || 'bifravst'
 const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || ''

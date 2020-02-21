@@ -1,17 +1,19 @@
+@Last
 Feature: Delete cats
   As a user
   I can delete cats
 
   Background:
 
-    Given I am run after the "List cats" feature
-    And I am authenticated with Cognito
+    Given I am authenticated with Cognito
 
   Scenario: Delete the certificate
 
     When I execute "listThingPrincipals" of the AWS Iot SDK with
       """
-      {"thingName": "{cat:id}"}
+      {
+        "thingName": "{cat:id}"
+      }
       """
     Then "$count(awsSdk.res.principals)" should equal 1
     Given I store "awsSdk.res.principals[0]" into "certificateArn"
@@ -38,5 +40,7 @@ Feature: Delete cats
       """
     And I execute "deleteThing" of the AWS Iot SDK with
       """
-      {"thingName": "{cat:id}"}
+      {
+        "thingName": "{cat:id}"
+      }
       """

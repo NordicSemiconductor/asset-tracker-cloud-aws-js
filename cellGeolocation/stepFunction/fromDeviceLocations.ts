@@ -1,18 +1,12 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { CelGeoResponse } from './CelGeoResponse'
-import { CelGeoInput } from './CelGeoInput'
+import { StateDocument, CellGeo } from './types'
 
 const TableName = process.env.LOCATIONS_TABLE || ''
 const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''
 const dynamodb = new DynamoDBClient({})
 
-export const handler = async ({
-	roaming: cell,
-}: CelGeoInput): Promise<CelGeoResponse> => {
-	console.log({
-		cell,
-	})
+export const handler = async (input: StateDocument): Promise<CellGeo> => {
 	const { Items } = await dynamodb.send(
 		new QueryCommand({
 			TableName,
@@ -20,7 +14,7 @@ export const handler = async ({
 			KeyConditionExpression: 'cellId = :cellId',
 			ExpressionAttributeValues: {
 				[':cellId']: {
-					S: cellId(cell),
+					S: cellId(input.roaming),
 				},
 			},
 			ProjectionExpression: 'lat,lng',
@@ -35,21 +29,19 @@ export const handler = async ({
 
 		console.log(
 			JSON.stringify({
-				cell,
+				cell: input.roaming,
 				lats,
 				lngs,
 			}),
 		)
 
 		return {
-			...cell,
 			located: true,
 			lat: lats[Math.floor(lats.length / 2)],
 			lng: lngs[Math.floor(lngs.length / 2)],
 		}
 	}
 	return {
-		...cell,
 		located: false,
 	}
 }

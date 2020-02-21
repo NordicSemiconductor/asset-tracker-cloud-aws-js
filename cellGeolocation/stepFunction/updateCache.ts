@@ -3,29 +3,28 @@ import {
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { CelGeoResponse } from './CelGeoResponse'
+import { StateDocument } from './types'
+import { Location } from '../geolocateCell'
 
 const TableName = process.env.CACHE_TABLE || ''
 const dynamodb = new DynamoDBClient({})
 
-export const handler = async (cell: CelGeoResponse): Promise<boolean> => {
-	const { lat, lng } = cell
-	if (!lat || !lng) {
-		console.error('lat or lng not defined in', JSON.stringify(cell))
-		return false
-	}
+export const handler = async ({
+	roaming,
+	cellgeo: { lat, lng },
+}: StateDocument & { cellgeo: Location }): Promise<boolean> => {
 	await dynamodb.send(
 		new PutItemCommand({
 			TableName,
 			Item: {
 				cellId: {
-					S: cellId(cell),
+					S: cellId(roaming),
 				},
 				lat: {
-					N: `${cell.lat}`,
+					N: `${lat}`,
 				},
 				lng: {
-					N: `${cell.lng}`,
+					N: `${lng}`,
 				},
 			},
 		}),

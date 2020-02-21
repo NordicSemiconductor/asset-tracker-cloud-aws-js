@@ -16,6 +16,7 @@ import { logToCloudWatch } from '../resources/logToCloudWatch'
 import { BifravstLambdas } from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
 import { CellGeolocation } from '../resources/CellGeolocation'
+import { CellGeolocationApi } from '../resources/CellGeolocationApi'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -422,6 +423,18 @@ export class BifravstStack extends CloudFormation.Stack {
 				resources: [cellgeo.cacheTable.tableArn],
 			}),
 		)
+
+		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
+			baseLayer,
+			lambdas: lambdas,
+			sourceCodeBucket,
+			cellGeolocationCacheTable: cellgeo.cacheTable,
+		})
+
+		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {
+			value: `https://${cellGeoApi.api.ref}.execute-api.${this.region}.amazonaws.com/`,
+			exportName: `${this.stackName}:geolocationApiUrl`,
+		})
 	}
 }
 
@@ -446,4 +459,5 @@ export type StackOutputs = {
 	historicalDataBucketName: string
 	historicalDataQueryResultsBucketName: string
 	cellGeoLocationsCacheTable: string
+	geolocationApiUrl: string
 }
