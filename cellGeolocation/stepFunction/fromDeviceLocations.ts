@@ -26,12 +26,17 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 		const asc = (a: number, b: number) => a - b
 		const lats = Items.map(({ lat }) => parseFloat(lat.N as string)).sort(asc)
 		const lngs = Items.map(({ lng }) => parseFloat(lng.N as string)).sort(asc)
+		// FIXME: accuracy should be calculated, and not be the median here
+		const accuracies = Items.map(({ accuracy }) =>
+			parseInt(accuracy.N as string, 10),
+		).sort(asc)
 
 		console.log(
 			JSON.stringify({
 				cell: input.roaming,
 				lats,
 				lngs,
+				accuracies,
 			}),
 		)
 
@@ -39,6 +44,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 			located: true,
 			lat: lats[Math.floor(lats.length / 2)],
 			lng: lngs[Math.floor(lngs.length / 2)],
+			accuracy: accuracies[Math.floor(accuracies.length / 2)],
 		}
 	}
 	return {
