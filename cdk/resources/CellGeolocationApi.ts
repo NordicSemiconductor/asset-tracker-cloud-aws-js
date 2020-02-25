@@ -154,9 +154,12 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/geolocation`,
 		})
 
-		new HttpApi.CfnDeployment(this, 'httpApiDeployment', {
+		const deployment = new HttpApi.CfnDeployment(this, 'httpApiDeployment', {
 			apiId: this.api.ref,
 			stageName: this.stage.stageName,
-		}).node.addDependency([this.stage, geolocateRoute, geolocationRoute])
+		})
+		deployment.node.addDependency(this.stage)
+		deployment.node.addDependency(geolocateRoute)
+		deployment.node.addDependency(geolocationRoute)
 	}
 }
