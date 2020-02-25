@@ -100,11 +100,6 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			autoDeploy: true,
 		})
 
-		new HttpApi.CfnDeployment(this, 'httpApiDeployment', {
-			apiId: this.api.ref,
-			stageName: this.stage.stageName,
-		}).node.addDependency(this.stage)
-
 		const geolocateIntegration = new HttpApi.CfnIntegration(
 			this,
 			'httpApiAddCellGeolocateIntegration',
@@ -117,11 +112,15 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		)
 
-		new HttpApi.CfnRoute(this, 'httpApiAddCellGeolocateRoute', {
-			apiId: this.api.ref,
-			routeKey: 'GET /geolocate',
-			target: `integrations/${geolocateIntegration.ref}`,
-		})
+		const geolocateRoute = new HttpApi.CfnRoute(
+			this,
+			'httpApiAddCellGeolocateRoute',
+			{
+				apiId: this.api.ref,
+				routeKey: 'GET /geolocate',
+				target: `integrations/${geolocateIntegration.ref}`,
+			},
+		)
 
 		geolocateCellFromCache.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
@@ -140,15 +139,24 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		)
 
-		new HttpApi.CfnRoute(this, 'httpApiAddCellGeolocationRoute', {
-			apiId: this.api.ref,
-			routeKey: 'POST /geolocation',
-			target: `integrations/${geolocationIntegration.ref}`,
-		})
+		const geolocationRoute = new HttpApi.CfnRoute(
+			this,
+			'httpApiAddCellGeolocationRoute',
+			{
+				apiId: this.api.ref,
+				routeKey: 'POST /geolocation',
+				target: `integrations/${geolocationIntegration.ref}`,
+			},
+		)
 
 		addCellGeolocation.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/geolocation`,
 		})
+
+		new HttpApi.CfnDeployment(this, 'httpApiDeployment', {
+			apiId: this.api.ref,
+			stageName: this.stage.stageName,
+		}).node.addDependency([this.stage, geolocateRoute, geolocationRoute])
 	}
 }
