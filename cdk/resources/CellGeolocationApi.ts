@@ -61,36 +61,32 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		)
 
-		const addCellGeolocation = new Lambda.Function(
-			this,
-			'addCellGeolocation',
-			{
-				layers: [baseLayer],
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.addCellGeolocationHttpApi,
-				),
-				description: 'Stores geolocations for cells',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: ['dynamodb:PutItem'],
-						resources: [
-							cellGeolocationCacheTable.tableArn,
-							deviceCellGeolocationTable.tableArn,
-						],
-					}),
-				],
-				environment: {
-					CACHE_TABLE: cellGeolocationCacheTable.tableName,
-					DEVICE_CELL_GEOLOCATION_TABLE: deviceCellGeolocationTable.tableName,
-				},
+		const addCellGeolocation = new Lambda.Function(this, 'addCellGeolocation', {
+			layers: [baseLayer],
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: Lambda.Code.bucket(
+				sourceCodeBucket,
+				lambdas.lambdaZipFileNames.addCellGeolocationHttpApi,
+			),
+			description: 'Stores geolocations for cells',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['dynamodb:PutItem'],
+					resources: [
+						cellGeolocationCacheTable.tableArn,
+						deviceCellGeolocationTable.tableArn,
+					],
+				}),
+			],
+			environment: {
+				CACHE_TABLE: cellGeolocationCacheTable.tableName,
+				DEVICE_CELL_GEOLOCATION_TABLE: deviceCellGeolocationTable.tableName,
 			},
-		)
+		})
 
 		this.api = new HttpApi.CfnApi(this, 'httpApi', {
 			name: 'Cell Geolocation',
@@ -106,16 +102,20 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		new HttpApi.CfnDeployment(this, 'httpApiDeployment', {
 			apiId: this.api.ref,
-			stageName: this.stage.stageName
-		})
+			stageName: this.stage.stageName,
+		}).node.addDependency(this.stage)
 
-		const geolocateIntegration = new HttpApi.CfnIntegration(this, 'httpApiAddCellGeolocateIntegration', {
-			apiId: this.api.ref,
-			integrationType: 'AWS_PROXY',
-			integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCellFromCache.functionArn}/invocations`,
-			integrationMethod: 'POST',
-			payloadFormatVersion: '1.0'
-		})
+		const geolocateIntegration = new HttpApi.CfnIntegration(
+			this,
+			'httpApiAddCellGeolocateIntegration',
+			{
+				apiId: this.api.ref,
+				integrationType: 'AWS_PROXY',
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCellFromCache.functionArn}/invocations`,
+				integrationMethod: 'POST',
+				payloadFormatVersion: '1.0',
+			},
+		)
 
 		new HttpApi.CfnRoute(this, 'httpApiAddCellGeolocateRoute', {
 			apiId: this.api.ref,
@@ -128,13 +128,17 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/geolocate`,
 		})
 
-		const geolocationIntegration = new HttpApi.CfnIntegration(this, 'httpApiAddCellGeolocationIntegration', {
-			apiId: this.api.ref,
-			integrationType: 'AWS_PROXY',
-			integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCellGeolocation.functionArn}/invocations`,
-			integrationMethod: 'POST',
-			payloadFormatVersion: '1.0'
-		})
+		const geolocationIntegration = new HttpApi.CfnIntegration(
+			this,
+			'httpApiAddCellGeolocationIntegration',
+			{
+				apiId: this.api.ref,
+				integrationType: 'AWS_PROXY',
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCellGeolocation.functionArn}/invocations`,
+				integrationMethod: 'POST',
+				payloadFormatVersion: '1.0',
+			},
+		)
 
 		new HttpApi.CfnRoute(this, 'httpApiAddCellGeolocationRoute', {
 			apiId: this.api.ref,

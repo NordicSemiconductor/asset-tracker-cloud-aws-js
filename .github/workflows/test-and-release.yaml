@@ -44,6 +44,7 @@ jobs:
       - name: Test
         run: npm test
       - name: Set up stack for End-to-End tests
+        timeout-minutes: 30
         run: |
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk bootstrap
