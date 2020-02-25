@@ -3,6 +3,7 @@ export enum ErrorType {
 	BadRequest = 'BadRequest',
 	AccessDenied = 'AccessDenied',
 	InternalError = 'InternalError',
+	Conflict = 'Conflict',
 }
 
 export type ErrorInfo = {
@@ -16,4 +17,5 @@ export const toStatusCode = {
 	[ErrorType.AccessDenied]: 403,
 	[ErrorType.EntityNotFound]: 404,
 	[ErrorType.InternalError]: 500,
+	[ErrorType.Conflict]: 409,
 }

@@ -17,6 +17,7 @@ import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
  */
 export class CellGeolocation extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.Table
+	public readonly deviceCellGeolocationTable: DynamoDB.Table
 
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -78,7 +79,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		lambdaLogGroup(this, 'geolocateCellFromCache', geolocateCellFromCache)
 
-		const deviceCellGeoLocations = new DynamoDB.Table(
+		this.deviceCellGeolocationTable = new DynamoDB.Table(
 			this,
 			'deviceCellGeoLocations',
 			{
@@ -100,7 +101,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
 
-		deviceCellGeoLocations.addGlobalSecondaryIndex({
+		this.deviceCellGeolocationTable.addGlobalSecondaryIndex({
 			indexName: LOCATIONS_TABLE_CELLID_INDEX,
 			partitionKey: {
 				name: 'cellId',
@@ -134,13 +135,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 					new IAM.PolicyStatement({
 						actions: ['dynamodb:Query'],
 						resources: [
-							deviceCellGeoLocations.tableArn,
-							`${deviceCellGeoLocations.tableArn}/*`,
+							this.deviceCellGeolocationTable.tableArn,
+							`${this.deviceCellGeolocationTable.tableArn}/*`,
 						],
 					}),
 				],
 				environment: {
-					LOCATIONS_TABLE: deviceCellGeoLocations.tableName,
+					LOCATIONS_TABLE: this.deviceCellGeolocationTable.tableName,
 					LOCATIONS_TABLE_CELLID_INDEX,
 				},
 			},
@@ -372,7 +373,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					statements: [
 						new IAM.PolicyStatement({
 							actions: ['dynamodb:PutItem'],
-							resources: [deviceCellGeoLocations.tableArn],
+							resources: [this.deviceCellGeolocationTable.tableArn],
 						}),
 					],
 				}),
@@ -437,6 +438,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 						'current.state.reported.roam.v.area) AS cellId,',
 						'current.state.reported.gps.v.lat AS lat,',
 						'current.state.reported.gps.v.lng AS lng,',
+						'current.state.reported.gps.v.acc AS accuracy,',
 						'concat("device:", topic(3)) as source,',
 						"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
 						`FROM '$aws/things/+/shadow/update/documents'`,
@@ -463,7 +465,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 						{
 							dynamoDBv2: {
 								putItem: {
-									tableName: deviceCellGeoLocations.tableName,
+									tableName: this.deviceCellGeolocationTable.tableName,
 								},
 								roleArn: topicRuleRole.roleArn,
 							},

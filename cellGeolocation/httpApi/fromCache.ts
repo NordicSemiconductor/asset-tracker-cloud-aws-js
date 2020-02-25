@@ -3,10 +3,10 @@ import * as Ajv from 'ajv'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { validate } from './validate'
 import * as TE from 'fp-ts/lib/TaskEither'
-import * as T from 'fp-ts/lib/Task'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb-v2-node'
 import { geolocateCellFromCache, Cell } from '../geolocateCell'
 import { toStatusCode } from '../ErrorInfo'
+import { res } from './res'
 
 const locator = geolocateCellFromCache({
 	dynamodb: new DynamoDBClient({}),
@@ -16,7 +16,7 @@ const locator = geolocateCellFromCache({
 const inputSchema = new Ajv().compile({
 	type: 'object',
 	properties: {
-		cellId: {
+		cell: {
 			type: 'number',
 			min: 1,
 		},
@@ -30,28 +30,14 @@ const inputSchema = new Ajv().compile({
 		},
 	},
 	required: ['cell', 'area', 'mccmnc'],
+	additionalProperties: false,
 })
 
 const allMembersToInt = (o: object) =>
-	Object.entries(o).reduce((o, [k, v]) => ({ ...o, [k]: parseInt(v, 10) }), {})
-
-const res = (statusCode: number, options?: { expires: number }) => (
-	body: any,
-): T.Task<APIGatewayProxyResult> =>
-	T.of({
-		statusCode,
-		headers: {
-			'Access-Control-Allow-Origin': '*',
-			'Content-Type': 'application/json',
-			...(options?.expires && {
-				'Cache-Control': `public, max-age=${options.expires}`,
-				Expires: new Date(
-					new Date().getTime() + options.expires * 1000,
-				).toUTCString(),
-			}),
-		},
-		body: JSON.stringify(body),
-	})
+	Object.entries(o).reduce(
+		(o, [k, v]) => ({ ...o, [k]: v ? parseInt(v, 10) : 0 }),
+		{},
+	)
 
 export const handler = async (
 	event: APIGatewayProxyEvent,

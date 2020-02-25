@@ -62,7 +62,7 @@ Feature: Cell Geolocation
                         "S": "{cellId}-26201-211"
                     }
                 },
-                "ProjectionExpression": "lat,lng"
+                "ProjectionExpression": "lat,lng,accuracy"
             }
             """
         Then "awsSdk.res.Item" should equal this JSON
@@ -73,6 +73,9 @@ Feature: Cell Geolocation
                 },
                 "lng": {
                     "N": "{lng}"
+                },
+                "accuracy": {
+                    "N": "19"
                 }
             }
             """

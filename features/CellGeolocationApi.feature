@@ -18,6 +18,7 @@ Feature: Cell Geolocation API
             """
             {
             "lng": {lng},
-            "lat": {lat}
+            "lat": {lat},
+            "accuracy": 19
             }
             """

@@ -15,6 +15,7 @@ export type Cell = {
 export type Location = {
 	lat: number
 	lng: number
+	accuracy: number
 }
 
 export const geolocateCellFromCache = ({
@@ -35,13 +36,14 @@ export const geolocateCellFromCache = ({
 							S: id,
 						},
 					},
-					ProjectionExpression: 'lat,lng',
+					ProjectionExpression: 'lat,lng,accuracy',
 				}),
 			)
 			if (Item)
 				return {
 					lat: parseFloat(Item.lat.N as string),
 					lng: parseFloat(Item.lng.N as string),
+					accuracy: Item.accuracy.N ? parseInt(Item.accuracy.N) : 5000,
 				}
 			throw new Error('NOT_FOUND')
 		},
