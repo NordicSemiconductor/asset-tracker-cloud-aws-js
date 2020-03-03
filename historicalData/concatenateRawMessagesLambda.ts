@@ -13,7 +13,7 @@ const concatenateFilesInBucket = concatenateFiles({ s3, Bucket })
 /**
  * Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.
  */
-const handler = async () => {
+export const handler = async () => {
 	await concatenateRawMessages({
 		collectFilesInBucket,
 		concatenateFilesInBucket,
@@ -25,7 +25,3 @@ const handler = async () => {
 		documentType: 'updates',
 	})
 }
-
-handler().catch(err => {
-	console.error(err)
-})
