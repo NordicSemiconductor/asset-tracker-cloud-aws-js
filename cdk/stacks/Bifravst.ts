@@ -60,8 +60,12 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const userPool = new Cognito.UserPool(this, 'userPool', {
 			userPoolName: id,
-			signInType: Cognito.SignInType.EMAIL,
-			autoVerifiedAttributes: [Cognito.UserPoolAttribute.EMAIL],
+			signInAliases: {
+				email: true,
+			},
+			autoVerify: {
+				email: true,
+			},
 		})
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
 			userPool: userPool,
@@ -429,7 +433,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			lambdas: lambdas,
 			sourceCodeBucket,
 			cellGeolocationCacheTable: cellgeo.cacheTable,
-			deviceCellGeolocationTable: cellgeo.deviceCellGeolocationTable
+			deviceCellGeolocationTable: cellgeo.deviceCellGeolocationTable,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {
