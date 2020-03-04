@@ -7,24 +7,51 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: eu-central-1
-  STACK_ID: bifravst-${{ github.sha }}
   CI: 1
   FORCE_COLOR: 3
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ matrix.os }}
+    env:
+      STACK_ID: bifravst-${{ matrix.os }}-${{ github.sha }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
-      - name: Install latest npm
+      - name: Cache AWS CLI (Linux)
+        if: runner.OS == 'Linux'
+        id: cache-aws-cli-linux
+        uses: actions/cache@v1
+        with:
+          path: aws/
+          key: ${{ runner.OS }}-cache-aws-cli
+      - name: Install AWS (Linux)
+        if:
+          runner.OS == 'Linux' && steps.cache-aws-cli-linux.outputs.cache-hit !=
+          'true'
         run: |
-          sudo npm install -g npm@
-          npm config set update-notifier false
-          sudo chown -R $USER:$(id -gn $USER) /home/runner/.config
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+      - name: Cache AWS CLI (MacOS)
+        if: runner.OS == 'macOS'
+        id: cache-aws-cli-macos
+        uses: actions/cache@v1
+        with:
+          path: AWSCLIV2.pkg
+          key: ${{ runner.OS }}-cache-aws-cli
+      - name: Install AWS (MacOS)
+        if:
+          runner.OS == 'macOS' && steps.cache-aws-cli-macos.outputs.cache-hit !=
+          'true'
+        run: |
+          curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+          sudo installer -pkg AWSCLIV2.pkg -target /
       - name: Authenticate with NPM
         run: |
           echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
@@ -54,12 +81,6 @@ jobs:
       - name: End-to-End Tests
         run: |
           npm run test:e2e
-      - name: Semantic release
-        if: success()
-        continue-on-error: true
-        run: |
-          npm i --no-save semantic-release@next
-          npx semantic-release
       - name: Clean up End-to-End test resources
         if: always()
         run: |
@@ -74,3 +95,19 @@ jobs:
           aws s3 rb s3://$SOURCE_CODE_BUCKET --force
           # Delete the sourceode stack
           npx cdk -a 'node dist/cdk/cloudformation-sourcecode.js' destroy -f '*'
+
+  release:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - name: Authenticate with NPM
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
+      - name: Semantic release
+        run: |
+          npm i --no-save semantic-release
+          npx semantic-release
