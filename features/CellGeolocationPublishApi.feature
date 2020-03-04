@@ -10,7 +10,7 @@ Feature: Cell Geolocation Publish API
         And I store "$floor($random() * 100000000)" into "cellId"
         And I store "$floor($random() * 10000) + 10000" into "mccmnc"
         And I store "$floor($random() * 100) + 100" into "area"
-        And I store "$floor($random() * 50000)" into "accuracy"
+        And I store "$random() * 50000" into "accuracy"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
 

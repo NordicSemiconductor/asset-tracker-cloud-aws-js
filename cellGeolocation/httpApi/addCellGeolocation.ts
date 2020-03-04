@@ -79,7 +79,7 @@ export const handler = async (
 				mccmnc: toIntOr0(b.mccmnc),
 				lat: toFloatOr0(b.lat),
 				lng: toFloatOr0(b.lng),
-				accuracy: toIntOr0(b.accuracy),
+				accuracy: toFloatOr0(b.accuracy),
 			})()
 		}),
 		E.flatten,

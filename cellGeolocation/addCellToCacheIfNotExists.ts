@@ -38,7 +38,7 @@ export const addCellToCacheIfNotExists = ({
 							N: `${lng}`,
 						},
 						accuracy: {
-							N: `${Math.round(accuracy)}`,
+							N: `${accuracy}`,
 						},
 					},
 					ConditionExpression: 'attribute_not_exists(cellId)',

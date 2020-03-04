@@ -43,7 +43,7 @@ export const geolocateCellFromCache = ({
 				return {
 					lat: parseFloat(Item.lat.N as string),
 					lng: parseFloat(Item.lng.N as string),
-					accuracy: Item?.accuracy?.N ? parseInt(Item.accuracy.N, 10) : 5000,
+					accuracy: Item?.accuracy?.N ? parseFloat(Item.accuracy.N) : 5000,
 				}
 			throw new Error('NOT_FOUND')
 		},
