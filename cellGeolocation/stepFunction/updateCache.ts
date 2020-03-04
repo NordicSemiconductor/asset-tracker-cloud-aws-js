@@ -11,7 +11,7 @@ const dynamodb = new DynamoDBClient({})
 
 export const handler = async ({
 	roaming,
-	cellgeo: { lat, lng },
+	cellgeo: { lat, lng, accuracy },
 }: StateDocument & { cellgeo: Location }): Promise<boolean> => {
 	await dynamodb.send(
 		new PutItemCommand({
@@ -25,6 +25,9 @@ export const handler = async ({
 				},
 				lng: {
 					N: `${lng}`,
+				},
+				accuracy: {
+					N: `${accuracy}`,
 				},
 			},
 		}),
