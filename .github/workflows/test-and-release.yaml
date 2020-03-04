@@ -14,7 +14,7 @@ jobs:
   tests:
     runs-on: ${{ matrix.os }}
     env:
-      STACK_ID: bifravst-${{ matrix.os }}-${{ github.sha }}
+      STACK_ID: ${{ matrix.os }}-${{ github.sha }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
