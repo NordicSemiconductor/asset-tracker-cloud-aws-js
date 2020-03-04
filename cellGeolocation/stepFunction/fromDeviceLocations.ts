@@ -28,7 +28,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 		const lngs = Items.map(({ lng }) => parseFloat(lng.N as string)).sort(asc)
 		// FIXME: accuracy should be calculated, and not be the median here
 		const accuracies = Items.map(({ accuracy }) =>
-			parseInt(accuracy.N as string, 10),
+			accuracy ? parseInt(accuracy.N as string, 10) : 0,
 		).sort(asc)
 
 		console.log(
