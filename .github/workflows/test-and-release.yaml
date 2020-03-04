@@ -81,6 +81,9 @@ jobs:
       - name: End-to-End Tests
         run: |
           npm run test:e2e
+      - name: Get logs
+        if: always()
+        run: node cli logs
       - name: Clean up End-to-End test resources
         if: always()
         run: |

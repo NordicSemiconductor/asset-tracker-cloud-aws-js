@@ -15,6 +15,7 @@ import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/purge-buckets'
 import { dropAthenaResourcesCommand } from './commands/drop-athena-resources'
+import { logsCommand } from './commands/logs'
 import { stackId as webStackId } from '../cdk/stacks/WebApps'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
 import { cellLocation } from './commands/cell-location'
@@ -96,11 +97,11 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			stackId,
 			region,
 		}),
-
 		purgeIotUserPolicyPrincipals({
 			stackId,
 			region,
 		}),
+		logsCommand({ stackId, region }),
 	]
 
 	if (isCI) {
