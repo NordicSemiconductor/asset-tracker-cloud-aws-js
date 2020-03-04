@@ -17,7 +17,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 					S: cellId(input.roaming),
 				},
 			},
-			ProjectionExpression: 'lat,lng',
+			ProjectionExpression: 'lat,lng,accuracy',
 		}),
 	)
 
@@ -28,7 +28,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 		const lngs = Items.map(({ lng }) => parseFloat(lng.N as string)).sort(asc)
 		// FIXME: accuracy should be calculated, and not be the median here
 		const accuracies = Items.map(({ accuracy }) =>
-			accuracy ? parseInt(accuracy.N as string, 10) : 0,
+			parseInt(accuracy.N as string, 10),
 		).sort(asc)
 
 		console.log(

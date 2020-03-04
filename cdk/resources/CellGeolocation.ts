@@ -99,7 +99,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		const LOCATIONS_TABLE_CELLID_INDEX = 'cellIdIndex'
+		const LOCATIONS_TABLE_CELLID_INDEX =
+			'cellIdIndex-720633fc-5dec-4b39-972a-b4347188d69b'
 
 		this.deviceCellGeolocationTable.addGlobalSecondaryIndex({
 			indexName: LOCATIONS_TABLE_CELLID_INDEX,
@@ -112,7 +113,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				type: DynamoDB.AttributeType.STRING,
 			},
 			projectionType: DynamoDB.ProjectionType.INCLUDE,
-			nonKeyAttributes: ['lat', 'lng'],
+			nonKeyAttributes: ['lat', 'lng', 'accuracy'],
 		})
 
 		const geolocateCellFromDevices = new Lambda.Function(
