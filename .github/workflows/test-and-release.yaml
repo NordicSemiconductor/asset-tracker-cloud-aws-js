@@ -82,7 +82,7 @@ jobs:
         run: |
           npm run test:e2e
       - name: Get logs
-        if: always()
+        if: failure()
         run: node cli logs
       - name: Clean up End-to-End test resources
         if: always()
