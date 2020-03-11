@@ -40,6 +40,9 @@ export const addCellToCacheIfNotExists = ({
 						accuracy: {
 							N: `${accuracy}`,
 						},
+						ttl: {
+							N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
+						},
 					},
 					ConditionExpression: 'attribute_not_exists(cellId)',
 				}

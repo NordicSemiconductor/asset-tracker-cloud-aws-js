@@ -29,6 +29,9 @@ export const handler = async ({
 				accuracy: {
 					N: `${accuracy}`,
 				},
+				ttl: {
+					N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
+				},
 			},
 		}),
 	)

@@ -48,6 +48,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			removalPolicy: isTest
 				? CloudFormation.RemovalPolicy.DESTROY
 				: CloudFormation.RemovalPolicy.RETAIN,
+			timeToLiveAttribute: 'ttl',
 		})
 
 		const geolocateCellFromCache = new Lambda.Function(
