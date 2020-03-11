@@ -81,7 +81,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		this.deviceCellGeolocationTable = new DynamoDB.Table(
 			this,
-			'deviceCellGeoLocations',
+			'deviceCellGeoLocation',
 			{
 				billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
 				partitionKey: {
