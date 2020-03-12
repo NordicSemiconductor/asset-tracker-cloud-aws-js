@@ -40,6 +40,6 @@ Feature: Cell Geolocation Publish API
             {
             "lng": {lng},
             "lat": {lat},
-            "accuracy": {accuracy}
+            "accuracy": 5000
             }
             """

@@ -1,18 +1,12 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb-v2-node'
-import {
-	cellId,
-	cellFromGeolocations,
-} from '@bifravst/cell-geolocation-helpers'
+import { cellId } from '@bifravst/cell-geolocation-helpers'
 import { StateDocument, CellGeo } from './types'
 import { isSome } from 'fp-ts/lib/Option'
+import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
 
 const TableName = process.env.LOCATIONS_TABLE || ''
 const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''
 const dynamodb = new DynamoDBClient({})
-const c = cellFromGeolocations({
-	minCellDiameterInMeters: 5000,
-	percentile: 0.9,
-})
 
 export const handler = async (input: StateDocument): Promise<CellGeo> => {
 	const { Items } = await dynamodb.send(
@@ -30,7 +24,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 	)
 
 	if (Items?.length) {
-		const location = c(
+		const location = fromDeviceLocations(
 			Items.map(({ lat, lng }) => ({
 				lat: parseFloat(lat.N as string),
 				lng: parseFloat(lng.N as string),

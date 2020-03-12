@@ -75,7 +75,7 @@ Feature: Cell Geolocation
                     "N": "{lng}"
                 },
                 "accuracy": {
-                    "N": "18.625809"
+                    "N": "5000"
                 }
             }
             """

@@ -7,6 +7,8 @@ import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from './ErrorInfo'
 import { Location, Cell } from './geolocateCell'
 import { pipe } from 'fp-ts/lib/pipeable'
+import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations'
+import { isSome } from 'fp-ts/lib/Option'
 
 export const addCellToCacheIfNotExists = ({
 	dynamodb,
@@ -20,11 +22,25 @@ export const addCellToCacheIfNotExists = ({
 	cell,
 	lat,
 	lng,
-	accuracy,
 }: Cell & Location): TE.TaskEither<ErrorInfo, void> =>
 	pipe(
 		TE.tryCatch<ErrorInfo, void>(
 			async () => {
+				const location = fromDeviceLocations([
+					{
+						lat,
+						lng,
+					},
+				])
+				if (!isSome(location)) {
+					throw new Error(
+						`Failed to determine cell location from ${JSON.stringify({
+							lat,
+							lng,
+						})}`,
+					)
+				}
+				const cellGeoLocation = location.value
 				const query = {
 					TableName,
 					Item: {
@@ -32,13 +48,13 @@ export const addCellToCacheIfNotExists = ({
 							S: cellId({ area, mccmnc, cell }),
 						},
 						lat: {
-							N: `${lat}`,
+							N: `${cellGeoLocation.lat}`,
 						},
 						lng: {
-							N: `${lng}`,
+							N: `${cellGeoLocation.lng}`,
 						},
 						accuracy: {
-							N: `${accuracy}`,
+							N: `${cellGeoLocation.accuracy}`,
 						},
 						ttl: {
 							N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
