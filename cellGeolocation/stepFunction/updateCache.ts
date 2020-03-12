@@ -9,10 +9,18 @@ import { Location } from '../geolocateCell'
 const TableName = process.env.CACHE_TABLE || ''
 const dynamodb = new DynamoDBClient({})
 
-export const handler = async ({
-	roaming,
-	cellgeo: { lat, lng, accuracy },
-}: StateDocument & { cellgeo: Location }): Promise<boolean> => {
+export const handler = async (
+	event: StateDocument & { cellgeo: Location },
+): Promise<boolean> => {
+	console.log(
+		JSON.stringify({
+			event,
+		}),
+	)
+	const {
+		roaming,
+		cellgeo: { lat, lng, accuracy },
+	} = event
 	await dynamodb.send(
 		new PutItemCommand({
 			TableName,

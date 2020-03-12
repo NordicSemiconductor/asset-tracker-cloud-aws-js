@@ -10,7 +10,17 @@ export const logsCommand = ({
 	region: string
 }): ComandDefinition => ({
 	command: 'logs',
-	action: async () => {
+	options: [
+		{
+			flags: '-n, --numLogGroups <numLogGroups>',
+			description: 'Number of logGroups to consider, default: 1',
+		},
+		{
+			flags: '-s, --numLogStreams <numLogStreams>',
+			description: 'Number of logStreams to consider, default: 100',
+		},
+	],
+	action: async ({ numLogGroups, numLogStreams }) => {
 		const cf = new CloudFormation({ region })
 		const logs = new CloudWatchLogs({ region })
 
@@ -29,7 +39,7 @@ export const logsCommand = ({
 						logGroupName,
 						orderBy: 'LastEventTime',
 						descending: true,
-						limit: 10,
+						limit: numLogGroups ? parseInt(numLogGroups, 10) : 1,
 					})
 					.promise()
 				return {
@@ -50,7 +60,7 @@ export const logsCommand = ({
 								logGroupName,
 								logStreamName,
 								startFromHead: false,
-								limit: 100,
+								limit: numLogStreams ? parseInt(numLogStreams, 10) : 100,
 							})
 							.promise(),
 					),

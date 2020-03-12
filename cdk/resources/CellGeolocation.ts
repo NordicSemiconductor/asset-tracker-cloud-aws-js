@@ -249,6 +249,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			true,
 		)
 
+		// FIXME: Enable logging
 		const stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineType: StateMachineType.EXPRESS,
 			definition: new StepFunctions.Task(this, 'Resolve from cache', {

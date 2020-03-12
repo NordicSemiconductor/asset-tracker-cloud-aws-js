@@ -1,10 +1,18 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb-v2-node'
-import { cellId } from '@bifravst/cell-geolocation-helpers'
+import {
+	cellId,
+	cellFromGeolocations,
+} from '@bifravst/cell-geolocation-helpers'
 import { StateDocument, CellGeo } from './types'
+import { isSome } from 'fp-ts/lib/Option'
 
 const TableName = process.env.LOCATIONS_TABLE || ''
 const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''
 const dynamodb = new DynamoDBClient({})
+const c = cellFromGeolocations({
+	minCellDiameterInMeters: 5000,
+	percentile: 0.9,
+})
 
 export const handler = async (input: StateDocument): Promise<CellGeo> => {
 	const { Items } = await dynamodb.send(
@@ -22,29 +30,25 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 	)
 
 	if (Items?.length) {
-		// Calculate the center of the cell as the median of all lat and lng measurements on record
-		const asc = (a: number, b: number) => a - b
-		const lats = Items.map(({ lat }) => parseFloat(lat.N as string)).sort(asc)
-		const lngs = Items.map(({ lng }) => parseFloat(lng.N as string)).sort(asc)
-		// FIXME: accuracy should be calculated, and not be the median here
-		const accuracies = Items.map(({ accuracy }) =>
-			parseFloat(accuracy.N as string),
-		).sort(asc)
-
-		console.log(
-			JSON.stringify({
-				cell: input.roaming,
-				lats,
-				lngs,
-				accuracies,
-			}),
+		const location = c(
+			Items.map(({ lat, lng }) => ({
+				lat: parseFloat(lat.N as string),
+				lng: parseFloat(lng.N as string),
+			})),
 		)
 
-		return {
-			located: true,
-			lat: lats[Math.floor(lats.length / 2)],
-			lng: lngs[Math.floor(lngs.length / 2)],
-			accuracy: accuracies[Math.floor(accuracies.length / 2)],
+		if (isSome(location)) {
+			console.log(
+				JSON.stringify({
+					cell: input.roaming,
+					location,
+				}),
+			)
+
+			return {
+				located: true,
+				...location.value,
+			}
 		}
 	}
 	return {
