@@ -301,6 +301,7 @@ export class BifravstStack extends CloudFormation.Stack {
 						Resource: [
 							'arn:aws:iot:*:*:topic/$aws/things/${iot:ClientId}/*',
 							'arn:aws:iot:*:*:topic/${iot:ClientId}/batch',
+							'arn:aws:iot:*:*:topic/${iot:ClientId}/messages',
 						],
 					},
 				],

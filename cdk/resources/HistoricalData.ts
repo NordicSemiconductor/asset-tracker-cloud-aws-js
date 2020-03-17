@@ -162,6 +162,33 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		})
 
+		new IoT.CfnTopicRule(this, 'storeMessages', {
+			topicRulePayload: {
+				awsIotSqlVersion: '2016-03-23',
+				description: 'Store all messages on S3',
+				ruleDisabled: false,
+				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
+				sql:
+					'SELECT * as message, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'+/messages\'',
+				actions: [
+					{
+						s3: {
+							bucketName: this.dataBucket.bucketName,
+							key:
+								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${regexp_replace(clientid(), "/", "")}-${newuuid()}.json',
+							roleArn: topicRuleRole.roleArn,
+						},
+					},
+				],
+				errorAction: {
+					republish: {
+						roleArn: topicRuleRole.roleArn,
+						topic: 'errors',
+					},
+				},
+			},
+		})
+
 		// Batch messages
 
 		const processBatchMessages = new Lambda.Function(

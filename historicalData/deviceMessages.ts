@@ -129,6 +129,22 @@ export const deviceMessagesFields: {
 			},
 		},
 	},
+	message: {
+		type: AthenaTableStructFieldType.struct,
+		fields: {
+			btn: {
+				type: AthenaTableStructFieldType.struct,
+				fields: {
+					ts: {
+						type: AthenaTableScalarFieldType.bigint,
+					},
+					v: {
+						type: AthenaTableScalarFieldType.int,
+					},
+				},
+			},
+		},
+	},
 	timestamp: {
 		type: AthenaTableScalarFieldType.timestamp,
 	},
