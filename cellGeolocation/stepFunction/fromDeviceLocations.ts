@@ -1,14 +1,15 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { StateDocument, CellGeo } from './types'
+import { MaybeCellGeoLocation } from './types'
 import { isSome } from 'fp-ts/lib/Option'
 import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
+import { Cell } from '../geolocateCell'
 
 const TableName = process.env.LOCATIONS_TABLE || ''
 const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX || ''
 const dynamodb = new DynamoDBClient({})
 
-export const handler = async (input: StateDocument): Promise<CellGeo> => {
+export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	const { Items } = await dynamodb.send(
 		new QueryCommand({
 			TableName,
@@ -16,7 +17,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 			KeyConditionExpression: 'cellId = :cellId',
 			ExpressionAttributeValues: {
 				[':cellId']: {
-					S: cellId(input.roaming),
+					S: cellId(cell),
 				},
 			},
 			ProjectionExpression: 'lat,lng,accuracy',
@@ -34,7 +35,7 @@ export const handler = async (input: StateDocument): Promise<CellGeo> => {
 		if (isSome(location)) {
 			console.log(
 				JSON.stringify({
-					cell: input.roaming,
+					cell,
 					location,
 				}),
 			)

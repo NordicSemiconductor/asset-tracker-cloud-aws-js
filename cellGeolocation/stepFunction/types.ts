@@ -1,10 +1,5 @@
-import { Cell, Location } from '../geolocateCell'
+import { Location } from '../geolocateCell'
 
-export type CellGeo = {
+export type MaybeCellGeoLocation = {
 	located: boolean
 } & Partial<Location>
-
-export type StateDocument = {
-	deviceId: string
-	roaming: Cell
-}

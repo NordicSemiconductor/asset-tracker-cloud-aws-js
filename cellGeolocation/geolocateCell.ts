@@ -25,7 +25,7 @@ export const geolocateCellFromCache = ({
 	dynamodb: DynamoDBClient
 	TableName: string
 }) => (cell: Cell) =>
-	TE.tryCatch<ErrorInfo, { lat: number; lng: number }>(
+	TE.tryCatch<ErrorInfo, Location>(
 		async () => {
 			const id = cellId(cell)
 			const { Item } = await dynamodb.send(

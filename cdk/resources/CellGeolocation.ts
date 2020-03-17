@@ -11,6 +11,7 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
+import { Role } from '@aws-cdk/aws-iam'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -18,6 +19,8 @@ import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 export class CellGeolocation extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.Table
 	public readonly deviceCellGeolocationTable: DynamoDB.Table
+	public readonly stateMachine: StepFunctions.IStateMachine
+	public readonly stateMachineName: string
 
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -180,34 +183,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		lambdaLogGroup(this, 'cacheCellGeolocation', cacheCellGeolocation)
 
-		const cacheCellGeolocationFromDeviceIfNewCell = new Lambda.Function(
-			this,
-			'cacheCellGeolocationFromDeviceIfNewCell',
-			{
-				layers: [baseLayer],
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.cacheCellGeolocationFromDeviceIfNewCell,
-				),
-				description:
-					'Make sure this location is available in the cache, if it is the first time we see this cell',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: ['dynamodb:PutItem'],
-						resources: [this.cacheTable.tableArn],
-					}),
-				],
-				environment: {
-					CACHE_TABLE: this.cacheTable.tableName,
-				},
-			},
-		)
-
 		// Optional step
 		let geolocateCellFromUnwiredLabs: Lambda.IFunction | undefined = undefined
 		if (enableUnwiredApi) {
@@ -249,9 +224,18 @@ export class CellGeolocation extends CloudFormation.Resource {
 			true,
 		)
 
-		// FIXME: Enable logging
-		const stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
-			stateMachineType: StateMachineType.EXPRESS,
+		const stateMachineRole = new Role(this, 'stateMachineRole', {
+			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
+		})
+
+		/**
+		 * This is a STANDARD StepFunction because we want the user to be able to execute it and query it for the result.
+		 * This is not possible with EXPRESS StepFunctions.
+		 */
+		this.stateMachineName = `${this.stack.stackName}-cellGeo`
+		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
+			stateMachineName: this.stateMachineName,
+			stateMachineType: StateMachineType.STANDARD,
 			definition: new StepFunctions.Task(this, 'Resolve from cache', {
 				task: new StepFunctionTasks.InvokeFunction(geolocateCellFromCache),
 				resultPath: '$.cellgeo',
@@ -349,6 +333,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					),
 			),
 			timeout: CloudFormation.Duration.minutes(5),
+			role: stateMachineRole,
 		})
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
@@ -364,14 +349,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 						}),
 					],
 				}),
-				stepFunctions: new IAM.PolicyDocument({
-					statements: [
-						new IAM.PolicyStatement({
-							actions: ['states:StartExecution'],
-							resources: [stateMachine.stateMachineArn],
-						}),
-					],
-				}),
 				dynamodb: new IAM.PolicyDocument({
 					statements: [
 						new IAM.PolicyStatement({
@@ -383,29 +360,54 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		new IoT.CfnTopicRule(this, 'resolveCellIds', {
+		new IoT.CfnTopicRule(this, 'storeCellGeolocationsFromDevices', {
 			topicRulePayload: {
 				awsIotSqlVersion: '2016-03-23',
-				description:
-					'Executes a step function which will geolocate the cell location provided by the device',
+				description: 'Stores the geolocations for cells from devices',
 				ruleDisabled: false,
 				sql: [
-					'SELECT current.state.reported.roam.v AS roaming, topic(3) as deviceId',
+					'SELECT',
+					'newuuid() as uuid,',
+					'current.state.reported.roam.v.cell as cell,',
+					'current.state.reported.roam.v.mccmnc as mccmnc,',
+					'current.state.reported.roam.v.area as area,',
+					// see cellGeolocation/cellId.ts for format of cellId
+					'concat(current.state.reported.roam.v.cell,',
+					'"-",',
+					'current.state.reported.roam.v.mccmnc,',
+					'"-",',
+					'current.state.reported.roam.v.area) AS cellId,',
+					'current.state.reported.gps.v.lat AS lat,',
+					'current.state.reported.gps.v.lng AS lng,',
+					'current.state.reported.gps.v.acc AS accuracy,',
+					'concat("device:", topic(3)) as source,',
+					"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
 					`FROM '$aws/things/+/shadow/update/documents'`,
-					'WHERE current.state.reported.roam.v.cell <> NULL',
+					'WHERE',
+					// only if it actually has roaming information
+					'current.state.reported.roam.v.area <> NULL',
 					'AND current.state.reported.roam.v.mccmnc <> NULL',
-					'AND current.state.reported.roam.v.area <> NULL',
-					// Only trigger if the reported cell changed
+					'AND current.state.reported.roam.v.cell <> NULL',
+					// and if it has GPS location
+					'AND current.state.reported.gps.v.lat <> NULL',
+					'AND current.state.reported.gps.v.lng <> NULL',
+					// only if the location has changed
 					'AND (',
-					'isUndefined(previous.state.reported.roam.v.cell)',
+					'isUndefined(previous.state.reported.gps.v.lat)',
 					'OR',
-					'previous.state.reported.roam.v.cell <> current.state.reported.roam.v.cell',
+					'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
+					'OR',
+					'isUndefined(previous.state.reported.gps.v.lng)',
+					'OR',
+					'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
 					')',
 				].join(' '),
 				actions: [
 					{
-						stepFunctions: {
-							stateMachineName: stateMachine.stateMachineName,
+						dynamoDBv2: {
+							putItem: {
+								tableName: this.deviceCellGeolocationTable.tableName,
+							},
 							roleArn: topicRuleRole.roleArn,
 						},
 					},
@@ -417,82 +419,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 					},
 				},
 			},
-		})
-
-		const storeCellGeolocationsFromDevices = new IoT.CfnTopicRule(
-			this,
-			'storeCellGeolocationsFromDevices',
-			{
-				topicRulePayload: {
-					awsIotSqlVersion: '2016-03-23',
-					description: 'Stores the geolocations for cells from devices',
-					ruleDisabled: false,
-					sql: [
-						'SELECT',
-						'newuuid() as uuid,',
-						'current.state.reported.roam.v.cell as cell,',
-						'current.state.reported.roam.v.mccmnc as mccmnc,',
-						'current.state.reported.roam.v.area as area,',
-						// see cellGeolocation/cellId.ts for format of cellId
-						'concat(current.state.reported.roam.v.cell,',
-						'"-",',
-						'current.state.reported.roam.v.mccmnc,',
-						'"-",',
-						'current.state.reported.roam.v.area) AS cellId,',
-						'current.state.reported.gps.v.lat AS lat,',
-						'current.state.reported.gps.v.lng AS lng,',
-						'current.state.reported.gps.v.acc AS accuracy,',
-						'concat("device:", topic(3)) as source,',
-						"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
-						`FROM '$aws/things/+/shadow/update/documents'`,
-						'WHERE',
-						// only if it actually has roaming information
-						'current.state.reported.roam.v.area <> NULL',
-						'AND current.state.reported.roam.v.mccmnc <> NULL',
-						'AND current.state.reported.roam.v.cell <> NULL',
-						// and if it has GPS location
-						'AND current.state.reported.gps.v.lat <> NULL',
-						'AND current.state.reported.gps.v.lng <> NULL',
-						// only if the location has changed
-						'AND (',
-						'isUndefined(previous.state.reported.gps.v.lat)',
-						'OR',
-						'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
-						'OR',
-						'isUndefined(previous.state.reported.gps.v.lng)',
-						'OR',
-						'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
-						')',
-					].join(' '),
-					actions: [
-						{
-							dynamoDBv2: {
-								putItem: {
-									tableName: this.deviceCellGeolocationTable.tableName,
-								},
-								roleArn: topicRuleRole.roleArn,
-							},
-						},
-						{
-							lambda: {
-								functionArn:
-									cacheCellGeolocationFromDeviceIfNewCell.functionArn,
-							},
-						},
-					],
-					errorAction: {
-						republish: {
-							roleArn: topicRuleRole.roleArn,
-							topic: 'errors',
-						},
-					},
-				},
-			},
-		)
-
-		cacheCellGeolocationFromDeviceIfNewCell.addPermission('invokeFromIotRule', {
-			principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
-			sourceArn: storeCellGeolocationsFromDevices.attrArn,
 		})
 	}
 }
