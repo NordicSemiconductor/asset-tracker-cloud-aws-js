@@ -5,6 +5,8 @@ import {
 import { cellId } from '@bifravst/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from './ErrorInfo'
+import { SQS } from 'aws-sdk'
+import { Option, some, none } from 'fp-ts/lib/Option'
 
 export type Cell = {
 	area: number
@@ -25,7 +27,7 @@ export const geolocateCellFromCache = ({
 	dynamodb: DynamoDBClient
 	TableName: string
 }) => (cell: Cell) =>
-	TE.tryCatch<ErrorInfo, Location>(
+	TE.tryCatch<ErrorInfo, Option<Location>>(
 		async () => {
 			const id = cellId(cell)
 			const { Item } = await dynamodb.send(
@@ -40,12 +42,12 @@ export const geolocateCellFromCache = ({
 				}),
 			)
 			if (Item)
-				return {
+				return some({
 					lat: parseFloat(Item.lat.N as string),
 					lng: parseFloat(Item.lng.N as string),
 					accuracy: Item?.accuracy?.N ? parseFloat(Item.accuracy.N) : 5000,
-				}
-			throw new Error('NOT_FOUND')
+				})
+			return none
 		},
 		err => {
 			const id = cellId(cell)
@@ -57,7 +59,66 @@ export const geolocateCellFromCache = ({
 					type: ErrorType.EntityNotFound,
 					message: `Cell ${id} not found!`,
 				}
-			console.error(JSON.stringify({ error: err }))
+			console.error(
+				JSON.stringify({
+					geolocateCellFromCache: {
+						err,
+						cell,
+						TableName,
+					},
+				}),
+			)
+			return {
+				type: ErrorType.InternalError,
+				message: (err as Error).message,
+			}
+		},
+	)
+
+export const queueCellGeolocationResolutionJob = ({
+	sqs,
+	QueueUrl,
+}: {
+	sqs: SQS
+	QueueUrl: string
+}) => (cell: Cell) =>
+	TE.tryCatch(
+		async () => {
+			console.debug(
+				JSON.stringify({
+					queueCellGeolocationResolutionJob: {
+						cell,
+					},
+				}),
+			)
+			const { MessageId, SequenceNumber } = await sqs
+				.sendMessage({
+					QueueUrl,
+					MessageBody: JSON.stringify(cell),
+					MessageGroupId: cellId(cell),
+					MessageDeduplicationId: cellId(cell),
+				})
+				.promise()
+			console.debug(
+				JSON.stringify({
+					queueCellGeolocationResolutionJob: {
+						QueueUrl,
+						MessageId,
+						SequenceNumber,
+					},
+				}),
+			)
+		},
+		err => {
+			console.error(
+				JSON.stringify({
+					queueCellGeolocationResolutionJob: {
+						error: (err as Error).message,
+						cell,
+						QueueUrl,
+					},
+				}),
+			)
 			return {
 				type: ErrorType.InternalError,
 				message: (err as Error).message,

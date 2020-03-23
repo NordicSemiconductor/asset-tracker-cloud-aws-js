@@ -15,7 +15,8 @@ export type BifravstLambdas = {
 	createThingGroup: string
 	concatenateRawMessages: string
 	processBatchMessages: string
-	geolocateCellFromCacheHttpApi: string
+	geolocateCellHttpApi: string
+	invokeStepFunctionFromSQS: string
 	geolocateCellFromCacheStepFunction: string
 	geolocateCellFromDeviceLocationsStepFunction: string
 	geolocateCellFromUnwiredLabsStepFunction: string
@@ -85,6 +86,12 @@ export const prepareResources = async ({
 				'historicalData',
 				'processBatchMessages.ts',
 			),
+			invokeStepFunctionFromSQS: path.resolve(
+				rootDir,
+				'cellGeolocation',
+				'lambda',
+				'invokeStepFunctionFromSQS.ts',
+			),
 			geolocateCellFromCacheStepFunction: path.resolve(
 				rootDir,
 				'cellGeolocation',
@@ -109,11 +116,11 @@ export const prepareResources = async ({
 				'stepFunction',
 				'updateCache.ts',
 			),
-			geolocateCellFromCacheHttpApi: path.resolve(
+			geolocateCellHttpApi: path.resolve(
 				rootDir,
 				'cellGeolocation',
 				'httpApi',
-				'fromCache.ts',
+				'cell.ts',
 			),
 			addCellGeolocationHttpApi: path.resolve(
 				rootDir,

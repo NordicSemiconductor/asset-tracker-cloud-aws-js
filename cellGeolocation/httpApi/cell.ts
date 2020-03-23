@@ -4,13 +4,24 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import { validate } from './validate'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb-v2-node'
-import { geolocateCellFromCache, Cell } from '../geolocateCell'
-import { toStatusCode } from '../ErrorInfo'
+import {
+	geolocateCellFromCache,
+	Cell,
+	queueCellGeolocationResolutionJob,
+} from '../geolocateCell'
+import { toStatusCode, ErrorType } from '../ErrorInfo'
 import { res } from './res'
+import { SQS } from 'aws-sdk'
+import { getOrElse } from '../../util/fp-ts'
 
 const locator = geolocateCellFromCache({
 	dynamodb: new DynamoDBClient({}),
 	TableName: process.env.CACHE_TABLE || '',
+})
+
+const q = queueCellGeolocationResolutionJob({
+	QueueUrl: process.env.CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE || '',
+	sqs: new SQS(),
 })
 
 const inputSchema = new Ajv().compile({
@@ -43,12 +54,30 @@ export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(JSON.stringify(event))
+
 	return pipe(
 		validate<Cell>(inputSchema)(
 			allMembersToInt(event.queryStringParameters || {}),
 		)(),
 		TE.fromEither,
-		TE.chain(pipe(locator)),
+		TE.chain(cell =>
+			pipe(
+				locator(cell),
+				getOrElse.TE(() =>
+					pipe(
+						q(cell),
+						TE.fold(
+							err => TE.left(err),
+							() =>
+								TE.left({
+									type: ErrorType.Conflict,
+									message: 'Calculation for cell geolocation in process',
+								}),
+						),
+					),
+				),
+			),
+		),
 		TE.fold(
 			error =>
 				res(toStatusCode[error.type], {

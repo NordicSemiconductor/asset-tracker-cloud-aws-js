@@ -53,6 +53,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			status,
 			lat,
 			lon,
+			accuracy,
 		}: {
 			status: 'ok' | 'error'
 			message?: string
@@ -124,6 +125,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			return {
 				lat,
 				lng: lon,
+				accuracy,
 				located: true,
 			}
 		}

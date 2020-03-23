@@ -1,5 +1,4 @@
 import * as CloudFormation from '@aws-cdk/core'
-import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
@@ -7,6 +6,7 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { BifravstLambdas } from '../prepare-resources'
 import { logToCloudWatch } from './logToCloudWatch'
+import { CellGeolocation } from './CellGeolocation'
 
 /**
  * Allows to resolve cell geolocations using a GraphQL API
@@ -19,14 +19,12 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		parent: CloudFormation.Stack,
 		id: string,
 		{
-			cellGeolocationCacheTable,
-			deviceCellGeolocationTable,
+			cellgeo,
 			sourceCodeBucket,
 			baseLayer,
 			lambdas,
 		}: {
-			cellGeolocationCacheTable: DynamoDB.ITable
-			deviceCellGeolocationTable: DynamoDB.ITable
+			cellgeo: CellGeolocation
 			sourceCodeBucket: S3.IBucket
 			baseLayer: Lambda.ILayerVersion
 			lambdas: LayeredLambdas<BifravstLambdas>
@@ -34,32 +32,34 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		const geolocateCellFromCache = new Lambda.Function(
-			this,
-			'geolocateCellFromCache',
-			{
-				layers: [baseLayer],
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.geolocateCellFromCacheHttpApi,
-				),
-				description: 'Geolocate cells from cache',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: ['dynamodb:GetItem'],
-						resources: [cellGeolocationCacheTable.tableArn],
-					}),
-				],
-				environment: {
-					CACHE_TABLE: cellGeolocationCacheTable.tableName,
-				},
+		const geolocateCell = new Lambda.Function(this, 'geolocateCell', {
+			layers: [baseLayer],
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: Lambda.Code.bucket(
+				sourceCodeBucket,
+				lambdas.lambdaZipFileNames.geolocateCellHttpApi,
+			),
+			description: 'Geolocate cells from cache',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['dynamodb:GetItem'],
+					resources: [cellgeo.cacheTable.tableArn],
+				}),
+				new IAM.PolicyStatement({
+					resources: [cellgeo.resolutionJobsQueue.queueArn],
+					actions: ['sqs:SendMessage'],
+				}),
+			],
+			environment: {
+				CACHE_TABLE: cellgeo.cacheTable.tableName,
+				CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE:
+					cellgeo.resolutionJobsQueue.queueUrl,
 			},
-		)
+		})
 
 		const addCellGeolocation = new Lambda.Function(this, 'addCellGeolocation', {
 			layers: [baseLayer],
@@ -77,14 +77,15 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				new IAM.PolicyStatement({
 					actions: ['dynamodb:PutItem'],
 					resources: [
-						cellGeolocationCacheTable.tableArn,
-						deviceCellGeolocationTable.tableArn,
+						cellgeo.cacheTable.tableArn,
+						cellgeo.deviceCellGeolocationTable.tableArn,
 					],
 				}),
 			],
 			environment: {
-				CACHE_TABLE: cellGeolocationCacheTable.tableName,
-				DEVICE_CELL_GEOLOCATION_TABLE: deviceCellGeolocationTable.tableName,
+				CACHE_TABLE: cellgeo.cacheTable.tableName,
+				DEVICE_CELL_GEOLOCATION_TABLE:
+					cellgeo.deviceCellGeolocationTable.tableName,
 			},
 		})
 
@@ -106,7 +107,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCellFromCache.functionArn}/invocations`,
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCell.functionArn}/invocations`,
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -114,15 +115,15 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		const geolocateRoute = new HttpApi.CfnRoute(
 			this,
-			'httpApiAddCellGeolocateRoute',
+			'httpApiCellGeolocateRoute',
 			{
 				apiId: this.api.ref,
-				routeKey: 'GET /geolocate',
+				routeKey: 'GET /cellgeolocation',
 				target: `integrations/${geolocateIntegration.ref}`,
 			},
 		)
 
-		geolocateCellFromCache.addPermission('invokeByHttpApi', {
+		geolocateCell.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/geolocate`,
 		})
@@ -144,7 +145,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			'httpApiAddCellGeolocationRoute',
 			{
 				apiId: this.api.ref,
-				routeKey: 'POST /geolocation',
+				routeKey: 'POST /cellgeolocation',
 				target: `integrations/${geolocationIntegration.ref}`,
 			},
 		)

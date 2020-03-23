@@ -417,16 +417,6 @@ export class BifravstStack extends CloudFormation.Stack {
 			isTest,
 		})
 
-		new CloudFormation.CfnOutput(this, 'cellGeoLocationsCacheTable', {
-			value: cellgeo.cacheTable.tableName,
-			exportName: `${this.stackName}:cellGeoLocationsCacheTable`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'cellGeoStateMachineArn', {
-			value: cellgeo.stateMachine.stateMachineArn,
-			exportName: `${this.stackName}:cellGeoStateMachineArn`,
-		})
-
 		cellgeo.stateMachine.grantStartExecution(userRole)
 
 		userRole.addToPolicy(
@@ -449,8 +439,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			baseLayer,
 			lambdas: lambdas,
 			sourceCodeBucket,
-			cellGeolocationCacheTable: cellgeo.cacheTable,
-			deviceCellGeolocationTable: cellgeo.deviceCellGeolocationTable,
+			cellgeo,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {

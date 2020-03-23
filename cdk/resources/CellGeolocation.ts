@@ -12,6 +12,7 @@ import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
+import * as SQS from '@aws-cdk/aws-sqs'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -21,6 +22,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 	public readonly deviceCellGeolocationTable: DynamoDB.Table
 	public readonly stateMachine: StepFunctions.IStateMachine
 	public readonly stateMachineName: string
+	public readonly resolutionJobsQueue: SQS.IQueue
 
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -40,6 +42,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 		},
 	) {
 		super(parent, id)
+
+		this.stateMachineName = `${this.stack.stackName}-cellGeo`
 
 		this.cacheTable = new DynamoDB.Table(this, 'cellGeolocationCache', {
 			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
@@ -232,7 +236,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 		 * This is a STANDARD StepFunction because we want the user to be able to execute it and query it for the result.
 		 * This is not possible with EXPRESS StepFunctions.
 		 */
-		this.stateMachineName = `${this.stack.stackName}-cellGeo`
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: this.stateMachineName,
 			stateMachineType: StateMachineType.STANDARD,
@@ -420,5 +423,56 @@ export class CellGeolocation extends CloudFormation.Resource {
 				},
 			},
 		})
+
+		this.resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
+			fifo: true,
+			queueName: `${`${id}-${this.stack.stackName}`.substr(0, 75)}.fifo`,
+		})
+
+		const invokeStepFunctionFromSQS = new Lambda.Function(
+			this,
+			'invokeStepFunctionFromSQS',
+			{
+				handler: 'index.handler',
+				runtime: Lambda.Runtime.NODEJS_12_X,
+				timeout: CloudFormation.Duration.seconds(10),
+				memorySize: 1792,
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					lambdas.lambdaZipFileNames.invokeStepFunctionFromSQS,
+				),
+				description:
+					'Invoke the cell geolocation resolution step function for SQS messages',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						actions: [
+							'sqs:ReceiveMessage',
+							'sqs:DeleteMessage',
+							'sqs:GetQueueAttributes',
+						],
+						resources: [this.resolutionJobsQueue.queueArn],
+					}),
+				],
+				environment: {
+					STEP_FUNCTION_ARN: this.stateMachine.stateMachineArn,
+				},
+			},
+		)
+
+		lambdaLogGroup(this, 'invokeStepFunctionFromSQS', invokeStepFunctionFromSQS)
+
+		invokeStepFunctionFromSQS.addPermission('invokeBySQS', {
+			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
+			sourceArn: this.resolutionJobsQueue.queueArn,
+		})
+
+		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
+			eventSourceArn: this.resolutionJobsQueue.queueArn,
+			target: invokeStepFunctionFromSQS,
+			batchSize: 10,
+		})
+
+		this.stateMachine.grantStartExecution(invokeStepFunctionFromSQS)
 	}
 }
