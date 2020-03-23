@@ -83,9 +83,20 @@ export const handler = async (
 				res(toStatusCode[error.type], {
 					expires: 3600,
 				})(error),
-			res(200, {
-				expires: 86400,
-			}),
+			cell => {
+				if (cell.unresolved) {
+					return res(toStatusCode[ErrorType.EntityNotFound], {
+						expires: 86400,
+					})({})
+				}
+				return res(200, {
+					expires: 86400,
+				})({
+					lat: cell.lat,
+					lng: cell.lng,
+					accuracy: cell.accuracy,
+				})
+			},
 		),
 	)()
 }

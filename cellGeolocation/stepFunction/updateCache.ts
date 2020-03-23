@@ -3,27 +3,36 @@ import {
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb-v2-node'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
-import { Location, Cell } from '../geolocateCell'
+import { Cell } from '../geolocateCell'
+import { MaybeCellGeoLocation } from './types'
 
 const TableName = process.env.CACHE_TABLE || ''
 const dynamodb = new DynamoDBClient({})
 
 export const handler = async (
-	geolocatedCell: Cell & { cellgeo: Location },
+	maybeLocatedCell: Cell & {
+		cellgeo: MaybeCellGeoLocation
+	},
 ): Promise<boolean> => {
 	console.log(
 		JSON.stringify({
-			geolocatedCell,
+			geolocatedCell: maybeLocatedCell,
 		}),
 	)
-	const { lat, lng, accuracy } = geolocatedCell.cellgeo
-	await dynamodb.send(
-		new PutItemCommand({
-			TableName,
-			Item: {
-				cellId: {
-					S: cellId(geolocatedCell),
-				},
+	const { located } = maybeLocatedCell.cellgeo
+	let Item = {
+		cellId: {
+			S: cellId(maybeLocatedCell),
+		},
+		ttl: {
+			N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
+		},
+	}
+	if (located) {
+		const { lat, lng, accuracy } = maybeLocatedCell.cellgeo
+		Item = {
+			...Item,
+			...{
 				lat: {
 					N: `${lat}`,
 				},
@@ -33,11 +42,25 @@ export const handler = async (
 				accuracy: {
 					N: `${accuracy}`,
 				},
-				ttl: {
-					N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
+			},
+		}
+	} else {
+		Item = {
+			...Item,
+			...{
+				unresolved: {
+					BOOL: true,
 				},
 			},
+		}
+	}
+
+	await dynamodb.send(
+		new PutItemCommand({
+			TableName,
+			Item,
 		}),
 	)
+
 	return true
 }

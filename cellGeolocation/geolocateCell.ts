@@ -27,7 +27,7 @@ export const geolocateCellFromCache = ({
 	dynamodb: DynamoDBClient
 	TableName: string
 }) => (cell: Cell) =>
-	TE.tryCatch<ErrorInfo, Option<Location>>(
+	TE.tryCatch<ErrorInfo, Option<{ unresolved: boolean } & Partial<Location>>>(
 		async () => {
 			const id = cellId(cell)
 			const { Item } = await dynamodb.send(
@@ -41,12 +41,22 @@ export const geolocateCellFromCache = ({
 					ProjectionExpression: 'lat,lng,accuracy',
 				}),
 			)
-			if (Item)
-				return some({
-					lat: parseFloat(Item.lat.N as string),
-					lng: parseFloat(Item.lng.N as string),
-					accuracy: Item?.accuracy?.N ? parseFloat(Item.accuracy.N) : 5000,
-				})
+			if (Item) {
+				const unresolved = Item.unresolved?.BOOL ?? false
+				if (unresolved) {
+					return some({
+						unresolved,
+					})
+				} else {
+					return some({
+						unresolved,
+						lat: parseFloat(Item.lat.N as string),
+						lng: parseFloat(Item.lng.N as string),
+						accuracy: Item?.accuracy?.N ? parseFloat(Item.accuracy.N) : 5000,
+					})
+				}
+			}
+
 			return none
 		},
 		err => {

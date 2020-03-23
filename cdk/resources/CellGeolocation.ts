@@ -319,14 +319,25 @@ export class CellGeolocation extends CloudFormation.Resource {
 													),
 												)
 												.otherwise(
-													new StepFunctions.Fail(
+													new StepFunctions.Task(
 														this,
-														'Failed (no resolution)',
+														'Cache result (not resolved)',
 														{
-															error: 'FAILED',
-															cause:
-																'The cell geolocation could not be resolved',
+															task: new StepFunctionTasks.InvokeFunction(
+																cacheCellGeolocation,
+															),
+															resultPath: '$.storedInCache',
 														},
+													).next(
+														new StepFunctions.Fail(
+															this,
+															'Failed (no resolution)',
+															{
+																error: 'FAILED',
+																cause:
+																	'The cell geolocation could not be resolved',
+															},
+														),
 													),
 												),
 										)
