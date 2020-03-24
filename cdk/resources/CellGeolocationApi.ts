@@ -9,7 +9,10 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 
 /**
- * Allows to resolve cell geolocations using a GraphQL API
+ * Allows to resolve cell geolocations using a HTTP API
+ *
+ * This API is public because it does not expose critical information.
+ * If you want to protect this API, look into enabling Authentication on HTTP APIs here: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html
  */
 export class CellGeolocationApi extends CloudFormation.Resource {
 	public readonly api: HttpApi.CfnApi
@@ -42,7 +45,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				sourceCodeBucket,
 				lambdas.lambdaZipFileNames.geolocateCellHttpApi,
 			),
-			description: 'Geolocate cells from cache',
+			description: 'Geolocate cells',
 			initialPolicy: [
 				logToCloudWatch,
 				new IAM.PolicyStatement({
@@ -125,7 +128,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		geolocateCell.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/geolocate`,
+			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/cellgeolocation`,
 		})
 
 		const geolocationIntegration = new HttpApi.CfnIntegration(
@@ -152,7 +155,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		addCellGeolocation.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/geolocation`,
+			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cellgeolocation`,
 		})
 
 		const deployment = new HttpApi.CfnDeployment(this, 'httpApiDeployment', {

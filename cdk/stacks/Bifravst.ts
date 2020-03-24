@@ -428,13 +428,6 @@ export class BifravstStack extends CloudFormation.Stack {
 			}),
 		)
 
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				actions: ['dynamodb:GetItem'],
-				resources: [cellgeo.cacheTable.tableArn],
-			}),
-		)
-
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			baseLayer,
 			lambdas: lambdas,

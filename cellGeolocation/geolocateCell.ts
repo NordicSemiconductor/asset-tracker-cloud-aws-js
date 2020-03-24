@@ -38,7 +38,7 @@ export const geolocateCellFromCache = ({
 							S: id,
 						},
 					},
-					ProjectionExpression: 'lat,lng,accuracy',
+					ProjectionExpression: 'lat,lng,accuracy,unresolved',
 				}),
 			)
 			if (Item) {

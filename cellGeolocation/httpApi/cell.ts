@@ -81,7 +81,7 @@ export const handler = async (
 		TE.fold(
 			error =>
 				res(toStatusCode[error.type], {
-					expires: 3600,
+					expires: 60,
 				})(error),
 			cell => {
 				if (cell.unresolved) {
