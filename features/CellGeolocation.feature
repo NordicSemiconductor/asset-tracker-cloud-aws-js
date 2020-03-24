@@ -1,4 +1,4 @@
-Feature: Cell Geolocation
+Feature: Cell Geolocation API
 
     GPS fixes will be stored with the cell id
     so that the UI can show an approximate tracker location
@@ -8,6 +8,7 @@ Feature: Cell Geolocation
 
         Given I am run after the "Connect a Cat Tracker" feature
         And I am run after the "Device: Update Shadow" feature
+        And the endpoint is "{geolocationApiUrl}"
 
     Scenario: Device enters a cell
 
@@ -49,65 +50,26 @@ Feature: Cell Geolocation
             }
             """
 
-    Scenario: User can start the step function to resolve the cell
+    Scenario: Query a cell: first time
 
-        Given I am authenticated with Cognito
-        When I execute "startExecution" of the AWS StepFunctions SDK with
+        The first time the API is called, the cell geolocation will not be
+        available and has to be calculated, therefore the API will return 409 (Conflict)
+
+        When I GET /cellgeolocation?cell={cellId}&area=211&mccmnc=26201
+        Then the response status code should be 409
+        And the response Access-Control-Allow-Origin should be "*"
+
+    Scenario: Query a cell
+
+        When I GET /cellgeolocation?cell={cellId}&area=211&mccmnc=26201
+        Then the response status code should be 200
+        And the response Access-Control-Allow-Origin should be "*"
+        And the response Content-Type should be "application/json"
+        And the response should equal this JSON
             """
             {
-                "stateMachineArn": "{cellGeoStateMachineArn}",
-                "input": "{\"area\":211,\"mccmnc\":26201,\"cell\":{cellId}}"
-            }
-            """
-        Then "$length(awsSdk.res.executionArn) > 0" should be true
-        And I store "awsSdk.res.executionArn" into "executionArn"
-
-    Scenario: User can query the step function execution
-
-        Given I am authenticated with Cognito
-        When I execute "describeExecution" of the AWS StepFunctions SDK with
-            """
-            {
-                "executionArn": "{executionArn}"
-            }
-            """
-        Then "awsSdk.res" should match this JSON
-            """
-            {
-                "executionArn": "{executionArn}",
-                "stateMachineArn": "{cellGeoStateMachineArn}",
-                "status": "SUCCEEDED",
-                "input": "{\"area\":211,\"mccmnc\":26201,\"cell\":{cellId}}",
-                "output": "{\"area\":211,\"mccmnc\":26201,\"cell\":{cellId},\"cellgeo\":{\"located\":true,\"lat\":{lat},\"lng\":{lng},\"accuracy\":5000},\"storedInCache\":true}"
-            }
-            """
-
-    Scenario: User can resolve the cell using the cache table
-
-        Given I am authenticated with Cognito
-        When I execute "getItem" of the AWS DynamoDB SDK with
-            """
-            {
-                "TableName": "{cellGeoLocationsCacheTable}",
-                "Key": {
-                    "cellId": {
-                        "S": "{cellId}-26201-211"
-                    }
-                },
-                "ProjectionExpression": "lat,lng,accuracy"
-            }
-            """
-        Then "awsSdk.res.Item" should equal this JSON
-            """
-            {
-                "lat": {
-                    "N": "{lat}"
-                },
-                "lng": {
-                    "N": "{lng}"
-                },
-                "accuracy": {
-                    "N": "5000"
-                }
+            "lng": {lng},
+            "lat": {lat},
+            "accuracy": 5000
             }
             """

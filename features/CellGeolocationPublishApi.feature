@@ -2,7 +2,6 @@ Feature: Cell Geolocation Publish API
 
     Trusted clients can publish cell geolocation information,
     so it becomes available for querying.
-    # FIXME: Authenticate using API Key
 
     Background:
 
@@ -16,7 +15,7 @@ Feature: Cell Geolocation Publish API
 
     Scenario: Provice cell geolocation
 
-        When I POST to /geolocation with this JSON
+        When I POST to /cellgeolocation with this JSON
             """
             {
             "cell": {cellId},
@@ -31,7 +30,7 @@ Feature: Cell Geolocation Publish API
 
     Scenario: Query a cell
 
-        When I GET /geolocate?cell={cellId}&area={area}&mccmnc={mccmnc}
+        When I GET /cellgeolocation?cell={cellId}&area={area}&mccmnc={mccmnc}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
