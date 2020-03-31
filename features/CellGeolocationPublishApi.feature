@@ -13,7 +13,7 @@ Feature: Cell Geolocation Publish API
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
 
-    Scenario: Provice cell geolocation
+    Scenario: Provide cell geolocation
 
         When I POST to /cellgeolocation with this JSON
             """
