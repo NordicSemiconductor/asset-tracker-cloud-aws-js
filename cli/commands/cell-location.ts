@@ -33,7 +33,7 @@ export const cellLocation = ({
 		const query = athenaQuery({
 			athena,
 			WorkGroup,
-			backoff: (() => {
+			runningBackoff: (() => {
 				const b = backoff.exponential({
 					randomisationFactor: 0,
 					initialDelay: 1000,

@@ -2,7 +2,6 @@ import { regexMatcher } from '@coderbyheart/bdd-feature-runner-aws'
 import { BifravstWorld } from '../run-features'
 import { athenaQuery, parseAthenaResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
-import { exponential } from 'backoff'
 
 export const athenaStepRunners = ({
 	region,
@@ -29,15 +28,6 @@ export const athenaStepRunners = ({
 			errorLog: async (...args: any) => {
 				await runner.progress('[athena:error]', JSON.stringify(args))
 			},
-			backoff: (() => {
-				const b = exponential({
-					randomisationFactor: 0,
-					initialDelay: 1000,
-					maxDelay: 5000,
-				})
-				b.failAfter(14) // 62000
-				return b
-			})(),
 		})
 		await runner.progress('[athena]', step.interpolatedArgument)
 		const ResultSet = await q({ QueryString: step.interpolatedArgument })
