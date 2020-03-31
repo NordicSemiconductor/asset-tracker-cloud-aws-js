@@ -12,11 +12,17 @@ export const connectCommand = ({
 	certsDir: string
 }): ComandDefinition => ({
 	command: 'connect <deviceId>',
-	action: async (deviceId: string) =>
+	options: [
+		{
+			flags: '-e, --endpoint <endpoint>',
+			description: `AWS IoT endpoint to use, default: ${endpoint}`,
+		},
+	],
+	action: async (deviceId: string, { endpoint: e }) =>
 		connect({
 			deviceId,
 			deviceUiUrl,
-			endpoint,
+			endpoint: e || endpoint,
 			certsDir,
 			caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 		}),
