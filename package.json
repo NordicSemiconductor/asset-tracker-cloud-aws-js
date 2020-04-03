@@ -40,7 +40,7 @@
     "date-fns": "^2.11.1",
     "fp-ts": "^2.5.3",
     "modemtalk": "^1.1.8",
-    "uuid": "^7.0.2"
+    "uuid": "^7.0.3"
   },
   "devDependencies": {
     "@aws-cdk/aws-apigatewayv2": "^1.31.0",
