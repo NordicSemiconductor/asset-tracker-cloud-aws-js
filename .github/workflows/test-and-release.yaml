@@ -53,9 +53,6 @@ jobs:
         run: |
           curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
           sudo installer -pkg AWSCLIV2.pkg -target /
-      - name: Authenticate with NPM
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
       - name: Keep npm cache around to speed up installs
         uses: actions/cache@v1
         with:
@@ -107,9 +104,6 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12.x"
-      - name: Authenticate with NPM
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
       - name: Semantic release
         run: |
           npm i --no-save semantic-release

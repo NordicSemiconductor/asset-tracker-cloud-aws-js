@@ -4,7 +4,6 @@ phases:
     runtime-versions:
       nodejs: 12
     commands:
-      - echo "//npm.pkg.github.com/:_authToken=$GH_TOKEN" > ~/.npmrc
       - npm ci --no-audit
       - npx tsc
   build:
