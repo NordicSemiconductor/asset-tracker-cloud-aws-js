@@ -39,7 +39,7 @@ export const connect = async (args: {
 
 	try {
 		await Promise.all(
-			certFiles.map(async f => {
+			certFiles.map(async (f) => {
 				try {
 					await fs.stat(f)
 					console.log(chalk.green('✔'), chalk.magenta(f))
@@ -85,11 +85,15 @@ export const connect = async (args: {
 			await uiServer({
 				deviceUiUrl,
 				deviceId: deviceId,
-				onUpdate: update => {
+				onUpdate: (update) => {
 					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(update)))
 					connection.update(deviceId, { state: { reported: update } })
 				},
-				onWsConnection: c => {
+				onMessage: (message) => {
+					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(message)))
+					connection.publish(`${deviceId}/messages`, JSON.stringify(message))
+				},
+				onWsConnection: (c) => {
 					console.log(chalk.magenta('[ws]'), chalk.cyan('connected'))
 					wsConnection = c
 					connection.get(deviceId)
