@@ -6,10 +6,12 @@ export const connectCommand = ({
 	endpoint,
 	deviceUiUrl,
 	certsDir,
+	version,
 }: {
 	endpoint: string
 	deviceUiUrl: string
 	certsDir: string
+	version: string
 }): ComandDefinition => ({
 	command: 'connect <deviceId>',
 	options: [
@@ -25,6 +27,7 @@ export const connectCommand = ({
 			endpoint: e || endpoint,
 			certsDir,
 			caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+			version,
 		}),
 	help: 'Connect to the AWS IoT broker using a generated device certificate.',
 })

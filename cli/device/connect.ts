@@ -17,16 +17,46 @@ const defaultConfig = {
 /**
  * Connect to the AWS IoT broker using a generated device certificate
  */
-export const connect = async (args: {
+export const connect = async ({
+	deviceId,
+	deviceUiUrl,
+	certsDir,
+	endpoint,
+	caCert,
+	version,
+}: {
 	deviceId: string
 	endpoint: string
 	deviceUiUrl: string
 	certsDir: string
 	caCert: string
+	version: string
 }) => {
-	const { deviceId, deviceUiUrl, certsDir, endpoint, caCert } = args
 	const deviceFiles = deviceFileLocations({ certsDir, deviceId })
 	let cfg = defaultConfig
+	const devRoam = {
+		dev: {
+			v: {
+				band: 666,
+				nw: 'LAN',
+				modV: 'device-simulator',
+				brdV: 'device-simulator',
+				appV: version,
+				iccid: '12345678901234567890',
+			},
+			ts: Date.now(),
+		},
+		roam: {
+			v: {
+				rsrp: 70,
+				area: 30401,
+				mccmnc: 24201,
+				cell: 16964098,
+				ip: '0.0.0.0',
+			},
+			ts: Date.now(),
+		},
+	}
 
 	console.log(chalk.blue('Device ID:   '), chalk.yellow(deviceId))
 	console.log(chalk.blue('endpoint:    '), chalk.yellow(endpoint))
@@ -101,9 +131,11 @@ export const connect = async (args: {
 			})
 			console.log(
 				chalk.magenta('>'),
-				chalk.cyan(JSON.stringify({ state: { reported: { cfg } } })),
+				chalk.cyan(
+					JSON.stringify({ state: { reported: { cfg, ...devRoam } } }),
+				),
 			)
-			connection.update(deviceId, { state: { reported: { cfg } } })
+			connection.update(deviceId, { state: { reported: { cfg, ...devRoam } } })
 		})
 
 		connection.on('close', () => {

@@ -1,5 +1,6 @@
 import * as program from 'commander'
 import * as chalk from 'chalk'
+import * as fs from 'fs'
 import { Iot } from 'aws-sdk'
 import { stackOutput } from './cloudformation/stackOutput'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
@@ -29,6 +30,9 @@ const region = process.env.AWS_DEFAULT_REGION || ''
 const iot = new Iot({
 	region,
 })
+const version = JSON.parse(
+	fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
+).version
 
 const config = async () => {
 	const [
@@ -60,7 +64,7 @@ const confirm = (
 			output: process.stdout,
 		})
 		await new Promise((resolve, reject) =>
-			rl.question(`${chalk.blueBright(confirm)} (y,N): `, answer => {
+			rl.question(`${chalk.blueBright(confirm)} (y,N): `, (answer) => {
 				rl.close()
 				if (answer === 'y') return resolve()
 				reject(new Error(`Answered NO to ${confirm}!`))
@@ -130,6 +134,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				endpoint,
 				deviceUiUrl: `https://${deviceUiDomainName}`,
 				certsDir,
+				version,
 			}),
 			cdUpdateTokenCommand({ region }),
 			confirm(
@@ -195,7 +200,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 
 bifravstCLI({
 	isCI: !!process.env.CI,
-}).catch(err => {
+}).catch((err) => {
 	console.error(chalk.red(err))
 	process.exit(1)
 })
