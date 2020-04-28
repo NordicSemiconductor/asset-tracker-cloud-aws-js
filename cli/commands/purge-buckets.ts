@@ -1,6 +1,7 @@
 import { ComandDefinition } from './CommandDefinition'
 import { stackOutput } from '../cloudformation/stackOutput'
 import { S3 } from 'aws-sdk'
+import * as chalk from 'chalk'
 
 export const purgeBucketsCommand = ({
 	stackId,
@@ -30,11 +31,16 @@ export const purgeBucketsCommand = ({
 			webAppBucketName,
 			deviceUiBucketName,
 		]
+		console.log('Purging bucket:')
+		buckets
+			.filter((b) => b)
+			.forEach((b) => console.log(chalk.grey('-'), chalk.yellow(b)))
+
 		const s3 = new S3({ region })
 		await Promise.all(
 			buckets
-				.filter(b => b)
-				.map(async bucketName => {
+				.filter((b) => b)
+				.map(async (bucketName) => {
 					console.log('Purging bucket', bucketName)
 					const { Contents } = await s3
 						.listObjects({ Bucket: bucketName })
@@ -44,7 +50,7 @@ export const purgeBucketsCommand = ({
 						return
 					}
 					return Promise.all(
-						Contents.map(async obj => {
+						Contents.map(async (obj) => {
 							console.log(bucketName, obj.Key)
 							return s3
 								.deleteObject({
