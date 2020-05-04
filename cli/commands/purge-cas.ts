@@ -1,7 +1,7 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import { Iot } from 'aws-sdk'
 import { paginate } from '../../util/paginate'
-import { stackOutput } from '../cloudformation/stackOutput'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
 
 const purgeCACertificate = ({
 	iot,
@@ -43,7 +43,7 @@ export const purgeCAsCommand = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'purge-cas',
 	options: [
 		{

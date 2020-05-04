@@ -2,7 +2,7 @@ import { Iot, CloudFormation } from 'aws-sdk'
 import { promises as fs } from 'fs'
 import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
-import { toObject } from '../cloudformation/toObject'
+import { toObject } from '@bifravst/cloudformation-helpers'
 
 /**
  * Creates a CA certificate and registers it for Just-in-time provisioning

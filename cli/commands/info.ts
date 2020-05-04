@@ -1,5 +1,5 @@
-import { ComandDefinition } from './CommandDefinition'
-import { stackOutput } from '../cloudformation/stackOutput'
+import { CommandDefinition } from './CommandDefinition'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as chalk from 'chalk'
 
 export const infoCommand = ({
@@ -8,7 +8,7 @@ export const infoCommand = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'info',
 	options: [
 		{

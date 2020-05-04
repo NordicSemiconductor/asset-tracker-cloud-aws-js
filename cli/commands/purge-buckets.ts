@@ -1,5 +1,5 @@
-import { ComandDefinition } from './CommandDefinition'
-import { stackOutput } from '../cloudformation/stackOutput'
+import { CommandDefinition } from './CommandDefinition'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { S3 } from 'aws-sdk'
 import * as chalk from 'chalk'
 
@@ -9,7 +9,7 @@ export const purgeBucketsCommand = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'purge-buckets',
 	action: async () => {
 		const {

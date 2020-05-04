@@ -1,11 +1,10 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import {
 	DataBaseName,
 	UpdatesTableName,
 	WorkGroupName,
 } from '../../historicalData/settings'
-import { objectToEnv } from '../cloudformation/objectToEnv'
-import { stackOutput } from '../cloudformation/stackOutput'
+import { stackOutput, objectToEnv } from '@bifravst/cloudformation-helpers'
 import { stackId as webStackId } from '../../cdk/stacks/WebApps'
 
 export const reactConfigCommand = ({
@@ -14,7 +13,7 @@ export const reactConfigCommand = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'react-config',
 	action: async () => {
 		process.stdout.write(

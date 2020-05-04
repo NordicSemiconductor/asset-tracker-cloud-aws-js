@@ -1,5 +1,5 @@
-import { ComandDefinition } from './CommandDefinition'
-import { stackOutput } from '../cloudformation/stackOutput'
+import { CommandDefinition } from './CommandDefinition'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { Iot } from 'aws-sdk'
 import { paginate } from '../../util/paginate'
 
@@ -9,7 +9,7 @@ export const purgeIotUserPolicyPrincipals = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'purge-iot-user-policy-principals',
 	action: async () => {
 		const { userIotPolicyArn } = {
@@ -30,7 +30,7 @@ export const purgeIotUserPolicyPrincipals = ({
 					.promise()
 					.then(async ({ principals, nextMarker }) => {
 						await Promise.all(
-							principals?.map(async principal => {
+							principals?.map(async (principal) => {
 								console.log(
 									`Detaching principal ${principal} from policy ${policyName} ...`,
 								)
