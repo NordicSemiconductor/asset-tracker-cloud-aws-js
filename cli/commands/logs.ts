@@ -1,5 +1,5 @@
 import { CloudFormation, CloudWatchLogs } from 'aws-sdk'
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 
 export const logsCommand = ({
@@ -8,7 +8,7 @@ export const logsCommand = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'logs',
 	options: [
 		{
@@ -33,7 +33,7 @@ export const logsCommand = ({
 			([] as string[])
 
 		const streams = await Promise.all(
-			logGroups.map(async logGroupName => {
+			logGroups.map(async (logGroupName) => {
 				const { logStreams } = await logs
 					.describeLogStreams({
 						logGroupName,
@@ -54,7 +54,7 @@ export const logsCommand = ({
 		await Promise.all(
 			streams.map(async ({ logGroupName, logStreams }) => {
 				const l = await Promise.all(
-					logStreams.map(async logStreamName =>
+					logStreams.map(async (logStreamName) =>
 						logs
 							.getLogEvents({
 								logGroupName,
@@ -66,14 +66,14 @@ export const logsCommand = ({
 					),
 				)
 				console.log(chalk.yellow(logGroupName))
-				l.forEach(x => {
+				l.forEach((x) => {
 					x.events
 						?.filter(
 							({ message }) =>
 								!/^(START|END|REPORT) RequestId:/.test(message || ''),
 						)
 						?.filter(({ message }) => message?.includes('\tERROR\t'))
-						?.forEach(e => console.log(e.message?.trim()))
+						?.forEach((e) => console.log(e.message?.trim()))
 				})
 			}),
 		)

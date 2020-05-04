@@ -1,5 +1,5 @@
 import * as chalk from 'chalk'
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import { createCA } from '../jitp/createCA'
 
 export const createCACommand = ({
@@ -10,7 +10,7 @@ export const createCACommand = ({
 	stackId: string
 	region: string
 	certsDir: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'create-ca',
 	action: async () => {
 		const { certificateId } = await createCA({
@@ -18,10 +18,10 @@ export const createCACommand = ({
 			certsDir,
 			region,
 			log: (...message: any[]) => {
-				console.log(...message.map(m => chalk.magenta(m)))
+				console.log(...message.map((m) => chalk.magenta(m)))
 			},
 			debug: (...message: any[]) => {
-				console.log(...message.map(m => chalk.cyan(m)))
+				console.log(...message.map((m) => chalk.cyan(m)))
 			},
 		})
 		console.log(

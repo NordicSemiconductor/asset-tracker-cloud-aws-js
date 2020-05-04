@@ -1,4 +1,4 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import { ModemPort } from 'modemtalk'
 import * as chalk from 'chalk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
@@ -9,7 +9,7 @@ export const flashCertificate = ({
 	certsDir,
 }: {
 	certsDir: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'flash <deviceId>',
 	options: [
 		{

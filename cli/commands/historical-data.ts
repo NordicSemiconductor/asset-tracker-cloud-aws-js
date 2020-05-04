@@ -1,4 +1,4 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import {
 	athenaQuery,
 	createAthenaTableSQL,
@@ -24,7 +24,7 @@ export const historicalDataCommand = ({
 	region: string
 	QueryResultsBucketName: string
 	DataBucketName: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'historical-data',
 	options: [
 		{

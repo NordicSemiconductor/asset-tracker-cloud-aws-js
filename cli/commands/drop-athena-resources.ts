@@ -1,4 +1,4 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import { athenaQuery } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
@@ -14,7 +14,7 @@ export const dropAthenaResourcesCommand = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'drop-athena-resources',
 	action: async () => {
 		const athena = new Athena({ region })

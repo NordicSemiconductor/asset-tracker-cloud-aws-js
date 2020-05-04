@@ -1,5 +1,5 @@
 import * as chalk from 'chalk'
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import { randomWords } from '@bifravst/random-words'
 import * as path from 'path'
 import { createDeviceCertificate } from '../jitp/generateDeviceCertificate'
@@ -10,7 +10,7 @@ export const createDeviceCertCommand = ({
 	endpoint,
 }: {
 	endpoint: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'create-device-cert',
 	options: [
 		{
@@ -25,10 +25,10 @@ export const createDeviceCertCommand = ({
 			deviceId: id,
 			certsDir,
 			log: (...message: any[]) => {
-				console.log(...message.map(m => chalk.magenta(m)))
+				console.log(...message.map((m) => chalk.magenta(m)))
 			},
 			debug: (...message: any[]) => {
-				console.log(...message.map(m => chalk.cyan(m)))
+				console.log(...message.map((m) => chalk.cyan(m)))
 			},
 		})
 		console.log(

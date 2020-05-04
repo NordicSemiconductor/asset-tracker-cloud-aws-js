@@ -1,4 +1,4 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import * as path from 'path'
 import { connect } from '../device/connect'
 
@@ -12,7 +12,7 @@ export const connectCommand = ({
 	deviceUiUrl: string
 	certsDir: string
 	version: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'connect <deviceId>',
 	options: [
 		{

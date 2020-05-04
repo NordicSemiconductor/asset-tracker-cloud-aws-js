@@ -1,4 +1,4 @@
-import { ComandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition'
 import { athenaQuery, parseAthenaResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
@@ -15,7 +15,7 @@ export const cellLocation = ({
 }: {
 	stackId: string
 	region: string
-}): ComandDefinition => ({
+}): CommandDefinition => ({
 	command: 'cell-location <mccmnc> <area> <cell>',
 	options: [
 		{
