@@ -59,7 +59,7 @@
     "@aws-cdk/aws-stepfunctions-tasks": "^1.36.1",
     "@aws-cdk/core": "^1.36.1",
     "@bifravst/cloudformation-helpers": "^1.0.0",
-    "@bifravst/code-style": "^7.1.9",
+    "@bifravst/code-style": "^7.1.10",
     "@bifravst/package-layered-lambdas": "^3.8.13",
     "@coderbyheart/bdd-feature-runner-aws": "^10.6.2",
     "@commitlint/cli": "^8.3.5",
