@@ -29,7 +29,7 @@ export const historicalDataCommand = ({
 	options: [
 		{
 			flags: '-s, --setup',
-			description: 'Set up the neccessary resources',
+			description: 'Set up the necessary resources',
 		},
 		{
 			flags: '-r, --recreate',
