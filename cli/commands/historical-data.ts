@@ -202,6 +202,13 @@ export const historicalDataCommand = ({
 			s3Location: `s3://${DataBucketName}/updates/`,
 		})
 
+		console.log(
+			chalk.green.inverse(' OK '),
+			chalk.gray(
+				`Athena table ${chalk.blue(`${dbName}.${updatesTableName}`)} exists.`,
+			),
+		)
+
 		await checkTable({
 			tableName: documentsTableName,
 			setup,
@@ -211,7 +218,7 @@ export const historicalDataCommand = ({
 		console.log(
 			chalk.green.inverse(' OK '),
 			chalk.gray(
-				`Athena table ${chalk.blue(`${dbName}.${updatesTableName}`)} exists.`,
+				`Athena table ${chalk.blue(`${dbName}.${documentsTableName}`)} exists.`,
 			),
 		)
 	},
