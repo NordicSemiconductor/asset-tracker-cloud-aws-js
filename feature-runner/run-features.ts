@@ -96,6 +96,7 @@ program
 						printResults,
 						printProgress: progress,
 						printProgressTimestamps: true,
+						printSummary: true,
 					}),
 				],
 				retry,
