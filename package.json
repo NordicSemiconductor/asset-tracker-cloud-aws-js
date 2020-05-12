@@ -39,7 +39,6 @@
     "commander": "^5.1.0",
     "date-fns": "^2.13.0",
     "fp-ts": "^2.6.0",
-    "modemtalk": "^1.1.8",
     "uuid": "^8.0.0"
   },
   "devDependencies": {

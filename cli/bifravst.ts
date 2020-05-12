@@ -12,7 +12,6 @@ import { reactConfigCommand } from './commands/react-config'
 import { infoCommand } from './commands/info'
 import { createCACommand } from './commands/create-ca'
 import { historicalDataCommand } from './commands/historical-data'
-import { flashCertificate } from './commands/flash-cert'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/purge-buckets'
 import { dropAthenaResourcesCommand } from './commands/drop-athena-resources'
@@ -82,7 +81,6 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 
 	const commands = [
 		createCACommand({ stackId, certsDir, region }),
-		flashCertificate({ certsDir }),
 		createDeviceCertCommand({ endpoint }),
 		reactConfigCommand({ stackId, region }),
 		infoCommand({ stackId, region }),
