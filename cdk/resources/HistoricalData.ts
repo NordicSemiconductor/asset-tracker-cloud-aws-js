@@ -301,7 +301,7 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		lambdaLogGroup(this, 'concatenateRawMessages', concatenateRawMessages)
 
-		const rule = new Events.Rule(this, 'invokeMessageCounterRule', {
+		const rule = new Events.Rule(this, 'invokeConcatenateRawMessagesRule', {
 			schedule: Events.Schedule.expression('rate(1 hour)'),
 			description:
 				'Invoke the lambda which concatenates the raw device messages',
@@ -315,7 +315,7 @@ export class HistoricalData extends CloudFormation.Resource {
 		})
 
 		// User permissions
-		permissions({ historicalData: this }).forEach(policy =>
+		permissions({ historicalData: this }).forEach((policy) =>
 			userRole.addToPolicy(policy),
 		)
 	}
