@@ -36,7 +36,7 @@ export const athenaStepRunners = ({
 			skip: 1,
 		})
 		// eslint-disable-next-line require-atomic-updates
-		runner.store['queryResult'] = data
+		runner.store['athenaQueryResult'] = data
 		return data
 	}),
 ]
