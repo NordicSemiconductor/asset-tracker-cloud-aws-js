@@ -1,5 +1,4 @@
 import {
-	ArrayFieldType,
 	Field,
 	ScalarFieldType,
 	StructFieldType,
@@ -21,8 +20,18 @@ export const deviceMessagesFields: {
 						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: ArrayFieldType.array,
-						items: ScalarFieldType.float,
+						type: StructFieldType.struct,
+						fields: {
+							x: {
+								type: ScalarFieldType.float,
+							},
+							y: {
+								type: ScalarFieldType.float,
+							},
+							z: {
+								type: ScalarFieldType.float,
+							},
+						},
 					},
 				},
 			},
