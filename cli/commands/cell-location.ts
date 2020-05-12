@@ -1,5 +1,5 @@
 import { CommandDefinition } from './CommandDefinition'
-import { athenaQuery, parseAthenaResult } from '@bifravst/athena-helpers'
+import { query, parseResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
@@ -30,7 +30,7 @@ export const cellLocation = ({
 		const dbName = DataBaseName({ bifravstStackName: stackId })
 		const tableName = DocumentsTableName({ bifravstStackName: stackId })
 
-		const query = athenaQuery({
+		const q = query({
 			athena,
 			WorkGroup,
 			runningBackoff: (() => {
@@ -57,8 +57,8 @@ export const cellLocation = ({
 				)
 			},
 		})
-		const cellLocations = parseAthenaResult({
-			ResultSet: await query({
+		const cellLocations = parseResult({
+			ResultSet: await q({
 				QueryString: `SELECT reported.gps.v.lat as lat, reported.gps.v.lng as lng
 				FROM ${dbName}.${tableName} 
 				WHERE reported.roam.v.cell = ${cell} 

@@ -6,6 +6,7 @@ import {
 } from '../../historicalData/settings'
 import { stackOutput, objectToEnv } from '@bifravst/cloudformation-helpers'
 import { stackId as webStackId } from '../../cdk/stacks/WebApps'
+import { CloudFormation } from 'aws-sdk'
 
 export const reactConfigCommand = ({
 	stackId,
@@ -16,6 +17,7 @@ export const reactConfigCommand = ({
 }): CommandDefinition => ({
 	command: 'react-config',
 	action: async () => {
+		const so = stackOutput(new CloudFormation({ region }))
 		process.stdout.write(
 			objectToEnv({
 				region,
@@ -28,16 +30,12 @@ export const reactConfigCommand = ({
 				historicaldataTableName: UpdatesTableName({
 					bifravstStackName: stackId,
 				}),
-				...(await stackOutput({
-					stackId,
-					region,
-				})),
-				...(await stackOutput({
-					stackId: webStackId({
+				...(await so(stackId)),
+				...(await so(
+					webStackId({
 						bifravstStackName: stackId,
 					}),
-					region,
-				})),
+				)),
 			}),
 		)
 	},

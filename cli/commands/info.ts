@@ -1,6 +1,7 @@
 import { CommandDefinition } from './CommandDefinition'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as chalk from 'chalk'
+import { CloudFormation } from 'aws-sdk'
 
 export const infoCommand = ({
 	stackId,
@@ -17,10 +18,7 @@ export const infoCommand = ({
 		},
 	],
 	action: async ({ output }) => {
-		const outputs = await stackOutput({
-			stackId,
-			region,
-		})
+		const outputs = await stackOutput(new CloudFormation({ region }))(stackId)
 		if (output) {
 			if (outputs[output] === undefined) {
 				throw new Error(`${output} is not defined.`)

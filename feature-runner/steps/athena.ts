@@ -1,6 +1,6 @@
 import { regexMatcher } from '@coderbyheart/bdd-feature-runner-aws'
 import { BifravstWorld } from '../run-features'
-import { athenaQuery, parseAthenaResult } from '@bifravst/athena-helpers'
+import { query, parseResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 
 export const athenaStepRunners = ({
@@ -19,7 +19,7 @@ export const athenaStepRunners = ({
 		const athena = new Athena({
 			region,
 		})
-		const q = athenaQuery({
+		const q = query({
 			WorkGroup: historicaldataWorkgroupName,
 			athena,
 			debugLog: async (...args: any) => {
@@ -31,12 +31,12 @@ export const athenaStepRunners = ({
 		})
 		await runner.progress('[athena]', step.interpolatedArgument)
 		const ResultSet = await q({ QueryString: step.interpolatedArgument })
-		const data = parseAthenaResult({
+		const data = parseResult({
 			ResultSet,
 			skip: 1,
 		})
 		// eslint-disable-next-line require-atomic-updates
-		runner.store['athenaQueryResult'] = data
+		runner.store['queryResult'] = data
 		return data
 	}),
 ]

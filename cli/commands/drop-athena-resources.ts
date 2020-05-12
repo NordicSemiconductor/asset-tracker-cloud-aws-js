@@ -1,5 +1,5 @@
 import { CommandDefinition } from './CommandDefinition'
-import { athenaQuery } from '@bifravst/athena-helpers'
+import { query } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
@@ -26,7 +26,7 @@ export const dropAthenaResourcesCommand = ({
 			bifravstStackName: stackId,
 		})
 
-		const query = athenaQuery({
+		const q = query({
 			athena,
 			WorkGroup,
 			debugLog: (...args: any) => {
@@ -37,10 +37,10 @@ export const dropAthenaResourcesCommand = ({
 			},
 		})
 
-		await query({ QueryString: `DROP TABLE ${dbName}.${updatesTableName}` })
-		await query({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
+		await q({ QueryString: `DROP TABLE ${dbName}.${updatesTableName}` })
+		await q({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
 
-		await query({
+		await q({
 			QueryString: `DROP DATABASE ${dbName}`,
 		})
 

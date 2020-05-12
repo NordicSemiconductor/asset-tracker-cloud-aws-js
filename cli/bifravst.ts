@@ -1,7 +1,7 @@
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
-import { Iot } from 'aws-sdk'
+import { Iot, CloudFormation } from 'aws-sdk'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
@@ -34,17 +34,13 @@ const version = JSON.parse(
 	fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
 ).version
 
+const so = stackOutput(new CloudFormation({ region }))
+
 const config = async () => {
 	const [
 		endpoint,
 		{ historicalDataQueryResultsBucketName, historicalDataBucketName },
-	] = await Promise.all([
-		getIotEndpoint(iot),
-		stackOutput<StackOutputs>({
-			region,
-			stackId,
-		}),
-	])
+	] = await Promise.all([getIotEndpoint(iot), so<StackOutputs>(stackId)])
 
 	return {
 		endpoint,
@@ -125,10 +121,9 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			}),
 		)
 	} else {
-		const { deviceUiDomainName } = await stackOutput<StackOutputs>({
-			region,
-			stackId: webStackId({ bifravstStackName: stackId }),
-		})
+		const { deviceUiDomainName } = await so<StackOutputs>(
+			webStackId({ bifravstStackName: stackId }),
+		)
 		commands.push(
 			connectCommand({
 				endpoint,

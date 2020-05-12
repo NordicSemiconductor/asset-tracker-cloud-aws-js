@@ -1,9 +1,5 @@
 import { CommandDefinition } from './CommandDefinition'
-import {
-	athenaQuery,
-	createAthenaTableSQL,
-	parseAthenaResult,
-} from '@bifravst/athena-helpers'
+import { query, createTableSQL, parseResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 import {
 	DataBaseName,
@@ -100,7 +96,7 @@ export const historicalDataCommand = ({
 			chalk.gray(`Athena workgroup ${chalk.blue(WorkGroup)} exists.`),
 		)
 
-		const query = athenaQuery({
+		const q = query({
 			athena,
 			WorkGroup,
 			debugLog: (...args: any) => {
@@ -118,15 +114,15 @@ export const historicalDataCommand = ({
 				)
 			},
 		})
-		const dbs = parseAthenaResult({
-			ResultSet: await query({
+		const dbs = parseResult({
+			ResultSet: await q({
 				QueryString: `SHOW DATABASES`,
 			}),
 		})
 		if (!dbs.find(({ database_name: db }) => db === dbName)) {
 			if (setup) {
 				console.log(chalk.magenta(`Creating database...`))
-				await query({
+				await q({
 					QueryString: `CREATE DATABASE ${dbName}`,
 				})
 			} else {
@@ -148,8 +144,8 @@ export const historicalDataCommand = ({
 
 		if (recreate) {
 			console.log(chalk.magenta(`Dropping table...`))
-			await query({ QueryString: `DROP TABLE ${dbName}.${updatesTableName}` })
-			await query({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
+			await q({ QueryString: `DROP TABLE ${dbName}.${updatesTableName}` })
+			await q({ QueryString: `DROP TABLE ${dbName}.${documentsTableName}` })
 		}
 
 		const checkTable = async ({
@@ -162,20 +158,20 @@ export const historicalDataCommand = ({
 			setup: boolean
 		}) => {
 			try {
-				await query({
+				await q({
 					QueryString: `DESCRIBE ${dbName}.${tableName}`,
 				})
 			} catch (error) {
 				if (setup) {
 					console.log(chalk.magenta(`Creating table...`))
-					const createSQL = createAthenaTableSQL({
+					const createSQL = createTableSQL({
 						database: dbName,
 						table: tableName,
 						s3Location,
 						fields: deviceMessagesFields,
 					})
 					console.log(chalk.magenta(createSQL))
-					await query({
+					await q({
 						QueryString: createSQL,
 					})
 				} else {

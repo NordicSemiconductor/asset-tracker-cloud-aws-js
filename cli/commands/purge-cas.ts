@@ -1,5 +1,5 @@
 import { CommandDefinition } from './CommandDefinition'
-import { Iot } from 'aws-sdk'
+import { Iot, CloudFormation } from 'aws-sdk'
 import { paginate } from '../../util/paginate'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 
@@ -54,10 +54,7 @@ export const purgeCAsCommand = ({
 	action: async ({ caId }: { caId: string }) => {
 		const iot = new Iot({ region })
 		const { thingGroupName } = {
-			...(await stackOutput({
-				stackId,
-				region,
-			})),
+			...(await stackOutput(new CloudFormation({ region }))(stackId)),
 		} as { [key: string]: string }
 
 		const purge = purgeCACertificate({ iot, thingGroupName })

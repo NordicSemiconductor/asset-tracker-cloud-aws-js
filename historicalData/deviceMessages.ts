@@ -1,127 +1,127 @@
 import {
-	AthenaTableArrayFieldType,
-	AthenaTableField,
-	AthenaTableScalarFieldType,
-	AthenaTableStructFieldType,
+	ArrayFieldType,
+	Field,
+	ScalarFieldType,
+	StructFieldType,
 } from '@bifravst/athena-helpers'
 
 /**
  * This defines the table structure for querying device data
  */
 export const deviceMessagesFields: {
-	[key: string]: AthenaTableField
+	[key: string]: Field
 } = {
 	reported: {
-		type: AthenaTableStructFieldType.struct,
+		type: StructFieldType.struct,
 		fields: {
 			acc: {
-				type: AthenaTableStructFieldType.struct,
+				type: StructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.bigint,
+						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: AthenaTableArrayFieldType.array,
-						items: AthenaTableScalarFieldType.float,
+						type: ArrayFieldType.array,
+						items: ScalarFieldType.float,
 					},
 				},
 			},
 			bat: {
-				type: AthenaTableStructFieldType.struct,
+				type: StructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.bigint,
+						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: AthenaTableScalarFieldType.int,
+						type: ScalarFieldType.int,
 					},
 				},
 			},
 			gps: {
-				type: AthenaTableStructFieldType.struct,
+				type: StructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.bigint,
+						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: AthenaTableStructFieldType.struct,
+						type: StructFieldType.struct,
 						fields: {
 							acc: {
-								type: AthenaTableScalarFieldType.float,
+								type: ScalarFieldType.float,
 							},
 							alt: {
-								type: AthenaTableScalarFieldType.float,
+								type: ScalarFieldType.float,
 							},
 							hdg: {
-								type: AthenaTableScalarFieldType.float,
+								type: ScalarFieldType.float,
 							},
 							lat: {
-								type: AthenaTableScalarFieldType.float,
+								type: ScalarFieldType.float,
 							},
 							lng: {
-								type: AthenaTableScalarFieldType.float,
+								type: ScalarFieldType.float,
 							},
 							spd: {
-								type: AthenaTableScalarFieldType.float,
+								type: ScalarFieldType.float,
 							},
 						},
 					},
 				},
 			},
 			dev: {
-				type: AthenaTableStructFieldType.struct,
+				type: StructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.bigint,
+						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: AthenaTableStructFieldType.struct,
+						type: StructFieldType.struct,
 						fields: {
 							band: {
-								type: AthenaTableScalarFieldType.int,
+								type: ScalarFieldType.int,
 							},
 							nw: {
-								type: AthenaTableScalarFieldType.string,
+								type: ScalarFieldType.string,
 							},
 							iccid: {
-								type: AthenaTableScalarFieldType.string,
+								type: ScalarFieldType.string,
 							},
 							modV: {
-								type: AthenaTableScalarFieldType.string,
+								type: ScalarFieldType.string,
 							},
 							brdV: {
-								type: AthenaTableScalarFieldType.string,
+								type: ScalarFieldType.string,
 							},
 							appV: {
-								type: AthenaTableScalarFieldType.string,
+								type: ScalarFieldType.string,
 							},
 						},
 					},
 				},
 			},
 			roam: {
-				type: AthenaTableStructFieldType.struct,
+				type: StructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.bigint,
+						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: AthenaTableStructFieldType.struct,
+						type: StructFieldType.struct,
 						fields: {
 							rsrp: {
-								type: AthenaTableScalarFieldType.int,
+								type: ScalarFieldType.int,
 							},
 							area: {
-								type: AthenaTableScalarFieldType.int,
+								type: ScalarFieldType.int,
 							},
 							mccmnc: {
-								type: AthenaTableScalarFieldType.int,
+								type: ScalarFieldType.int,
 							},
 							cell: {
-								type: AthenaTableScalarFieldType.int,
+								type: ScalarFieldType.int,
 							},
 							ip: {
-								type: AthenaTableScalarFieldType.string,
+								type: ScalarFieldType.string,
 							},
 						},
 					},
@@ -130,25 +130,25 @@ export const deviceMessagesFields: {
 		},
 	},
 	message: {
-		type: AthenaTableStructFieldType.struct,
+		type: StructFieldType.struct,
 		fields: {
 			btn: {
-				type: AthenaTableStructFieldType.struct,
+				type: StructFieldType.struct,
 				fields: {
 					ts: {
-						type: AthenaTableScalarFieldType.bigint,
+						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: AthenaTableScalarFieldType.int,
+						type: ScalarFieldType.int,
 					},
 				},
 			},
 		},
 	},
 	timestamp: {
-		type: AthenaTableScalarFieldType.timestamp,
+		type: ScalarFieldType.timestamp,
 	},
 	deviceId: {
-		type: AthenaTableScalarFieldType.string,
+		type: ScalarFieldType.string,
 	},
 } as const

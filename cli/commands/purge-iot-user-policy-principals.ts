@@ -1,6 +1,6 @@
 import { CommandDefinition } from './CommandDefinition'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
-import { Iot } from 'aws-sdk'
+import { Iot, CloudFormation } from 'aws-sdk'
 import { paginate } from '../../util/paginate'
 
 export const purgeIotUserPolicyPrincipals = ({
@@ -13,10 +13,7 @@ export const purgeIotUserPolicyPrincipals = ({
 	command: 'purge-iot-user-policy-principals',
 	action: async () => {
 		const { userIotPolicyArn } = {
-			...(await stackOutput({
-				stackId,
-				region,
-			})),
+			...(await stackOutput(new CloudFormation({ region }))(stackId)),
 		} as { [key: string]: string }
 		const policyName = userIotPolicyArn?.split('/').pop() as string
 		const iot = new Iot({ region })

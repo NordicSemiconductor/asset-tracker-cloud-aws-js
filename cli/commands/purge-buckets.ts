@@ -1,6 +1,6 @@
 import { CommandDefinition } from './CommandDefinition'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
-import { S3 } from 'aws-sdk'
+import { S3, CloudFormation } from 'aws-sdk'
 import * as chalk from 'chalk'
 
 export const purgeBucketsCommand = ({
@@ -19,10 +19,7 @@ export const purgeBucketsCommand = ({
 			webAppBucketName,
 			deviceUiBucketName,
 		} = {
-			...(await stackOutput({
-				stackId,
-				region,
-			})),
+			...(await stackOutput(new CloudFormation({ region }))(stackId)),
 		} as { [key: string]: string }
 		const buckets = [
 			historicalDataQueryResultsBucketName,
