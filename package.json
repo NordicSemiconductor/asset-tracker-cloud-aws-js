@@ -61,7 +61,7 @@
     "@bifravst/cloudformation-helpers": "^3.0.0",
     "@bifravst/code-style": "^7.1.11",
     "@bifravst/package-layered-lambdas": "^3.8.13",
-    "@coderbyheart/bdd-feature-runner-aws": "^10.7.0",
+    "@coderbyheart/bdd-feature-runner-aws": "^10.8.1",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-angular": "^8.3.4",
     "@types/aws-iot-device-sdk": "^2.2.1",

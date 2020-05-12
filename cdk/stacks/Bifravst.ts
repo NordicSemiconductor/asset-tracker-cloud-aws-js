@@ -66,6 +66,10 @@ export class BifravstStack extends CloudFormation.Stack {
 			autoVerify: {
 				email: true,
 			},
+			selfSignUpEnabled: true,
+			passwordPolicy: {
+				requireSymbols: false,
+			},
 		})
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
 			userPool: userPool,

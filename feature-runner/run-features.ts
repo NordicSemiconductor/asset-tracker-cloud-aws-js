@@ -6,6 +6,7 @@ import {
 	awsSdkStepRunners,
 	storageStepRunners,
 	restStepRunners,
+	randomStepRunners,
 } from '@coderbyheart/bdd-feature-runner-aws'
 import * as program from 'commander'
 import * as chalk from 'chalk'
@@ -19,6 +20,7 @@ import {
 import { athenaStepRunners } from './steps/athena'
 import { uuidHelper } from './steps/uuidHelper'
 import { STS } from 'aws-sdk'
+import { v4 } from 'uuid'
 
 let ran = false
 
@@ -121,6 +123,22 @@ program
 					.addStepRunners(bifravstStepRunners(world))
 					.addStepRunners([uuidHelper])
 					.addStepRunners(storageStepRunners())
+					.addStepRunners(
+						randomStepRunners({
+							generators: {
+								email: () => `${v4()}@example.com`,
+								password: () =>
+									((pw) =>
+										`${pw[0].toUpperCase()}${pw.substr(1)}${Math.round(
+											Math.random() * 1000,
+										)}`)(
+										Math.random()
+											.toString(36)
+											.replace(/[^a-z]+/g, ''),
+									),
+							},
+						}),
+					)
 					.addStepRunners(restStepRunners())
 					.run()
 				if (!success) {
