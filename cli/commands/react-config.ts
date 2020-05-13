@@ -19,24 +19,27 @@ export const reactConfigCommand = ({
 	action: async () => {
 		const so = stackOutput(new CloudFormation({ region }))
 		process.stdout.write(
-			objectToEnv({
-				region,
-				historicaldataWorkgroupName: WorkGroupName({
-					bifravstStackName: stackId,
-				}),
-				historicaldataDatabaseName: DataBaseName({
-					bifravstStackName: stackId,
-				}),
-				historicaldataTableName: UpdatesTableName({
-					bifravstStackName: stackId,
-				}),
-				...(await so(stackId)),
-				...(await so(
-					webStackId({
+			objectToEnv(
+				{
+					region,
+					historicaldataWorkgroupName: WorkGroupName({
 						bifravstStackName: stackId,
 					}),
-				)),
-			}),
+					historicaldataDatabaseName: DataBaseName({
+						bifravstStackName: stackId,
+					}),
+					historicaldataTableName: UpdatesTableName({
+						bifravstStackName: stackId,
+					}),
+					...(await so(stackId)),
+					...(await so(
+						webStackId({
+							bifravstStackName: stackId,
+						}),
+					)),
+				},
+				'REACT_',
+			),
 		)
 	},
 	help: 'Prints the stack outputs as create-react-app environment variables.',
