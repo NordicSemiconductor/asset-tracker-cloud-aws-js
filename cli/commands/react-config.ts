@@ -38,7 +38,7 @@ export const reactConfigCommand = ({
 						}),
 					)),
 				},
-				'REACT_',
+				'REACT_APP_',
 			),
 		)
 	},
