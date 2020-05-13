@@ -136,25 +136,22 @@ export const deviceMessagesFields: {
 					},
 				},
 			},
-			temp: {
+			env: {
 				type: StructFieldType.struct,
 				fields: {
 					ts: {
 						type: ScalarFieldType.bigint,
 					},
 					v: {
-						type: ScalarFieldType.float,
-					},
-				},
-			},
-			hum: {
-				type: StructFieldType.struct,
-				fields: {
-					ts: {
-						type: ScalarFieldType.bigint,
-					},
-					v: {
-						type: ScalarFieldType.float,
+						type: StructFieldType.struct,
+						fields: {
+							temp: {
+								type: ScalarFieldType.float,
+							},
+							hum: {
+								type: ScalarFieldType.float,
+							},
+						},
 					},
 				},
 			},
