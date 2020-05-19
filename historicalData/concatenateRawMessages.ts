@@ -1,5 +1,6 @@
 import * as dateFns from 'date-fns'
 import * as path from 'path'
+import { v4 } from 'uuid'
 
 import { CollectFilesFn } from './collectFiles'
 import { ConcatenateFilesFn } from './concatenateFiles'
@@ -20,7 +21,7 @@ export const concatenateRawMessages = async ({
 		files: await collectFilesInBucket({
 			Prefix: `${documentType}/raw/`,
 			notAfterDate: dateFns.format(new Date(), "yyyy-MM-dd'T'HH"),
-			fileNameToDate: filename => {
+			fileNameToDate: (filename) => {
 				const [date] = path.parse(filename).name.split('-')
 				const m = dateRx.exec(date)
 				if (m) {
@@ -30,14 +31,14 @@ export const concatenateRawMessages = async ({
 				return dateFns.format(new Date(), "yyyy-MM-dd'T'HH") // No date found
 			},
 		}),
-		dateToFileName: date => `${documentType}/hours/${date}.txt`,
+		dateToFileName: (date) => `${documentType}/hours/${date}-${v4()}.txt`,
 	})
 	// Concatenate days
 	await concatenateFilesInBucket({
 		files: await collectFilesInBucket({
 			Prefix: `${documentType}/hours/`,
 			notAfterDate: dateFns.format(new Date(), 'yyyy-MM-dd'),
-			fileNameToDate: filename => {
+			fileNameToDate: (filename) => {
 				const [year, month, day] = path
 					.parse(filename)
 					.name.split('T')[0]
@@ -45,21 +46,21 @@ export const concatenateRawMessages = async ({
 				return `${year}-${month}-${day}`
 			},
 		}),
-		dateToFileName: date => `${documentType}/days/${date}.txt`,
+		dateToFileName: (date) => `${documentType}/days/${date}-${v4()}.txt`,
 	})
 	// Concatenate months
 	await concatenateFilesInBucket({
 		files: await collectFilesInBucket({
 			Prefix: `${documentType}/days/`,
 			notAfterDate: dateFns.format(new Date(), 'yyyy-MM-01'),
-			fileNameToDate: filename => {
+			fileNameToDate: (filename) => {
 				const [year, month] = path.parse(filename).name.split('-')
 				return `${year}-${month}-01`
 			},
 		}),
-		dateToFileName: date => {
+		dateToFileName: (date) => {
 			const [year, month] = date.split('-')
-			return `${documentType}/months/${year}-${month}.txt`
+			return `${documentType}/months/${year}-${month}-${v4()}.txt`
 		},
 	})
 }

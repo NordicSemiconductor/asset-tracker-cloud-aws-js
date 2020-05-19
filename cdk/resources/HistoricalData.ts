@@ -296,6 +296,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				environment: {
 					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
 				},
+				reservedConcurrentExecutions: 1,
 			},
 		)
 
