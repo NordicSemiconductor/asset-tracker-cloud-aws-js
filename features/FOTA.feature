@@ -33,7 +33,7 @@ Feature: Device Firmware Upgrade over the air
               "path": "{jobId}"
           },
           "fwversion": "1.0.1",
-          "targetBoard": "PCA20035"
+          "targetBoard": "Thingy91"
       }
       """
     And I execute "createJob" of the AWS Iot SDK with

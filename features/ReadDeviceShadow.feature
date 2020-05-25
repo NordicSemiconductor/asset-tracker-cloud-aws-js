@@ -23,7 +23,7 @@ Feature: Read Device Shadow
               "nw": "NB-IoT GPS",
               "iccid": "89882806660004909182",
               "modV": "mfw_nrf9160_1.0.0",
-              "brdV": "nrf9160_pca20035",
+              "brdV": "thingy91_nrf9160",
               "appV": "0.14.6"
             },
             "ts": 1567921067432
