@@ -39,7 +39,7 @@
     "commander": "^5.1.0",
     "date-fns": "^2.14.0",
     "fp-ts": "^2.6.1",
-    "uuid": "^8.0.0"
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
     "@aws-cdk/aws-apigatewayv2": "^1.39.0",
