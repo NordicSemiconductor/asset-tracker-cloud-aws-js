@@ -9,7 +9,6 @@ import {
 } from '../../historicalData/settings'
 
 export const dropAthenaResourcesCommand = ({
-	stackId,
 	region,
 }: {
 	stackId: string
@@ -19,12 +18,10 @@ export const dropAthenaResourcesCommand = ({
 	action: async () => {
 		const athena = new Athena({ region })
 
-		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
-		const dbName = DataBaseName({ bifravstStackName: stackId })
-		const updatesTableName = UpdatesTableName({ bifravstStackName: stackId })
-		const documentsTableName = DocumentsTableName({
-			bifravstStackName: stackId,
-		})
+		const WorkGroup = WorkGroupName()
+		const dbName = DataBaseName()
+		const updatesTableName = UpdatesTableName()
+		const documentsTableName = DocumentsTableName()
 
 		const q = query({
 			athena,

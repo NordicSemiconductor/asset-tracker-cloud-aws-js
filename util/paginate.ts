@@ -6,11 +6,11 @@ export const paginate = async ({
 	paginator,
 	startKey,
 }: {
-	paginator: (startKey?: any) => Promise<any | undefined>
+	paginator: (startKey?: any) => Promise<unknown | undefined>
 	startKey?: any
 }): Promise<void> => {
 	const nextStartKey = await paginator(startKey)
-	if (nextStartKey) {
+	if (nextStartKey !== undefined) {
 		await paginate({
 			paginator,
 			startKey: nextStartKey,

@@ -39,7 +39,7 @@ export const logsCommand = ({
 						logGroupName,
 						orderBy: 'LastEventTime',
 						descending: true,
-						limit: numLogGroups ? parseInt(numLogGroups, 10) : 1,
+						limit: numLogGroups !== undefined ? parseInt(numLogGroups, 10) : 1,
 					})
 					.promise()
 				return {
@@ -60,7 +60,10 @@ export const logsCommand = ({
 								logGroupName,
 								logStreamName,
 								startFromHead: false,
-								limit: numLogStreams ? parseInt(numLogStreams, 10) : 100,
+								limit:
+									numLogStreams !== undefined
+										? parseInt(numLogStreams, 10)
+										: 100,
 							})
 							.promise(),
 					),
@@ -70,7 +73,7 @@ export const logsCommand = ({
 					x.events
 						?.filter(
 							({ message }) =>
-								!/^(START|END|REPORT) RequestId:/.test(message || ''),
+								!/^(START|END|REPORT) RequestId:/.test(message ?? ''),
 						)
 						?.filter(({ message }) => message?.includes('\tERROR\t'))
 						?.forEach((e) => console.log(e.message?.trim()))

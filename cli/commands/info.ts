@@ -19,7 +19,7 @@ export const infoCommand = ({
 	],
 	action: async ({ output }) => {
 		const outputs = await stackOutput(new CloudFormation({ region }))(stackId)
-		if (output) {
+		if (output !== undefined) {
 			if (outputs[output] === undefined) {
 				throw new Error(`${output} is not defined.`)
 			}

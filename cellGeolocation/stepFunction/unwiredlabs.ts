@@ -8,7 +8,7 @@ export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
 	api,
 }: {
 	api: 'unwiredlabs'
-}) => {
+}): Promise<{ apiKey: string; endpoint: string }> => {
 	const Path = `/bifravst/cellGeoLocation/${api}`
 	const { Parameters } = await ssm
 		.getParametersByPath({
@@ -20,6 +20,7 @@ export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
 	const apiKey = Parameters?.find(
 		({ Name }) => Name?.replace(`${Path}/`, '') === 'apiKey',
 	)?.Value
+	if (apiKey === undefined) throw new Error('No API key configured!')
 	const endpoint =
 		Parameters?.find(({ Name }) => Name?.replace(`${Path}/`, '') === 'endpoint')
 			?.Value ?? 'https://eu1.unwiredlabs.com/'
@@ -37,16 +38,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 		const { apiKey, endpoint } = await fetchSettings({
 			api: 'unwiredlabs',
 		})
-
-		if (!apiKey) {
-			throw new Error('No API key configured!')
-		}
-
 		const { hostname, path } = parse(endpoint)
-
-		if (!hostname) {
-			throw new Error(`No hostname found in "${endpoint}"!`)
-		}
 
 		// See https://eu1.unwiredlabs.com/docs-html/index.html#response
 		const {
@@ -69,12 +61,12 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 		} = await new Promise((resolve, reject) => {
 			const options = {
 				host: hostname,
-				path: `${path ? path.replace(/\/*$/, '') : ''}/v2/process.php`,
+				path: `${path?.replace(/\/*$/, '') ?? ''}/v2/process.php`,
 				method: 'POST',
 				agent: false,
 			}
 
-			const req = nodeRequest(options, res => {
+			const req = nodeRequest(options, (res) => {
 				console.debug(
 					JSON.stringify({
 						response: {
@@ -83,14 +75,14 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 						},
 					}),
 				)
-				res.on('data', d => {
+				res.on('data', (d) => {
 					const responseBody = JSON.parse(d.toString())
 					console.debug(
 						JSON.stringify({
 							responseBody,
 						}),
 					)
-					if (!res.statusCode) {
+					if (res.statusCode === undefined) {
 						return reject(new Error('No response received!'))
 					}
 					if (res.statusCode >= 400) {
@@ -100,7 +92,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 				})
 			})
 
-			req.on('error', e => {
+			req.on('error', (e) => {
 				reject(new Error(e.message))
 			})
 

@@ -17,7 +17,9 @@ const purgeCACertificate = ({
 		.promise()
 	const config = JSON.parse(cert.registrationConfig?.templateBody ?? '{}')
 	if (
-		config?.Resources?.thing?.Properties?.ThingGroups?.includes(thingGroupName)
+		(
+			(config?.Resources?.thing?.Properties?.ThingGroups as string[]) ?? []
+		).includes(thingGroupName)
 	) {
 		console.log(`Marking CA certificate ${certificateId} as INACTIVE ...`)
 		await iot

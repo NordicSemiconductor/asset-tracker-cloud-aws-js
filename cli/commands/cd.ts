@@ -31,7 +31,7 @@ export const cdCommand = ({
 						summary: {
 							status: 'Unknown',
 							lastUpdateTime: new Date(),
-							...(pipelineExecutionSummaries && pipelineExecutionSummaries[0]),
+							...pipelineExecutionSummaries?.[0],
 						},
 					}))
 					.catch(() => ({

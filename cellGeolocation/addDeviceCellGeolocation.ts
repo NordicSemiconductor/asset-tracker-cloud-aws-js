@@ -20,7 +20,7 @@ export const addDeviceCellGeolocation = ({
 }: {
 	cellgeolocation: Cell & Location
 	source: string
-}) =>
+}): TE.TaskEither<ErrorInfo, string> =>
 	TE.tryCatch<ErrorInfo, string>(
 		async () => {
 			const id = v4()
@@ -60,7 +60,7 @@ export const addDeviceCellGeolocation = ({
 			)
 			return id
 		},
-		err => {
+		(err) => {
 			console.error(
 				JSON.stringify({ addDeviceCellGeolocation: { error: err, TableName } }),
 			)

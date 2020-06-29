@@ -34,7 +34,7 @@ export const collectFiles = ({
 		})
 		.promise()
 		.then(async ({ NextMarker, Contents }) => {
-			const f = (Contents || [])
+			const f = (Contents ?? [])
 				.map(({ Key }) => Key as string)
 				.reduce((files, file) => {
 					const d = fileNameToDate(file)
@@ -42,14 +42,14 @@ export const collectFiles = ({
 					if (d >= notAfterDate) {
 						return files
 					}
-					if (!files[d]) {
+					if (files[d] === undefined) {
 						files[d] = [file]
 					} else {
 						files[d].push(file)
 					}
 					return files
-				}, files || {})
-			if (NextMarker) {
+				}, files ?? {})
+			if (NextMarker !== undefined) {
 				return collectFiles({ Bucket, s3 })({
 					files: f,
 					Marker: NextMarker,

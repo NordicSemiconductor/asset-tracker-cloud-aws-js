@@ -16,16 +16,16 @@ import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/purge-buckets'
 import { dropAthenaResourcesCommand } from './commands/drop-athena-resources'
 import { logsCommand } from './commands/logs'
-import { stackId as webStackId } from '../cdk/stacks/WebApps'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
 import { cellLocation } from './commands/cell-location'
 import { CommandDefinition } from './commands/CommandDefinition'
 import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
 import { purgeCAsCommand } from './commands/purge-cas'
+import { stackId as generateStackId } from '../cdk/stacks/stackId'
 
-const stackId = process.env.STACK_ID || 'bifravst'
-const region = process.env.AWS_DEFAULT_REGION || ''
+const stackId = generateStackId()
+const region = process.env.AWS_DEFAULT_REGION ?? ''
 const iot = new Iot({
 	region,
 })
@@ -82,17 +82,15 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	const commands = [
 		createCACommand({ stackId, certsDir, region }),
 		createDeviceCertCommand({ endpoint }),
-		reactConfigCommand({ stackId, region }),
+		reactConfigCommand({ region }),
 		infoCommand({ stackId, region }),
 		cdCommand({ region }),
 		historicalDataCommand({
-			stackId,
 			region,
 			QueryResultsBucketName: historicalDataQueryResultsBucketName,
 			DataBucketName: historicalDataBucketName,
 		}),
 		cellLocation({
-			stackId,
 			region,
 		}),
 		purgeIotUserPolicyPrincipals({
@@ -120,7 +118,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 		)
 	} else {
 		const { deviceUiDomainName } = await so<StackOutputs>(
-			webStackId({ bifravstStackName: stackId }),
+			generateStackId('webapps'),
 		)
 		commands.push(
 			connectCommand({
@@ -192,7 +190,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 }
 
 bifravstCLI({
-	isCI: !!process.env.CI,
+	isCI: process.env.CI === '1',
 }).catch((err) => {
 	console.error(chalk.red(err))
 	process.exit(1)

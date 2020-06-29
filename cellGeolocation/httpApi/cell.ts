@@ -16,11 +16,11 @@ import { getOrElse } from '../../util/fp-ts'
 
 const locator = geolocateCellFromCache({
 	dynamodb: new DynamoDBClient({}),
-	TableName: process.env.CACHE_TABLE || '',
+	TableName: process.env.CACHE_TABLE ?? '',
 })
 
 const q = queueCellGeolocationResolutionJob({
-	QueueUrl: process.env.CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE || '',
+	QueueUrl: process.env.CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE ?? '',
 	sqs: new SQS(),
 })
 
@@ -44,9 +44,9 @@ const inputSchema = new Ajv().compile({
 	additionalProperties: false,
 })
 
-const allMembersToInt = (o: object) =>
+const allMembersToInt = (o: Record<string, any>): Record<string, number> =>
 	Object.entries(o).reduce(
-		(o, [k, v]) => ({ ...o, [k]: v ? parseInt(v, 10) : 0 }),
+		(o, [k, v]) => ({ ...o, [k]: v !== undefined ? parseInt(v, 10) : 0 }),
 		{},
 	)
 
@@ -57,17 +57,17 @@ export const handler = async (
 
 	return pipe(
 		validate<Cell>(inputSchema)(
-			allMembersToInt(event.queryStringParameters || {}),
+			allMembersToInt(event.queryStringParameters ?? {}),
 		)(),
 		TE.fromEither,
-		TE.chain(cell =>
+		TE.chain((cell) =>
 			pipe(
 				locator(cell),
 				getOrElse.TE(() =>
 					pipe(
 						q(cell),
 						TE.fold(
-							err => TE.left(err),
+							(err) => TE.left(err),
 							() =>
 								TE.left({
 									type: ErrorType.Conflict,
@@ -79,11 +79,11 @@ export const handler = async (
 			),
 		),
 		TE.fold(
-			error =>
+			(error) =>
 				res(toStatusCode[error.type], {
 					expires: 60,
 				})(error),
-			cell => {
+			(cell) => {
 				if (cell.unresolved) {
 					return res(toStatusCode[ErrorType.EntityNotFound], {
 						expires: 86400,

@@ -3,10 +3,10 @@ import { ErrorInfo, ErrorType } from '../ErrorInfo'
 import * as Ajv from 'ajv'
 
 export const validate = <T>(schema: Ajv.ValidateFunction) => (
-	value: any,
+	value: Record<string, any>,
 ) => (): E.Either<ErrorInfo, T> => {
-	const valid = schema(value)
-	if (!valid) {
+	const valid = schema(value) as boolean
+	if (valid) {
 		return E.left({
 			type: ErrorType.BadRequest,
 			message: 'Validation failed!',

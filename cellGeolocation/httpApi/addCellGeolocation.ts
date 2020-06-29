@@ -16,12 +16,12 @@ const dynamodb = new DynamoDBClient({})
 
 const persistDeviceCellGeolocation = addDeviceCellGeolocation({
 	dynamodb,
-	TableName: process.env.DEVICE_CELL_GEOLOCATION_TABLE || '',
+	TableName: process.env.DEVICE_CELL_GEOLOCATION_TABLE ?? '',
 })
 
 const addToCellGeolocation = addCellToCacheIfNotExists({
 	dynamodb,
-	TableName: process.env.CACHE_TABLE || '',
+	TableName: process.env.CACHE_TABLE ?? '',
 })
 
 const inputSchema = new Ajv().compile({
@@ -59,19 +59,19 @@ const inputSchema = new Ajv().compile({
 	additionalProperties: false,
 })
 
-const toIntOr0 = (v?: any) => (v ? parseInt(v, 10) : 0)
-const toFloatOr0 = (v?: any) => (v ? parseFloat(v) : 0)
+const toIntOr0 = (v?: unknown) => (typeof v === 'string' ? parseInt(v, 10) : 0)
+const toFloatOr0 = (v?: unknown) => (typeof v === 'string' ? parseFloat(v) : 0)
 
 export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(JSON.stringify(event))
 	return pipe(
-		E.parseJSON<ErrorInfo>(event.body || '', () => ({
+		E.parseJSON<ErrorInfo>(event?.body ?? '', () => ({
 			message: `Failed to parse body "${event.body}"!`,
 			type: ErrorType.BadRequest,
 		})),
-		E.map(body => {
+		E.map((body) => {
 			const b = body as any
 			return validate<Cell & Location>(inputSchema)({
 				cell: toIntOr0(b.cell),
@@ -84,7 +84,7 @@ export const handler = async (
 		}),
 		E.flatten,
 		TE.fromEither,
-		TE.map(cellgeolocation =>
+		TE.map((cellgeolocation) =>
 			sequenceT(TE.taskEither)(
 				// Persist cell geo locations
 				persistDeviceCellGeolocation({
@@ -97,6 +97,6 @@ export const handler = async (
 		),
 		TE.flatten,
 		TE.map(([id]) => id),
-		TE.fold(error => res(toStatusCode[error.type])(error), res(202)),
+		TE.fold((error) => res(toStatusCode[error.type])(error), res(202)),
 	)()
 }

@@ -3,28 +3,31 @@ import { prepareResources } from './prepare-resources'
 import { SSM } from 'aws-sdk'
 import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
 
-const STACK_ID = process.env.STACK_ID || 'bifravst'
-const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || ''
+const region = process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? ''
 
-const fetchCellLocationApiSettings = getApiSettings({
+const fetchUnwiredLabsApiSettings = getApiSettings({
 	ssm: new SSM({ region }),
 })
 
 Promise.all([
 	prepareResources({
-		stackId: STACK_ID,
 		region,
 		rootDir: process.cwd(),
 	}),
-	fetchCellLocationApiSettings({ api: 'unwiredlabs' }),
+	fetchUnwiredLabsApiSettings({ api: 'unwiredlabs' }).catch(() => {
+		console.debug(
+			'No UnwiredLabs API key configured. Feature will be disabled.',
+		)
+		return {}
+	}),
 ])
-	.then(([args, { apiKey }]) =>
+	.then(([args, ulApiSettings]) =>
 		new BifravstApp({
 			...args,
-			enableUnwiredApi: !!apiKey,
+			enableUnwiredApi: 'apiKey' in ulApiSettings,
 		}).synth(),
 	)
-	.catch(err => {
+	.catch((err) => {
 		console.error(err)
 		process.exit(1)
 	})

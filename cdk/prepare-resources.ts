@@ -6,6 +6,7 @@ import {
 	packBaseLayer,
 	packLayeredLambdas,
 	WebpackMode,
+	LayeredLambdas,
 } from '@bifravst/package-layered-lambdas'
 import { supportedRegions } from './regions'
 import * as chalk from 'chalk'
@@ -25,14 +26,17 @@ export type BifravstLambdas = {
 }
 
 export const prepareResources = async ({
-	stackId,
 	region,
 	rootDir,
 }: {
-	stackId: string
 	region: string
 	rootDir: string
-}) => {
+}): Promise<{
+	mqttEndpoint: string
+	sourceCodeBucketName: string
+	baseLayerZipFileName: string
+	lambdas: LayeredLambdas<BifravstLambdas>
+}> => {
 	// Detect the AWS IoT endpoint
 	const endpointAddress = await getIotEndpoint(
 		new Iot({
@@ -60,9 +64,7 @@ export const prepareResources = async ({
 	} catch (_) {
 		await fs.mkdir(outDir)
 	}
-	const sourceCodeBucketName = await getLambdaSourceCodeBucketName({
-		bifravstStackName: stackId,
-	})
+	const sourceCodeBucketName = await getLambdaSourceCodeBucketName()
 	const baseLayerZipFileName = await packBaseLayer({
 		srcDir: rootDir,
 		outDir,
@@ -133,9 +135,6 @@ export const prepareResources = async ({
 	})
 
 	return {
-		stackId,
-		region,
-		rootDir,
 		mqttEndpoint: endpointAddress,
 		sourceCodeBucketName,
 		baseLayerZipFileName,

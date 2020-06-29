@@ -25,7 +25,7 @@ export const concatenateFiles = ({
 		// Fetch all bodies
 		console.log(`Fetching all bodies`, files)
 		const bodies = await Promise.all(
-			files.map(async Key =>
+			files.map(async (Key) =>
 				s3
 					.getObject({
 						Bucket,
@@ -42,7 +42,7 @@ export const concatenateFiles = ({
 			.putObject({
 				Bucket,
 				Key: dateFile,
-				Body: bodies.map(b => b && b.toString()).join('\n'),
+				Body: bodies.map((b) => b?.toString() ?? '').join('\n'),
 			})
 			.promise()
 		console.log(`${dateFile} written`)
@@ -50,7 +50,7 @@ export const concatenateFiles = ({
 		await s3
 			.deleteObjects({
 				Bucket,
-				Delete: { Objects: files.map(Key => ({ Key })) },
+				Delete: { Objects: files.map((Key) => ({ Key })) },
 			})
 			.promise()
 		console.log(`Deleted ${files.length} original files`)

@@ -10,10 +10,8 @@ import * as chalk from 'chalk'
 import * as backoff from 'backoff'
 
 export const cellLocation = ({
-	stackId,
 	region,
 }: {
-	stackId: string
 	region: string
 }): CommandDefinition => ({
 	command: 'cell-location <mccmnc> <area> <cell>',
@@ -26,9 +24,9 @@ export const cellLocation = ({
 	action: async (mccmnc, area, cell, { debug }) => {
 		const athena = new Athena({ region })
 
-		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
-		const dbName = DataBaseName({ bifravstStackName: stackId })
-		const tableName = DocumentsTableName({ bifravstStackName: stackId })
+		const WorkGroup = WorkGroupName()
+		const dbName = DataBaseName()
+		const tableName = DocumentsTableName()
 
 		const q = query({
 			athena,
@@ -43,7 +41,7 @@ export const cellLocation = ({
 				return b
 			})(),
 			debugLog: (...args: any) => {
-				if (debug) {
+				if (debug !== undefined) {
 					console.debug(
 						chalk.gray('[Athena]'),
 						...args.map((a: any) => chalk.blue(JSON.stringify(a))),

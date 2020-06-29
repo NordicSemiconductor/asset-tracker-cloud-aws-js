@@ -71,15 +71,9 @@ program
 			const world: BifravstWorld = {
 				...stackConfig,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
-				historicaldataWorkgroupName: WorkGroupName({
-					bifravstStackName: stackName,
-				}),
-				historicaldataDatabaseName: DataBaseName({
-					bifravstStackName: stackName,
-				}),
-				historicaldataTableName: UpdatesTableName({
-					bifravstStackName: stackName,
-				}),
+				historicaldataWorkgroupName: WorkGroupName(),
+				historicaldataDatabaseName: DataBaseName(),
+				historicaldataTableName: UpdatesTableName(),
 				region,
 				accountId: accountId as string,
 			}

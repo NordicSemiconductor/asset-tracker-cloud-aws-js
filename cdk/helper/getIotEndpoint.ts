@@ -5,7 +5,7 @@ export const getIotEndpoint = async (iot: Iot): Promise<string> =>
 		.describeEndpoint({ endpointType: 'iot:Data-ATS' })
 		.promise()
 		.then(({ endpointAddress }) => {
-			if (!endpointAddress) {
+			if (endpointAddress === undefined) {
 				throw new Error(`Failed to resolved AWS IoT endpoint`)
 			}
 			return endpointAddress

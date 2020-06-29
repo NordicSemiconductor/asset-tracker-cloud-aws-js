@@ -1,8 +1,6 @@
 import { LambdaSourceCodeStorageApp } from './apps/LambdaSourceCodeStorage'
-import { stackId } from './stacks/LambdaSourceCodeStorage'
-
-const STACK_ID = process.env.STACK_ID || 'bifravst'
+import { stackId } from './stacks/stackId'
 
 new LambdaSourceCodeStorageApp({
-	stackId: stackId({ bifravstStackName: STACK_ID }),
+	stackId: stackId('sourcecode'),
 }).synth()

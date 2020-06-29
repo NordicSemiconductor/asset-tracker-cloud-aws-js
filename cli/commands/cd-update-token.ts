@@ -56,8 +56,7 @@ export const cdUpdateTokenCommand = ({
 												...action,
 												configuration: {
 													...action.configuration,
-													...(action.configuration &&
-													action.configuration.OAuthToken
+													...(action.configuration?.OAuthToken !== undefined
 														? { OAuthToken: token }
 														: {}),
 												},

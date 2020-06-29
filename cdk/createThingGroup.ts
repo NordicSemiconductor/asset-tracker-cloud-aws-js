@@ -8,7 +8,7 @@ const iot = new Iot()
 export const handler = async (
 	event: CloudFormationCustomResourceEvent,
 	context: Context,
-) => {
+): Promise<void> => {
 	console.log(
 		JSON.stringify({
 			event,
@@ -25,16 +25,16 @@ export const handler = async (
 		},
 	} = event
 
-	let resolve: (result?: unknown) => void
+	let resolve: () => void
 	let reject: (reason?: any) => void
-	const p = new Promise((onResult, onError) => {
+	const p = new Promise<void>((onResult, onError) => {
 		resolve = onResult
 		reject = onError
 	})
 	const doneWithPromise = (error?: Error, result?: any) => {
 		context.done(error, result)
 		if (error) reject(error)
-		resolve(result)
+		resolve()
 	}
 	if (RequestType === 'Create') {
 		await iot
@@ -44,7 +44,7 @@ export const handler = async (
 			})
 			.promise()
 			.then(async ({ thingGroupArn }) => {
-				if (!thingGroupArn) {
+				if (thingGroupArn === undefined) {
 					throw new Error(`Failed to create thing group ${ThingGroupName}!`)
 				}
 				await iot
@@ -60,7 +60,7 @@ export const handler = async (
 				if (AddExisitingThingsToGroup === '1') {
 					// Add exisiting Things to the new group
 					await Promise.all(
-						(things || []).map(async ({ thingName }) =>
+						(things ?? []).map(async ({ thingName }) =>
 							iot
 								.addThingToThingGroup({
 									thingName,
@@ -72,7 +72,7 @@ export const handler = async (
 				}
 			})
 			.then(async () => {
-				response.send(
+				await response.send(
 					event,
 					{
 						...context,
@@ -84,8 +84,8 @@ export const handler = async (
 				)
 				return p
 			})
-			.catch(async err => {
-				response.send(
+			.catch(async (err) => {
+				await response.send(
 					event,
 					{
 						...context,
@@ -100,7 +100,7 @@ export const handler = async (
 			})
 	} else {
 		await paginate({
-			paginator: async nextToken =>
+			paginator: async (nextToken) =>
 				iot
 					.listThingsInThingGroup({
 						thingGroupName: ThingGroupName,
@@ -111,7 +111,7 @@ export const handler = async (
 						// Detach all the certificates, deactivate and delete them
 						// then delete the device
 						await Promise.all(
-							things?.map(async thing =>
+							things?.map(async (thing) =>
 								iot
 									.listThingPrincipals({
 										thingName: thing,
@@ -119,7 +119,7 @@ export const handler = async (
 									.promise()
 									.then(async ({ principals }) =>
 										Promise.all(
-											principals?.map(async principal => {
+											principals?.map(async (principal) => {
 												const principalId = principal.split('/').pop() as string
 												console.log(
 													`Detaching certificate ${principal} from thing ${thing} ...`,
@@ -166,7 +166,7 @@ export const handler = async (
 					}),
 		})
 		console.log(`${RequestType} not supported.`)
-		response.send(
+		await response.send(
 			event,
 			{
 				...context,

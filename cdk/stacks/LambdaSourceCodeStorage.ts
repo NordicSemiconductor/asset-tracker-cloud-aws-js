@@ -19,6 +19,3 @@ export class LambdaSourceCodeStorageStack extends Stack {
 		})
 	}
 }
-
-export const stackId = (args: { bifravstStackName: string }) =>
-	args.bifravstStackName + '-sourcecode'

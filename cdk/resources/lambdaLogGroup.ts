@@ -6,7 +6,7 @@ export const lambdaLogGroup = (
 	parent: CloudFormation.Construct,
 	functionName: string,
 	lambda: Lambda.IFunction,
-) =>
+): CloudWatchLogs.LogGroup =>
 	new CloudWatchLogs.LogGroup(parent, `${functionName}LogGroup`, {
 		removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		logGroupName: `/aws/lambda/${lambda.functionName}`,

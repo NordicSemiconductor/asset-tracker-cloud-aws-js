@@ -43,7 +43,7 @@ export const createCA = async (args: {
 			.describeStacks({ StackName: stackId })
 			.promise()
 			.then(async ({ Stacks }) => {
-				if (!Stacks || !Stacks.length || !Stacks[0].Outputs) {
+				if (Stacks?.length === 0 || Stacks?.[0].Outputs === undefined) {
 					throw new Error(`Stack ${stackId} not found.`)
 				}
 				return toObject(Stacks[0].Outputs)
@@ -190,7 +190,7 @@ export const createCA = async (args: {
 		})
 		.promise()
 
-	if (!res || !res.certificateId) {
+	if (res?.certificateId === undefined) {
 		throw new Error('Failed to register CA!')
 	}
 

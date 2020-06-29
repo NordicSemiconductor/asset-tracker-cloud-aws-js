@@ -15,7 +15,7 @@ export const concatenateRawMessages = async ({
 	concatenateFilesInBucket: ConcatenateFilesFn
 	collectFilesInBucket: CollectFilesFn
 	documentType: 'updates' | 'documents'
-}) => {
+}): Promise<void> => {
 	// Concatenate hours
 	await concatenateFilesInBucket({
 		files: await collectFilesInBucket({

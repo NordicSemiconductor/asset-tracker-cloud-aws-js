@@ -11,12 +11,10 @@ import * as chalk from 'chalk'
 import { deviceMessagesFields } from '../../historicalData/deviceMessages'
 
 export const historicalDataCommand = ({
-	stackId,
 	region,
 	QueryResultsBucketName,
 	DataBucketName,
 }: {
-	stackId: string
 	region: string
 	QueryResultsBucketName: string
 	DataBucketName: string
@@ -49,12 +47,10 @@ export const historicalDataCommand = ({
 
 		const { WorkGroups } = await athena.listWorkGroups().promise()
 
-		const WorkGroup = WorkGroupName({ bifravstStackName: stackId })
-		const dbName = DataBaseName({ bifravstStackName: stackId })
-		const updatesTableName = UpdatesTableName({ bifravstStackName: stackId })
-		const documentsTableName = DocumentsTableName({
-			bifravstStackName: stackId,
-		})
+		const WorkGroup = WorkGroupName()
+		const dbName = DataBaseName()
+		const updatesTableName = UpdatesTableName()
+		const documentsTableName = DocumentsTableName()
 
 		if (
 			!WorkGroups ||

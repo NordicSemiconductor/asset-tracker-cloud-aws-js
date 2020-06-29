@@ -24,7 +24,7 @@ export const connectCommand = ({
 		connect({
 			deviceId,
 			deviceUiUrl,
-			endpoint: e || endpoint,
+			endpoint: e ?? endpoint,
 			certsDir,
 			caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 			version,

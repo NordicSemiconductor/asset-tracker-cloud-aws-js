@@ -42,6 +42,3 @@ export class WebAppsStack extends CloudFormation.Stack {
 		})
 	}
 }
-
-export const stackId = (args: { bifravstStackName: string }) =>
-	args.bifravstStackName + '-webapps'

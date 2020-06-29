@@ -5,14 +5,12 @@ import {
 	WorkGroupName,
 } from '../../historicalData/settings'
 import { stackOutput, objectToEnv } from '@bifravst/cloudformation-helpers'
-import { stackId as webStackId } from '../../cdk/stacks/WebApps'
 import { CloudFormation } from 'aws-sdk'
+import { stackId } from '../../cdk/stacks/stackId'
 
 export const reactConfigCommand = ({
-	stackId,
 	region,
 }: {
-	stackId: string
 	region: string
 }): CommandDefinition => ({
 	command: 'react-config',
@@ -22,21 +20,11 @@ export const reactConfigCommand = ({
 			objectToEnv(
 				{
 					region,
-					historicaldataWorkgroupName: WorkGroupName({
-						bifravstStackName: stackId,
-					}),
-					historicaldataDatabaseName: DataBaseName({
-						bifravstStackName: stackId,
-					}),
-					historicaldataTableName: UpdatesTableName({
-						bifravstStackName: stackId,
-					}),
-					...(await so(stackId)),
-					...(await so(
-						webStackId({
-							bifravstStackName: stackId,
-						}),
-					)),
+					historicaldataWorkgroupName: WorkGroupName(),
+					historicaldataDatabaseName: DataBaseName(),
+					historicaldataTableName: UpdatesTableName(),
+					...(await so(stackId())),
+					...(await so(stackId('webapps'))),
 				},
 				'REACT_APP_',
 			),

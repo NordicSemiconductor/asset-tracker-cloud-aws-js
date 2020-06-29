@@ -8,13 +8,13 @@ import { MaybeCellGeoLocation } from './types'
 
 const locator = geolocateCellFromCache({
 	dynamodb: new DynamoDBClient({}),
-	TableName: process.env.CACHE_TABLE || '',
+	TableName: process.env.CACHE_TABLE ?? '',
 })
 
 export const handler = async (input: Cell): Promise<MaybeCellGeoLocation> =>
 	pipe(
 		locator(input),
-		TE.map(optionalLocation => {
+		TE.map((optionalLocation) => {
 			if (isSome(optionalLocation)) {
 				return {
 					located: true,

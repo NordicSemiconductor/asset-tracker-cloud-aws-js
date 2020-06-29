@@ -25,7 +25,7 @@ export const createDeviceCertificate = async ({
 		throw new Error(`${certsDir} does not exist.`)
 	}
 
-	log && log(`Generating certificate for device ${deviceId}`)
+	log?.(`Generating certificate for device ${deviceId}`)
 	const caFiles = caFileLocations(certsDir)
 	const deviceFiles = deviceFileLocations({
 		certsDir,

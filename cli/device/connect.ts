@@ -31,7 +31,7 @@ export const connect = async ({
 	certsDir: string
 	caCert: string
 	version: string
-}) => {
+}): Promise<void> => {
 	const deviceFiles = deviceFileLocations({ certsDir, deviceId })
 	let cfg = defaultConfig
 	const devRoam = {
@@ -150,10 +150,10 @@ export const connect = async ({
 			console.log(chalk.magenta('>'), chalk.cyan(stat))
 			console.log(chalk.magenta('>'), chalk.cyan(JSON.stringify(stateObject)))
 			if (stat === 'accepted') {
-				if (wsConnection) {
+				if (wsConnection !== undefined) {
 					cfg = {
 						...cfg,
-						...(stateObject.desired && stateObject.desired.cfg),
+						...stateObject.desired.cfg,
 					}
 					console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
 					wsConnection.send(JSON.stringify(cfg))
@@ -165,9 +165,9 @@ export const connect = async ({
 			console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(stateObject)))
 			cfg = {
 				...cfg,
-				...(stateObject.state && stateObject.state.cfg),
+				...stateObject.state.cfg,
 			}
-			if (wsConnection) {
+			if (wsConnection !== undefined) {
 				console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
 				wsConnection.send(JSON.stringify(cfg))
 			}

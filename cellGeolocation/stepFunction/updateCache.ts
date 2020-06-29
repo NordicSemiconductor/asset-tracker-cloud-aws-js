@@ -6,7 +6,7 @@ import { cellId } from '@bifravst/cell-geolocation-helpers'
 import { Cell } from '../geolocateCell'
 import { MaybeCellGeoLocation } from './types'
 
-const TableName = process.env.CACHE_TABLE || ''
+const TableName = process.env.CACHE_TABLE ?? ''
 const dynamodb = new DynamoDBClient({})
 
 export const handler = async (

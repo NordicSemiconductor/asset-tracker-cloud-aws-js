@@ -2,7 +2,7 @@ import { S3 } from 'aws-sdk'
 import { format } from 'date-fns'
 
 const s3 = new S3()
-const Bucket = process.env.HISTORICAL_DATA_BUCKET || ''
+const Bucket = process.env.HISTORICAL_DATA_BUCKET ?? ''
 
 /**
  * Processes batch messages and stores them on S3
@@ -12,15 +12,15 @@ export const handler = async (event: {
 	deviceId: string
 	messageId: string
 	timestamp: number
-}) => {
+}): Promise<void> => {
 	const { message, deviceId, messageId, timestamp } = event
 
 	let id = 0
 
-	return Promise.all(
-		Object.keys(message).map(async key =>
+	await Promise.all(
+		Object.keys(message).map(async (key) =>
 			Promise.all(
-				message[key].map(async body => {
+				message[key].map(async (body) => {
 					const Key = `updates/raw/${format(timestamp, 'yyyy/MM/dd')}/${format(
 						timestamp,
 						"yyyyMMdd'T'HHmmss",
@@ -38,7 +38,7 @@ export const handler = async (event: {
 							Body,
 						}),
 					)
-					return s3
+					await s3
 						.putObject({
 							Bucket,
 							Key,

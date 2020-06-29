@@ -26,8 +26,13 @@ export const geolocateCellFromCache = ({
 }: {
 	dynamodb: DynamoDBClient
 	TableName: string
-}) => (cell: Cell) =>
-	TE.tryCatch<ErrorInfo, Option<{ unresolved: boolean } & Partial<Location>>>(
+}) => (
+	cell: Cell,
+): TE.TaskEither<
+	ErrorInfo,
+	Option<{ unresolved: boolean } & Partial<Location>>
+> =>
+	TE.tryCatch(
 		async () => {
 			const id = cellId(cell)
 			const { Item } = await dynamodb.send(
@@ -52,14 +57,17 @@ export const geolocateCellFromCache = ({
 						unresolved,
 						lat: parseFloat(Item.lat.N as string),
 						lng: parseFloat(Item.lng.N as string),
-						accuracy: Item?.accuracy?.N ? parseFloat(Item.accuracy.N) : 5000,
+						accuracy:
+							Item?.accuracy?.N !== undefined
+								? parseFloat(Item.accuracy.N)
+								: 5000,
 					})
 				}
 			}
 
 			return none
 		},
-		err => {
+		(err) => {
 			const id = cellId(cell)
 			if (
 				(err as Error).message === 'NOT_FOUND' ||
@@ -91,7 +99,7 @@ export const queueCellGeolocationResolutionJob = ({
 }: {
 	sqs: SQS
 	QueueUrl: string
-}) => (cell: Cell) =>
+}) => (cell: Cell): TE.TaskEither<ErrorInfo, void> =>
 	TE.tryCatch(
 		async () => {
 			console.debug(
@@ -119,7 +127,7 @@ export const queueCellGeolocationResolutionJob = ({
 				}),
 			)
 		},
-		err => {
+		(err) => {
 			console.error(
 				JSON.stringify({
 					queueCellGeolocationResolutionJob: {
