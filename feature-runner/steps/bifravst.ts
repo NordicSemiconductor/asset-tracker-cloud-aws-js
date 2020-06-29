@@ -1,7 +1,9 @@
 import {
 	regexGroupMatcher,
 	regexMatcher,
-} from '@coderbyheart/bdd-feature-runner-aws'
+	StepRunnerFunc,
+	InterpolatedStep,
+} from '@bifravst/e2e-bdd-test-runner'
 import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
@@ -44,13 +46,13 @@ export const bifravstStepRunners = ({
 	mqttEndpoint,
 }: {
 	mqttEndpoint: string
-}) => {
+}): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => {
 	const connectToBroker = connect(mqttEndpoint)
 	const shadowOnBroker = shadow(mqttEndpoint)
 	return [
 		regexMatcher<BifravstWorld>(/^(?:a cat exists|I generate a certificate)$/)(
 			async (_, __, runner) => {
-				if (!runner.store['cat:id']) {
+				if (runner.store['cat:id'] === undefined) {
 					const catName = (await randomWords({ numWords: 3 })).join('-')
 
 					await createDeviceCertificate({
@@ -78,7 +80,7 @@ export const bifravstStepRunners = ({
 		),
 		regexMatcher<BifravstWorld>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
 			async ([deviceId], __, runner) => {
-				const catId = deviceId || runner.store['cat:id']
+				const catId = deviceId ?? runner.store['cat:id']
 				await runner.progress('IoT', catId)
 				const deviceFiles = deviceFileLocations({
 					certsDir: path.resolve(process.cwd(), 'certificates'),
@@ -114,11 +116,11 @@ export const bifravstStepRunners = ({
 		regexMatcher<BifravstWorld>(
 			/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
 		)(async ([deviceId], step, runner) => {
-			if (!step.interpolatedArgument) {
+			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
 			}
 			const reported = JSON.parse(step.interpolatedArgument)
-			const catId = deviceId || runner.store['cat:id']
+			const catId = deviceId ?? runner.store['cat:id']
 			const connection = shadowOnBroker(catId)
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
@@ -128,7 +130,7 @@ export const bifravstStepRunners = ({
 						_thingName: string,
 						stat: string,
 						_clientToken: string,
-						stateObject: object,
+						stateObject: Record<string, any>,
 					) => {
 						await runner.progress('IoT < status', stat)
 						await runner.progress('IoT < status', JSON.stringify(stateObject))
@@ -156,8 +158,8 @@ export const bifravstStepRunners = ({
 		regexMatcher<BifravstWorld>(
 			/^the cat tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
 		)(async ([deviceId, topic], step, runner) => {
-			const catId = deviceId || runner.store['cat:id']
-			if (!step.interpolatedArgument) {
+			const catId = deviceId ?? runner.store['cat:id']
+			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
 			}
 			const message = JSON.parse(step.interpolatedArgument)
@@ -168,25 +170,20 @@ export const bifravstStepRunners = ({
 					clearTimeout(timeout)
 					reject(err)
 				})
-				connection.publish(
-					topic,
-					JSON.stringify(message),
-					undefined,
-					(err: any) => {
-						if (err) {
-							return reject(err)
-						}
-						clearTimeout(timeout)
-						resolve()
-					},
-				)
+				connection.publish(topic, JSON.stringify(message), undefined, (err) => {
+					if (err !== undefined) {
+						return reject(err)
+					}
+					clearTimeout(timeout)
+					resolve()
+				})
 			})
 			return await publishPromise
 		}),
 		regexGroupMatcher(
 			/^the cat tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
-			const catId = deviceId || runner.store['cat:id']
+			const catId = deviceId ?? runner.store['cat:id']
 
 			return new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 60 * 1000)
@@ -196,8 +193,8 @@ export const bifravstStepRunners = ({
 
 				connection.on('connect', () => {
 					clearTimeout(timeout)
-					connection.subscribe(successTopic, undefined, err => {
-						if (err) {
+					connection.subscribe(successTopic, undefined, (err) => {
+						if (err !== undefined) {
 							connection.end()
 							reject(err)
 						}
@@ -205,8 +202,8 @@ export const bifravstStepRunners = ({
 							`$aws/things/${catId}/jobs/$next/get`,
 							'',
 							undefined,
-							err => {
-								if (err) {
+							(err) => {
+								if (err !== undefined) {
 									connection.end()
 									reject(err)
 								}
@@ -219,7 +216,7 @@ export const bifravstStepRunners = ({
 						await runner.progress('Iot (job)', topic)
 						await runner.progress('Iot (job)', message)
 						const { execution } = JSON.parse(message)
-						if (topic === successTopic && execution) {
+						if (topic === successTopic && execution !== undefined) {
 							// eslint-disable-next-line require-atomic-updates
 							runner.store[storeName] = execution
 							resolve(execution)
@@ -230,7 +227,7 @@ export const bifravstStepRunners = ({
 						}
 					})
 				})
-				connection.on('error', error => {
+				connection.on('error', (error) => {
 					clearTimeout(timeout)
 					reject(error)
 					connection.end()
@@ -240,7 +237,7 @@ export const bifravstStepRunners = ({
 		regexGroupMatcher(
 			/^the cat tracker(?: (?<deviceId>[^ ]+))? marks the job in "(?<storeName>[^"]+)" as in progress$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
-			const catId = deviceId || runner.store['cat:id']
+			const catId = deviceId ?? runner.store['cat:id']
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
 
@@ -261,7 +258,7 @@ export const bifravstStepRunners = ({
 							executionNumber: job.executionNumber,
 						}),
 						undefined,
-						err => {
+						(err) => {
 							if (err) {
 								connection.end()
 								reject(err)
@@ -275,7 +272,7 @@ export const bifravstStepRunners = ({
 					connection.end()
 					resolve()
 				})
-				connection.on('error', error => {
+				connection.on('error', (error) => {
 					clearTimeout(timeout)
 					reject(error)
 					connection.end()

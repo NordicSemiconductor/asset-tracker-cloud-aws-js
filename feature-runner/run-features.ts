@@ -7,7 +7,7 @@ import {
 	storageStepRunners,
 	restStepRunners,
 	randomStepRunners,
-} from '@coderbyheart/bdd-feature-runner-aws'
+} from '@bifravst/e2e-bdd-test-runner'
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
@@ -34,7 +34,7 @@ export type BifravstWorld = StackOutputs & {
 }
 
 const region =
-	process.env.AWS_DEFAULT_REGION || process.env.AWS_REGION || 'eu-central-1'
+	process.env.AWS_DEFAULT_REGION ?? process.env.AWS_REGION ?? 'eu-central-1'
 
 program
 	.arguments('<featureDir>')
@@ -44,7 +44,7 @@ program
 	.option(
 		'-s, --stack <stack>',
 		'Stack name',
-		process.env.STACK_ID || 'bifravst',
+		process.env.STACK_ID ?? 'bifravst',
 	)
 	.action(
 		async (

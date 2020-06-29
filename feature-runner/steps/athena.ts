@@ -1,4 +1,8 @@
-import { regexMatcher } from '@coderbyheart/bdd-feature-runner-aws'
+import {
+	regexMatcher,
+	StepRunnerFunc,
+	InterpolatedStep,
+} from '@bifravst/e2e-bdd-test-runner'
 import { BifravstWorld } from '../run-features'
 import { query, parseResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
@@ -9,11 +13,11 @@ export const athenaStepRunners = ({
 }: {
 	region: string
 	historicaldataWorkgroupName: string
-}) => [
+}): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => [
 	regexMatcher<BifravstWorld>(
 		/^I run this query in the Athena workgroup ([^ ]+)$/,
 	)(async (_, step, runner) => {
-		if (!step.interpolatedArgument) {
+		if (step.interpolatedArgument === undefined) {
 			throw new Error('Must provide argument!')
 		}
 		const athena = new Athena({

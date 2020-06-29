@@ -1,4 +1,4 @@
-import { regexGroupMatcher } from '@coderbyheart/bdd-feature-runner-aws'
+import { regexGroupMatcher } from '@bifravst/e2e-bdd-test-runner'
 import * as uuid from 'uuid'
 
 export const uuidHelper = regexGroupMatcher(
