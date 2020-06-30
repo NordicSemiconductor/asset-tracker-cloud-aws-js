@@ -120,6 +120,11 @@ export const handler = async (
 					return n
 				},
 			})
+			await cfnResponse({
+				Status: ResponseStatus.SUCCESS,
+				event,
+				PhysicalResourceId: ThingGroupName,
+			})
 		} else {
 			console.log(`${RequestType} not supported.`)
 			await cfnResponse({
