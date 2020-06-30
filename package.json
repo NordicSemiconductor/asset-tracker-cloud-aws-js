@@ -34,7 +34,6 @@
     "aws-iot-device-sdk": "^2.2.6",
     "aws-sdk": "^2.706.0",
     "backoff": "^2.5.0",
-    "cfn-response": "^1.0.1",
     "chalk": "^4.1.0",
     "commander": "^5.1.0",
     "date-fns": "^2.14.0",
@@ -80,6 +79,7 @@
     "compare-versions": "^3.6.0",
     "husky": "^4.2.5",
     "jest": "^26.1.0",
+    "nock": "^13.0.0",
     "ts-jest": "^26.1.1",
     "typescript": "^3.9.5"
   },
