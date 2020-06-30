@@ -1,4 +1,8 @@
 import { S3 } from 'aws-sdk'
+import {
+	isNotNullOrUndefined,
+	isNullOrUndefined,
+} from '../util/isNullOrUndefined'
 
 export type CollectFilesArgs = {
 	Prefix: string
@@ -42,14 +46,14 @@ export const collectFiles = ({
 					if (d >= notAfterDate) {
 						return files
 					}
-					if (files[d] === undefined) {
+					if (isNullOrUndefined(files[d])) {
 						files[d] = [file]
 					} else {
 						files[d].push(file)
 					}
 					return files
 				}, files ?? {})
-			if (NextMarker !== undefined) {
+			if (isNotNullOrUndefined(NextMarker)) {
 				return collectFiles({ Bucket, s3 })({
 					files: f,
 					Marker: NextMarker,

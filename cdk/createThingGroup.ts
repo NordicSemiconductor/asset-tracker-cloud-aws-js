@@ -2,6 +2,7 @@ import { Iot } from 'aws-sdk'
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { paginate } from '../util/paginate'
 import { cfnResponse, ResponseStatus } from '@bifravst/cloudformation-helpers'
+import { isNullOrUndefined } from 'util'
 
 const iot = new Iot()
 
@@ -32,7 +33,7 @@ export const handler = async (
 					thingGroupProperties: ThingGroupProperties,
 				})
 				.promise()
-			if (thingGroupArn === undefined) {
+			if (isNullOrUndefined(thingGroupArn)) {
 				throw new Error(`Failed to create thing group ${ThingGroupName}!`)
 			}
 			await iot

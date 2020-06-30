@@ -11,10 +11,7 @@ import * as path from 'path'
 import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
-
-const isNullOrUndefined = (arg?: unknown | null): boolean =>
-	arg === undefined || arg === null
-const isNotNullOrUndefined = (arg?: unknown | null) => !isNullOrUndefined(arg)
+import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 
 const connect = (mqttEndpoint: string) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
