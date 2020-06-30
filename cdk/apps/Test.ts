@@ -12,6 +12,7 @@ export class TestApp extends App {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
 		baseLayerZipFileName: string
+		cloudFormationLayerZipFileName: string
 		lambdas: LayeredLambdas<BifravstLambdas>
 	}) {
 		super()

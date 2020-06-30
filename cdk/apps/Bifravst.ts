@@ -10,6 +10,7 @@ export class BifravstApp extends App {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
 		baseLayerZipFileName: string
+		cloudFormationLayerZipFileName: string
 		lambdas: LayeredLambdas<BifravstLambdas>
 		enableUnwiredApi: boolean
 	}) {

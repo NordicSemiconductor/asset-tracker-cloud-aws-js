@@ -11,6 +11,7 @@ import {
 import { supportedRegions } from './regions'
 import * as chalk from 'chalk'
 import { getIotEndpoint } from './helper/getIotEndpoint'
+import { spawn } from 'child_process'
 
 export type BifravstLambdas = {
 	createThingGroup: string
@@ -35,6 +36,7 @@ export const prepareResources = async ({
 	mqttEndpoint: string
 	sourceCodeBucketName: string
 	baseLayerZipFileName: string
+	cloudFormationLayerZipFileName: string
 	lambdas: LayeredLambdas<BifravstLambdas>
 }> => {
 	// Detect the AWS IoT endpoint
@@ -65,11 +67,59 @@ export const prepareResources = async ({
 		await fs.mkdir(outDir)
 	}
 	const sourceCodeBucketName = await getLambdaSourceCodeBucketName()
+
+	// Layer with dependencies for application lambdas
 	const baseLayerZipFileName = await packBaseLayer({
 		srcDir: rootDir,
 		outDir,
 		Bucket: sourceCodeBucketName,
 	})
+
+	// Dedicated layer for Custom Resource Lambda
+	const cloudFormationLayerDir = path.resolve(
+		rootDir,
+		'dist',
+		'lambdas',
+		'cloudFormationLayer',
+	)
+	try {
+		await fs.stat(cloudFormationLayerDir)
+	} catch (_) {
+		await fs.mkdir(cloudFormationLayerDir)
+	}
+	const devDeps = JSON.parse(
+		await fs.readFile(path.resolve(rootDir, 'package.json'), 'utf-8'),
+	).devDependencies
+	await fs.writeFile(
+		path.join(cloudFormationLayerDir, 'package.json'),
+		JSON.stringify({
+			dependencies: {
+				'aws-sdk': devDeps['aws-sdk'],
+				'@bifravst/cloudformation-helpers':
+					devDeps['@bifravst/cloudformation-helpers'],
+			},
+		}),
+		'utf-8',
+	)
+	await new Promise((resolve, reject) => {
+		const p = spawn('npm', ['i', '--ignore-scripts', '--only=prod'], {
+			cwd: cloudFormationLayerDir,
+		})
+		p.on('close', (code) => {
+			if (code !== 0) {
+				const msg = `[CloudFormation Layer] npm i in ${cloudFormationLayerDir} exited with code ${code}.`
+				return reject(new Error(msg))
+			}
+			return resolve()
+		})
+	})
+	const cloudFormationLayerZipFileName = await packBaseLayer({
+		srcDir: cloudFormationLayerDir,
+		outDir,
+		Bucket: sourceCodeBucketName,
+	})
+
+	// Pack lambdas
 	const lambdas = await packLayeredLambdas<BifravstLambdas>({
 		id: 'bifravst',
 		mode: WebpackMode.production,
@@ -138,6 +188,7 @@ export const prepareResources = async ({
 		mqttEndpoint: endpointAddress,
 		sourceCodeBucketName,
 		baseLayerZipFileName,
+		cloudFormationLayerZipFileName,
 		lambdas,
 	}
 }

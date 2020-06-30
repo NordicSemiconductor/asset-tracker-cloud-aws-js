@@ -1,10 +1,7 @@
 import { Iot } from 'aws-sdk'
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { paginate } from '../util/paginate'
-import {
-	customResourceResponse,
-	ResponseStatus,
-} from './customResourceResponse'
+import { cfnResponse, ResponseStatus } from '@bifravst/cloudformation-helpers'
 
 const iot = new Iot()
 
@@ -59,7 +56,7 @@ export const handler = async (
 					),
 				)
 			}
-			await customResourceResponse({
+			await cfnResponse({
 				Status: ResponseStatus.SUCCESS,
 				event,
 				PhysicalResourceId: ThingGroupName,
@@ -124,7 +121,7 @@ export const handler = async (
 			})
 		} else {
 			console.log(`${RequestType} not supported.`)
-			await customResourceResponse({
+			await cfnResponse({
 				Status: ResponseStatus.SUCCESS,
 				event,
 				PhysicalResourceId: ThingGroupName,
@@ -132,7 +129,7 @@ export const handler = async (
 			})
 		}
 	} catch (err) {
-		await customResourceResponse({
+		await cfnResponse({
 			Status: ResponseStatus.FAILED,
 			Reason: err.message,
 			event,

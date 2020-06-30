@@ -26,6 +26,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			mqttEndpoint,
 			sourceCodeBucketName,
 			baseLayerZipFileName,
+			cloudFormationLayerZipFileName,
 			lambdas,
 			isTest,
 			enableUnwiredApi,
@@ -33,6 +34,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			mqttEndpoint: string
 			sourceCodeBucketName: string
 			baseLayerZipFileName: string
+			cloudFormationLayerZipFileName: string
 			lambdas: LayeredLambdas<BifravstLambdas>
 			isTest: boolean
 			enableUnwiredApi: boolean
@@ -52,6 +54,18 @@ export class BifravstStack extends CloudFormation.Stack {
 			code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
 			compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
 		})
+
+		const cloudFormationLayer = new Lambda.LayerVersion(
+			this,
+			`${id}-cloudformation-layer`,
+			{
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					cloudFormationLayerZipFileName,
+				),
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
+			},
+		)
 
 		new CloudFormation.CfnOutput(this, 'mqttEndpoint', {
 			value: mqttEndpoint,
@@ -326,7 +340,7 @@ export class BifravstStack extends CloudFormation.Stack {
 				sourceCodeBucket,
 				lambdas.lambdaZipFileNames.createThingGroup,
 			),
-			layers: [baseLayer],
+			layers: [cloudFormationLayer],
 			description:
 				'Used in CloudFormation to create the thing group for the devices',
 			handler: 'index.handler',
