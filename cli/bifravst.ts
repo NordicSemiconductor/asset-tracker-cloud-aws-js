@@ -101,7 +101,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	]
 
 	if (isCI) {
-		console.log('Running on CI...')
+		console.error('Running on CI...')
 		commands.push(
 			dropAthenaResourcesCommand({
 				stackId,
@@ -117,13 +117,19 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			}),
 		)
 	} else {
-		const { deviceUiDomainName } = await so<StackOutputs>(
-			generateStackId('webapps'),
-		)
+		let deviceUiUrl = ''
+		try {
+			const { deviceUiDomainName } = await so<StackOutputs>(
+				generateStackId('webapps'),
+			)
+			deviceUiUrl = `https://${deviceUiDomainName}`
+		} catch (err) {
+			console.error(chalk.red.dim(`Could not determine Device UI URL.`))
+		}
 		commands.push(
 			connectCommand({
 				endpoint,
-				deviceUiUrl: `https://${deviceUiDomainName}`,
+				deviceUiUrl,
 				certsDir,
 				version,
 			}),

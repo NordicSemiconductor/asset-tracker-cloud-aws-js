@@ -27,7 +27,10 @@ export const createCACommand = ({
 		console.log(
 			chalk.green(`CA certificate ${chalk.yellow(certificateId)} registered.`),
 		)
-		console.log(chalk.green('You can now generate device certificates.'))
+		console.log(
+			chalk.green('You can now generate device certificates.'),
+			chalk.greenBright('node cli create-device-cert'),
+		)
 	},
 	help:
 		'Creates a CA certificate and registers it for Just-in-time provisioning.',

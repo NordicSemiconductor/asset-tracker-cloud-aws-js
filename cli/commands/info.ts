@@ -23,7 +23,7 @@ export const infoCommand = ({
 			if (outputs[output] === undefined) {
 				throw new Error(`${output} is not defined.`)
 			}
-			console.log(outputs[output])
+			process.stdout.write(outputs[output])
 			return
 		}
 		Object.entries(outputs).forEach(([k, v]) => {
