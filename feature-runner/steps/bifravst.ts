@@ -12,6 +12,10 @@ import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
 
+const isNullOrUndefined = (arg?: unknown | null): boolean =>
+	arg === undefined || arg === null
+const isNotNullOrUndefined = (arg?: unknown | null) => !isNullOrUndefined(arg)
+
 const connect = (mqttEndpoint: string) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
 		certsDir: path.resolve(process.cwd(), 'certificates'),
@@ -171,7 +175,7 @@ export const bifravstStepRunners = ({
 					reject(err)
 				})
 				connection.publish(topic, JSON.stringify(message), undefined, (err) => {
-					if (err !== undefined) {
+					if (isNotNullOrUndefined(err)) {
 						return reject(err)
 					}
 					clearTimeout(timeout)
@@ -194,7 +198,7 @@ export const bifravstStepRunners = ({
 				connection.on('connect', () => {
 					clearTimeout(timeout)
 					connection.subscribe(successTopic, undefined, (err) => {
-						if (err !== undefined) {
+						if (isNotNullOrUndefined(err)) {
 							connection.end()
 							reject(err)
 						}
@@ -203,7 +207,7 @@ export const bifravstStepRunners = ({
 							'',
 							undefined,
 							(err) => {
-								if (err !== undefined) {
+								if (isNotNullOrUndefined(err)) {
 									connection.end()
 									reject(err)
 								}
@@ -216,7 +220,7 @@ export const bifravstStepRunners = ({
 						await runner.progress('Iot (job)', topic)
 						await runner.progress('Iot (job)', message)
 						const { execution } = JSON.parse(message)
-						if (topic === successTopic && execution !== undefined) {
+						if (topic === successTopic && isNotNullOrUndefined(execution)) {
 							// eslint-disable-next-line require-atomic-updates
 							runner.store[storeName] = execution
 							resolve(execution)
