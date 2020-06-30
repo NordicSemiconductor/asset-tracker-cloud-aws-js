@@ -6,7 +6,7 @@ export const validate = <T>(schema: Ajv.ValidateFunction) => (
 	value: Record<string, any>,
 ) => (): E.Either<ErrorInfo, T> => {
 	const valid = schema(value) as boolean
-	if (valid) {
+	if (valid !== true) {
 		return E.left({
 			type: ErrorType.BadRequest,
 			message: 'Validation failed!',

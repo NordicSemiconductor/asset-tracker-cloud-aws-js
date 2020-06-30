@@ -59,8 +59,8 @@ const inputSchema = new Ajv().compile({
 	additionalProperties: false,
 })
 
-const toIntOr0 = (v?: unknown) => (typeof v === 'string' ? parseInt(v, 10) : 0)
-const toFloatOr0 = (v?: unknown) => (typeof v === 'string' ? parseFloat(v) : 0)
+const toIntOr0 = (v?: any) => parseInt(v ?? '0', 10)
+const toFloatOr0 = (v?: any) => parseFloat(v ?? '0')
 
 export const handler = async (
 	event: APIGatewayProxyEvent,
