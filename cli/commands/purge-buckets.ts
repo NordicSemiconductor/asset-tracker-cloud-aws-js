@@ -18,6 +18,7 @@ export const purgeBucketsCommand = ({
 			historicalDataBucketName,
 			webAppBucketName,
 			deviceUiBucketName,
+			fotaBucketName,
 		} = {
 			...(await stackOutput(new CloudFormation({ region }))(stackId)),
 		} as { [key: string]: string }
@@ -27,6 +28,7 @@ export const purgeBucketsCommand = ({
 			historicalDataBucketName,
 			webAppBucketName,
 			deviceUiBucketName,
+			fotaBucketName,
 		]
 		console.log('Purging bucket:')
 		buckets
@@ -39,24 +41,30 @@ export const purgeBucketsCommand = ({
 				.filter((b) => b)
 				.map(async (bucketName) => {
 					console.log('Purging bucket', bucketName)
-					const { Contents } = await s3
-						.listObjects({ Bucket: bucketName })
-						.promise()
-					if (!Contents) {
-						console.log(`${bucketName} is empty.`)
-						return
+					try {
+						const { Contents } = await s3
+							.listObjects({ Bucket: bucketName })
+							.promise()
+						if (!Contents) {
+							console.log(`${bucketName} is empty.`)
+							return
+						}
+						await Promise.all(
+							Contents.map(async (obj) => {
+								console.log(bucketName, obj.Key)
+								return s3
+									.deleteObject({
+										Bucket: bucketName,
+										Key: `${obj.Key}`,
+									})
+									.promise()
+							}),
+						)
+					} catch (err) {
+						console.error(
+							`Failed to purge bucket ${bucketName}: ${err.message}`,
+						)
 					}
-					return Promise.all(
-						Contents.map(async (obj) => {
-							console.log(bucketName, obj.Key)
-							return s3
-								.deleteObject({
-									Bucket: bucketName,
-									Key: `${obj.Key}`,
-								})
-								.promise()
-						}),
-					)
 				}),
 		)
 	},
