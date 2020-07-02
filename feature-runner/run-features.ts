@@ -1,6 +1,5 @@
 import {
 	FeatureRunner,
-	fetchStackConfiguration,
 	ConsoleReporter,
 	cognitoStepRunners,
 	awsSdkStepRunners,
@@ -8,6 +7,7 @@ import {
 	restStepRunners,
 	randomStepRunners,
 } from '@bifravst/e2e-bdd-test-runner'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
@@ -19,7 +19,7 @@ import {
 } from '../historicalData/settings'
 import { athenaStepRunners } from './steps/athena'
 import { uuidHelper } from './steps/uuidHelper'
-import { STS } from 'aws-sdk'
+import { STS, CloudFormation } from 'aws-sdk'
 import { v4 } from 'uuid'
 
 let ran = false
@@ -59,10 +59,9 @@ program
 			ran = true
 			const { printResults, stack: stackName, progress, retry } = options
 
-			const stackConfig = (await fetchStackConfiguration({
-				StackName: stackName,
-				region,
-			})) as StackOutputs
+			const stackConfig = await stackOutput(new CloudFormation({ region }))<
+				StackOutputs
+			>(stackName)
 
 			const { Account: accountId } = await new STS({ region })
 				.getCallerIdentity()
