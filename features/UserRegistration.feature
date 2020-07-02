@@ -3,7 +3,8 @@ Feature: Register a new account
     I can register a new account
 
     Note: this tests only that sign up is possible (which can be disabled),
-    once this works, password reset etc. can be assumed to be working
+    once this works, password reset etc. can be assumed to be working because
+    this is handled by AWS Cognito.
 
     Scenario: Sign up
 
