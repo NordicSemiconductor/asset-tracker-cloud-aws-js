@@ -13,14 +13,20 @@ import { toStatusCode, ErrorType } from '../ErrorInfo'
 import { res } from './res'
 import { SQS } from 'aws-sdk'
 import { getOrElse } from '../../util/fp-ts'
+import { fromEnv } from '../../util/fromEnv'
+
+const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
+	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',
+	cacheTable: 'CACHE_TABLE',
+})(process.env)
 
 const locator = geolocateCellFromCache({
 	dynamodb: new DynamoDBClient({}),
-	TableName: process.env.CACHE_TABLE ?? '',
+	TableName: cacheTable,
 })
 
 const q = queueCellGeolocationResolutionJob({
-	QueueUrl: process.env.CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE ?? '',
+	QueueUrl: cellGeolocationResolutionJobsQueue,
 	sqs: new SQS(),
 })
 

@@ -1,8 +1,9 @@
 import { S3 } from 'aws-sdk'
 import { format } from 'date-fns'
+import { fromEnv } from '../util/fromEnv'
 
 const s3 = new S3()
-const Bucket = process.env.HISTORICAL_DATA_BUCKET ?? ''
+const { Bucket } = fromEnv({ Bucket: 'HISTORICAL_DATA_BUCKET' })(process.env)
 
 /**
  * Processes batch messages and stores them on S3

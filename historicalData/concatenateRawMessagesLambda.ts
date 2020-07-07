@@ -3,9 +3,10 @@ import { S3 } from 'aws-sdk'
 import { collectFiles } from './collectFiles'
 import { concatenateFiles } from './concatenateFiles'
 import { concatenateRawMessages } from './concatenateRawMessages'
+import { fromEnv } from '../util/fromEnv'
 
 const s3 = new S3()
-const Bucket = process.env.HISTORICAL_DATA_BUCKET ?? ''
+const { Bucket } = fromEnv({ Bucket: 'HISTORICAL_DATA_BUCKET' })(process.env)
 
 const collectFilesInBucket = collectFiles({ s3, Bucket })
 const concatenateFilesInBucket = concatenateFiles({ s3, Bucket })

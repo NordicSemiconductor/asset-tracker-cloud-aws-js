@@ -4,9 +4,12 @@ import { MaybeCellGeoLocation } from './types'
 import { isSome } from 'fp-ts/lib/Option'
 import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
 import { Cell } from '../geolocateCell'
+import { fromEnv } from '../../util/fromEnv'
 
-const TableName = process.env.LOCATIONS_TABLE ?? ''
-const IndexName = process.env.LOCATIONS_TABLE_CELLID_INDEX ?? ''
+const { TableName, IndexName } = fromEnv({
+	TableName: 'LOCATIONS_TABLE',
+	IndexName: 'LOCATIONS_TABLE_CELLID_INDEX',
+})(process.env)
 const dynamodb = new DynamoDBClient({})
 
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {

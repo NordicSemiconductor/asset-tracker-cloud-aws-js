@@ -11,17 +11,23 @@ import { res } from './res'
 import { addDeviceCellGeolocation } from '../addDeviceCellGeolocation'
 import { addCellToCacheIfNotExists } from '../addCellToCacheIfNotExists'
 import { sequenceT } from 'fp-ts/lib/Apply'
+import { fromEnv } from '../../util/fromEnv'
+
+const { deviceCellGeolocationTable, cacheTable } = fromEnv({
+	deviceCellGeolocationTable: 'DEVICE_CELL_GEOLOCATION_TABLE',
+	cacheTable: 'CACHE_TABLE',
+})(process.env)
 
 const dynamodb = new DynamoDBClient({})
 
 const persistDeviceCellGeolocation = addDeviceCellGeolocation({
 	dynamodb,
-	TableName: process.env.DEVICE_CELL_GEOLOCATION_TABLE ?? '',
+	TableName: deviceCellGeolocationTable,
 })
 
 const addToCellGeolocation = addCellToCacheIfNotExists({
 	dynamodb,
-	TableName: process.env.CACHE_TABLE ?? '',
+	TableName: cacheTable,
 })
 
 const inputSchema = new Ajv().compile({
