@@ -23,9 +23,9 @@ import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
 import { purgeCAsCommand } from './commands/purge-cas'
 import { stackId as generateStackId } from '../cdk/stacks/stackId'
+import { region } from '../cdk/regions'
 
 const stackId = generateStackId()
-const region = process.env.AWS_DEFAULT_REGION ?? ''
 const iot = new Iot({
 	region,
 })

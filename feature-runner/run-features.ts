@@ -21,6 +21,8 @@ import { athenaStepRunners } from './steps/athena'
 import { uuidHelper } from './steps/uuidHelper'
 import { STS, CloudFormation } from 'aws-sdk'
 import { v4 } from 'uuid'
+import { region } from '../cdk/regions'
+import { stackId } from '../cdk/stacks/stackId'
 
 let ran = false
 
@@ -33,19 +35,12 @@ export type BifravstWorld = StackOutputs & {
 	historicaldataTableName: string
 }
 
-const region =
-	process.env.AWS_DEFAULT_REGION ?? process.env.AWS_REGION ?? 'eu-central-1'
-
 program
 	.arguments('<featureDir>')
 	.option('-r, --print-results', 'Print results')
 	.option('-p, --progress', 'Print progress')
 	.option('-X, --no-retry', 'Do not retry steps')
-	.option(
-		'-s, --stack <stack>',
-		'Stack name',
-		process.env.STACK_ID ?? 'bifravst',
-	)
+	.option('-s, --stack <stack>', 'Stack name', stackId())
 	.action(
 		async (
 			featureDir: string,

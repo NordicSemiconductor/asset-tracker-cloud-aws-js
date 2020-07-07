@@ -1,9 +1,9 @@
 import { TestApp } from './apps/Test'
 import { prepareResources } from './prepare-resources'
 import { stackId as generateStackId } from './stacks/stackId'
+import { region } from './regions'
 
 const stackId = generateStackId()
-const region = process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? ''
 
 prepareResources({
 	region,
