@@ -14,8 +14,6 @@ jobs:
   tests:
     timeout-minutes: 60
     runs-on: ${{ matrix.os }}
-    env:
-      STACK_ID: ${{ matrix.os }}-${{ github.sha }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -65,6 +63,10 @@ jobs:
         run: npx tsc
       - name: Test
         run: npm test
+      - name: Generate Stack ID
+        run: |
+          RANDOM_STRING=`node -e "const crypto = require('crypto'); process.stdout.write(crypto.randomBytes(Math.ceil(8 * 0.5)).toString('hex').slice(0, 8));"`
+          echo "::set-env name=STACK_ID::bifravst-${{ runner.OS }}-${RANDOM_STRING}"
       - name: Set up stack for End-to-End tests
         run: |
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
