@@ -67,6 +67,19 @@ export const purgeBucketsCommand = ({
 					}
 				}),
 		)
+		// Delete buckets
+		await Promise.all(
+			buckets
+				.filter((b) => b)
+				.map(async (bucketName) => {
+					try {
+						await s3.deleteBucket({ Bucket: bucketName }).promise()
+						console.log(`${bucketName} deleted.`)
+					} catch (err) {
+						console.log(`Failed to delete bucket ${bucketName}: ${err.message}`)
+					}
+				}),
+		)
 	},
 	help: 'Purges all S3 buckets (used during CI runs)',
 })
