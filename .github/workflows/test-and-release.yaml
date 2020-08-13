@@ -61,7 +61,7 @@ jobs:
         run: npm ci --no-audit
       - name: Compile source
         run: npx tsc
-      - name: Test
+      - name: Run Unit Tests
         run: npm test
       - name: Generate Stack ID
         run: |
@@ -74,7 +74,7 @@ jobs:
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' deploy --require-approval never
           node cli historical-data --setup -d
           node cli create-ca
-      - name: End-to-End Tests
+      - name: Run End-to-End Tests
         run: |
           npm run test:e2e
       - name: Get logs

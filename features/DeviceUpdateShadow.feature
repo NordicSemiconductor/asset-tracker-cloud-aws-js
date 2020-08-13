@@ -5,7 +5,7 @@ Feature: Device: Update Shadow
 
     Given I am run after the "Connect a Cat Tracker" feature
 
-  Scenario: Publish device information to desired state
+  Scenario: Publish device information to reported state
 
     Given the cat tracker updates its reported state with
       """
