@@ -7,7 +7,7 @@ Feature: Delete cats
 
     Given I am authenticated with Cognito
 
-  Scenario: Delete the certificate
+  Scenario: Delete the cat
 
     When I execute "listThingPrincipals" of the AWS Iot SDK with
       """
