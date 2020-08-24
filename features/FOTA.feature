@@ -7,7 +7,7 @@ Feature: Device Firmware Upgrade over the air
 
     Given I am run after the "Connect a Cat Tracker" feature
 
-  Scenario: Create a new firmware upgraded as a user
+  Scenario: Create a new firmware upgrade as a user
 
     Given I am authenticated with Cognito
     And I store a UUIDv4 as "jobId"
