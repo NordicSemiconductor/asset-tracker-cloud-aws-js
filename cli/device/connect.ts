@@ -123,6 +123,10 @@ export const connect = async ({
 					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(message)))
 					connection.publish(`${deviceId}/messages`, JSON.stringify(message))
 				},
+				onBatch: (batch) => {
+					console.log(chalk.magenta('<'), chalk.cyan(JSON.stringify(batch)))
+					connection.publish(`${deviceId}/batch`, JSON.stringify(batch))
+				},
 				onWsConnection: (c) => {
 					console.log(chalk.magenta('[ws]'), chalk.cyan('connected'))
 					wsConnection = c
