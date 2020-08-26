@@ -56,7 +56,7 @@
     "@aws-cdk/aws-stepfunctions": "1.60.0",
     "@aws-cdk/aws-stepfunctions-tasks": "1.60.0",
     "@aws-cdk/core": "1.60.0",
-    "@bifravst/cloudformation-helpers": "3.1.22",
+    "@bifravst/cloudformation-helpers": "3.1.23",
     "@bifravst/code-style": "8.0.42",
     "@bifravst/e2e-bdd-test-runner": "2.6.0",
     "@bifravst/package-layered-lambdas": "3.10.23",
