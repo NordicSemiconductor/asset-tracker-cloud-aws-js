@@ -26,7 +26,7 @@ Feature: Cell Geolocation API
             "cell": {cellId},
             "ip": "10.202.80.9"
             },
-            "ts": 1572340608948
+            "ts": 1572340324000
             }
             }
             """
@@ -45,7 +45,7 @@ Feature: Cell Geolocation API
             "spd": 0.448984,
             "hdg": 0
             },
-            "ts": 1572340324000
+            "ts": 1572340608948
             }
             }
             """
