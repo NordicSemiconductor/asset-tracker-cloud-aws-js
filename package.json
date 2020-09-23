@@ -32,7 +32,7 @@
     "@bifravst/random-words": "4.2.1",
     "ajv": "6.12.5",
     "aws-iot-device-sdk": "2.2.6",
-    "aws-sdk": "2.758.0",
+    "aws-sdk": "2.759.0",
     "backoff": "2.5.0",
     "chalk": "4.1.0",
     "commander": "6.1.0",
