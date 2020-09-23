@@ -157,7 +157,7 @@ export const connect = async ({
 				if (wsConnection !== undefined) {
 					cfg = {
 						...cfg,
-						...stateObject.desired.cfg,
+						...(stateObject?.desired?.cfg ?? {}),
 					}
 					console.log(chalk.magenta('[ws>'), JSON.stringify(cfg))
 					wsConnection.send(JSON.stringify(cfg))
