@@ -65,7 +65,7 @@ export const addCellToCacheIfNotExists = ({
 				const res = await dynamodb.send(new PutItemCommand(query))
 				console.log(JSON.stringify({ query, res }))
 			},
-			err => {
+			(err) => {
 				if ((err as Error).name === 'ConditionalCheckFailedException') {
 					return {
 						type: ErrorType.Conflict,
@@ -84,7 +84,7 @@ export const addCellToCacheIfNotExists = ({
 			},
 		),
 		TE.fold(
-			e => (e.type === ErrorType.Conflict ? TE.right(undefined) : TE.left(e)),
+			(e) => (e.type === ErrorType.Conflict ? TE.right(undefined) : TE.left(e)),
 			() => TE.right(undefined),
 		),
 	)

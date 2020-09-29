@@ -4,6 +4,7 @@ import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { WebAppsStack } from '../stacks/WebApps'
 import { BifravstLambdas } from '../prepare-resources'
 import { stackId } from '../stacks/stackId'
+import { FirmwareCIStack } from '../stacks/FirmwareCI'
 
 export class BifravstApp extends App {
 	public constructor(args: {
@@ -20,5 +21,8 @@ export class BifravstApp extends App {
 			isTest: false,
 		})
 		new WebAppsStack(this, stackId('webapps'))
+		new FirmwareCIStack(this, stackId('firmware-ci'), {
+			bifravstStackId: stackId(),
+		})
 	}
 }

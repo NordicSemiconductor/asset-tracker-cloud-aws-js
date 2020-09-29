@@ -5,7 +5,7 @@ import { getOptionM } from 'fp-ts/lib/OptionT'
 const MTE = getOptionM(taskEither)
 export const TE = <E, A>(
 	onNone: () => TaskEither<E, A>,
-): ((ma: TaskEither<E, Option<A>>) => TaskEither<E, A>) => ma =>
+): ((ma: TaskEither<E, Option<A>>) => TaskEither<E, A>) => (ma) =>
 	MTE.getOrElse(ma, onNone)
 
 export const getOrElse = {

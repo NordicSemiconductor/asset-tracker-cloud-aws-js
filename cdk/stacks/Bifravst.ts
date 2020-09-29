@@ -1,8 +1,4 @@
 import * as CloudFormation from '@aws-cdk/core'
-import {
-	CustomResource,
-	CustomResourceProvider,
-} from '@aws-cdk/aws-cloudformation'
 import * as Cognito from '@aws-cdk/aws-cognito'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import * as IAM from '@aws-cdk/aws-iam'
@@ -12,11 +8,12 @@ import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import { HistoricalData } from '../resources/HistoricalData'
-import { logToCloudWatch } from '../resources/logToCloudWatch'
 import { BifravstLambdas } from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
 import { CellGeolocation } from '../resources/CellGeolocation'
 import { CellGeolocationApi } from '../resources/CellGeolocationApi'
+import { ThingGroupLambda } from '../resources/ThingGroupLambda'
+import { ThingGroup } from '../resources/ThingGroup'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -67,6 +64,11 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 		)
 
+		new CloudFormation.CfnOutput(this, 'cloudformationLayerVersionArn', {
+			value: cloudFormationLayer.layerVersionArn,
+			exportName: `${this.stackName}:cloudformationLayerVersionArn`,
+		})
+
 		new CloudFormation.CfnOutput(this, 'mqttEndpoint', {
 			value: mqttEndpoint,
 			exportName: `${this.stackName}:mqttEndpoint`,
@@ -85,6 +87,12 @@ export class BifravstStack extends CloudFormation.Stack {
 				requireSymbols: false,
 			},
 		})
+
+		new CloudFormation.CfnOutput(this, 'userPoolId', {
+			value: userPool.userPoolId,
+			exportName: `${this.stackName}:userPoolId`,
+		})
+
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
 			userPool: userPool,
 			authFlows: {
@@ -216,11 +224,6 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 		})
 
-		new CloudFormation.CfnOutput(this, 'userPoolId', {
-			value: userPool.userPoolId,
-			exportName: `${this.stackName}:userPoolId`,
-		})
-
 		new CloudFormation.CfnOutput(this, 'identityPoolId', {
 			value: identityPool.ref,
 			exportName: `${this.stackName}:identityPoolId`,
@@ -333,38 +336,25 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:thingPolicyArn`,
 		})
 
-		const ThingGroupName = id
-
-		const createThingGroup = new Lambda.Function(this, 'createThingGroup', {
-			code: Lambda.Code.bucket(
-				sourceCodeBucket,
-				lambdas.lambdaZipFileNames.createThingGroup,
-			),
-			layers: [cloudFormationLayer],
-			description:
-				'Used in CloudFormation to create the thing group for the devices',
-			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
-			timeout: CloudFormation.Duration.minutes(1),
-			initialPolicy: [
-				new IAM.PolicyStatement({
-					resources: ['*'],
-					actions: ['iot:*'],
-				}),
-				logToCloudWatch,
-			],
+		const thingGroupLambda = new ThingGroupLambda(this, 'thingGroupLambda', {
+			cloudFormationLayer,
+			lambdas,
+			sourceCodeBucket,
 		})
 
-		new CustomResource(this, 'ThingGroupResource', {
-			provider: CustomResourceProvider.lambda(createThingGroup),
-			properties: {
-				ThingGroupName,
-				ThingGroupProperties: {
-					thingGroupDescription: 'Group created for Bifravst Things',
-				},
-				PolicyName: iotThingPolicy.ref,
-				AddExisitingThingsToGroup: isTest ? 0 : 1,
-			},
+		new CloudFormation.CfnOutput(this, 'thingGroupLambdaArn', {
+			value: thingGroupLambda.function.functionArn,
+			exportName: `${this.stackName}:thingGroupLambdaArn`,
+		})
+
+		const ThingGroupName = id
+
+		new ThingGroup(this, 'deviceThingGroup', {
+			name: ThingGroupName,
+			description: 'Group created for Bifravst Things',
+			addExisting: isTest,
+			PolicyName: iotThingPolicy.ref,
+			thingGroupLambda: thingGroupLambda.function,
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {

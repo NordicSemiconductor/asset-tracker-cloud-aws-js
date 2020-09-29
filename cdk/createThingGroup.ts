@@ -21,7 +21,7 @@ export const handler = async (
 			ThingGroupName,
 			ThingGroupProperties,
 			PolicyName,
-			AddExisitingThingsToGroup,
+			AddExisiting,
 		},
 	} = event
 
@@ -44,7 +44,7 @@ export const handler = async (
 				.promise()
 			// Attach all existing Things to the group
 			const { things } = await iot.listThings({}).promise()
-			if (AddExisitingThingsToGroup === '1') {
+			if (AddExisiting === '1') {
 				// Add exisiting Things to the new group
 				await Promise.all(
 					(things ?? []).map(async ({ thingName }) =>
