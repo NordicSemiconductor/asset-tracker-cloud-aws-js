@@ -21,7 +21,7 @@ Feature: Device Firmware Upgrade over the air
           "ContentType": "text/x-hex"
 	    }
        """
-    When I escape this JSON into "jobDocument"
+    When I encode this payload into "jobDocument" using JSON
       """
       {
           "operation": "app_fw_update",

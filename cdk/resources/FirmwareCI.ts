@@ -72,7 +72,15 @@ export class FirmwareCI extends CloudFormation.Resource {
 
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				actions: ['iot:createThing'],
+				actions: [
+					'iot:createThing',
+					'iot:deleteThing',
+					'iot:AddThingToThingGroup',
+					'iot:RemoveThingFromThingGroup',
+					'iot:AttachThingPrincipal',
+					'iot:DetachThingPrincipal',
+					'iot:CreateJob',
+				],
 				resources: [
 					`arn:aws:iot:${parent.region}:${parent.account}:thing/firmware-ci-*`,
 				],
@@ -80,20 +88,28 @@ export class FirmwareCI extends CloudFormation.Resource {
 		)
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				actions: ['iot:AddThingToThingGroup'],
+				actions: [
+					'iot:CreateKeysAndCertificate',
+					'iot:DeleteCertificate',
+					'iot:UpdateCertificate',
+					'iot:AttachThingPrincipal',
+					'iot:DetachThingPrincipal',
+				],
+				resources: [`*`],
+			}),
+		)
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: ['iot:AddThingToThingGroup', 'iot:RemoveThingFromThingGroup'],
 				resources: [
 					`arn:aws:iot:${parent.region}:${parent.account}:thinggroup/${this.thingGroupName}`,
-					`arn:aws:iot:${parent.region}:${parent.account}:thing/firmware-ci-*`,
 				],
 			}),
 		)
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				actions: ['iot:CreateJob'],
-				resources: [
-					`arn:aws:iot:${parent.region}:${parent.account}:thing/firmware-ci-*`,
-					`arn:aws:iot:${parent.region}:${parent.account}:job/*`,
-				],
+				actions: ['iot:CreateJob', 'iot:CancelJob', 'iot:DeleteJob'],
+				resources: [`arn:aws:iot:${parent.region}:${parent.account}:job/*`],
 			}),
 		)
 		ciUser.addToPolicy(

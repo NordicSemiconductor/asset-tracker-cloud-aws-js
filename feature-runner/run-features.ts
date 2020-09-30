@@ -24,6 +24,8 @@ import { STS, CloudFormation } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
 import { stackId } from '../cdk/stacks/stackId'
+import { promises as fs } from 'fs'
+import * as path from 'path'
 
 let ran = false
 
@@ -37,6 +39,8 @@ export type BifravstWorld = StackOutputs & {
 	'firmwareCI:userAccessKeyId': string
 	'firmwareCI:userSecretAccessKey': string
 	'firmwareCI:thingGroupName': string
+	'firmwareCI:resultsBucketName': string
+	awsIotRootCA: string
 }
 
 program
@@ -86,12 +90,17 @@ program
 				'firmwareCI:userSecretAccessKey':
 					firmwareCIStackConfig.userSecretAccessKey,
 				'firmwareCI:thingGroupName': firmwareCIStackConfig.thingGroupName,
+				'firmwareCI:resultsBucketName': firmwareCIStackConfig.resultsBucketName,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				historicaldataWorkgroupName: WorkGroupName(),
 				historicaldataDatabaseName: DataBaseName(),
 				historicaldataTableName: UpdatesTableName(),
 				region,
 				accountId: accountId as string,
+				awsIotRootCA: await fs.readFile(
+					path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+					'utf-8',
+				),
 			}
 
 			console.log(chalk.yellow.bold(' World:'))

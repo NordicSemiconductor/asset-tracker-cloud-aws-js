@@ -10,7 +10,7 @@ Feature: Update Device Configuration
   Scenario: Update the device configuration as a user
 
     Given I am authenticated with Cognito
-    And I escape this JSON into "payload"
+    And I encode this payload into "payload" using JSON
        """
        {
          "state": {

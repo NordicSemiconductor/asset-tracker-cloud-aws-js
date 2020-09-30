@@ -12,6 +12,7 @@ import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
+import { promises as fs } from 'fs'
 
 const connect = (mqttEndpoint: string) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
@@ -51,34 +52,47 @@ export const bifravstStepRunners = ({
 	const connectToBroker = connect(mqttEndpoint)
 	const shadowOnBroker = shadow(mqttEndpoint)
 	return [
-		regexMatcher<BifravstWorld>(/^(?:a cat exists|I generate a certificate)$/)(
-			async (_, __, runner) => {
-				if (runner.store['cat:id'] === undefined) {
-					const catName = (await randomWords({ numWords: 3 })).join('-')
+		regexMatcher<BifravstWorld>(
+			/^(?:a cat exists|I generate a certificate)(?: for the cat tracker "([^"]+)")?$/,
+		)(async ([deviceId], __, runner) => {
+			const catId = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
+			const prefix = deviceId === undefined ? 'cat' : `cat:${catId}`
+			if (runner.store[`${prefix}:id`] === undefined) {
+				await createDeviceCertificate({
+					deviceId: catId,
+					certsDir: path.resolve(process.cwd(), 'certificates'),
+					log: (...message: any[]) => {
+						// eslint-disable-next-line @typescript-eslint/no-floating-promises
+						runner.progress('IoT (cert)', ...message)
+					},
+					debug: (...message: any[]) => {
+						// eslint-disable-next-line @typescript-eslint/no-floating-promises
+						runner.progress('IoT (cert)', ...message)
+					},
+				})
+				const deviceFiles = deviceFileLocations({
+					certsDir: path.resolve(process.cwd(), 'certificates'),
+					deviceId: catId,
+				})
+				runner.store[`${prefix}:privateKey`] = await fs.readFile(
+					deviceFiles.key,
+					'utf-8',
+				)
+				runner.store[`${prefix}:clientCert`] = await fs.readFile(
+					deviceFiles.certWithCA,
+					'utf-8',
+				)
 
-					await createDeviceCertificate({
-						deviceId: catName,
-						certsDir: path.resolve(process.cwd(), 'certificates'),
-						log: (...message: any[]) => {
-							// eslint-disable-next-line @typescript-eslint/no-floating-promises
-							runner.progress('IoT (cert)', ...message)
-						},
-						debug: (...message: any[]) => {
-							// eslint-disable-next-line @typescript-eslint/no-floating-promises
-							runner.progress('IoT (cert)', ...message)
-						},
-					})
-
-					// eslint-disable-next-line require-atomic-updates
-					runner.store['cat:id'] = catName
-					// eslint-disable-next-line require-atomic-updates
-					runner.store[
-						'cat:arn'
-					] = `arn:aws:iot:${runner.world.region}:${runner.world.accountId}:thing/${catName}`
-				}
-				return runner.store['cat:id']
-			},
-		),
+				// eslint-disable-next-line require-atomic-updates
+				runner.store[`${prefix}:id`] = catId
+				// eslint-disable-next-line require-atomic-updates
+				runner.store[
+					`${prefix}:arn`
+				] = `arn:aws:iot:${runner.world.region}:${runner.world.accountId}:thing/${catId}`
+			}
+			console.log(JSON.stringify(runner.store, null, 2))
+			return runner.store[`${prefix}:id`]
+		}),
 		regexMatcher<BifravstWorld>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
 			async ([deviceId], __, runner) => {
 				const catId = deviceId ?? runner.store['cat:id']
