@@ -26,7 +26,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@aws-sdk/client-dynamodb-v2-node": "0.1.0-preview.2",
-    "@bifravst/athena-helpers": "8.0.60",
+    "@bifravst/athena-helpers": "8.0.61",
     "@bifravst/cell-geolocation-helpers": "1.3.14",
     "@bifravst/device-ui-server": "2.0.1",
     "@bifravst/random-words": "4.2.1",
