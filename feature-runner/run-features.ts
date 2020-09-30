@@ -11,6 +11,7 @@ import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
+import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { bifravstStepRunners } from './steps/bifravst'
 import {
 	DataBaseName,
@@ -33,6 +34,9 @@ export type BifravstWorld = StackOutputs & {
 	historicaldataWorkgroupName: string
 	historicaldataDatabaseName: string
 	historicaldataTableName: string
+	'firmwareCI:userAccessKeyId': string
+	'firmwareCI:userSecretAccessKey': string
+	'firmwareCI:thingGroupName': string
 }
 
 program
@@ -41,22 +45,36 @@ program
 	.option('-p, --progress', 'Print progress')
 	.option('-X, --no-retry', 'Do not retry steps')
 	.option('-s, --stack <stack>', 'Stack name', stackId())
+	.option(
+		'-f, --firmware-ci-stack <stack>',
+		'Firmware CI Stack name',
+		stackId('firmware-ci'),
+	)
 	.action(
 		async (
 			featureDir: string,
 			options: {
 				printResults: boolean
 				stack: string
+				firmwareCiStack: string
 				progress: boolean
 				retry: boolean
 			},
 		) => {
 			ran = true
-			const { printResults, stack: stackName, progress, retry } = options
+			const {
+				printResults,
+				stack: stackName,
+				firmwareCiStack: ciStackName,
+				progress,
+				retry,
+			} = options
+			const cf = new CloudFormation({ region })
+			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
 
-			const stackConfig = await stackOutput(new CloudFormation({ region }))<
-				StackOutputs
-			>(stackName)
+			const firmwareCIStackConfig = await stackOutput(cf)<
+				FirmwareCIStackOutputs
+			>(ciStackName)
 
 			const { Account: accountId } = await new STS({ region })
 				.getCallerIdentity()
@@ -64,6 +82,10 @@ program
 
 			const world: BifravstWorld = {
 				...stackConfig,
+				'firmwareCI:userAccessKeyId': firmwareCIStackConfig.userAccessKeyId,
+				'firmwareCI:userSecretAccessKey':
+					firmwareCIStackConfig.userSecretAccessKey,
+				'firmwareCI:thingGroupName': firmwareCIStackConfig.thingGroupName,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				historicaldataWorkgroupName: WorkGroupName(),
 				historicaldataDatabaseName: DataBaseName(),

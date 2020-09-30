@@ -11,8 +11,7 @@ Feature: Execute CI runs of the firmware
 
     Background:
 
-        Given I am authenticated with Cognito
-        And I am member of the "firmware-ci" Cognito user group
+        Given I am authenticated with AWS key "{firmwareCI:userAccessKeyId}" and secret "{firmwareCI:userSecretAccessKey}"
     
     Scenario: Create a device for the CI runner
 
@@ -23,27 +22,45 @@ Feature: Execute CI runs of the firmware
             "thingName": "firmware-ci-{firmwareCIDeviceId}"
         }
         """
-        And I execute "addThingToGroup" of the AWS Iot SDK with
+        Then I store "awsSdk.res.thingArn" into "firmwareCIDeviceArn"
+        And I execute "addThingToThingGroup" of the AWS Iot SDK with
         """
         {
             "thingName": "firmware-ci-{firmwareCIDeviceId}",
-            "thingGroupName": "{firmwareCIDevicesThingGroupName}"
+            "thingGroupName": "{firmwareCI:thingGroupName}"
         }
         """
 
     Scenario: Create a CI job
 
         Given I store a UUIDv4 as "ciJobId"
-        When I execute "createJob" of the AWS Iot SDK with
-        """
-        {
-            "Bucket": "{fotaBucketName}",
-            "Key": "{jobId}",
-            "Body": "SOME HEX DATA",
-            "ContentLength": 13,
-            "ContentType": "text/x-hex"
-        }
-        """
+        When I escape this JSON into "jobDocument"
+            """
+            {
+                "fw": "https://github.com/bifravst/firmware/releases/download/v3.0.0/cat-tracker-Thingy91-ltem-debug-v3.0.0.hex",
+                "target": "thingy91_nrf9160ns:ltem",
+                "credentials": {
+                    "secTag": 42,
+                    "privateKey": "<INSERT PK>",
+                    "clientCert": "<INSERT CLIENT CERT>",
+                    "caCert": "<INSERT CA CERT>"
+                }
+            }
+            """
+        And I execute "createJob" of the AWS Iot SDK with
+            """
+            {
+                "jobId": "{ciJobId}",
+                "targets": ["{firmwareCIDeviceArn}"],
+                "document": {jobDocument},
+                "description": "Run firmware v3.0.0 on Thingy:91 with LTE-m",
+                "targetSelection": "SNAPSHOT"
+            }
+            """
+        Then "awsSdk.res.jobId" should equal this JSON
+            """
+            "{ciJobId}"
+            """
 
     Scenario: Fetch CI run result
 

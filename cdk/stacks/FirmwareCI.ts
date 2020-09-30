@@ -1,5 +1,4 @@
 import * as CloudFormation from '@aws-cdk/core'
-import * as Cognito from '@aws-cdk/aws-cognito'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { FirmwareCI } from '../resources/FirmwareCI'
 
@@ -15,12 +14,6 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 	) {
 		super(parent, id)
 
-		const userPool = Cognito.UserPool.fromUserPoolId(
-			this,
-			`userPool`,
-			CloudFormation.Fn.importValue(`${bifravstStackId}:userPoolId`),
-		)
-
 		const thingGroupLambda = Lambda.Function.fromFunctionArn(
 			this,
 			'thingGroupLambda',
@@ -28,25 +21,34 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 		)
 
 		const firmwareCI = new FirmwareCI(this, 'firmwareCI', {
-			identityPool: {
-				ref: CloudFormation.Fn.importValue(`${bifravstStackId}:identityPoolId`),
-			} as Cognito.CfnIdentityPool,
 			thingGroupLambda,
-			userPool,
 		})
 
-		new CloudFormation.CfnOutput(this, 'ciThingGroupName', {
+		new CloudFormation.CfnOutput(this, 'thingGroupName', {
 			value: firmwareCI.thingGroupName,
-			exportName: `${this.stackName}:ciThingGroupName`,
+			exportName: `${this.stackName}:thingGroupName`,
 		})
 
 		new CloudFormation.CfnOutput(this, 'resultsBucketName', {
 			value: firmwareCI.resultsBucket.bucketName,
 			exportName: `${this.stackName}:resultsBucketName`,
 		})
+
+		new CloudFormation.CfnOutput(this, 'userAccessKeyId', {
+			value: firmwareCI.userAccessKey.ref,
+			exportName: `${this.stackName}:userAccessKeyId`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'userSecretAccessKey', {
+			value: firmwareCI.userAccessKey.attrSecretAccessKey,
+			exportName: `${this.stackName}:userSecretAccessKey`,
+		})
 	}
 }
 
 export type StackOutputs = {
-	ciThingGroupName: string
+	thingGroupName: string
+	resultsBucketName: string
+	userAccessKeyId: string
+	userSecretAccessKey: string
 }
