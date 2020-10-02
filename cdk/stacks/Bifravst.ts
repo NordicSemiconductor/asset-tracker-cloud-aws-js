@@ -99,7 +99,6 @@ export class BifravstStack extends CloudFormation.Stack {
 				userPassword: true,
 				userSrp: true,
 				adminUserPassword: true,
-				refreshToken: true, // REFRESH_TOKEN_AUTH should always be allowed.
 			},
 		})
 		const developerProviderName = 'developerAuthenticated'
