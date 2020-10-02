@@ -90,7 +90,6 @@ export const bifravstStepRunners = ({
 					`${prefix}:arn`
 				] = `arn:aws:iot:${runner.world.region}:${runner.world.accountId}:thing/${catId}`
 			}
-			console.log(JSON.stringify(runner.store, null, 2))
 			return runner.store[`${prefix}:id`]
 		}),
 		regexMatcher<BifravstWorld>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
