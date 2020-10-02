@@ -1,9 +1,9 @@
 import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Iot from '@aws-cdk/aws-iot'
-import * as Lambda from '@aws-cdk/aws-lambda'
 import * as S3 from '@aws-cdk/aws-s3'
 import { ThingGroup } from './ThingGroup'
+import { ThingGroupLambda } from './ThingGroupLambda'
 
 export class FirmwareCI extends CloudFormation.Resource {
 	public readonly thingGroupName
@@ -12,11 +12,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
-		{
-			thingGroupLambda,
-		}: {
-			thingGroupLambda: Lambda.IFunction
-		},
+		{ thingGroupLambda }: { thingGroupLambda: ThingGroupLambda },
 	) {
 		super(parent, id)
 
@@ -65,7 +61,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 			name: this.thingGroupName,
 			description: 'Group for Firmware CI',
 			PolicyName: iotThingPolicy.ref,
-			thingGroupLambda,
+			thingGroupLambda: thingGroupLambda.function,
 		})
 
 		const ciUser = new IAM.User(this, 'ciUser')

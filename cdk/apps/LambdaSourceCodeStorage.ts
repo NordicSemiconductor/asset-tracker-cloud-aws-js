@@ -7,9 +7,9 @@ import { LambdaSourceCodeStorageStack } from '../stacks/LambdaSourceCodeStorage'
  * This app provides the bucket and run before the main app.
  */
 export class LambdaSourceCodeStorageApp extends App {
-	public constructor(args: { stackId: string }) {
+	public constructor() {
 		super()
 
-		new LambdaSourceCodeStorageStack(this, args.stackId)
+		new LambdaSourceCodeStorageStack(this)
 	}
 }

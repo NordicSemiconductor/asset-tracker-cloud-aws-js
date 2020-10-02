@@ -1,8 +1,11 @@
 import * as CloudFormation from '@aws-cdk/core'
 import { WebAppHosting } from '../resources/WebAppHosting'
+import { stackId } from './stackId'
+
+const id = stackId('webapps')
 
 export class WebAppsStack extends CloudFormation.Stack {
-	public constructor(parent: CloudFormation.App, id: string) {
+	public constructor(parent: CloudFormation.App) {
 		super(parent, id)
 
 		// Web App

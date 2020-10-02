@@ -1,24 +1,54 @@
 import * as CloudFormation from '@aws-cdk/core'
 import * as Lambda from '@aws-cdk/aws-lambda'
+import * as S3 from '@aws-cdk/aws-s3'
 import { FirmwareCI } from '../resources/FirmwareCI'
+import { ThingGroupLambda } from '../resources/ThingGroupLambda'
+import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
+import { BifravstLambdas } from '../prepare-resources'
+import { stackId } from './stackId'
+
+const id = stackId('firmware-ci')
 
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
-		id: string,
 		{
-			bifravstStackId,
+			sourceCodeBucketName,
+			cloudFormationLayerZipFileName,
+			lambdas,
 		}: {
-			bifravstStackId: string
+			sourceCodeBucketName: string
+			cloudFormationLayerZipFileName: string
+			lambdas: LayeredLambdas<BifravstLambdas>
 		},
 	) {
 		super(parent, id)
 
-		const thingGroupLambda = Lambda.Function.fromFunctionArn(
+		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
 			this,
-			'thingGroupLambda',
-			CloudFormation.Fn.importValue(`${bifravstStackId}:thingGroupLambdaArn`),
+			'SourceCodeBucket',
+			{
+				bucketName: sourceCodeBucketName,
+			},
 		)
+
+		const cloudFormationLayer = new Lambda.LayerVersion(
+			this,
+			`${id}-cloudformation-layer`,
+			{
+				code: Lambda.Code.bucket(
+					sourceCodeBucket,
+					cloudFormationLayerZipFileName,
+				),
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
+			},
+		)
+
+		const thingGroupLambda = new ThingGroupLambda(this, 'thingGroupLambda', {
+			cloudFormationLayer,
+			lambdas,
+			sourceCodeBucket,
+		})
 
 		const firmwareCI = new FirmwareCI(this, 'firmwareCI', {
 			thingGroupLambda,

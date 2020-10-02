@@ -3,8 +3,6 @@ import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
 
 export class ContinuousDeploymentApp extends CloudFormation.App {
 	public constructor(props: {
-		stackId: string
-		bifravstStackId: string
 		bifravstAWS: {
 			owner: string
 			repo: string
@@ -23,6 +21,6 @@ export class ContinuousDeploymentApp extends CloudFormation.App {
 	}) {
 		super()
 
-		new ContinuousDeploymentStack(this, props.stackId, props)
+		new ContinuousDeploymentStack(this, props)
 	}
 }

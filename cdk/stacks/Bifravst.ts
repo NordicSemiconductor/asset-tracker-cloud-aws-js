@@ -14,11 +14,13 @@ import { CellGeolocation } from '../resources/CellGeolocation'
 import { CellGeolocationApi } from '../resources/CellGeolocationApi'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { ThingGroup } from '../resources/ThingGroup'
+import { stackId } from './stackId'
+
+const id = stackId()
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
-		id: string,
 		{
 			mqttEndpoint,
 			sourceCodeBucketName,

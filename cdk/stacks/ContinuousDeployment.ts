@@ -5,6 +5,9 @@ import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
 import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
+import { stackId } from './stackId'
+
+const id = stackId('continuous-deployment')
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
@@ -12,9 +15,7 @@ import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
 export class ContinuousDeploymentStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
-		id: string,
 		properties: {
-			bifravstStackId: string
 			bifravstAWS: {
 				owner: string
 				repo: string
@@ -34,7 +35,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 	) {
 		super(parent, id)
 
-		const { bifravstAWS, deviceUI, webApp, bifravstStackId } = properties
+		const { bifravstAWS, deviceUI, webApp } = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
@@ -168,7 +169,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				bifravst: bifravstSourceCodeAction,
 				webApp: webAppSourceCodeAction,
 			},
-			bifravstStackId,
 			buildSpec: 'continuous-deployment-web-app.yml',
 			githubToken,
 		})
@@ -180,7 +180,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				bifravst: bifravstSourceCodeAction,
 				webApp: deviceUISourceCodeAction,
 			},
-			bifravstStackId,
 			buildSpec: 'continuous-deployment-device-ui-app.yml',
 			githubToken,
 		})

@@ -1,5 +1,8 @@
 import { App, CfnOutput, RemovalPolicy, Stack } from '@aws-cdk/core'
 import { Bucket } from '@aws-cdk/aws-s3'
+import { stackId } from './stackId'
+
+const id = stackId('sourcecode')
 
 /**
  * This stack provides a bucket to store the source code for the lambda functions
@@ -7,7 +10,7 @@ import { Bucket } from '@aws-cdk/aws-s3'
 export class LambdaSourceCodeStorageStack extends Stack {
 	public readonly bucket: Bucket
 
-	public constructor(parent: App, id: string) {
+	public constructor(parent: App) {
 		super(parent, id)
 		this.bucket = new Bucket(this, 'cf-sourcecode', {
 			removalPolicy: RemovalPolicy.DESTROY,
