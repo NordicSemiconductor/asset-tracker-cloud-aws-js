@@ -1,12 +1,12 @@
-import { stackId } from '../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../cdk/stacks/stackId'
 
 export const DataBaseName = (): string =>
-	`${stackId().replace(/-/g, '_')}_historicaldata`
+	`${CORE_STACK_NAME.replace(/-/g, '_')}_historicaldata`
 
 export const UpdatesTableName = (): string =>
-	`${stackId().replace(/-/g, '_')}_deviceupdates`
+	`${CORE_STACK_NAME.replace(/-/g, '_')}_deviceupdates`
 
 export const DocumentsTableName = (): string =>
-	`${stackId().replace(/-/g, '_')}_devicedocuments`
+	`${CORE_STACK_NAME.replace(/-/g, '_')}_devicedocuments`
 
-export const WorkGroupName = (): string => stackId()
+export const WorkGroupName = (): string => CORE_STACK_NAME

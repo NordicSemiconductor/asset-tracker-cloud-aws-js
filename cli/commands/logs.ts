@@ -1,14 +1,10 @@
 import { CloudFormation, CloudWatchLogs } from 'aws-sdk'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
+import { region } from '../../cdk/regions'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
 
-export const logsCommand = ({
-	stackId,
-	region,
-}: {
-	stackId: string
-	region: string
-}): CommandDefinition => ({
+export const logsCommand = (): CommandDefinition => ({
 	command: 'logs',
 	options: [
 		{
@@ -26,7 +22,9 @@ export const logsCommand = ({
 
 		const logGroups =
 			(
-				await cf.describeStackResources({ StackName: stackId }).promise()
+				await cf
+					.describeStackResources({ StackName: CORE_STACK_NAME })
+					.promise()
 			).StackResources?.filter(
 				({ ResourceType }) => ResourceType === 'AWS::Logs::LogGroup',
 			)?.map(({ PhysicalResourceId }) => PhysicalResourceId as string) ??

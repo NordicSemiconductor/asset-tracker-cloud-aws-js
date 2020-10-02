@@ -3,16 +3,10 @@ import { CodePipeline } from 'aws-sdk'
 import { formatDistanceToNow } from 'date-fns'
 import { CommandDefinition } from './CommandDefinition'
 
-export const cdCommand = ({
-	region,
-}: {
-	region: string
-}): CommandDefinition => ({
+export const cdCommand = (): CommandDefinition => ({
 	command: 'cd',
 	action: async () => {
-		const cp = new CodePipeline({
-			region,
-		})
+		const cp = new CodePipeline({})
 		const pipelines = [
 			'bifravst-continuous-deployment',
 			'bifravst-continuous-deployment-deviceUICD',

@@ -14,9 +14,7 @@ import { CellGeolocation } from '../resources/CellGeolocation'
 import { CellGeolocationApi } from '../resources/CellGeolocationApi'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { ThingGroup } from '../resources/ThingGroup'
-import { stackId } from './stackId'
-
-const id = stackId()
+import { CORE_STACK_NAME } from './stackId'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -39,7 +37,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			enableUnwiredApi: boolean
 		},
 	) {
-		super(parent, id)
+		super(parent, CORE_STACK_NAME)
 
 		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
 			this,
@@ -49,14 +47,18 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 		)
 
-		const baseLayer = new Lambda.LayerVersion(this, `${id}-layer`, {
-			code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
-			compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
-		})
+		const baseLayer = new Lambda.LayerVersion(
+			this,
+			`${CORE_STACK_NAME}-layer`,
+			{
+				code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
+			},
+		)
 
 		const cloudFormationLayer = new Lambda.LayerVersion(
 			this,
-			`${id}-cloudformation-layer`,
+			`${CORE_STACK_NAME}-cloudformation-layer`,
 			{
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,
@@ -77,7 +79,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		const userPool = new Cognito.UserPool(this, 'userPool', {
-			userPoolName: id,
+			userPoolName: CORE_STACK_NAME,
 			signInAliases: {
 				email: true,
 			},
@@ -111,7 +113,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		const identityPool = new Cognito.CfnIdentityPool(this, 'identityPool', {
-			identityPoolName: id.replace(/-/, '_'),
+			identityPoolName: CORE_STACK_NAME.replace(/-/, '_'),
 			allowUnauthenticatedIdentities: false,
 			cognitoIdentityProviders: [
 				{
@@ -348,10 +350,8 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:thingGroupLambdaArn`,
 		})
 
-		const ThingGroupName = id
-
 		new ThingGroup(this, 'deviceThingGroup', {
-			name: ThingGroupName,
+			name: CORE_STACK_NAME,
 			description: 'Group created for Bifravst Things',
 			addExisting: !isTest,
 			PolicyName: iotThingPolicy.ref,
@@ -359,7 +359,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {
-			value: ThingGroupName,
+			value: CORE_STACK_NAME,
 			exportName: `${this.stackName}:thingGroupName`,
 		})
 

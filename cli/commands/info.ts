@@ -2,14 +2,10 @@ import { CommandDefinition } from './CommandDefinition'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as chalk from 'chalk'
 import { CloudFormation } from 'aws-sdk'
+import { region } from '../../cdk/regions'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
 
-export const infoCommand = ({
-	stackId,
-	region,
-}: {
-	stackId: string
-	region: string
-}): CommandDefinition => ({
+export const infoCommand = (): CommandDefinition => ({
 	command: 'info',
 	options: [
 		{
@@ -18,7 +14,9 @@ export const infoCommand = ({
 		},
 	],
 	action: async ({ output }) => {
-		const outputs = await stackOutput(new CloudFormation({ region }))(stackId)
+		const outputs = await stackOutput(new CloudFormation({ region }))(
+			CORE_STACK_NAME,
+		)
 		if (output !== undefined) {
 			if (outputs[output] === undefined) {
 				throw new Error(`${output} is not defined.`)

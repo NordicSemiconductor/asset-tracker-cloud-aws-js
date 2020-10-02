@@ -23,7 +23,7 @@ import { uuidHelper } from './steps/uuidHelper'
 import { STS, CloudFormation } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
-import { stackId } from '../cdk/stacks/stackId'
+import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../cdk/stacks/stackId'
 import { promises as fs } from 'fs'
 import * as path from 'path'
 
@@ -48,11 +48,11 @@ program
 	.option('-r, --print-results', 'Print results')
 	.option('-p, --progress', 'Print progress')
 	.option('-X, --no-retry', 'Do not retry steps')
-	.option('-s, --stack <stack>', 'Stack name', stackId())
+	.option('-s, --stack <stack>', 'Stack name', CORE_STACK_NAME)
 	.option(
 		'-f, --firmware-ci-stack <stack>',
 		'Firmware CI Stack name',
-		stackId('firmware-ci'),
+		FIRMWARE_CI_STACK_NAME,
 	)
 	.action(
 		async (

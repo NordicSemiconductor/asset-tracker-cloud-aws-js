@@ -8,12 +8,9 @@ import {
 } from '../../historicalData/settings'
 import * as chalk from 'chalk'
 import * as backoff from 'backoff'
+import { region } from '../../cdk/regions'
 
-export const cellLocation = ({
-	region,
-}: {
-	region: string
-}): CommandDefinition => ({
+export const cellLocation = (): CommandDefinition => ({
 	command: 'cell-location <mccmnc> <area> <cell>',
 	options: [
 		{

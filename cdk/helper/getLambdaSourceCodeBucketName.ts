@@ -1,20 +1,19 @@
 import { CloudFormation } from 'aws-sdk'
-import { stackId } from '../stacks/stackId'
-import { isNullOrUndefined } from 'util'
+import { SOURCECODE_STACK_NAME } from '../stacks/stackId'
 
 const cf = new CloudFormation({
 	region: process.env.AWS_DEFAULT_REGION,
 })
 
 export const getLambdaSourceCodeBucketName = async (): Promise<string> => {
-	const StackName = stackId('sourcecode')
+	const StackName = SOURCECODE_STACK_NAME
 	return cf
 		.describeStacks({
 			StackName: StackName,
 		})
 		.promise()
 		.then(({ Stacks }) => {
-			if (isNullOrUndefined(Stacks) || !Stacks.length) {
+			if (Stacks === null || Stacks === undefined || !Stacks.length) {
 				throw new Error(`${StackName} stack is not available.`)
 			} else {
 				const stack = Stacks[0]

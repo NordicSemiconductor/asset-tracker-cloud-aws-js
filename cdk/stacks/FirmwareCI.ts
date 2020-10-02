@@ -5,9 +5,7 @@ import { FirmwareCI } from '../resources/FirmwareCI'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { BifravstLambdas } from '../prepare-resources'
-import { stackId } from './stackId'
-
-const id = stackId('firmware-ci')
+import { FIRMWARE_CI_STACK_NAME } from './stackId'
 
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(
@@ -22,7 +20,7 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 			lambdas: LayeredLambdas<BifravstLambdas>
 		},
 	) {
-		super(parent, id)
+		super(parent, FIRMWARE_CI_STACK_NAME)
 
 		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
 			this,
@@ -34,7 +32,7 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 
 		const cloudFormationLayer = new Lambda.LayerVersion(
 			this,
-			`${id}-cloudformation-layer`,
+			`${FIRMWARE_CI_STACK_NAME}-cloudformation-layer`,
 			{
 				code: Lambda.Code.bucket(
 					sourceCodeBucket,

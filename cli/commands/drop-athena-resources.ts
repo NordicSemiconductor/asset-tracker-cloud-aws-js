@@ -7,13 +7,9 @@ import {
 	DocumentsTableName,
 	WorkGroupName,
 } from '../../historicalData/settings'
+import { region } from '../../cdk/regions'
 
-export const dropAthenaResourcesCommand = ({
-	region,
-}: {
-	stackId: string
-	region: string
-}): CommandDefinition => ({
+export const dropAthenaResourcesCommand = (): CommandDefinition => ({
 	command: 'drop-athena-resources',
 	action: async () => {
 		const athena = new Athena({ region })

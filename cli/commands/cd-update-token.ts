@@ -1,12 +1,9 @@
 import { CodePipeline, SSM } from 'aws-sdk'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
+import { region } from '../../cdk/regions'
 
-export const cdUpdateTokenCommand = ({
-	region,
-}: {
-	region: string
-}): CommandDefinition => ({
+export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',
 	action: async (token: string) => {
 		const ssm = new SSM({ region })
@@ -26,9 +23,7 @@ export const cdUpdateTokenCommand = ({
 				Type: 'String',
 			})
 			.promise()
-		const cp = new CodePipeline({
-			region,
-		})
+		const cp = new CodePipeline({})
 		const pipelines = [
 			'bifravst-continuous-deployment',
 			'bifravst-continuous-deployment-deviceUICD',

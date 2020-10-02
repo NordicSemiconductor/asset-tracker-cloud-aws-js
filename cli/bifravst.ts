@@ -22,10 +22,9 @@ import { CommandDefinition } from './commands/CommandDefinition'
 import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
 import { purgeCAsCommand } from './commands/purge-cas'
-import { stackId as generateStackId } from '../cdk/stacks/stackId'
 import { region } from '../cdk/regions'
+import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../cdk/stacks/stackId'
 
-const stackId = generateStackId()
 const iot = new Iot({
 	region,
 })
@@ -39,7 +38,10 @@ const config = async () => {
 	const [
 		endpoint,
 		{ historicalDataQueryResultsBucketName, historicalDataBucketName },
-	] = await Promise.all([getIotEndpoint(iot), so<StackOutputs>(stackId)])
+	] = await Promise.all([
+		getIotEndpoint(iot),
+		so<StackOutputs>(CORE_STACK_NAME),
+	])
 
 	return {
 		endpoint,
@@ -80,48 +82,31 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	program.description('Bifravst Command Line Interface')
 
 	const commands = [
-		createCACommand({ stackId, certsDir, region }),
+		createCACommand({ certsDir }),
 		createDeviceCertCommand({ endpoint }),
-		reactConfigCommand({ region }),
-		infoCommand({ stackId, region }),
-		cdCommand({ region }),
+		reactConfigCommand(),
+		infoCommand(),
+		cdCommand(),
 		historicalDataCommand({
-			region,
 			QueryResultsBucketName: historicalDataQueryResultsBucketName,
 			DataBucketName: historicalDataBucketName,
 		}),
-		cellLocation({
-			region,
-		}),
-		purgeIotUserPolicyPrincipals({
-			stackId,
-			region,
-		}),
-		logsCommand({ stackId, region }),
+		cellLocation(),
+		purgeIotUserPolicyPrincipals(),
+		logsCommand(),
 	]
 
 	if (isCI) {
 		console.error('Running on CI...')
 		commands.push(
-			dropAthenaResourcesCommand({
-				stackId,
-				region,
-			}),
-			purgeBucketsCommand({
-				stackId,
-				region,
-			}),
-			purgeCAsCommand({
-				stackId,
-				region,
-			}),
+			dropAthenaResourcesCommand(),
+			purgeBucketsCommand(),
+			purgeCAsCommand(),
 		)
 	} else {
 		let deviceUiUrl = ''
 		try {
-			const { deviceUiDomainName } = await so<StackOutputs>(
-				generateStackId('webapps'),
-			)
+			const { deviceUiDomainName } = await so<StackOutputs>(WEBAPPS_STACK_NAME)
 			deviceUiUrl = `https://${deviceUiDomainName}`
 		} catch (err) {
 			console.error(chalk.red.dim(`Could not determine Device UI URL.`))
@@ -133,27 +118,18 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				certsDir,
 				version,
 			}),
-			cdUpdateTokenCommand({ region }),
+			cdUpdateTokenCommand(),
 			confirm(
 				'Do you really want to drop all Athena resources?',
-				dropAthenaResourcesCommand({
-					stackId,
-					region,
-				}),
+				dropAthenaResourcesCommand(),
 			),
 			confirm(
 				'Do you really purge all Bifravst buckets?',
-				purgeBucketsCommand({
-					stackId,
-					region,
-				}),
+				purgeBucketsCommand(),
 			),
 			confirm(
 				'Do you really want to purge all Bifravst CAs?',
-				purgeCAsCommand({
-					stackId,
-					region,
-				}),
+				purgeCAsCommand(),
 			),
 		)
 	}

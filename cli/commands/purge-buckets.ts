@@ -3,14 +3,10 @@ import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { S3, CloudFormation } from 'aws-sdk'
 import * as chalk from 'chalk'
 import { retry } from './retry'
+import { region } from '../../cdk/regions'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
 
-export const purgeBucketsCommand = ({
-	stackId,
-	region,
-}: {
-	stackId: string
-	region: string
-}): CommandDefinition => ({
+export const purgeBucketsCommand = (): CommandDefinition => ({
 	command: 'purge-buckets',
 	action: async () => {
 		const {
@@ -21,7 +17,7 @@ export const purgeBucketsCommand = ({
 			deviceUiBucketName,
 			fotaBucketName,
 		} = {
-			...(await stackOutput(new CloudFormation({ region }))(stackId)),
+			...(await stackOutput(new CloudFormation({ region }))(CORE_STACK_NAME)),
 		} as { [key: string]: string }
 		const buckets = [
 			historicalDataQueryResultsBucketName,

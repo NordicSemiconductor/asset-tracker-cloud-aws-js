@@ -9,13 +9,12 @@ import {
 } from '../../historicalData/settings'
 import * as chalk from 'chalk'
 import { deviceMessagesFields } from '../../historicalData/deviceMessages'
+import { region } from '../../cdk/regions'
 
 export const historicalDataCommand = ({
-	region,
 	QueryResultsBucketName,
 	DataBucketName,
 }: {
-	region: string
 	QueryResultsBucketName: string
 	DataBucketName: string
 }): CommandDefinition => ({

@@ -3,20 +3,14 @@ import { CommandDefinition } from './CommandDefinition'
 import { createCA } from '../jitp/createCA'
 
 export const createCACommand = ({
-	stackId,
-	region,
 	certsDir,
 }: {
-	stackId: string
-	region: string
 	certsDir: string
 }): CommandDefinition => ({
 	command: 'create-ca',
 	action: async () => {
 		const { certificateId } = await createCA({
-			stackId,
 			certsDir,
-			region,
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},

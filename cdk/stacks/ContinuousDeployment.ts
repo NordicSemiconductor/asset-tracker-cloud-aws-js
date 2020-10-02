@@ -5,9 +5,7 @@ import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
 import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
-import { stackId } from './stackId'
-
-const id = stackId('continuous-deployment')
+import { CONTINUOUS_DEPLOYMENT_STACK_NAME } from './stackId'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
@@ -33,7 +31,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			}
 		},
 	) {
-		super(parent, id)
+		super(parent, CONTINUOUS_DEPLOYMENT_STACK_NAME)
 
 		const { bifravstAWS, deviceUI, webApp } = properties
 
@@ -72,7 +70,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		)
 
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
-			name: id,
+			name: CONTINUOUS_DEPLOYMENT_STACK_NAME,
 			description: 'Continuous deploys the Bifravst project',
 			source: {
 				type: 'CODEPIPELINE',
@@ -163,26 +161,34 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 
 		// Sets up the continuous deployment for the web app
-		const webAppCd = new WebAppCD(this, `${id}-webAppCD`, {
-			description: 'Continuously deploys the Bifravst Web App',
-			sourceCodeActions: {
-				bifravst: bifravstSourceCodeAction,
-				webApp: webAppSourceCodeAction,
+		const webAppCd = new WebAppCD(
+			this,
+			`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-webAppCD`,
+			{
+				description: 'Continuously deploys the Bifravst Web App',
+				sourceCodeActions: {
+					bifravst: bifravstSourceCodeAction,
+					webApp: webAppSourceCodeAction,
+				},
+				buildSpec: 'continuous-deployment-web-app.yml',
+				githubToken,
 			},
-			buildSpec: 'continuous-deployment-web-app.yml',
-			githubToken,
-		})
+		)
 
 		// Sets up the continuous deployment for the device UI
-		const deviceUICD = new WebAppCD(this, `${id}-deviceUICD`, {
-			description: 'Continuously deploys the Bifravst Device UI',
-			sourceCodeActions: {
-				bifravst: bifravstSourceCodeAction,
-				webApp: deviceUISourceCodeAction,
+		const deviceUICD = new WebAppCD(
+			this,
+			`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
+			{
+				description: 'Continuously deploys the Bifravst Device UI',
+				sourceCodeActions: {
+					bifravst: bifravstSourceCodeAction,
+					webApp: deviceUISourceCodeAction,
+				},
+				buildSpec: 'continuous-deployment-device-ui-app.yml',
+				githubToken,
 			},
-			buildSpec: 'continuous-deployment-device-ui-app.yml',
-			githubToken,
-		})
+		)
 
 		// Set up the continuous deployment for Bifravst.
 		// This will also run the deployment of the WebApp and DeviceUI after a deploy
@@ -220,7 +226,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				type: 'S3',
 				location: bucket.bucketName,
 			},
-			name: id,
+			name: CONTINUOUS_DEPLOYMENT_STACK_NAME,
 			stages: [
 				{
 					name: 'Source',
@@ -302,8 +308,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		pipeline.node.addDependency(codePipelineRole)
 
 		new CodePipeline.CfnWebhook(this, 'webhook', {
-			name: `${id}-InvokePipelineFromGitHubChange`,
-			targetPipeline: id,
+			name: `${CONTINUOUS_DEPLOYMENT_STACK_NAME}-InvokePipelineFromGitHubChange`,
+			targetPipeline: CONTINUOUS_DEPLOYMENT_STACK_NAME,
 			targetPipelineVersion: 1,
 			targetAction: 'Source',
 			filters: [
