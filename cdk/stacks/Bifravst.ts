@@ -351,7 +351,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		new ThingGroup(this, 'deviceThingGroup', {
 			name: ThingGroupName,
 			description: 'Group created for Bifravst Things',
-			addExisting: isTest,
+			addExisting: !isTest,
 			PolicyName: iotThingPolicy.ref,
 			thingGroupLambda: thingGroupLambda.function,
 		})

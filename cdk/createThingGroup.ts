@@ -2,7 +2,6 @@ import { Iot } from 'aws-sdk'
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { paginate } from '../util/paginate'
 import { cfnResponse, ResponseStatus } from '@bifravst/cloudformation-helpers'
-import { isNullOrUndefined } from 'util'
 
 const iot = new Iot()
 
@@ -21,7 +20,7 @@ export const handler = async (
 			ThingGroupName,
 			ThingGroupProperties,
 			PolicyName,
-			AddExisiting,
+			AddExisting,
 		},
 	} = event
 
@@ -33,7 +32,7 @@ export const handler = async (
 					thingGroupProperties: ThingGroupProperties,
 				})
 				.promise()
-			if (isNullOrUndefined(thingGroupArn)) {
+			if (thingGroupArn === null || thingGroupArn === undefined) {
 				throw new Error(`Failed to create thing group ${ThingGroupName}!`)
 			}
 			await iot
@@ -44,7 +43,7 @@ export const handler = async (
 				.promise()
 			// Attach all existing Things to the group
 			const { things } = await iot.listThings({}).promise()
-			if (AddExisiting === '1') {
+			if (AddExisting === '1') {
 				// Add exisiting Things to the new group
 				await Promise.all(
 					(things ?? []).map(async ({ thingName }) =>

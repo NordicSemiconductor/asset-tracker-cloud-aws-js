@@ -29,7 +29,7 @@ export class ThingGroup extends CloudFormation.Resource {
 					thingGroupDescription: description,
 				},
 				PolicyName,
-				AddExisiting: addExisting ?? false ? 0 : 1,
+				AddExisting: addExisting ?? false ? 0 : 1,
 			},
 		})
 	}
