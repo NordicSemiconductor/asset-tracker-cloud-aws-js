@@ -59,7 +59,7 @@ export const firmwareCICommand = ({
 		})
 
 		if (create === true) {
-			const { thingArn: deviceId } = await createDevice({
+			const { thingName: deviceId } = await createDevice({
 				iot,
 				thingGroupName: firmwareCIStackConfig.thingGroupName,
 				endpoint,
