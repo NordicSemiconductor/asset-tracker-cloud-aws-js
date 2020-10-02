@@ -1,8 +1,4 @@
 import * as CloudFormation from '@aws-cdk/core'
-import {
-	CustomResource,
-	CustomResourceProvider,
-} from '@aws-cdk/aws-cloudformation'
 import * as Lambda from '@aws-cdk/aws-lambda'
 
 export class ThingGroup extends CloudFormation.Resource {
@@ -25,8 +21,8 @@ export class ThingGroup extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		new CustomResource(this, 'ThingGroup', {
-			provider: CustomResourceProvider.lambda(thingGroupLambda),
+		new CloudFormation.CustomResource(this, 'ThingGroup', {
+			serviceToken: thingGroupLambda.functionArn,
 			properties: {
 				ThingGroupName: name,
 				ThingGroupProperties: {
