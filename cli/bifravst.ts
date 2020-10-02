@@ -24,6 +24,7 @@ import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-p
 import { purgeCAsCommand } from './commands/purge-cas'
 import { region } from '../cdk/regions'
 import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../cdk/stacks/stackId'
+import { firmwareCICommand } from './commands/firmware-ci'
 
 const iot = new Iot({
 	region,
@@ -131,6 +132,10 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				'Do you really want to purge all Bifravst CAs?',
 				purgeCAsCommand(),
 			),
+			firmwareCICommand({
+				endpoint,
+				certsDir,
+			}),
 		)
 	}
 

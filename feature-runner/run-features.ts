@@ -26,6 +26,7 @@ import { region } from '../cdk/regions'
 import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../cdk/stacks/stackId'
 import { promises as fs } from 'fs'
 import * as path from 'path'
+import { firmwareCIStepRunners } from './steps/firmwareCI'
 
 let ran = false
 
@@ -141,6 +142,7 @@ program
 					)
 					.addStepRunners(athenaStepRunners(world))
 					.addStepRunners(bifravstStepRunners(world))
+					.addStepRunners(firmwareCIStepRunners(world))
 					.addStepRunners([uuidHelper])
 					.addStepRunners(storageStepRunners())
 					.addStepRunners(
