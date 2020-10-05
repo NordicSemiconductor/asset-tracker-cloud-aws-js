@@ -57,9 +57,9 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:thingGroupName`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'resultsBucketName', {
-			value: firmwareCI.resultsBucket.bucketName,
-			exportName: `${this.stackName}:resultsBucketName`,
+		new CloudFormation.CfnOutput(this, 'bucketName', {
+			value: firmwareCI.bucket.bucketName,
+			exportName: `${this.stackName}:bucketName`,
 		})
 
 		new CloudFormation.CfnOutput(this, 'userAccessKeyId', {
@@ -76,7 +76,7 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 
 export type StackOutputs = {
 	thingGroupName: string
-	resultsBucketName: string
+	bucketName: string
 	userAccessKeyId: string
 	userSecretAccessKey: string
 }

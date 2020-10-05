@@ -39,6 +39,14 @@ export const firmwareCICommand = ({
 		)
 		console.log(chalk.grey('Region:            '), chalk.yellow(region))
 		console.log(
+			chalk.grey('Firmware Bucket:   '),
+			chalk.yellow(firmwareCIStackConfig.bucketName),
+		)
+		console.log(
+			chalk.grey('Results Bucket:    '),
+			chalk.yellow(firmwareCIStackConfig.bucketName),
+		)
+		console.log(
 			chalk.grey('Access Key ID:     '),
 			chalk.yellow(firmwareCIStackConfig.userAccessKeyId),
 		)

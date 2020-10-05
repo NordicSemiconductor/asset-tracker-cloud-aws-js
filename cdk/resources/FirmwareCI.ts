@@ -7,7 +7,7 @@ import { ThingGroupLambda } from './ThingGroupLambda'
 
 export class FirmwareCI extends CloudFormation.Resource {
 	public readonly thingGroupName
-	public readonly resultsBucket
+	public readonly bucket
 	public readonly userAccessKey
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -16,7 +16,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		this.resultsBucket = new S3.Bucket(this, 'resultsBucket', {
+		this.bucket = new S3.Bucket(this, 'resultsBucket', {
 			publicReadAccess: true,
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
@@ -110,7 +110,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 		)
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				resources: [`${this.resultsBucket.bucketArn}/*`],
+				resources: [`${this.bucket.bucketArn}/*`],
 				actions: ['s3:PutObject'],
 			}),
 		)

@@ -31,7 +31,7 @@ Feature: Schedule CI runs of firmware builds
         When I execute "createPresignedPost" of the AWS S3 SDK with
             """
             {
-                "Bucket": "{firmwareCI:resultsBucketName}",
+                "Bucket": "{firmwareCI:bucketName}",
                 "Fields": {
                     "key": "{ciJobId}.json"
                 }

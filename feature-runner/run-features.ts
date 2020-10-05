@@ -41,7 +41,7 @@ export type BifravstWorld = StackOutputs & {
 	'firmwareCI:userAccessKeyId': string
 	'firmwareCI:userSecretAccessKey': string
 	'firmwareCI:thingGroupName': string
-	'firmwareCI:resultsBucketName': string
+	'firmwareCI:bucketName': string
 	awsIotRootCA: string
 	certsDir: string
 }
@@ -93,7 +93,7 @@ program
 				'firmwareCI:userSecretAccessKey':
 					firmwareCIStackConfig.userSecretAccessKey,
 				'firmwareCI:thingGroupName': firmwareCIStackConfig.thingGroupName,
-				'firmwareCI:resultsBucketName': firmwareCIStackConfig.resultsBucketName,
+				'firmwareCI:bucketName': firmwareCIStackConfig.bucketName,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				historicaldataWorkgroupName: WorkGroupName(),
 				historicaldataDatabaseName: DataBaseName(),
