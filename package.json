@@ -75,7 +75,6 @@
     "cdk": "1.66.0",
     "change-case": "4.1.1",
     "check-node-version": "4.0.3",
-    "compare-versions": "3.6.0",
     "husky": "4.3.0",
     "jest": "26.5.0",
     "nock": "13.0.4",
