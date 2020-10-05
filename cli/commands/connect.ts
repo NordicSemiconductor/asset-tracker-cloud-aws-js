@@ -1,15 +1,19 @@
 import { CommandDefinition } from './CommandDefinition'
 import * as path from 'path'
 import { connect } from '../device/connect'
+import { StackOutputs } from '../../cdk/stacks/Bifravst'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
+import { CloudFormation } from 'aws-sdk'
+import { region } from '../../cdk/regions'
+import * as chalk from 'chalk'
+import { WEBAPPS_STACK_NAME } from '../../cdk/stacks/stackId'
 
 export const connectCommand = ({
 	endpoint,
-	deviceUiUrl,
 	certsDir,
 	version,
 }: {
 	endpoint: string
-	deviceUiUrl: string
 	certsDir: string
 	version: string
 }): CommandDefinition => ({
@@ -20,14 +24,24 @@ export const connectCommand = ({
 			description: `AWS IoT endpoint to use, default: ${endpoint}`,
 		},
 	],
-	action: async (deviceId: string, { endpoint: e }) =>
-		connect({
+	action: async (deviceId: string, { endpoint: e }) => {
+		let deviceUiUrl = ''
+		try {
+			const { deviceUiDomainName } = await stackOutput(
+				new CloudFormation({ region }),
+			)<StackOutputs>(WEBAPPS_STACK_NAME)
+			deviceUiUrl = `https://${deviceUiDomainName}`
+		} catch (err) {
+			console.error(chalk.red.dim(`Could not determine Device UI URL.`))
+		}
+		return connect({
 			deviceId,
 			deviceUiUrl,
 			endpoint: e ?? endpoint,
 			certsDir,
 			caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 			version,
-		}),
+		})
+	},
 	help: 'Connect to the AWS IoT broker using a generated device certificate.',
 })

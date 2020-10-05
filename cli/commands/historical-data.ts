@@ -1,6 +1,6 @@
 import { CommandDefinition } from './CommandDefinition'
 import { query, createTableSQL, parseResult } from '@bifravst/athena-helpers'
-import { Athena } from 'aws-sdk'
+import { Athena, CloudFormation } from 'aws-sdk'
 import {
 	DataBaseName,
 	UpdatesTableName,
@@ -10,14 +10,11 @@ import {
 import * as chalk from 'chalk'
 import { deviceMessagesFields } from '../../historicalData/deviceMessages'
 import { region } from '../../cdk/regions'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
+import { StackOutputs } from '../../cdk/stacks/Bifravst'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
 
-export const historicalDataCommand = ({
-	QueryResultsBucketName,
-	DataBucketName,
-}: {
-	QueryResultsBucketName: string
-	DataBucketName: string
-}): CommandDefinition => ({
+export const historicalDataCommand = (): CommandDefinition => ({
 	command: 'historical-data',
 	options: [
 		{
@@ -43,6 +40,12 @@ export const historicalDataCommand = ({
 		recreate: boolean
 	}) => {
 		const athena = new Athena({ region })
+		const {
+			historicalDataQueryResultsBucketName: QueryResultsBucketName,
+			historicalDataBucketName: DataBucketName,
+		} = await stackOutput(new CloudFormation({ region }))<StackOutputs>(
+			CORE_STACK_NAME,
+		)
 
 		const { WorkGroups } = await athena.listWorkGroups().promise()
 

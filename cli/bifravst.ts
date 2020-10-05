@@ -1,9 +1,7 @@
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
-import { Iot, CloudFormation, STS } from 'aws-sdk'
-import { stackOutput } from '@bifravst/cloudformation-helpers'
-import { StackOutputs } from '../cdk/stacks/Bifravst'
+import { Iot, STS } from 'aws-sdk'
 import * as path from 'path'
 import { cdCommand } from './commands/cd'
 import { createDeviceCertCommand } from './commands/create-device-cert'
@@ -23,7 +21,6 @@ import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
 import { purgeCAsCommand } from './commands/purge-cas'
 import { region } from '../cdk/regions'
-import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../cdk/stacks/stackId'
 import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 
@@ -34,24 +31,15 @@ const version = JSON.parse(
 	fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
 ).version
 
-const so = stackOutput(new CloudFormation({ region }))
-
 const config = async () => {
-	const [
-		accessKeyInfo,
-		endpoint,
-		{ historicalDataQueryResultsBucketName, historicalDataBucketName },
-	] = await Promise.all([
+	const [accessKeyInfo, endpoint] = await Promise.all([
 		new STS().getCallerIdentity().promise(),
 		getIotEndpoint(iot),
-		so<StackOutputs>(CORE_STACK_NAME),
 	])
 
 	return {
 		accountId: accessKeyInfo.Account as string,
 		endpoint,
-		historicalDataQueryResultsBucketName,
-		historicalDataBucketName,
 	}
 }
 
@@ -77,12 +65,7 @@ const confirm = (
 })
 
 const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
-	const {
-		accountId,
-		endpoint,
-		historicalDataQueryResultsBucketName,
-		historicalDataBucketName,
-	} = await config()
+	const { accountId, endpoint } = await config()
 	const certsDir = await provideCertsDir({
 		iotEndpoint: endpoint,
 		accountId,
@@ -96,10 +79,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 		reactConfigCommand(),
 		infoCommand(),
 		cdCommand(),
-		historicalDataCommand({
-			QueryResultsBucketName: historicalDataQueryResultsBucketName,
-			DataBucketName: historicalDataBucketName,
-		}),
+		historicalDataCommand(),
 		cellLocation(),
 		purgeIotUserPolicyPrincipals(),
 		logsCommand(),
@@ -113,17 +93,9 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			purgeCAsCommand(),
 		)
 	} else {
-		let deviceUiUrl = ''
-		try {
-			const { deviceUiDomainName } = await so<StackOutputs>(WEBAPPS_STACK_NAME)
-			deviceUiUrl = `https://${deviceUiDomainName}`
-		} catch (err) {
-			console.error(chalk.red.dim(`Could not determine Device UI URL.`))
-		}
 		commands.push(
 			connectCommand({
 				endpoint,
-				deviceUiUrl,
 				certsDir,
 				version,
 			}),
