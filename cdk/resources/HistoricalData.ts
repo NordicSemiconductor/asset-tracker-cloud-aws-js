@@ -5,10 +5,10 @@ import * as IoT from '@aws-cdk/aws-iot'
 import * as Events from '@aws-cdk/aws-events'
 import * as EventTargets from '@aws-cdk/aws-events-targets'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
 import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
+import { LambdasWithLayer } from './LambdasWithLayer'
 
 export const permissions = ({
 	historicalData,
@@ -90,15 +90,11 @@ export class HistoricalData extends CloudFormation.Resource {
 		parent: CloudFormation.Stack,
 		id: string,
 		{
-			sourceCodeBucket,
-			baseLayer,
 			lambdas,
 			userRole,
 			isTest,
 		}: {
-			sourceCodeBucket: S3.IBucket
-			baseLayer: Lambda.ILayerVersion
-			lambdas: LayeredLambdas<BifravstLambdas>
+			lambdas: LambdasWithLayer<BifravstLambdas>
 			userRole: IAM.IRole
 			isTest: boolean
 		},
@@ -195,15 +191,12 @@ export class HistoricalData extends CloudFormation.Resource {
 			this,
 			'processBatchMessages',
 			{
-				layers: [baseLayer],
+				layers: lambdas.layers,
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.processBatchMessages,
-				),
+				code: lambdas.lambdas.processBatchMessages,
 				description: 'Processes batch messages and stores them on S3',
 				initialPolicy: [
 					logToCloudWatch,
@@ -267,15 +260,12 @@ export class HistoricalData extends CloudFormation.Resource {
 			this,
 			'concatenateRawMessages',
 			{
-				layers: [baseLayer],
+				layers: lambdas.layers,
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(900),
 				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.concatenateRawMessages,
-				),
+				code: lambdas.lambdas.concatenateRawMessages,
 				description:
 					'Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.',
 				initialPolicy: [

@@ -1,11 +1,28 @@
 import { TestApp } from './apps/Test'
-import { prepareResources } from './prepare-resources'
+import {
+	prepareBifravstLambdas,
+	prepareCDKLambdas,
+	prepareResources,
+} from './prepare-resources'
 import { region } from './regions'
+
+const rootDir = process.cwd()
 
 prepareResources({
 	region,
-	rootDir: process.cwd(),
+	rootDir,
 })
+	.then(async (res) => ({
+		...res,
+		packedLambdas: await prepareBifravstLambdas({
+			...res,
+			rootDir,
+		}),
+		packedCDKLambdas: await prepareCDKLambdas({
+			...res,
+			rootDir,
+		}),
+	}))
 	.then((args) =>
 		new TestApp({
 			...args,

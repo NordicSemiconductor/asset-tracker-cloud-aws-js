@@ -1,12 +1,11 @@
 import * as CloudFormation from '@aws-cdk/core'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
-import * as S3 from '@aws-cdk/aws-s3'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { BifravstLambdas } from '../prepare-resources'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
+import { LambdasWithLayer } from './LambdasWithLayer'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -23,28 +22,21 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		id: string,
 		{
 			cellgeo,
-			sourceCodeBucket,
-			baseLayer,
 			lambdas,
 		}: {
 			cellgeo: CellGeolocation
-			sourceCodeBucket: S3.IBucket
-			baseLayer: Lambda.ILayerVersion
-			lambdas: LayeredLambdas<BifravstLambdas>
+			lambdas: LambdasWithLayer<BifravstLambdas>
 		},
 	) {
 		super(parent, id)
 
 		const geolocateCell = new Lambda.Function(this, 'geolocateCell', {
-			layers: [baseLayer],
+			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_12_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: Lambda.Code.bucket(
-				sourceCodeBucket,
-				lambdas.lambdaZipFileNames.geolocateCellHttpApi,
-			),
+			code: lambdas.lambdas.geolocateCellHttpApi,
 			description: 'Geolocate cells',
 			initialPolicy: [
 				logToCloudWatch,
@@ -65,15 +57,12 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		})
 
 		const addCellGeolocation = new Lambda.Function(this, 'addCellGeolocation', {
-			layers: [baseLayer],
+			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_12_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: Lambda.Code.bucket(
-				sourceCodeBucket,
-				lambdas.lambdaZipFileNames.addCellGeolocationHttpApi,
-			),
+			code: lambdas.lambdas.addCellGeolocationHttpApi,
 			description: 'Stores geolocations for cells',
 			initialPolicy: [
 				logToCloudWatch,

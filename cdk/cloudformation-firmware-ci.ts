@@ -1,11 +1,20 @@
 import { FirmwareCIApp } from './apps/FirmwareCI'
-import { prepareResources } from './prepare-resources'
+import { prepareCDKLambdas, prepareResources } from './prepare-resources'
 import { region } from './regions'
+
+const rootDir = process.cwd()
 
 prepareResources({
 	region,
-	rootDir: process.cwd(),
+	rootDir,
 })
+	.then(async (res) => ({
+		...res,
+		packedCDKLambdas: await prepareCDKLambdas({
+			...res,
+			rootDir,
+		}),
+	}))
 	.then((args) => new FirmwareCIApp(args).synth())
 	.catch((err) => {
 		console.error(err)

@@ -5,14 +5,13 @@ import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
 import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import * as S3 from '@aws-cdk/aws-s3'
-import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { logToCloudWatch } from './logToCloudWatch'
 import { lambdaLogGroup } from './lambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
 import * as SQS from '@aws-cdk/aws-sqs'
+import { LambdasWithLayer } from './LambdasWithLayer'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -28,15 +27,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 		parent: CloudFormation.Stack,
 		id: string,
 		{
-			sourceCodeBucket,
-			baseLayer,
 			lambdas,
 			enableUnwiredApi,
 			isTest,
 		}: {
-			sourceCodeBucket: S3.IBucket
-			baseLayer: Lambda.ILayerVersion
-			lambdas: LayeredLambdas<BifravstLambdas>
+			lambdas: LambdasWithLayer<BifravstLambdas>
 			enableUnwiredApi: boolean
 			isTest: boolean
 		},
@@ -62,15 +57,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 			this,
 			'geolocateCellFromCache',
 			{
-				layers: [baseLayer],
+				layers: lambdas.layers,
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.geolocateCellFromCacheStepFunction,
-				),
+				code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
 				description: 'Geolocate cells from cache',
 				initialPolicy: [
 					logToCloudWatch,
@@ -128,16 +120,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 			this,
 			'geolocateCellFromDevices',
 			{
-				layers: [baseLayer],
+				layers: lambdas.layers,
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames
-						.geolocateCellFromDeviceLocationsStepFunction,
-				),
+				code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
 				description: 'Geolocate cells from device locations',
 				initialPolicy: [
 					logToCloudWatch,
@@ -162,15 +150,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 			this,
 			'cacheCellGeolocation',
 			{
-				layers: [baseLayer],
+				layers: lambdas.layers,
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.cacheCellGeolocationStepFunction,
-				),
+				code: lambdas.lambdas.cacheCellGeolocationStepFunction,
 				description: 'Caches cell geolocations',
 				initialPolicy: [
 					logToCloudWatch,
@@ -194,15 +179,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 				this,
 				'geolocateCellFromUnwiredLabs',
 				{
-					layers: [baseLayer],
+					layers: lambdas.layers,
 					handler: 'index.handler',
 					runtime: Lambda.Runtime.NODEJS_12_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
-					code: Lambda.Code.bucket(
-						sourceCodeBucket,
-						lambdas.lambdaZipFileNames.geolocateCellFromUnwiredLabsStepFunction,
-					),
+					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
 					description: 'Resolve cell geolocation using the UnwiredLabs API',
 					initialPolicy: [
 						logToCloudWatch,
@@ -448,10 +430,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
-				code: Lambda.Code.bucket(
-					sourceCodeBucket,
-					lambdas.lambdaZipFileNames.invokeStepFunctionFromSQS,
-				),
+				code: lambdas.lambdas.invokeStepFunctionFromSQS,
 				description:
 					'Invoke the cell geolocation resolution step function for SQS messages',
 				initialPolicy: [

@@ -1,16 +1,18 @@
 import { App } from '@aws-cdk/core'
 import { BifravstStack } from '../stacks/Bifravst'
-import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { WebAppsStack } from '../stacks/WebApps'
-import { BifravstLambdas } from '../prepare-resources'
+import {
+	BifravstLambdas,
+	CDKLambdas,
+	PackedLambdas,
+} from '../prepare-resources'
 
 export class BifravstApp extends App {
 	public constructor(args: {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
-		baseLayerZipFileName: string
-		cloudFormationLayerZipFileName: string
-		lambdas: LayeredLambdas<BifravstLambdas>
+		packedLambdas: PackedLambdas<BifravstLambdas>
+		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		enableUnwiredApi: boolean
 	}) {
 		super()

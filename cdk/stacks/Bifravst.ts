@@ -4,17 +4,22 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as Iot from '@aws-cdk/aws-iot'
-import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import { HistoricalData } from '../resources/HistoricalData'
-import { BifravstLambdas } from '../prepare-resources'
+import {
+	BifravstLambdas,
+	CDKLambdas,
+	PackedLambdas,
+} from '../prepare-resources'
 import { FOTAStorage } from '../resources/FOTAStorage'
 import { CellGeolocation } from '../resources/CellGeolocation'
 import { CellGeolocationApi } from '../resources/CellGeolocationApi'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { ThingGroup } from '../resources/ThingGroup'
 import { CORE_STACK_NAME } from './stackId'
+import { LambdasWithLayer } from '../resources/LambdasWithLayer'
+import { lambdasOnS3 } from '../resources/lambdasOnS3'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -22,17 +27,15 @@ export class BifravstStack extends CloudFormation.Stack {
 		{
 			mqttEndpoint,
 			sourceCodeBucketName,
-			baseLayerZipFileName,
-			cloudFormationLayerZipFileName,
-			lambdas,
+			packedLambdas,
+			packedCDKLambdas,
 			isTest,
 			enableUnwiredApi,
 		}: {
 			mqttEndpoint: string
 			sourceCodeBucketName: string
-			baseLayerZipFileName: string
-			cloudFormationLayerZipFileName: string
-			lambdas: LayeredLambdas<BifravstLambdas>
+			packedLambdas: PackedLambdas<BifravstLambdas>
+			packedCDKLambdas: PackedLambdas<CDKLambdas>
 			isTest: boolean
 			enableUnwiredApi: boolean
 		},
@@ -46,12 +49,16 @@ export class BifravstStack extends CloudFormation.Stack {
 				bucketName: sourceCodeBucketName,
 			},
 		)
+		const lambasOnBucket = lambdasOnS3(sourceCodeBucket)
 
 		const baseLayer = new Lambda.LayerVersion(
 			this,
 			`${CORE_STACK_NAME}-layer`,
 			{
-				code: Lambda.Code.bucket(sourceCodeBucket, baseLayerZipFileName),
+				code: Lambda.Code.fromBucket(
+					sourceCodeBucket,
+					packedLambdas.layerZipFileName,
+				),
 				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
 			},
 		)
@@ -60,9 +67,9 @@ export class BifravstStack extends CloudFormation.Stack {
 			this,
 			`${CORE_STACK_NAME}-cloudformation-layer`,
 			{
-				code: Lambda.Code.bucket(
+				code: Lambda.Code.fromBucket(
 					sourceCodeBucket,
-					cloudFormationLayerZipFileName,
+					packedCDKLambdas.layerZipFileName,
 				),
 				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
 			},
@@ -340,9 +347,10 @@ export class BifravstStack extends CloudFormation.Stack {
 		})
 
 		const thingGroupLambda = new ThingGroupLambda(this, 'thingGroupLambda', {
-			cloudFormationLayer,
-			lambdas,
-			sourceCodeBucket,
+			cdkLambdas: {
+				lambdas: lambasOnBucket(packedCDKLambdas),
+				layers: [cloudFormationLayer],
+			},
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupLambdaArn', {
@@ -372,10 +380,13 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:avatarBucketName`,
 		})
 
+		const lambdas: LambdasWithLayer<BifravstLambdas> = {
+			lambdas: lambasOnBucket(packedLambdas),
+			layers: [baseLayer],
+		}
+
 		const hd = new HistoricalData(this, 'historicalData', {
-			baseLayer,
-			lambdas: lambdas,
-			sourceCodeBucket,
+			lambdas,
 			userRole,
 			isTest: isTest,
 		})
@@ -421,9 +432,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		// Cell Geolocation
 
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
-			baseLayer,
-			lambdas: lambdas,
-			sourceCodeBucket,
+			lambdas,
 			enableUnwiredApi,
 			isTest,
 		})
@@ -440,9 +449,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		)
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
-			baseLayer,
-			lambdas: lambdas,
-			sourceCodeBucket,
+			lambdas,
 			cellgeo,
 		})
 

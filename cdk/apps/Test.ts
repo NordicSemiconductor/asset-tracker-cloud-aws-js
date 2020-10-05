@@ -1,7 +1,10 @@
 import { App } from '@aws-cdk/core'
 import { BifravstStack } from '../stacks/Bifravst'
-import { LayeredLambdas } from '@bifravst/package-layered-lambdas'
-import { BifravstLambdas } from '../prepare-resources'
+import {
+	BifravstLambdas,
+	CDKLambdas,
+	PackedLambdas,
+} from '../prepare-resources'
 import { FirmwareCIStack } from '../stacks/FirmwareCI'
 
 /**
@@ -11,9 +14,8 @@ export class TestApp extends App {
 	public constructor(args: {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
-		baseLayerZipFileName: string
-		cloudFormationLayerZipFileName: string
-		lambdas: LayeredLambdas<BifravstLambdas>
+		packedLambdas: PackedLambdas<BifravstLambdas>
+		packedCDKLambdas: PackedLambdas<CDKLambdas>
 	}) {
 		super()
 		new BifravstStack(this, {
