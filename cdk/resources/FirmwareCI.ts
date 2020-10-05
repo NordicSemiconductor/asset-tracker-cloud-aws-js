@@ -16,7 +16,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		this.bucket = new S3.Bucket(this, 'resultsBucket', {
+		this.bucket = new S3.Bucket(this, 'bucket', {
 			publicReadAccess: true,
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 		})
