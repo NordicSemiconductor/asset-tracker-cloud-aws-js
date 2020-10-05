@@ -27,6 +27,7 @@ import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../cdk/stacks/stackId'
 import { promises as fs } from 'fs'
 import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
+import { certsDir } from '../cli/jitp/certsDir'
 
 let ran = false
 
@@ -42,6 +43,7 @@ export type BifravstWorld = StackOutputs & {
 	'firmwareCI:thingGroupName': string
 	'firmwareCI:resultsBucketName': string
 	awsIotRootCA: string
+	certsDir: string
 }
 
 program
@@ -102,6 +104,10 @@ program
 					path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 					'utf-8',
 				),
+				certsDir: await certsDir({
+					iotEndpoint: stackConfig.mqttEndpoint,
+					accountId: accountId as string,
+				}),
 			}
 
 			console.log(chalk.yellow.bold(' World:'))

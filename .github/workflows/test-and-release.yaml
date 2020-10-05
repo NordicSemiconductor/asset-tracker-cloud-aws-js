@@ -85,7 +85,7 @@ jobs:
         run: |
           node cli drop-athena-resources
           node cli purge-iot-user-policy-principals
-          node cli purge-cas -i `cat certificates/rootCA.id`
+          node cli purge-cas -i `cat certificates/**/rootCA.id`
           # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
           node cli purge-buckets
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' destroy -f '*'

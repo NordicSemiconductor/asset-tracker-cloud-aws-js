@@ -1,7 +1,7 @@
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
-import { Iot, CloudFormation } from 'aws-sdk'
+import { Iot, CloudFormation, STS } from 'aws-sdk'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import * as path from 'path'
@@ -25,6 +25,7 @@ import { purgeCAsCommand } from './commands/purge-cas'
 import { region } from '../cdk/regions'
 import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../cdk/stacks/stackId'
 import { firmwareCICommand } from './commands/firmware-ci'
+import { certsDir as provideCertsDir } from './jitp/certsDir'
 
 const iot = new Iot({
 	region,
@@ -37,14 +38,17 @@ const so = stackOutput(new CloudFormation({ region }))
 
 const config = async () => {
 	const [
+		accessKeyInfo,
 		endpoint,
 		{ historicalDataQueryResultsBucketName, historicalDataBucketName },
 	] = await Promise.all([
+		new STS().getCallerIdentity().promise(),
 		getIotEndpoint(iot),
 		so<StackOutputs>(CORE_STACK_NAME),
 	])
 
 	return {
+		accountId: accessKeyInfo.Account as string,
 		endpoint,
 		historicalDataQueryResultsBucketName,
 		historicalDataBucketName,
@@ -74,17 +78,21 @@ const confirm = (
 
 const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	const {
+		accountId,
 		endpoint,
 		historicalDataQueryResultsBucketName,
 		historicalDataBucketName,
 	} = await config()
-	const certsDir = path.resolve(process.cwd(), 'certificates')
+	const certsDir = await provideCertsDir({
+		iotEndpoint: endpoint,
+		accountId,
+	})
 
 	program.description('Bifravst Command Line Interface')
 
 	const commands = [
 		createCACommand({ certsDir }),
-		createDeviceCertCommand({ endpoint }),
+		createDeviceCertCommand({ endpoint, certsDir }),
 		reactConfigCommand(),
 		infoCommand(),
 		cdCommand(),

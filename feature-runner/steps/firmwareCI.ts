@@ -4,7 +4,6 @@ import {
 	InterpolatedStep,
 } from '@bifravst/e2e-bdd-test-runner'
 import { BifravstWorld } from '../run-features'
-import * as path from 'path'
 import { createDevice } from '../../cli/firmware-ci/createDevice'
 import { Iot } from 'aws-sdk'
 import { region } from '../../cdk/regions'
@@ -12,7 +11,9 @@ import { deleteDevice } from '../../cli/firmware-ci/deleteDevice'
 
 export const firmwareCIStepRunners = ({
 	mqttEndpoint,
+	certsDir,
 }: {
+	certsDir: string
 	mqttEndpoint: string
 }): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => {
 	return [
@@ -20,7 +21,7 @@ export const firmwareCIStepRunners = ({
 			async ([storageName], __, runner) => {
 				const { thingName, thingArn } = await createDevice({
 					endpoint: mqttEndpoint,
-					certsDir: path.resolve(process.cwd(), 'certificates'),
+					certsDir,
 					iot: new Iot({ region }),
 					thingGroupName: runner.world['firmwareCI:thingGroupName'],
 				})
@@ -33,7 +34,7 @@ export const firmwareCIStepRunners = ({
 			async ([storageName], __, runner) => {
 				return deleteDevice({
 					thingName: runner.store[`${storageName}:name`],
-					certsDir: path.resolve(process.cwd(), 'certificates'),
+					certsDir,
 					iot: new Iot({ region }),
 					thingGroupName: runner.world['firmwareCI:thingGroupName'],
 				})

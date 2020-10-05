@@ -14,9 +14,15 @@ import { expect } from 'chai'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 import { promises as fs } from 'fs'
 
-const connect = (mqttEndpoint: string) => (clientId: string) => {
+const connect = ({
+	mqttEndpoint,
+	certsDir,
+}: {
+	mqttEndpoint: string
+	certsDir: string
+}) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
-		certsDir: path.resolve(process.cwd(), 'certificates'),
+		certsDir,
 		deviceId: clientId,
 	})
 	return new device({
@@ -29,9 +35,15 @@ const connect = (mqttEndpoint: string) => (clientId: string) => {
 	})
 }
 
-const shadow = (mqttEndpoint: string) => (clientId: string) => {
+const shadow = ({
+	mqttEndpoint,
+	certsDir,
+}: {
+	mqttEndpoint: string
+	certsDir: string
+}) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
-		certsDir: path.resolve(process.cwd(), 'certificates'),
+		certsDir,
 		deviceId: clientId,
 	})
 	return new thingShadow({
@@ -46,11 +58,19 @@ const shadow = (mqttEndpoint: string) => (clientId: string) => {
 
 export const bifravstStepRunners = ({
 	mqttEndpoint,
+	certsDir,
 }: {
 	mqttEndpoint: string
+	certsDir: string
 }): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => {
-	const connectToBroker = connect(mqttEndpoint)
-	const shadowOnBroker = shadow(mqttEndpoint)
+	const connectToBroker = connect({
+		mqttEndpoint,
+		certsDir,
+	})
+	const shadowOnBroker = shadow({
+		mqttEndpoint,
+		certsDir,
+	})
 	return [
 		regexMatcher<BifravstWorld>(
 			/^(?:a cat exists|I generate a certificate)(?: for the cat tracker "([^"]+)")?$/,
@@ -60,7 +80,7 @@ export const bifravstStepRunners = ({
 			if (runner.store[`${prefix}:id`] === undefined) {
 				await createDeviceCertificate({
 					deviceId: catId,
-					certsDir: path.resolve(process.cwd(), 'certificates'),
+					certsDir,
 					log: (...message: any[]) => {
 						// eslint-disable-next-line @typescript-eslint/no-floating-promises
 						runner.progress('IoT (cert)', ...message)
@@ -71,7 +91,7 @@ export const bifravstStepRunners = ({
 					},
 				})
 				const deviceFiles = deviceFileLocations({
-					certsDir: path.resolve(process.cwd(), 'certificates'),
+					certsDir,
 					deviceId: catId,
 				})
 				runner.store[`${prefix}:privateKey`] = await fs.readFile(
@@ -97,7 +117,7 @@ export const bifravstStepRunners = ({
 				const catId = deviceId ?? runner.store['cat:id']
 				await runner.progress('IoT', catId)
 				const deviceFiles = deviceFileLocations({
-					certsDir: path.resolve(process.cwd(), 'certificates'),
+					certsDir,
 					deviceId: catId,
 				})
 				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)

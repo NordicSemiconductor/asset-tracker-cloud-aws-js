@@ -8,8 +8,10 @@ import { promises as fs } from 'fs'
 
 export const createDeviceCertCommand = ({
 	endpoint,
+	certsDir,
 }: {
 	endpoint: string
+	certsDir: string
 }): CommandDefinition => ({
 	command: 'create-device-cert',
 	options: [
@@ -20,7 +22,6 @@ export const createDeviceCertCommand = ({
 	],
 	action: async ({ deviceId }: { deviceId: string }) => {
 		const id = deviceId || (await randomWords({ numWords: 3 })).join('-')
-		const certsDir = path.resolve(process.cwd(), 'certificates')
 		await createDeviceCertificate({
 			deviceId: id,
 			certsDir,
