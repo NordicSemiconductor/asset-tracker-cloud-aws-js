@@ -76,6 +76,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 					'iot:AttachThingPrincipal',
 					'iot:DetachThingPrincipal',
 					'iot:CreateJob',
+					'iot:DescribeJobExecution',
 				],
 				resources: [
 					`arn:aws:iot:${parent.region}:${parent.account}:thing/firmware-ci-*`,
@@ -104,7 +105,13 @@ export class FirmwareCI extends CloudFormation.Resource {
 		)
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				actions: ['iot:CreateJob', 'iot:CancelJob', 'iot:DeleteJob'],
+				actions: [
+					'iot:CreateJob',
+					'iot:CancelJob',
+					'iot:DeleteJob',
+					'iot:DescribeJob',
+					'iot:DescribeJobExecution',
+				],
 				resources: [`arn:aws:iot:${parent.region}:${parent.account}:job/*`],
 			}),
 		)
