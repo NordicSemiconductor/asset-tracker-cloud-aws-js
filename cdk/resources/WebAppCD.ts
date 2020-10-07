@@ -86,6 +86,10 @@ export class WebAppCD extends CloudFormation.Construct {
 						name: 'GH_TOKEN',
 						value: githubToken.stringValue,
 					},
+					{
+						name: 'CI',
+						value: '1',
+					},
 				],
 			},
 		})

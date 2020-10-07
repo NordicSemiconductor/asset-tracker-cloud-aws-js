@@ -89,6 +89,10 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 						name: 'GH_TOKEN',
 						value: githubToken.stringValue,
 					},
+					{
+						name: 'CI',
+						value: '1',
+					},
 				],
 			},
 		})
