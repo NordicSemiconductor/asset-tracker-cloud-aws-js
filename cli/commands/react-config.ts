@@ -21,6 +21,7 @@ export const reactConfigCommand = (): CommandDefinition => ({
 					historicaldataTableName: UpdatesTableName(),
 					...(await so(CORE_STACK_NAME)),
 					...(await so(WEBAPPS_STACK_NAME)),
+					region,
 				},
 				'REACT_APP_',
 			),
