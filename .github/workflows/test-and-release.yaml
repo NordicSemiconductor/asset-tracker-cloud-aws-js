@@ -66,7 +66,7 @@ jobs:
       - name: Generate Stack ID
         run: |
           RANDOM_STRING=`node -e "const crypto = require('crypto'); process.stdout.write(crypto.randomBytes(Math.ceil(8 * 0.5)).toString('hex').slice(0, 8));"`
-          echo "::set-env name=STACK_NAME::bifravst-${{ runner.OS }}-${RANDOM_STRING}"
+          echo "STACK_NAME=bifravst-${{ runner.OS }}-${RANDOM_STRING}" >> $GITHUB_ENV
       - name: Set up stack for End-to-End tests
         run: |
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
