@@ -12,7 +12,7 @@ import { deviceMessagesFields } from '../../historicalData/deviceMessages'
 import { region } from '../../cdk/regions'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { StackOutputs } from '../../cdk/stacks/Bifravst'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const historicalDataCommand = (): CommandDefinition => ({
 	command: 'historical-data',

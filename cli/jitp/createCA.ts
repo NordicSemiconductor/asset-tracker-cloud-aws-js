@@ -4,7 +4,7 @@ import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
 import { toObject } from '@bifravst/cloudformation-helpers'
 import { region } from '../../cdk/regions'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 /**
  * Creates a CA certificate and registers it for Just-in-time provisioning

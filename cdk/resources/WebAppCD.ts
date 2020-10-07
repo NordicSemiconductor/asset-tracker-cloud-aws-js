@@ -4,7 +4,7 @@ import * as CodeBuild from '@aws-cdk/aws-codebuild'
 import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as SSM from '@aws-cdk/aws-ssm'
-import { CORE_STACK_NAME } from '../stacks/stackId'
+import { CORE_STACK_NAME } from '../stacks/stackName'
 
 export const BuildActionCodeBuild = {
 	category: 'Build',
@@ -75,7 +75,7 @@ export class WebAppCD extends CloudFormation.Construct {
 				image: 'aws/codebuild/standard:3.0',
 				environmentVariables: [
 					{
-						name: 'STACK_ID',
+						name: 'STACK_NAME',
 						value: CORE_STACK_NAME,
 					},
 					{

@@ -4,7 +4,7 @@ import * as S3 from '@aws-cdk/aws-s3'
 import { FirmwareCI } from '../resources/FirmwareCI'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { CDKLambdas, PackedLambdas } from '../prepare-resources'
-import { FIRMWARE_CI_STACK_NAME } from './stackId'
+import { FIRMWARE_CI_STACK_NAME } from './stackName'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 
 export class FirmwareCIStack extends CloudFormation.Stack {

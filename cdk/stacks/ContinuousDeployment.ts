@@ -5,7 +5,7 @@ import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
 import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
-import { CONTINUOUS_DEPLOYMENT_STACK_NAME } from './stackId'
+import { CONTINUOUS_DEPLOYMENT_STACK_NAME } from './stackName'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.

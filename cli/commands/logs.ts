@@ -2,7 +2,7 @@ import { CloudFormation, CloudWatchLogs } from 'aws-sdk'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { region } from '../../cdk/regions'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const logsCommand = (): CommandDefinition => ({
 	command: 'logs',

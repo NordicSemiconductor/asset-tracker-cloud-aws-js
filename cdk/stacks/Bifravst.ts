@@ -17,7 +17,7 @@ import { CellGeolocation } from '../resources/CellGeolocation'
 import { CellGeolocationApi } from '../resources/CellGeolocationApi'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { ThingGroup } from '../resources/ThingGroup'
-import { CORE_STACK_NAME } from './stackId'
+import { CORE_STACK_NAME } from './stackName'
 import { LambdasWithLayer } from '../resources/LambdasWithLayer'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 

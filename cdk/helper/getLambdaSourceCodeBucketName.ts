@@ -1,5 +1,5 @@
 import { CloudFormation } from 'aws-sdk'
-import { SOURCECODE_STACK_NAME } from '../stacks/stackId'
+import { SOURCECODE_STACK_NAME } from '../stacks/stackName'
 
 const cf = new CloudFormation({
 	region: process.env.AWS_DEFAULT_REGION,

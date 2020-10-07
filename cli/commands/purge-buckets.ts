@@ -4,7 +4,7 @@ import { S3, CloudFormation } from 'aws-sdk'
 import * as chalk from 'chalk'
 import { retry } from './retry'
 import { region } from '../../cdk/regions'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const purgeBucketsCommand = (): CommandDefinition => ({
 	command: 'purge-buckets',

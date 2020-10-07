@@ -3,7 +3,7 @@ import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { Iot, CloudFormation } from 'aws-sdk'
 import { paginate } from '../../util/paginate'
 import { region } from '../../cdk/regions'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const purgeIotUserPolicyPrincipals = (): CommandDefinition => ({
 	command: 'purge-iot-user-policy-principals',

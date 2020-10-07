@@ -3,7 +3,7 @@ import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as chalk from 'chalk'
 import { CloudFormation } from 'aws-sdk'
 import { region } from '../../cdk/regions'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const infoCommand = (): CommandDefinition => ({
 	command: 'info',

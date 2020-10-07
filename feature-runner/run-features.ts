@@ -23,7 +23,10 @@ import { uuidHelper } from './steps/uuidHelper'
 import { STS, CloudFormation } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
-import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../cdk/stacks/stackId'
+import {
+	CORE_STACK_NAME,
+	FIRMWARE_CI_STACK_NAME,
+} from '../cdk/stacks/stackName'
 import { promises as fs } from 'fs'
 import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'

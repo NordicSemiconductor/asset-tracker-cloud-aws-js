@@ -6,7 +6,7 @@ import {
 } from '../../historicalData/settings'
 import { stackOutput, objectToEnv } from '@bifravst/cloudformation-helpers'
 import { CloudFormation } from 'aws-sdk'
-import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../../cdk/stacks/stackId'
+import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../../cdk/stacks/stackName'
 import { region } from '../../cdk/regions'
 
 export const reactConfigCommand = (): CommandDefinition => ({

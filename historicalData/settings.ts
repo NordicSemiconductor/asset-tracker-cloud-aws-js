@@ -1,4 +1,4 @@
-import { CORE_STACK_NAME } from '../cdk/stacks/stackId'
+import { CORE_STACK_NAME } from '../cdk/stacks/stackName'
 
 export const DataBaseName = (): string =>
 	`${CORE_STACK_NAME.replace(/-/g, '_')}_historicaldata`
