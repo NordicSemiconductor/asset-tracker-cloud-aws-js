@@ -24,7 +24,7 @@ export const certsDir = async ({
 		await fs.stat(dir)
 	} catch {
 		await fs.mkdir(dir, { recursive: true })
-		console.debug(`[certsDir]`, `${dir} created.`)
+		console.error(`[certsDir]`, `${dir} created.`)
 	}
 	return dir
 }
