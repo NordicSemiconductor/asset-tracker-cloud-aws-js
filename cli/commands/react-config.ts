@@ -6,7 +6,11 @@ import {
 } from '../../historicalData/settings'
 import { stackOutput, objectToEnv } from '@bifravst/cloudformation-helpers'
 import { CloudFormation } from 'aws-sdk'
-import { CORE_STACK_NAME, WEBAPPS_STACK_NAME } from '../../cdk/stacks/stackName'
+import {
+	CORE_STACK_NAME,
+	WEBAPP_STACK_NAME,
+	DEVICEUI_STACK_NAME,
+} from '../../cdk/stacks/stackName'
 import { region } from '../../cdk/regions'
 
 export const reactConfigCommand = (): CommandDefinition => ({
@@ -20,7 +24,8 @@ export const reactConfigCommand = (): CommandDefinition => ({
 					historicaldataDatabaseName: DataBaseName(),
 					historicaldataTableName: UpdatesTableName(),
 					...(await so(CORE_STACK_NAME)),
-					...(await so(WEBAPPS_STACK_NAME)),
+					...(await so(WEBAPP_STACK_NAME)),
+					...(await so(DEVICEUI_STACK_NAME)),
 					region,
 				},
 				'REACT_APP_',

@@ -8,4 +8,5 @@ phases:
       - npx tsc
   build:
     commands:
-      - npx cdk deploy --trace -v --require-approval never '*'
+      - npx cdk deploy --trace -v --require-approval never '*' -c webapp=$WEBAPP
+        -c deviceui=$DEVICEUI

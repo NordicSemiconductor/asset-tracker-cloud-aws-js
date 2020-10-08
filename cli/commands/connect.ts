@@ -6,7 +6,7 @@ import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { CloudFormation } from 'aws-sdk'
 import { region } from '../../cdk/regions'
 import * as chalk from 'chalk'
-import { WEBAPPS_STACK_NAME } from '../../cdk/stacks/stackName'
+import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const connectCommand = ({
 	endpoint,
@@ -29,7 +29,7 @@ export const connectCommand = ({
 		try {
 			const { deviceUiDomainName } = await stackOutput(
 				new CloudFormation({ region }),
-			)<StackOutputs>(WEBAPPS_STACK_NAME)
+			)<StackOutputs>(DEVICEUI_STACK_NAME)
 			deviceUiUrl = `https://${deviceUiDomainName}`
 		} catch (err) {
 			console.error(chalk.red.dim(`Could not determine Device UI URL.`))

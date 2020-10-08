@@ -5,7 +5,8 @@ import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
 import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
-import { CONTINUOUS_DEPLOYMENT_STACK_NAME } from './stackName'
+import { CONTINUOUS_DEPLOYMENT_STACK_NAME, CORE_STACK_NAME } from './stackName'
+import { enabledInContext } from '../helper/enabledInContext'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
@@ -32,6 +33,20 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		},
 	) {
 		super(parent, CONTINUOUS_DEPLOYMENT_STACK_NAME)
+
+		const checkFlag = enabledInContext(this.node)
+		// CD for the Web App is implied by enabled CD (in that case this Stack exists) and enabled Web App
+		const enableWebAppCD = checkFlag({
+			key: 'webapp',
+			component: 'Web App Continuous Deployment',
+			onUndefined: 'enabled',
+		})
+		// CD for the Device UI is implied by enabled CD (in that case this Stack exists) and enabled Device UI
+		const enableDeviceUICD = checkFlag({
+			key: 'deviceui',
+			component: 'Device UI Continuous Deployment',
+			onUndefined: 'enabled',
+		})
 
 		const { bifravstAWS, deviceUI, webApp } = properties
 
@@ -92,6 +107,18 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					{
 						name: 'CI',
 						value: '1',
+					},
+					{
+						name: 'STACK_NAME',
+						value: CORE_STACK_NAME,
+					},
+					{
+						name: 'WEBAPP',
+						value: enableWebAppCD ? '1' : '0',
+					},
+					{
+						name: 'DEVICEUI',
+						value: enableDeviceUICD ? '1' : '0',
 					},
 				],
 			},
@@ -165,34 +192,40 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		})
 
 		// Sets up the continuous deployment for the web app
-		const webAppCd = new WebAppCD(
-			this,
-			`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-webAppCD`,
-			{
-				description: 'Continuously deploys the Bifravst Web App',
-				sourceCodeActions: {
-					bifravst: bifravstSourceCodeAction,
-					webApp: webAppSourceCodeAction,
+		let webAppCDProject
+		if (enableWebAppCD) {
+			webAppCDProject = new WebAppCD(
+				this,
+				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-webAppCD`,
+				{
+					description: 'Continuously deploys the Bifravst Web App',
+					sourceCodeActions: {
+						bifravst: bifravstSourceCodeAction,
+						webApp: webAppSourceCodeAction,
+					},
+					buildSpec: 'continuous-deployment-web-app.yml',
+					githubToken,
 				},
-				buildSpec: 'continuous-deployment-web-app.yml',
-				githubToken,
-			},
-		)
+			).codeBuildProject
+		}
 
 		// Sets up the continuous deployment for the device UI
-		const deviceUICD = new WebAppCD(
-			this,
-			`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
-			{
-				description: 'Continuously deploys the Bifravst Device UI',
-				sourceCodeActions: {
-					bifravst: bifravstSourceCodeAction,
-					webApp: deviceUISourceCodeAction,
+		let deviceUICDProject
+		if (enableDeviceUICD) {
+			deviceUICDProject = new WebAppCD(
+				this,
+				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
+				{
+					description: 'Continuously deploys the Bifravst Device UI',
+					sourceCodeActions: {
+						bifravst: bifravstSourceCodeAction,
+						webApp: deviceUISourceCodeAction,
+					},
+					buildSpec: 'continuous-deployment-device-ui-app.yml',
+					githubToken,
 				},
-				buildSpec: 'continuous-deployment-device-ui-app.yml',
-				githubToken,
-			},
-		)
+			).codeBuildProject
+		}
 
 		// Set up the continuous deployment for Bifravst.
 		// This will also run the deployment of the WebApp and DeviceUI after a deploy
@@ -206,8 +239,12 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 						new IAM.PolicyStatement({
 							resources: [
 								project.attrArn,
-								webAppCd.codeBuildProject.attrArn,
-								deviceUICD.codeBuildProject.attrArn,
+								...(webAppCDProject !== undefined
+									? [webAppCDProject.attrArn]
+									: []),
+								...(deviceUICDProject !== undefined
+									? [deviceUICDProject.attrArn]
+									: []),
 							],
 							actions: ['codebuild:*'],
 						}),
@@ -236,8 +273,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					name: 'Source',
 					actions: [
 						bifravstSourceCodeAction.action,
-						webAppSourceCodeAction.action,
-						deviceUISourceCodeAction.action,
+						...(enableWebAppCD ? [webAppSourceCodeAction.action] : []),
+						...(enableDeviceUICD ? [deviceUISourceCodeAction.action] : []),
 					],
 				},
 				{
@@ -261,50 +298,58 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 							],
 							runOrder: 1,
 						},
-						{
-							name: 'DeployWebApp',
-							inputArtifacts: [
-								{
-									name: bifravstSourceCodeAction.outputName,
-								},
-								{
-									name: webAppSourceCodeAction.outputName,
-								},
-							],
-							actionTypeId: BuildActionCodeBuild,
-							configuration: {
-								ProjectName: webAppCd.codeBuildProject.name,
-								PrimarySource: bifravstSourceCodeAction.outputName,
-							},
-							outputArtifacts: [
-								{
-									name: 'WebAppBuildId',
-								},
-							],
-							runOrder: 2,
-						},
-						{
-							name: 'DeployDeviceUI',
-							inputArtifacts: [
-								{
-									name: bifravstSourceCodeAction.outputName,
-								},
-								{
-									name: deviceUISourceCodeAction.outputName,
-								},
-							],
-							actionTypeId: BuildActionCodeBuild,
-							configuration: {
-								ProjectName: deviceUICD.codeBuildProject.name,
-								PrimarySource: bifravstSourceCodeAction.outputName,
-							},
-							outputArtifacts: [
-								{
-									name: 'DeviceUIBuildId',
-								},
-							],
-							runOrder: 2,
-						},
+						...(webAppCDProject !== undefined
+							? [
+									{
+										name: 'DeployWebApp',
+										inputArtifacts: [
+											{
+												name: bifravstSourceCodeAction.outputName,
+											},
+											{
+												name: webAppSourceCodeAction.outputName,
+											},
+										],
+										actionTypeId: BuildActionCodeBuild,
+										configuration: {
+											ProjectName: webAppCDProject.name,
+											PrimarySource: bifravstSourceCodeAction.outputName,
+										},
+										outputArtifacts: [
+											{
+												name: 'WebAppBuildId',
+											},
+										],
+										runOrder: 2,
+									},
+							  ]
+							: []),
+						...(deviceUICDProject
+							? [
+									{
+										name: 'DeployDeviceUI',
+										inputArtifacts: [
+											{
+												name: bifravstSourceCodeAction.outputName,
+											},
+											{
+												name: deviceUISourceCodeAction.outputName,
+											},
+										],
+										actionTypeId: BuildActionCodeBuild,
+										configuration: {
+											ProjectName: deviceUICDProject.name,
+											PrimarySource: bifravstSourceCodeAction.outputName,
+										},
+										outputArtifacts: [
+											{
+												name: 'DeviceUIBuildId',
+											},
+										],
+										runOrder: 2,
+									},
+							  ]
+							: []),
 					],
 				},
 			],
