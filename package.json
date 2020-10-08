@@ -111,6 +111,16 @@
     ],
     "remoteTags": true
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "package-lock.json",
+    "dist",
+    "cli/index.js",
+    "LICENSE",
+    "README.md"
+  ],
   "deploy": {
     "branches": [
       "saga"
