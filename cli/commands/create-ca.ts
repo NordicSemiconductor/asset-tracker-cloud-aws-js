@@ -1,6 +1,8 @@
 import * as chalk from 'chalk'
 import { CommandDefinition } from './CommandDefinition'
 import { createCA } from '../jitp/createCA'
+import { Iot, CloudFormation } from 'aws-sdk'
+import { region } from '../../cdk/regions'
 
 export const createCACommand = ({
 	certsDir,
@@ -9,8 +11,13 @@ export const createCACommand = ({
 }): CommandDefinition => ({
 	command: 'create-ca',
 	action: async () => {
+		const iot = new Iot({ region })
+		const cf = new CloudFormation({ region })
+
 		const { certificateId } = await createCA({
 			certsDir,
+			iot,
+			cf,
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},

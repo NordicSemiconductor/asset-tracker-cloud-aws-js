@@ -3,7 +3,6 @@ import { promises as fs } from 'fs'
 import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
 import { toObject } from '@bifravst/cloudformation-helpers'
-import { region } from '../../cdk/regions'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 /**
@@ -12,12 +11,12 @@ import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
  */
 export const createCA = async (args: {
 	certsDir: string
+	iot: Iot
+	cf: CloudFormation
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
 }): Promise<{ certificateId: string }> => {
-	const { certsDir, log, debug } = args
-	const iot = new Iot({ region })
-	const cf = new CloudFormation({ region })
+	const { certsDir, log, debug, iot, cf } = args
 	const caFiles = caFileLocations(certsDir)
 	try {
 		await fs.stat(certsDir)
