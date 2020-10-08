@@ -2,6 +2,7 @@ import { CodePipeline, SSM } from 'aws-sdk'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { region } from '../../cdk/regions'
+import { listPipelines } from '../cd/listPipelines'
 
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',
@@ -23,12 +24,8 @@ export const cdUpdateTokenCommand = (): CommandDefinition => ({
 				Type: 'String',
 			})
 			.promise()
-		const cp = new CodePipeline({})
-		const pipelines = [
-			'bifravst-continuous-deployment',
-			'bifravst-continuous-deployment-deviceUICD',
-			'bifravst-continuous-deployment-webAppCD',
-		] as const
+		const cp = new CodePipeline({ region })
+		const pipelines = await listPipelines()
 		await Promise.all(
 			pipelines.map(async (name) => {
 				const { pipeline } = await cp

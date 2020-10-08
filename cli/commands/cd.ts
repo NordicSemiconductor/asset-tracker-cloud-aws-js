@@ -2,16 +2,14 @@ import * as chalk from 'chalk'
 import { CodePipeline } from 'aws-sdk'
 import { formatDistanceToNow } from 'date-fns'
 import { CommandDefinition } from './CommandDefinition'
+import { region } from '../../cdk/regions'
+import { listPipelines } from '../cd/listPipelines'
 
 export const cdCommand = (): CommandDefinition => ({
 	command: 'cd',
 	action: async () => {
-		const cp = new CodePipeline({})
-		const pipelines = [
-			'bifravst-continuous-deployment',
-			'bifravst-continuous-deployment-deviceUICD',
-			'bifravst-continuous-deployment-webAppCD',
-		] as const
+		const pipelines = await listPipelines()
+		const cp = new CodePipeline({ region })
 		const statuses = await Promise.all(
 			pipelines.map(async (name) =>
 				cp
