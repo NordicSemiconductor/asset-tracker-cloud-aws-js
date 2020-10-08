@@ -1,5 +1,0 @@
-export * from './jitp/caFileLocations'
-export * from './jitp/certsDir'
-export * from './jitp/createCA'
-export * from './jitp/deviceFileLocations'
-export * from './jitp/generateDeviceCertificate'
