@@ -1,0 +1,41 @@
+name: Shallow tested NPM prerelease
+
+on:
+  push:
+    branches:
+      - "!saga"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js 14
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14.x"
+
+      - name: Keep npm cache around to speed up installs
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci --no-audit
+
+      - name: Compile source
+        run: npx tsc
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Semantic release
+        run: |
+          npm i --no-save semantic-release
+          npx semantic-release

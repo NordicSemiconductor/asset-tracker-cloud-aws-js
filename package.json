@@ -2,6 +2,7 @@
   "name": "@bifravst/aws",
   "version": "0.0.0-development",
   "description": "AWS-based implementation of Bifravst",
+  "main": "./dist/cli/export.js",
   "scripts": {
     "test": "jest",
     "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress",
@@ -102,14 +103,13 @@
   },
   "release": {
     "branches": [
-      "saga"
+      "saga",
+      {
+        "name": "^(saga.+|(?!saga).*)$",
+        "prerelease": true
+      }
     ],
-    "remoteTags": true,
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/github"
-    ]
+    "remoteTags": true
   },
   "deploy": {
     "branches": [
