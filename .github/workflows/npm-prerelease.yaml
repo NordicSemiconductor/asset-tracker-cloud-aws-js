@@ -2,8 +2,8 @@ name: Shallow tested NPM prerelease
 
 on:
   push:
-    branches:
-      - "!saga"
+    branches-ignore:
+      - saga
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
