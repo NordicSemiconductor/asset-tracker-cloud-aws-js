@@ -45,6 +45,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'webAppCD', {
 			value: enableWebAppCD ? 'enabled' : 'disabled',
 			exportName: `${this.stackName}:webAppCD`,
+			description:
+				'Whether the continuous deployment of the Web App is enabled or disabled.',
 		})
 
 		// CD for the Device UI is implied by enabled CD (in that case this Stack exists) and enabled Device UI
@@ -56,6 +58,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'deviceUICD', {
 			value: enableDeviceUICD ? 'enabled' : 'disabled',
 			exportName: `${this.stackName}:deviceUICD`,
+			description:
+				'Whether the continuous deployment of the Device UI is enabled or disabled.',
 		})
 
 		const { bifravstAWS, deviceUI, webApp } = properties
