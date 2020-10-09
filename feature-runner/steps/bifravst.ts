@@ -6,7 +6,7 @@ import {
 } from '@bifravst/e2e-bdd-test-runner'
 import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
-import { createDeviceCertificate } from '../../cli/jitp/generateDeviceCertificate'
+import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
 import * as path from 'path'
 import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'

@@ -2,7 +2,7 @@ import * as chalk from 'chalk'
 import { CommandDefinition } from './CommandDefinition'
 import { randomWords } from '@bifravst/random-words'
 import * as path from 'path'
-import { createDeviceCertificate } from '../jitp/generateDeviceCertificate'
+import { createDeviceCertificate } from '../jitp/createDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
 
