@@ -32,7 +32,7 @@
     "@bifravst/cloudformation-helpers": "^3.1.51",
     "@bifravst/device-ui-server": "2.0.1",
     "@bifravst/random-words": "4.2.1",
-    "ajv": "6.12.5",
+    "ajv": "6.12.6",
     "aws-iot-device-sdk": "2.2.6",
     "aws-sdk": "2.771.0",
     "backoff": "2.5.0",
