@@ -55,13 +55,15 @@ Feature: Cell Geolocation API
         The first time the API is called, the cell geolocation will not be
         available and has to be calculated, therefore the API will return 409 (Conflict)
 
-        When I GET /cellgeolocation?cell={cellId}&area=211&mccmnc=26201
+        Given I store "$millis()" into "ts"
+        When I GET /cellgeolocation?cell={cellId}&area=211&mccmnc=26201&ts={ts}
         Then the response status code should be 409
         And the response Access-Control-Allow-Origin should be "*"
 
     Scenario: Query a cell
 
-        When I GET /cellgeolocation?cell={cellId}&area=211&mccmnc=26201
+        Given I store "$millis()" into "ts"
+        When I GET /cellgeolocation?cell={cellId}&area=211&mccmnc=26201&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"

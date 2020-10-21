@@ -45,6 +45,11 @@ const inputSchema = new Ajv().compile({
 			type: 'number',
 			min: 10000,
 		},
+		// Allow cache busting
+		ts: {
+			type: 'number',
+			min: 1,
+		},
 	},
 	required: ['cell', 'area', 'mccmnc'],
 	additionalProperties: false,

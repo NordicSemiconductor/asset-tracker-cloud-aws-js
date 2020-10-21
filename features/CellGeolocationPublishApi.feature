@@ -30,7 +30,8 @@ Feature: Cell Geolocation Publish API
 
     Scenario: Query a cell
 
-        When I GET /cellgeolocation?cell={cellId}&area={area}&mccmnc={mccmnc}
+        Given I store "$millis()" into "ts"
+        When I GET /cellgeolocation?cell={cellId}&area={area}&mccmnc={mccmnc}&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
