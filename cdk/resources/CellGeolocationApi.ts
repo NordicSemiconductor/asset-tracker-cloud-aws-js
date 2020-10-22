@@ -58,6 +58,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				CACHE_TABLE: cellgeo.cacheTable.tableName,
 				CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE:
 					cellgeo.resolutionJobsQueue.queueUrl,
+				VERSION: this.node.tryGetContext('version'),
 			},
 		})
 
@@ -83,6 +84,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				CACHE_TABLE: cellgeo.cacheTable.tableName,
 				DEVICE_CELL_GEOLOCATION_TABLE:
 					cellgeo.deviceCellGeolocationTable.tableName,
+				VERSION: this.node.tryGetContext('version'),
 			},
 		})
 
@@ -138,6 +140,9 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			code: cdkLambdas.lambdas.httpApiHealth,
 			description: 'HTTP API Health Check',
 			initialPolicy: [logToCloudWatch],
+			environment: {
+				VERSION: this.node.tryGetContext('version'),
+			},
 		})
 
 		const healthCheckIntegration = new HttpApi.CfnIntegration(

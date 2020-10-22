@@ -33,6 +33,9 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 				}),
 				logToCloudWatch,
 			],
+			environment: {
+				VERSION: this.node.tryGetContext('version'),
+			},
 		})
 	}
 }

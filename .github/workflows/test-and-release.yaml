@@ -70,6 +70,7 @@ jobs:
           RANDOM_STRING=`node -e "const crypto = require('crypto'); process.stdout.write(crypto.randomBytes(Math.ceil(8 * 0.5)).toString('hex').slice(0, 8));"`
           echo "STACK_NAME=bifravst-${{ runner.OS }}-${RANDOM_STRING}" >> $GITHUB_ENV
       - run: aws sts get-caller-identity
+      - run: echo "VERSION=${{ github.sha }}" >> $GITHUB_ENV
       - name: Set up stack for End-to-End tests
         run: |
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
