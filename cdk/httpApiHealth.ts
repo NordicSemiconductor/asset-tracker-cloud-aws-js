@@ -1,6 +1,6 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
 
-export const handler = (): APIGatewayProxyResult => ({
+export const handler = async (): Promise<APIGatewayProxyResult> => ({
 	statusCode: 200,
 	headers: {
 		'Access-Control-Allow-Origin': '*',
