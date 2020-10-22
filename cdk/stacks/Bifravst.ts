@@ -454,6 +454,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			lambdas,
 			cdkLambdas,
 			cellgeo,
+			enableLogging: isTest,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {

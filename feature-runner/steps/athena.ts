@@ -27,13 +27,13 @@ export const athenaStepRunners = ({
 			WorkGroup: historicaldataWorkgroupName,
 			athena,
 			debugLog: async (...args: any) => {
-				await runner.progress('[athena:debug]', JSON.stringify(args))
+				await runner.progress('athena:debug', JSON.stringify(args))
 			},
 			errorLog: async (...args: any) => {
-				await runner.progress('[athena:error]', JSON.stringify(args))
+				await runner.progress('athena:error', JSON.stringify(args))
 			},
 		})
-		await runner.progress('[athena]', step.interpolatedArgument)
+		await runner.progress('athena', step.interpolatedArgument)
 		const ResultSet = await q({ QueryString: step.interpolatedArgument })
 		const data = parseResult({
 			ResultSet,

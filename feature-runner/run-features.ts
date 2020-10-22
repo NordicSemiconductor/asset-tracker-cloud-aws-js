@@ -177,7 +177,7 @@ program
 									console.error(
 										' ',
 										chalk.red.bold(' 🚨 '),
-										chalk.red(`[RestClient]`),
+										chalk.red('RestClient'),
 										chalk.grey(requestId),
 									)
 									rest.map((r: any) =>
@@ -195,7 +195,7 @@ program
 									console.debug(
 										' ',
 										chalk.magenta(' ℹ '),
-										chalk.cyan(`[RestClient]`),
+										chalk.cyan('RestClient'),
 										chalk.grey(requestId),
 									)
 									rest.map((r: any) =>
