@@ -175,11 +175,17 @@ program
 							client: new RestClient({
 								errorLog: (requestId: string, ...rest: any) =>
 									console.error(
-										chalk.redBright('[RestClient]'),
-										chalk.yellow(requestId),
-										...rest.map((arg: any) =>
-											chalk.red(JSON.stringify(arg, null, 2)),
-										),
+										chalk.red.bold(' 🚨 '),
+										chalk.red(`[RestClient]`),
+										chalk.grey(requestId),
+										...rest,
+									),
+								debugLog: (requestId: string, ...rest: any) =>
+									console.debug(
+										chalk.magenta(' ℹ '),
+										chalk.cyan(`[RestClient]`),
+										chalk.grey(requestId),
+										...rest,
 									),
 							}),
 						}),
