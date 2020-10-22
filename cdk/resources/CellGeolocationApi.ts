@@ -124,6 +124,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				}),
 			},
 		})
+		this.stage.node.addDependency(httpApiLogGroup)
 
 		// GET __health
 
