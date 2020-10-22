@@ -346,11 +346,13 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:thingPolicyArn`,
 		})
 
+		const cdkLambdas = {
+			lambdas: lambasOnBucket(packedCDKLambdas),
+			layers: [cloudFormationLayer],
+		}
+
 		const thingGroupLambda = new ThingGroupLambda(this, 'thingGroupLambda', {
-			cdkLambdas: {
-				lambdas: lambasOnBucket(packedCDKLambdas),
-				layers: [cloudFormationLayer],
-			},
+			cdkLambdas,
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupLambdaArn', {
@@ -450,6 +452,7 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			lambdas,
+			cdkLambdas,
 			cellgeo,
 		})
 
