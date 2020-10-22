@@ -25,10 +25,12 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			cellgeo,
 			lambdas,
 			cdkLambdas,
+			enableLogging,
 		}: {
 			cellgeo: CellGeolocation
 			lambdas: LambdasWithLayer<BifravstLambdas>
 			cdkLambdas: LambdasWithLayer<CDKLambdas>
+			enableLogging?: boolean
 		},
 	) {
 		super(parent, id)
@@ -89,22 +91,23 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			description: 'Cell Geolocation HTTP API',
 			protocolType: 'HTTP',
 		})
-
-		const httpApiLogGroup = new CloudWatchLogs.LogGroup(
-			this,
-			`HttpApiLogGroup`,
-			{
-				removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
-				logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
-				retention: CloudWatchLogs.RetentionDays.ONE_WEEK,
-			},
-		)
-
 		this.stage = new HttpApi.CfnStage(this, 'stage', {
 			apiId: this.api.ref,
 			stageName: 'v1',
 			autoDeploy: true,
-			accessLogSettings: {
+		})
+
+		if (enableLogging ?? false) {
+			const httpApiLogGroup = new CloudWatchLogs.LogGroup(
+				this,
+				`HttpApiLogGroup`,
+				{
+					removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+					logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
+					retention: CloudWatchLogs.RetentionDays.ONE_WEEK,
+				},
+			)
+			this.stage.accessLogSettings = {
 				destinationArn: httpApiLogGroup.logGroupArn,
 				format: JSON.stringify({
 					requestId: '$context.requestId',
@@ -122,9 +125,9 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 						status: '$context.integration.status',
 					},
 				}),
-			},
-		})
-		this.stage.node.addDependency(httpApiLogGroup)
+			}
+			this.stage.node.addDependency(httpApiLogGroup)
+		}
 
 		// GET __health
 
