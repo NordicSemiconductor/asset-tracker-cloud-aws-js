@@ -6,6 +6,7 @@ import { BifravstLambdas } from '../prepare-resources'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
+import * as CloudWatchLogs from '@aws-cdk/aws-logs'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -87,10 +88,39 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			protocolType: 'HTTP',
 		})
 
+		const httpApiLogGroup = new CloudWatchLogs.LogGroup(
+			this,
+			`HttpApiLogGroup`,
+			{
+				removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+				logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
+				retention: CloudWatchLogs.RetentionDays.ONE_WEEK,
+			},
+		)
+
 		this.stage = new HttpApi.CfnStage(this, 'httpApiStage', {
 			apiId: this.api.ref,
 			stageName: 'v1',
 			autoDeploy: true,
+			accessLogSettings: {
+				destinationArn: httpApiLogGroup.logGroupArn,
+				format: JSON.stringify({
+					requestId: '$context.requestId',
+					awsEndpointRequestId: '$context.awsEndpointRequestId',
+					requestTime: '$context.requestTime',
+					ip: '$context.identity.sourceIp',
+					protocol: '$context.protocol',
+					routeKey: '$context.routeKey',
+					status: '$context.status',
+					responseLength: '$context.responseLength',
+					integrationLatency: '$context.integrationLatency',
+					integrationStatus: '$context.integrationStatus',
+					integrationErrorMessage: '$context.integrationErrorMessage',
+					integration: {
+						status: '$context.integration.status',
+					},
+				}),
+			},
 		})
 
 		const geolocateIntegration = new HttpApi.CfnIntegration(
