@@ -23,13 +23,14 @@ prepareResources({
 			rootDir,
 		}),
 	}))
-	.then((args) => {
-		const app = new TestApp({
+	.then((args) =>
+		new TestApp({
 			...args,
-		})
-		app.node.setContext('version', process.env.VERSION)
-		return app.synth()
-	})
+			context: {
+				version: process.env.VERSION,
+			},
+		}).synth(),
+	)
 	.catch((err) => {
 		console.error(err)
 		process.exit(1)

@@ -36,14 +36,15 @@ Promise.all([
 		return {}
 	}),
 ])
-	.then(([args, ulApiSettings]) => {
-		const app = new BifravstApp({
+	.then(([args, ulApiSettings]) =>
+		new BifravstApp({
 			...args,
 			enableUnwiredApi: 'apiKey' in ulApiSettings,
-		})
-		app.node.setContext('version', process.env.VERSION)
-		return app.synth()
-	})
+			context: {
+				version: process.env.VERSION,
+			},
+		}).synth(),
+	)
 	.catch((err) => {
 		console.error(err)
 		process.exit(1)

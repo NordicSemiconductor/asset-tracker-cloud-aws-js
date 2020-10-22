@@ -16,8 +16,9 @@ export class TestApp extends App {
 		sourceCodeBucketName: string
 		packedLambdas: PackedLambdas<BifravstLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
+		context?: Record<string, any>
 	}) {
-		super()
+		super({ context: args.context })
 		new BifravstStack(this, {
 			...args,
 			isTest: true,

@@ -21,8 +21,9 @@ export class BifravstApp extends App {
 		packedLambdas: PackedLambdas<BifravstLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		enableUnwiredApi: boolean
+		context?: Record<string, any>
 	}) {
-		super()
+		super({ context: args.context })
 		// Core
 		new BifravstStack(this, {
 			...args,
