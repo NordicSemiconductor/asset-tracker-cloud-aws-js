@@ -186,8 +186,7 @@ program
 												JSON.stringify(r, null, 2)
 													.split('\n')
 													.map((s) => `       ${s}`)
-													.join('\n')
-													.trim(),
+													.join('\n'),
 											),
 										),
 									)
@@ -205,8 +204,7 @@ program
 												JSON.stringify(r, null, 2)
 													.split('\n')
 													.map((s) => `       ${s}`)
-													.join('\n')
-													.trim(),
+													.join('\n'),
 											),
 										),
 									)
