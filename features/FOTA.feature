@@ -10,7 +10,7 @@ Feature: Device Firmware Upgrade over the air
   Scenario: Create a new firmware upgrade as a user
 
     Given I am authenticated with Cognito
-    And I store a UUIDv4 as "jobId"
+    Given I have a random UUID in "jobId"
     When I execute "putObject" of the AWS S3 SDK with
        """
         {

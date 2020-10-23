@@ -24,7 +24,7 @@ Feature: Schedule CI runs of firmware builds
         This happens for every firmware change
 
         # The job id needs to be unique, do not use the git commit hash
-        Given I store a UUIDv4 as "ciJobId"
+        Given I have a random UUID in "ciJobId"
 
         # Create a pre-signed URL which will be used by the firmware CI
         # runner to store the log output.

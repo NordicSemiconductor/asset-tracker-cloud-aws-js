@@ -20,7 +20,6 @@ import {
 	WorkGroupName,
 } from '../historicalData/settings'
 import { athenaStepRunners } from './steps/athena'
-import { uuidHelper } from './steps/uuidHelper'
 import { STS, CloudFormation } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
@@ -152,7 +151,6 @@ program
 					.addStepRunners(athenaStepRunners(world))
 					.addStepRunners(bifravstStepRunners(world))
 					.addStepRunners(firmwareCIStepRunners(world))
-					.addStepRunners([uuidHelper])
 					.addStepRunners(storageStepRunners())
 					.addStepRunners(
 						randomStepRunners({
@@ -167,6 +165,7 @@ program
 											.toString(36)
 											.replace(/[^a-z]+/g, ''),
 									),
+								UUID: (): string => v4(),
 							},
 						}),
 					)
