@@ -98,7 +98,10 @@ export const handler = async (
 				if (cell.unresolved) {
 					return res(toStatusCode[ErrorType.EntityNotFound], {
 						expires: 86400,
-					})({})
+					})({
+						type: ErrorType.EntityNotFound,
+						message: `cell geolocation for ${cell} not found!`,
+					})
 				}
 				return res(200, {
 					expires: 86400,

@@ -40,6 +40,9 @@ Promise.all([
 		new BifravstApp({
 			...args,
 			enableUnwiredApi: 'apiKey' in ulApiSettings,
+			context: {
+				version: process.env.VERSION,
+			},
 		}).synth(),
 	)
 	.catch((err) => {

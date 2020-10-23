@@ -5,7 +5,8 @@ Feature: Cell Geolocation Publish API
 
     Background:
 
-        Given the endpoint is "{geolocationApiUrl}"
+        Given I am run after the "Cell Geolocation API" feature
+        And the endpoint is "{geolocationApiUrl}"
         And I store "$floor($random() * 100000000)" into "cellId"
         And I store "$floor($random() * 10000) + 10000" into "mccmnc"
         And I store "$floor($random() * 100) + 100" into "area"

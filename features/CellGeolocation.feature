@@ -10,6 +10,19 @@ Feature: Cell Geolocation API
         And I am run after the "Device: Update Shadow" feature
         And the endpoint is "{geolocationApiUrl}"
 
+    Scenario: Check API health
+
+        When I GET /__health
+        Then the response status code should be 200
+        And the response Access-Control-Allow-Origin should be "*"
+        And the response Content-Type should be "application/json"
+        And the response should equal this JSON
+            """
+            {
+                "status": "OK"
+            }
+            """
+
     Scenario: Device enters a cell
 
         Given I store "$floor($random() * 100000000)" into "cellId"

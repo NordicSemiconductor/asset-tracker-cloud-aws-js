@@ -215,6 +215,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				],
 				environment: {
 					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
+					VERSION: this.node.tryGetContext('version'),
 				},
 				reservedConcurrentExecutions: 1,
 			},
@@ -285,6 +286,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				],
 				environment: {
 					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
+					VERSION: this.node.tryGetContext('version'),
 				},
 				reservedConcurrentExecutions: 1,
 			},

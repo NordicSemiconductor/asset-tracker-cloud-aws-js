@@ -15,6 +15,7 @@ export const res = (statusCode: number, options?: { expires: number }) => (
 					new Date().getTime() + options.expires * 1000,
 				).toUTCString(),
 			}),
+			'X-Bifravst-Version': process.env.VERSION ?? 'unknown',
 		},
 		body: JSON.stringify(body),
 	})

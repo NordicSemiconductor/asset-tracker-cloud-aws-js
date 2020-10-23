@@ -26,6 +26,9 @@ prepareResources({
 	.then((args) =>
 		new TestApp({
 			...args,
+			context: {
+				version: process.env.VERSION,
+			},
 		}).synth(),
 	)
 	.catch((err) => {
