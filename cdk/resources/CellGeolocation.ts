@@ -6,7 +6,7 @@ import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
 import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
-import { lambdaLogGroup } from './lambdaLogGroup'
+import { LambdaLogGroup } from './LambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
@@ -77,7 +77,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'geolocateCellFromCache', geolocateCellFromCache)
+		new LambdaLogGroup(
+			this,
+			'geolocateCellFromCacheLogGroup',
+			geolocateCellFromCache,
+		)
 
 		this.deviceCellGeolocationTable = new DynamoDB.Table(
 			this,
@@ -146,7 +150,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'geolocateCellFromDevices', geolocateCellFromDevices)
+		new LambdaLogGroup(
+			this,
+			'geolocateCellFromDevicesLogGroup',
+			geolocateCellFromDevices,
+		)
 
 		const cacheCellGeolocation = new Lambda.Function(
 			this,
@@ -173,7 +181,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'cacheCellGeolocation', cacheCellGeolocation)
+		new LambdaLogGroup(
+			this,
+			'cacheCellGeolocationLogGroup',
+			cacheCellGeolocation,
+		)
 
 		// Optional step
 		let geolocateCellFromUnwiredLabs: Lambda.IFunction | undefined = undefined
@@ -204,7 +216,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				},
 			)
 
-			lambdaLogGroup(
+			new LambdaLogGroup(
 				this,
 				'geolocateCellFromUnwiredLabs',
 				geolocateCellFromUnwiredLabs,
@@ -457,7 +469,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'invokeStepFunctionFromSQS', invokeStepFunctionFromSQS)
+		new LambdaLogGroup(
+			this,
+			'invokeStepFunctionFromSQSLogGroup',
+			invokeStepFunctionFromSQS,
+		)
 
 		invokeStepFunctionFromSQS.addPermission('invokeBySQS', {
 			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),

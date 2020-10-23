@@ -6,7 +6,7 @@ import * as Events from '@aws-cdk/aws-events'
 import * as EventTargets from '@aws-cdk/aws-events-targets'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
-import { lambdaLogGroup } from './lambdaLogGroup'
+import { LambdaLogGroup } from './LambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
 
@@ -220,7 +220,11 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'processBatchMessages', processBatchMessages)
+		new LambdaLogGroup(
+			this,
+			'processBatchMessagesLogGroup',
+			processBatchMessages,
+		)
 
 		const processBatchMessagesRule = new IoT.CfnTopicRule(
 			this,
@@ -291,7 +295,11 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		)
 
-		lambdaLogGroup(this, 'concatenateRawMessages', concatenateRawMessages)
+		new LambdaLogGroup(
+			this,
+			'concatenateRawMessagesLogGroup',
+			concatenateRawMessages,
+		)
 
 		const rule = new Events.Rule(this, 'invokeConcatenateRawMessagesRule', {
 			schedule: Events.Schedule.expression('rate(1 hour)'),
