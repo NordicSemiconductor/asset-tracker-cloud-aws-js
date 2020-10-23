@@ -29,14 +29,12 @@ export class BifravstStack extends CloudFormation.Stack {
 			sourceCodeBucketName,
 			packedLambdas,
 			packedCDKLambdas,
-			isTest,
 			enableUnwiredApi,
 		}: {
 			mqttEndpoint: string
 			sourceCodeBucketName: string
 			packedLambdas: PackedLambdas<BifravstLambdas>
 			packedCDKLambdas: PackedLambdas<CDKLambdas>
-			isTest: boolean
 			enableUnwiredApi: boolean
 		},
 	) {
@@ -363,7 +361,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		new ThingGroup(this, 'deviceThingGroup', {
 			name: CORE_STACK_NAME,
 			description: 'Group created for Bifravst Things',
-			addExisting: !isTest,
+			addExisting: this.node.tryGetContext('isTest') === false,
 			PolicyName: iotThingPolicy.ref,
 			thingGroupLambda: thingGroupLambda.function,
 		})
@@ -390,7 +388,6 @@ export class BifravstStack extends CloudFormation.Stack {
 		const hd = new HistoricalData(this, 'historicalData', {
 			lambdas,
 			userRole,
-			isTest: isTest,
 		})
 
 		new CloudFormation.CfnOutput(this, 'historicalDataBucketName', {
@@ -436,7 +433,6 @@ export class BifravstStack extends CloudFormation.Stack {
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			lambdas,
 			enableUnwiredApi,
-			isTest,
 		})
 
 		cellgeo.stateMachine.grantStartExecution(userRole)
@@ -454,7 +450,6 @@ export class BifravstStack extends CloudFormation.Stack {
 			lambdas,
 			cdkLambdas,
 			cellgeo,
-			enableLogging: isTest,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {

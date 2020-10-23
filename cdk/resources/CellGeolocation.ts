@@ -29,11 +29,9 @@ export class CellGeolocation extends CloudFormation.Resource {
 		{
 			lambdas,
 			enableUnwiredApi,
-			isTest,
 		}: {
 			lambdas: LambdasWithLayer<BifravstLambdas>
 			enableUnwiredApi: boolean
-			isTest: boolean
 		},
 	) {
 		super(parent, id)
@@ -47,9 +45,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 				type: DynamoDB.AttributeType.STRING,
 			},
 			pointInTimeRecovery: true,
-			removalPolicy: isTest
-				? CloudFormation.RemovalPolicy.DESTROY
-				: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy:
+				this.node.tryGetContext('isTest') === true
+					? CloudFormation.RemovalPolicy.DESTROY
+					: CloudFormation.RemovalPolicy.RETAIN,
 			timeToLiveAttribute: 'ttl',
 		})
 
@@ -94,9 +93,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 					type: DynamoDB.AttributeType.STRING,
 				},
 				pointInTimeRecovery: true,
-				removalPolicy: isTest
-					? CloudFormation.RemovalPolicy.DESTROY
-					: CloudFormation.RemovalPolicy.RETAIN,
+				removalPolicy:
+					this.node.tryGetContext('isTest') === true
+						? CloudFormation.RemovalPolicy.DESTROY
+						: CloudFormation.RemovalPolicy.RETAIN,
 			},
 		)
 

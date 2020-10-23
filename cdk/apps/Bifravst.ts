@@ -27,7 +27,6 @@ export class BifravstApp extends App {
 		// Core
 		new BifravstStack(this, {
 			...args,
-			isTest: false,
 		})
 		const checkFlag = enabledInContext(this.node)
 		// Web App

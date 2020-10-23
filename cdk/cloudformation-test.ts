@@ -28,6 +28,7 @@ prepareResources({
 			...args,
 			context: {
 				version: process.env.VERSION,
+				isTest: true,
 			},
 		}).synth(),
 	)

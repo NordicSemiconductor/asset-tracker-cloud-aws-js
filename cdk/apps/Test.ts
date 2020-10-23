@@ -21,7 +21,6 @@ export class TestApp extends App {
 		super({ context: args.context })
 		new BifravstStack(this, {
 			...args,
-			isTest: true,
 			enableUnwiredApi: false, // FIXME: implement e2e test
 		})
 		new FirmwareCIStack(this, args)
