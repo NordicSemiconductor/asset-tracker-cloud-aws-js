@@ -79,7 +79,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(
 			this,
-			'geolocateCellFromCacheLogGroup',
+			'geolocateCellFromCacheLogs',
 			geolocateCellFromCache,
 		)
 
@@ -152,7 +152,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(
 			this,
-			'geolocateCellFromDevicesLogGroup',
+			'geolocateCellFromDevicesLogs',
 			geolocateCellFromDevices,
 		)
 
@@ -181,11 +181,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		)
 
-		new LambdaLogGroup(
-			this,
-			'cacheCellGeolocationLogGroup',
-			cacheCellGeolocation,
-		)
+		new LambdaLogGroup(this, 'cacheCellGeolocationLogs', cacheCellGeolocation)
 
 		// Optional step
 		let geolocateCellFromUnwiredLabs: Lambda.IFunction | undefined = undefined
@@ -218,7 +214,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 			new LambdaLogGroup(
 				this,
-				'geolocateCellFromUnwiredLabs',
+				'geolocateCellFromUnwiredLabsLogs',
 				geolocateCellFromUnwiredLabs,
 			)
 		}
@@ -471,7 +467,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(
 			this,
-			'invokeStepFunctionFromSQSLogGroup',
+			'invokeStepFunctionFromSQSLogs',
 			invokeStepFunctionFromSQS,
 		)
 

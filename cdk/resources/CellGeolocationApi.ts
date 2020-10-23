@@ -25,12 +25,10 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			cellgeo,
 			lambdas,
 			cdkLambdas,
-			enableLogging,
 		}: {
 			cellgeo: CellGeolocation
 			lambdas: LambdasWithLayer<BifravstLambdas>
 			cdkLambdas: LambdasWithLayer<CDKLambdas>
-			enableLogging?: boolean
 		},
 	) {
 		super(parent, id)
@@ -99,37 +97,38 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			autoDeploy: true,
 		})
 
-		if (enableLogging ?? false) {
-			const httpApiLogGroup = new CloudWatchLogs.LogGroup(
-				this,
-				`HttpApiLogGroup`,
-				{
-					removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
-					logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
-					retention: CloudWatchLogs.RetentionDays.ONE_WEEK,
+		const httpApiLogGroup = new CloudWatchLogs.LogGroup(
+			this,
+			`HttpApiLogGroup`,
+			{
+				removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+				logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
+				retention:
+					this.node.tryGetContext('isTest') === true
+						? CloudWatchLogs.RetentionDays.ONE_DAY
+						: CloudWatchLogs.RetentionDays.ONE_WEEK,
+			},
+		)
+		this.stage.accessLogSettings = {
+			destinationArn: httpApiLogGroup.logGroupArn,
+			format: JSON.stringify({
+				requestId: '$context.requestId',
+				awsEndpointRequestId: '$context.awsEndpointRequestId',
+				requestTime: '$context.requestTime',
+				ip: '$context.identity.sourceIp',
+				protocol: '$context.protocol',
+				routeKey: '$context.routeKey',
+				status: '$context.status',
+				responseLength: '$context.responseLength',
+				integrationLatency: '$context.integrationLatency',
+				integrationStatus: '$context.integrationStatus',
+				integrationErrorMessage: '$context.integrationErrorMessage',
+				integration: {
+					status: '$context.integration.status',
 				},
-			)
-			this.stage.accessLogSettings = {
-				destinationArn: httpApiLogGroup.logGroupArn,
-				format: JSON.stringify({
-					requestId: '$context.requestId',
-					awsEndpointRequestId: '$context.awsEndpointRequestId',
-					requestTime: '$context.requestTime',
-					ip: '$context.identity.sourceIp',
-					protocol: '$context.protocol',
-					routeKey: '$context.routeKey',
-					status: '$context.status',
-					responseLength: '$context.responseLength',
-					integrationLatency: '$context.integrationLatency',
-					integrationStatus: '$context.integrationStatus',
-					integrationErrorMessage: '$context.integrationErrorMessage',
-					integration: {
-						status: '$context.integration.status',
-					},
-				}),
-			}
-			this.stage.node.addDependency(httpApiLogGroup)
+			}),
 		}
+		this.stage.node.addDependency(httpApiLogGroup)
 
 		// GET __health
 

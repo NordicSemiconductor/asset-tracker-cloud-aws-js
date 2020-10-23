@@ -9,7 +9,7 @@ export class LambdaLogGroup extends CloudFormation.Resource {
 		lambda: Lambda.IFunction,
 	) {
 		super(parent, id)
-		new CloudWatchLogs.LogGroup(parent, `LogGroup`, {
+		new CloudWatchLogs.LogGroup(this, 'LogGroup', {
 			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
 			logGroupName: `/aws/lambda/${lambda.functionName}`,
 			retention:

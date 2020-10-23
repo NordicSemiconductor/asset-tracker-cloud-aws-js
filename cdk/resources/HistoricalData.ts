@@ -220,11 +220,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		)
 
-		new LambdaLogGroup(
-			this,
-			'processBatchMessagesLogGroup',
-			processBatchMessages,
-		)
+		new LambdaLogGroup(this, 'processBatchMessagesLogs', processBatchMessages)
 
 		const processBatchMessagesRule = new IoT.CfnTopicRule(
 			this,
@@ -297,7 +293,7 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		new LambdaLogGroup(
 			this,
-			'concatenateRawMessagesLogGroup',
+			'concatenateRawMessagesLogs',
 			concatenateRawMessages,
 		)
 
