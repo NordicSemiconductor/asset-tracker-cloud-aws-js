@@ -40,14 +40,18 @@ export const cellLocation = (): CommandDefinition => ({
 			debugLog: (...args: any) => {
 				if (debug !== undefined) {
 					console.debug(
-						chalk.gray('[Athena]'),
+						' ',
+						chalk.magenta(' ℹ '),
+						chalk.cyan('Athena'),
 						...args.map((a: any) => chalk.blue(JSON.stringify(a))),
 					)
 				}
 			},
 			errorLog: (...args: any) => {
 				console.error(
-					chalk.red.inverse('[Athena]'),
+					' ',
+					chalk.red.bold(' 🚨 '),
+					chalk.red('Athena'),
 					...args.map((a: any) => chalk.red(JSON.stringify(a))),
 				)
 			},

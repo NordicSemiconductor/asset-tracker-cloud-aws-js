@@ -72,7 +72,12 @@ export const historicalDataCommand = (): CommandDefinition => ({
 					},
 				}
 				if (debug) {
-					console.debug(chalk.gray('[Athena]'), createWorkGroupArgs)
+					console.debug(
+						' ',
+						chalk.magenta(' ℹ '),
+						chalk.cyan('Athena'),
+						createWorkGroupArgs,
+					)
 				}
 				await athena.createWorkGroup(createWorkGroupArgs).promise()
 			} else {
@@ -100,14 +105,18 @@ export const historicalDataCommand = (): CommandDefinition => ({
 			debugLog: (...args: any) => {
 				if (debug) {
 					console.debug(
-						chalk.gray('[Athena]'),
+						' ',
+						chalk.magenta(' ℹ '),
+						chalk.cyan('Athena'),
 						...args.map((a: any) => chalk.blue(JSON.stringify(a))),
 					)
 				}
 			},
 			errorLog: (...args: any) => {
 				console.error(
-					chalk.red.inverse('[Athena]'),
+					' ',
+					chalk.red.bold(' 🚨 '),
+					chalk.red('Athena'),
 					...args.map((a: any) => chalk.red(JSON.stringify(a))),
 				)
 			},

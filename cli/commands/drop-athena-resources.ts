@@ -8,6 +8,7 @@ import {
 	WorkGroupName,
 } from '../../historicalData/settings'
 import { region } from '../../cdk/regions'
+import * as chalk from 'chalk'
 
 export const dropAthenaResourcesCommand = (): CommandDefinition => ({
 	command: 'drop-athena-resources',
@@ -23,10 +24,20 @@ export const dropAthenaResourcesCommand = (): CommandDefinition => ({
 			athena,
 			WorkGroup,
 			debugLog: (...args: any) => {
-				console.log('[Athena]', ...args.map((a: any) => JSON.stringify(a)))
+				console.debug(
+					' ',
+					chalk.magenta(' ℹ '),
+					chalk.cyan('Athena'),
+					...args.map((a: any) => JSON.stringify(a)),
+				)
 			},
 			errorLog: (...args: any) => {
-				console.error('[Athena]', ...args.map((a: any) => JSON.stringify(a)))
+				console.error(
+					' ',
+					chalk.red.bold(' 🚨 '),
+					chalk.red('Athena'),
+					...args.map((a: any) => JSON.stringify(a)),
+				)
 			},
 		})
 
