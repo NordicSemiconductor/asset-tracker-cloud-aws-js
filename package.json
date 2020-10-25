@@ -36,7 +36,7 @@
     "aws-sdk": "2.777.0",
     "backoff": "2.5.0",
     "chalk": "4.1.0",
-    "commander": "6.1.0",
+    "commander": "6.2.0",
     "date-fns": "2.16.1",
     "fp-ts": "2.8.4",
     "uuid": "8.3.1"
