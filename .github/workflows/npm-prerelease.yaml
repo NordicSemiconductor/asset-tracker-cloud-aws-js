@@ -10,7 +10,7 @@ env:
   NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
 
 jobs:
-  tests:
+  main:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
