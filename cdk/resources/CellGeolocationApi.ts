@@ -7,6 +7,7 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import * as CloudWatchLogs from '@aws-cdk/aws-logs'
+import { LambdaLogGroup } from './LambdaLogGroup'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -60,6 +61,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		})
 
+		new LambdaLogGroup(this, 'geolocateCellLogs', geolocateCell)
+
 		const addCellGeolocation = new Lambda.Function(this, 'addCellGeolocation', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
@@ -85,6 +88,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 			},
 		})
+
+		new LambdaLogGroup(this, 'addCellGeolocationLogs', addCellGeolocation)
 
 		this.api = new HttpApi.CfnApi(this, 'httpApi', {
 			name: 'Cell Geolocation',
@@ -143,6 +148,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 			},
 		})
+
+		new LambdaLogGroup(this, 'apiHealthLogs', healthCheck)
 
 		const healthCheckIntegration = new HttpApi.CfnIntegration(
 			this,
