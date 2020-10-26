@@ -157,7 +157,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${healthCheck.functionArn}`,
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${healthCheck.functionArn}/invocations`,
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -182,7 +182,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCell.functionArn}`,
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCell.functionArn}/invocations`,
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -207,7 +207,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCellGeolocation.functionArn}`,
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCellGeolocation.functionArn}/invocations`,
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
