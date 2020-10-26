@@ -107,7 +107,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			`HttpApiLogGroup`,
 			{
 				removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
-				logGroupName: `/${this.stack.stackName}/cellGeolocationApiAccessLogs`,
+				logGroupName: `/${this.stack.stackName}/cellGeolocation/apiAccessLogs`,
 				retention:
 					this.node.tryGetContext('isTest') === true
 						? CloudWatchLogs.RetentionDays.ONE_DAY
