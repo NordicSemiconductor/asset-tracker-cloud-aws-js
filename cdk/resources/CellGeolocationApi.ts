@@ -98,7 +98,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		})
 		this.stage = new HttpApi.CfnStage(this, 'stage', {
 			apiId: this.api.ref,
-			stageName: 'v1',
+			stageName: '2020-10-26',
 			autoDeploy: true,
 		})
 
@@ -107,7 +107,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			`HttpApiLogGroup`,
 			{
 				removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
-				logGroupName: `/${this.stack.stackName}/cellGeolocation/apiAccessLogs`,
+				logGroupName: `/${this.stack.stackName}/cell/apiAccessLogs`,
 				retention:
 					this.node.tryGetContext('isTest') === true
 						? CloudWatchLogs.RetentionDays.ONE_DAY
@@ -174,7 +174,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/__health`,
 		})
 
-		// GET /cellgeolocation
+		// GET /cell
 
 		const geolocateIntegration = new HttpApi.CfnIntegration(
 			this,
@@ -190,16 +190,16 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		const geolocateRoute = new HttpApi.CfnRoute(this, 'geolocateRoute', {
 			apiId: this.api.ref,
-			routeKey: 'GET /cellgeolocation',
+			routeKey: 'GET /cell',
 			target: `integrations/${geolocateIntegration.ref}`,
 		})
 
 		getCell.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/cellgeolocation`,
+			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/cell`,
 		})
 
-		// POST /cellgeolocation
+		// POST /cell
 
 		const geolocationIntegration = new HttpApi.CfnIntegration(
 			this,
@@ -215,13 +215,13 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		const geolocationRoute = new HttpApi.CfnRoute(this, 'geolocationRoute', {
 			apiId: this.api.ref,
-			routeKey: 'POST /cellgeolocation',
+			routeKey: 'POST /cell',
 			target: `integrations/${geolocationIntegration.ref}`,
 		})
 
 		addCell.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cellgeolocation`,
+			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cell`,
 		})
 
 		const deployment = new HttpApi.CfnDeployment(this, 'deployment', {
