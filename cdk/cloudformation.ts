@@ -41,7 +41,7 @@ Promise.all([
 			...args,
 			enableUnwiredApi: 'apiKey' in ulApiSettings,
 			context: {
-				version: process.env.VERSION,
+				version: process.env.VERSION ?? '0.0.0-development',
 			},
 		}).synth(),
 	)

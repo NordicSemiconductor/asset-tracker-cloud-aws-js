@@ -27,7 +27,7 @@ prepareResources({
 		new TestApp({
 			...args,
 			context: {
-				version: process.env.VERSION,
+				version: process.env.VERSION ?? '0.0.0-development',
 				isTest: true,
 			},
 		}).synth(),
