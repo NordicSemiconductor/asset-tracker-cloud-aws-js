@@ -3,7 +3,6 @@ import { promises as fs } from 'fs'
 import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
 import { toObject } from '@bifravst/cloudformation-helpers'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 /**
  * Creates a CA certificate and registers it for Just-in-time provisioning
@@ -13,6 +12,8 @@ export const createCA = async (args: {
 	certsDir: string
 	iot: Iot
 	cf: CloudFormation
+	stack: string
+	subject?: string
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
 }): Promise<{ certificateId: string }> => {
@@ -39,11 +40,11 @@ export const createCA = async (args: {
 	const [stackOutput, registrationCode] = await Promise.all([
 		// Fetch the stack configuration, we need the Thing Group and the role name
 		cf
-			.describeStacks({ StackName: CORE_STACK_NAME })
+			.describeStacks({ StackName: args.stack })
 			.promise()
 			.then(async ({ Stacks }) => {
 				if (Stacks?.length === 0 || Stacks?.[0].Outputs === undefined) {
-					throw new Error(`Stack ${CORE_STACK_NAME} not found.`)
+					throw new Error(`Stack ${args.stack} not found.`)
 				}
 				return toObject(Stacks[0].Outputs)
 			}),
@@ -86,7 +87,7 @@ export const createCA = async (args: {
 			'-out',
 			caFiles.cert,
 			'-subj',
-			`/OU=${CORE_STACK_NAME}`,
+			`/OU=${args.subject ?? args.stack}`,
 		],
 		log: debug,
 	})

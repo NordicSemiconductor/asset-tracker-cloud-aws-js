@@ -3,6 +3,7 @@ import { CommandDefinition } from './CommandDefinition'
 import { createCA } from '../jitp/createCA'
 import { Iot, CloudFormation } from 'aws-sdk'
 import { region } from '../../cdk/regions'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
 export const createCACommand = ({
 	certsDir,
@@ -18,6 +19,7 @@ export const createCACommand = ({
 			certsDir,
 			iot,
 			cf,
+			stack: CORE_STACK_NAME,
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},
