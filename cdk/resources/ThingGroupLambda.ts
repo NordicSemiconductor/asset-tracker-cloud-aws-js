@@ -4,6 +4,7 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CDKLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
+import { LambdaLogGroup } from './LambdaLogGroup'
 
 export class ThingGroupLambda extends CloudFormation.Resource {
 	public readonly function: Lambda.IFunction
@@ -33,9 +34,8 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 				}),
 				logToCloudWatch,
 			],
-			environment: {
-				VERSION: this.node.tryGetContext('version'),
-			},
 		})
+
+		new LambdaLogGroup(this, 'Logs', this.function)
 	}
 }

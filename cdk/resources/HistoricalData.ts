@@ -186,126 +186,110 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		// Batch messages
 
-		const processBatchMessages = new Lambda.Function(
-			this,
-			'processBatchMessages',
-			{
-				layers: lambdas.layers,
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: lambdas.lambdas.processBatchMessages,
-				description: 'Processes batch messages and stores them on S3',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						resources: [
-							this.dataBucket.bucketArn,
-							`${this.dataBucket.bucketArn}/*`,
-						],
-						actions: [
-							's3:ListBucket',
-							's3:GetObject',
-							's3:PutObject',
-							's3:DeleteObject',
-						],
-					}),
-				],
-				environment: {
-					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
-					VERSION: this.node.tryGetContext('version'),
-				},
-				reservedConcurrentExecutions: 1,
-			},
-		)
-
-		new LambdaLogGroup(this, 'processBatchMessagesLogs', processBatchMessages)
-
-		const processBatchMessagesRule = new IoT.CfnTopicRule(
-			this,
-			'processBatchMessagesIotRule',
-			{
-				topicRulePayload: {
-					awsIotSqlVersion: '2016-03-23',
-					description: 'Processes all batch messages and stores them on S3',
-					ruleDisabled: false,
-					sql:
-						"SELECT * as message, clientid() as deviceId, newuuid() as messageId, timestamp() as timestamp FROM '+/batch'",
-					actions: [
-						{
-							lambda: {
-								functionArn: processBatchMessages.functionArn,
-							},
-						},
+		const batch = new Lambda.Function(this, 'batch', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: lambdas.lambdas.processBatchMessages,
+			description: 'Processes batch messages and stores them on S3',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					resources: [
+						this.dataBucket.bucketArn,
+						`${this.dataBucket.bucketArn}/*`,
 					],
-					errorAction: {
-						republish: {
-							roleArn: topicRuleRole.roleArn,
-							topic: 'errors',
+					actions: [
+						's3:ListBucket',
+						's3:GetObject',
+						's3:PutObject',
+						's3:DeleteObject',
+					],
+				}),
+			],
+			environment: {
+				HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
+				VERSION: this.node.tryGetContext('version'),
+			},
+			reservedConcurrentExecutions: 1,
+		})
+
+		new LambdaLogGroup(this, 'batchLogs', batch)
+
+		const batchRule = new IoT.CfnTopicRule(this, 'batchIotRule', {
+			topicRulePayload: {
+				awsIotSqlVersion: '2016-03-23',
+				description: 'Processes all batch messages and stores them on S3',
+				ruleDisabled: false,
+				sql:
+					"SELECT * as message, clientid() as deviceId, newuuid() as messageId, timestamp() as timestamp FROM '+/batch'",
+				actions: [
+					{
+						lambda: {
+							functionArn: batch.functionArn,
 						},
+					},
+				],
+				errorAction: {
+					republish: {
+						roleArn: topicRuleRole.roleArn,
+						topic: 'errors',
 					},
 				},
 			},
-		)
+		})
 
-		processBatchMessages.addPermission('processBatchMessagesInvokeByIot', {
+		batch.addPermission('batchInvokeByIot', {
 			principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
-			sourceArn: processBatchMessagesRule.attrArn,
+			sourceArn: batchRule.attrArn,
 		})
 
 		// Concatenate the log files
 
-		const concatenateRawMessages = new Lambda.Function(
-			this,
-			'concatenateRawMessages',
-			{
-				layers: lambdas.layers,
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(900),
-				memorySize: 1792,
-				code: lambdas.lambdas.concatenateRawMessages,
-				description:
-					'Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						resources: [
-							this.dataBucket.bucketArn,
-							`${this.dataBucket.bucketArn}/*`,
-						],
-						actions: [
-							's3:ListBucket',
-							's3:GetObject',
-							's3:PutObject',
-							's3:DeleteObject',
-						],
-					}),
-				],
-				environment: {
-					HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
-					VERSION: this.node.tryGetContext('version'),
-				},
-				reservedConcurrentExecutions: 1,
+		const concatenate = new Lambda.Function(this, 'concatenate', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(900),
+			memorySize: 1792,
+			code: lambdas.lambdas.concatenateRawMessages,
+			description:
+				'Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					resources: [
+						this.dataBucket.bucketArn,
+						`${this.dataBucket.bucketArn}/*`,
+					],
+					actions: [
+						's3:ListBucket',
+						's3:GetObject',
+						's3:PutObject',
+						's3:DeleteObject',
+					],
+				}),
+			],
+			environment: {
+				HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
+				VERSION: this.node.tryGetContext('version'),
 			},
-		)
+			reservedConcurrentExecutions: 1,
+		})
 
-		new LambdaLogGroup(
-			this,
-			'concatenateRawMessagesLogs',
-			concatenateRawMessages,
-		)
+		new LambdaLogGroup(this, 'concatenateLogs', concatenate)
 
-		const rule = new Events.Rule(this, 'invokeConcatenateRawMessagesRule', {
+		const rule = new Events.Rule(this, 'invokeconcatenateRule', {
 			schedule: Events.Schedule.expression('rate(1 hour)'),
 			description:
 				'Invoke the lambda which concatenates the raw device messages',
 			enabled: true,
-			targets: [new EventTargets.LambdaFunction(concatenateRawMessages)],
+			targets: [new EventTargets.LambdaFunction(concatenate)],
 		})
 
-		concatenateRawMessages.addPermission('InvokeByEvents', {
+		concatenate.addPermission('InvokeByEvents', {
 			principal: new IAM.ServicePrincipal('events.amazonaws.com'),
 			sourceArn: rule.ruleArn,
 		})

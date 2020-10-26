@@ -34,7 +34,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		const geolocateCell = new Lambda.Function(this, 'geolocateCell', {
+		const getCell = new Lambda.Function(this, 'getCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_12_X,
@@ -61,9 +61,9 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		})
 
-		new LambdaLogGroup(this, 'geolocateCellLogs', geolocateCell)
+		new LambdaLogGroup(this, 'getCellLogs', getCell)
 
-		const addCellGeolocation = new Lambda.Function(this, 'addCellGeolocation', {
+		const addCell = new Lambda.Function(this, 'addCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_12_X,
@@ -89,7 +89,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		})
 
-		new LambdaLogGroup(this, 'addCellGeolocationLogs', addCellGeolocation)
+		new LambdaLogGroup(this, 'addCellLogs', addCell)
 
 		this.api = new HttpApi.CfnApi(this, 'httpApi', {
 			name: 'Cell Geolocation',
@@ -137,7 +137,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		// GET __health
 
-		const healthCheck = new Lambda.Function(this, 'apiHealth', {
+		const healthCheck = new Lambda.Function(this, 'healthCheck', {
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_12_X,
 			timeout: CloudFormation.Duration.seconds(10),
@@ -149,7 +149,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			},
 		})
 
-		new LambdaLogGroup(this, 'apiHealthLogs', healthCheck)
+		new LambdaLogGroup(this, 'healthCheckLogs', healthCheck)
 
 		const healthCheckIntegration = new HttpApi.CfnIntegration(
 			this,
@@ -182,7 +182,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${geolocateCell.functionArn}/invocations`,
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${getCell.functionArn}/invocations`,
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -194,7 +194,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			target: `integrations/${geolocateIntegration.ref}`,
 		})
 
-		geolocateCell.addPermission('invokeByHttpApi', {
+		getCell.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/cellgeolocation`,
 		})
@@ -207,7 +207,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCellGeolocation.functionArn}/invocations`,
+				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCell.functionArn}/invocations`,
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -219,7 +219,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			target: `integrations/${geolocationIntegration.ref}`,
 		})
 
-		addCellGeolocation.addPermission('invokeByHttpApi', {
+		addCell.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cellgeolocation`,
 		})

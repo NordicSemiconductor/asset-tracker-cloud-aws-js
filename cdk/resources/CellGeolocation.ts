@@ -52,36 +52,28 @@ export class CellGeolocation extends CloudFormation.Resource {
 			timeToLiveAttribute: 'ttl',
 		})
 
-		const geolocateCellFromCache = new Lambda.Function(
-			this,
-			'geolocateCellFromCache',
-			{
-				layers: lambdas.layers,
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
-				description: 'Geolocate cells from cache',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: ['dynamodb:GetItem'],
-						resources: [this.cacheTable.tableArn],
-					}),
-				],
-				environment: {
-					CACHE_TABLE: this.cacheTable.tableName,
-					VERSION: this.node.tryGetContext('version'),
-				},
+		const fromCache = new Lambda.Function(this, 'fromCache', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
+			description: 'Geolocate cells from cache',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['dynamodb:GetItem'],
+					resources: [this.cacheTable.tableArn],
+				}),
+			],
+			environment: {
+				CACHE_TABLE: this.cacheTable.tableName,
+				VERSION: this.node.tryGetContext('version'),
 			},
-		)
+		})
 
-		new LambdaLogGroup(
-			this,
-			'geolocateCellFromCacheLogs',
-			geolocateCellFromCache,
-		)
+		new LambdaLogGroup(this, 'fromCacheLogs', fromCache)
 
 		this.deviceCellGeolocationTable = new DynamoDB.Table(
 			this,
@@ -121,102 +113,82 @@ export class CellGeolocation extends CloudFormation.Resource {
 			nonKeyAttributes: ['lat', 'lng', 'accuracy'],
 		})
 
-		const geolocateCellFromDevices = new Lambda.Function(
-			this,
-			'geolocateCellFromDevices',
-			{
+		const fromDevices = new Lambda.Function(this, 'fromDevices', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
+			description: 'Geolocate cells from device locations',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['dynamodb:Query'],
+					resources: [
+						this.deviceCellGeolocationTable.tableArn,
+						`${this.deviceCellGeolocationTable.tableArn}/*`,
+					],
+				}),
+			],
+			environment: {
+				LOCATIONS_TABLE: this.deviceCellGeolocationTable.tableName,
+				LOCATIONS_TABLE_CELLID_INDEX,
+				VERSION: this.node.tryGetContext('version'),
+			},
+		})
+
+		new LambdaLogGroup(this, 'fromDevicesLogs', fromDevices)
+
+		const addToCache = new Lambda.Function(this, 'addToCache', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.minutes(1),
+			memorySize: 1792,
+			code: lambdas.lambdas.cacheCellGeolocationStepFunction,
+			description: 'Caches cell geolocations',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['dynamodb:PutItem'],
+					resources: [this.cacheTable.tableArn],
+				}),
+			],
+			environment: {
+				CACHE_TABLE: this.cacheTable.tableName,
+				VERSION: this.node.tryGetContext('version'),
+			},
+		})
+
+		new LambdaLogGroup(this, 'addToCacheLogs', addToCache)
+
+		// Optional step
+		let fromUnwiredLabs: Lambda.IFunction | undefined = undefined
+		if (enableUnwiredApi) {
+			fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
 				layers: lambdas.layers,
 				handler: 'index.handler',
 				runtime: Lambda.Runtime.NODEJS_12_X,
 				timeout: CloudFormation.Duration.seconds(10),
 				memorySize: 1792,
-				code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
-				description: 'Geolocate cells from device locations',
+				code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
+				description: 'Resolve cell geolocation using the UnwiredLabs API',
 				initialPolicy: [
 					logToCloudWatch,
 					new IAM.PolicyStatement({
-						actions: ['dynamodb:Query'],
+						actions: ['ssm:GetParametersByPath'],
 						resources: [
-							this.deviceCellGeolocationTable.tableArn,
-							`${this.deviceCellGeolocationTable.tableArn}/*`,
+							`arn:aws:ssm:${parent.region}:${parent.account}:parameter/bifravst/cellGeoLocation/unwiredlabs`,
 						],
 					}),
 				],
 				environment: {
-					LOCATIONS_TABLE: this.deviceCellGeolocationTable.tableName,
-					LOCATIONS_TABLE_CELLID_INDEX,
 					VERSION: this.node.tryGetContext('version'),
 				},
-			},
-		)
+			})
 
-		new LambdaLogGroup(
-			this,
-			'geolocateCellFromDevicesLogs',
-			geolocateCellFromDevices,
-		)
-
-		const cacheCellGeolocation = new Lambda.Function(
-			this,
-			'cacheCellGeolocation',
-			{
-				layers: lambdas.layers,
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.minutes(1),
-				memorySize: 1792,
-				code: lambdas.lambdas.cacheCellGeolocationStepFunction,
-				description: 'Caches cell geolocations',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: ['dynamodb:PutItem'],
-						resources: [this.cacheTable.tableArn],
-					}),
-				],
-				environment: {
-					CACHE_TABLE: this.cacheTable.tableName,
-					VERSION: this.node.tryGetContext('version'),
-				},
-			},
-		)
-
-		new LambdaLogGroup(this, 'cacheCellGeolocationLogs', cacheCellGeolocation)
-
-		// Optional step
-		let geolocateCellFromUnwiredLabs: Lambda.IFunction | undefined = undefined
-		if (enableUnwiredApi) {
-			geolocateCellFromUnwiredLabs = new Lambda.Function(
-				this,
-				'geolocateCellFromUnwiredLabs',
-				{
-					layers: lambdas.layers,
-					handler: 'index.handler',
-					runtime: Lambda.Runtime.NODEJS_12_X,
-					timeout: CloudFormation.Duration.seconds(10),
-					memorySize: 1792,
-					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
-					description: 'Resolve cell geolocation using the UnwiredLabs API',
-					initialPolicy: [
-						logToCloudWatch,
-						new IAM.PolicyStatement({
-							actions: ['ssm:GetParametersByPath'],
-							resources: [
-								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/bifravst/cellGeoLocation/unwiredlabs`,
-							],
-						}),
-					],
-					environment: {
-						VERSION: this.node.tryGetContext('version'),
-					},
-				},
-			)
-
-			new LambdaLogGroup(
-				this,
-				'geolocateCellFromUnwiredLabsLogs',
-				geolocateCellFromUnwiredLabs,
-			)
+			new LambdaLogGroup(this, 'fromUnwiredLabsLogs', fromUnwiredLabs)
 		}
 
 		const isGeolocated = StepFunctions.Condition.booleanEquals(
@@ -236,7 +208,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			stateMachineName: this.stateMachineName,
 			stateMachineType: StateMachineType.STANDARD,
 			definition: new StepFunctions.Task(this, 'Resolve from cache', {
-				task: new StepFunctionTasks.InvokeFunction(geolocateCellFromCache),
+				task: new StepFunctionTasks.InvokeFunction(fromCache),
 				resultPath: '$.cellgeo',
 			}).next(
 				new StepFunctions.Choice(this, 'Cache found?')
@@ -246,9 +218,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					)
 					.otherwise(
 						new StepFunctions.Task(this, 'Geolocation using Device Locations', {
-							task: new StepFunctionTasks.InvokeFunction(
-								geolocateCellFromDevices,
-							),
+							task: new StepFunctionTasks.InvokeFunction(fromDevices),
 							resultPath: '$.cellgeo',
 						}).next(
 							new StepFunctions.Choice(
@@ -261,9 +231,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 										this,
 										'Cache result from Device Locations',
 										{
-											task: new StepFunctionTasks.InvokeFunction(
-												cacheCellGeolocation,
-											),
+											task: new StepFunctionTasks.InvokeFunction(addToCache),
 											resultPath: '$.storedInCache',
 										},
 									).next(
@@ -275,7 +243,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 								)
 								.otherwise(
 									(() => {
-										if (!geolocateCellFromUnwiredLabs) {
+										if (!fromUnwiredLabs) {
 											return new StepFunctions.Fail(this, 'Failed (No API)', {
 												error: 'NO_API',
 												cause:
@@ -287,7 +255,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 											'Resolve using UnwiredLabs API',
 											{
 												task: new StepFunctionTasks.InvokeFunction(
-													geolocateCellFromUnwiredLabs,
+													fromUnwiredLabs,
 												),
 												resultPath: '$.cellgeo',
 											},
@@ -303,7 +271,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 														'Cache result from UnwiredLabs API',
 														{
 															task: new StepFunctionTasks.InvokeFunction(
-																cacheCellGeolocation,
+																addToCache,
 															),
 															resultPath: '$.storedInCache',
 														},
@@ -320,7 +288,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 														'Cache result (not resolved)',
 														{
 															task: new StepFunctionTasks.InvokeFunction(
-																cacheCellGeolocation,
+																addToCache,
 															),
 															resultPath: '$.storedInCache',
 														},
@@ -436,52 +404,44 @@ export class CellGeolocation extends CloudFormation.Resource {
 			queueName: `${`${id}-${this.stack.stackName}`.substr(0, 75)}.fifo`,
 		})
 
-		const invokeStepFunctionFromSQS = new Lambda.Function(
-			this,
-			'invokeStepFunctionFromSQS',
-			{
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: lambdas.lambdas.invokeStepFunctionFromSQS,
-				description:
-					'Invoke the cell geolocation resolution step function for SQS messages',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: [
-							'sqs:ReceiveMessage',
-							'sqs:DeleteMessage',
-							'sqs:GetQueueAttributes',
-						],
-						resources: [this.resolutionJobsQueue.queueArn],
-					}),
-				],
-				environment: {
-					STEP_FUNCTION_ARN: this.stateMachine.stateMachineArn,
-					VERSION: this.node.tryGetContext('version'),
-				},
+		const fromSQS = new Lambda.Function(this, 'fromSQS', {
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: lambdas.lambdas.invokeStepFunctionFromSQS,
+			description:
+				'Invoke the cell geolocation resolution step function for SQS messages',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: [
+						'sqs:ReceiveMessage',
+						'sqs:DeleteMessage',
+						'sqs:GetQueueAttributes',
+					],
+					resources: [this.resolutionJobsQueue.queueArn],
+				}),
+			],
+			environment: {
+				STEP_FUNCTION_ARN: this.stateMachine.stateMachineArn,
+				VERSION: this.node.tryGetContext('version'),
 			},
-		)
+		})
 
-		new LambdaLogGroup(
-			this,
-			'invokeStepFunctionFromSQSLogs',
-			invokeStepFunctionFromSQS,
-		)
+		new LambdaLogGroup(this, 'fromSQSLogs', fromSQS)
 
-		invokeStepFunctionFromSQS.addPermission('invokeBySQS', {
+		fromSQS.addPermission('invokeBySQS', {
 			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
 			sourceArn: this.resolutionJobsQueue.queueArn,
 		})
 
 		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
 			eventSourceArn: this.resolutionJobsQueue.queueArn,
-			target: invokeStepFunctionFromSQS,
+			target: fromSQS,
 			batchSize: 10,
 		})
 
-		this.stateMachine.grantStartExecution(invokeStepFunctionFromSQS)
+		this.stateMachine.grantStartExecution(fromSQS)
 	}
 }
