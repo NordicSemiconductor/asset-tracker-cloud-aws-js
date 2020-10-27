@@ -62,10 +62,9 @@ export const connect = async ({
 	console.log(chalk.blue('endpoint:    '), chalk.yellow(endpoint))
 	console.log(chalk.blue('deviceUiUrl: '), chalk.yellow(deviceUiUrl))
 	console.log(chalk.blue('CA cert:     '), chalk.yellow(caCert))
-	console.log(chalk.blue('Private key: '), chalk.yellow(deviceFiles.key))
-	console.log(chalk.blue('Certificate: '), chalk.yellow(deviceFiles.certWithCA))
+	console.log(chalk.blue('Certificate: '), chalk.yellow(deviceFiles.json))
 
-	const certFiles = [deviceFiles.certWithCA, deviceFiles.key, caCert]
+	const certFiles = [deviceFiles.json, caCert]
 
 	try {
 		await Promise.all(
@@ -96,9 +95,13 @@ export const connect = async ({
 		console.timeLog(note)
 	}, 5000)
 
+	const { privateKey, clientCert } = JSON.parse(
+		await fs.readFile(deviceFiles.json, 'utf-8'),
+	)
+
 	const connection = new thingShadow({
-		privateKey: deviceFiles.key,
-		clientCert: deviceFiles.certWithCA,
+		privateKey: Buffer.from(privateKey),
+		clientCert: Buffer.from(clientCert),
 		caCert,
 		clientId: deviceId,
 		host: endpoint,
