@@ -20,7 +20,7 @@ import {
 	WorkGroupName,
 } from '../historicalData/settings'
 import { athenaStepRunners } from './steps/athena'
-import { STS, CloudFormation } from 'aws-sdk'
+import { STS, CloudFormation, Iot, Athena } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
 import {
@@ -148,9 +148,21 @@ program
 							},
 						}),
 					)
-					.addStepRunners(athenaStepRunners(world))
+					.addStepRunners(
+						athenaStepRunners({
+							...world,
+							athena: new Athena({
+								region,
+							}),
+						}),
+					)
 					.addStepRunners(bifravstStepRunners(world))
-					.addStepRunners(firmwareCIStepRunners(world))
+					.addStepRunners(
+						firmwareCIStepRunners({
+							...world,
+							iot: new Iot({ region }),
+						}),
+					)
 					.addStepRunners(storageStepRunners())
 					.addStepRunners(
 						randomStepRunners({

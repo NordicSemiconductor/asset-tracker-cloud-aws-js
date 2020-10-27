@@ -8,11 +8,11 @@ import { query, parseResult } from '@bifravst/athena-helpers'
 import { Athena } from 'aws-sdk'
 
 export const athenaStepRunners = ({
-	region,
 	historicaldataWorkgroupName,
+	athena,
 }: {
-	region: string
 	historicaldataWorkgroupName: string
+	athena: Athena
 }): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => [
 	regexMatcher<BifravstWorld>(
 		/^I run this query in the Athena workgroup ([^ ]+)$/,
@@ -20,9 +20,6 @@ export const athenaStepRunners = ({
 		if (step.interpolatedArgument === undefined) {
 			throw new Error('Must provide argument!')
 		}
-		const athena = new Athena({
-			region,
-		})
 		const q = query({
 			WorkGroup: historicaldataWorkgroupName,
 			athena,
