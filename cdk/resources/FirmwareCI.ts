@@ -111,6 +111,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 					'iot:DeleteJob',
 					'iot:DescribeJob',
 					'iot:DescribeJobExecution',
+					'iot:GetJobDocument',
 				],
 				resources: [`arn:aws:iot:${parent.region}:${parent.account}:job/*`],
 			}),
