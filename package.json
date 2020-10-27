@@ -120,7 +120,11 @@
   },
   "files": [
     "package-lock.json",
-    "dist",
+    "dist/export.js",
+    "dist/export.d.ts",
+    "dist/util",
+    "dist/feature-runner",
+    "dist/cli",
     "cli/index.js",
     "LICENSE",
     "README.md"
