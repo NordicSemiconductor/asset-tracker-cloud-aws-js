@@ -58,7 +58,7 @@
     "@aws-cdk/aws-stepfunctions": "1.70.0",
     "@aws-cdk/aws-stepfunctions-tasks": "1.70.0",
     "@aws-cdk/core": "1.70.0",
-    "@bifravst/cloudformation-helpers": "3.1.65",
+    "@bifravst/cloudformation-helpers": "3.1.66",
     "@bifravst/code-style": "8.0.134",
     "@bifravst/e2e-bdd-test-runner": "4.0.6",
     "@bifravst/eslint-config-typescript": "5.0.73",
