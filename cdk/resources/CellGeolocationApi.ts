@@ -151,13 +151,16 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'healthCheckLogs', healthCheck)
 
+		const integrationUri = (f: Lambda.IFunction) =>
+			`arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${this.stack.region}:${this.stack.account}:function:${f.functionName}/invocations`
+
 		const healthCheckIntegration = new HttpApi.CfnIntegration(
 			this,
 			'healthCheckIntegration',
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${healthCheck.functionArn}/invocations`,
+				integrationUri: integrationUri(healthCheck),
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -182,7 +185,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${getCell.functionArn}/invocations`,
+				integrationUri: integrationUri(getCell),
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
@@ -207,7 +210,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			{
 				apiId: this.api.ref,
 				integrationType: 'AWS_PROXY',
-				integrationUri: `arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/${addCell.functionArn}/invocations`,
+				integrationUri: integrationUri(addCell),
 				integrationMethod: 'POST',
 				payloadFormatVersion: '1.0',
 			},
