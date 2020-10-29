@@ -227,6 +227,12 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cell`,
 		})
 
+		// Add $default route, this is a attempt to fix https://github.com/bifravst/aws/issues/455
+		new HttpApi.CfnRoute(this, 'defaultRoute', {
+			apiId: this.api.ref,
+			routeKey: '$default',
+		})
+
 		const deployment = new HttpApi.CfnDeployment(this, 'deployment', {
 			apiId: this.api.ref,
 			stageName: this.stage.stageName,
