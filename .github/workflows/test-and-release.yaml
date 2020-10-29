@@ -85,7 +85,9 @@ jobs:
         if: failure()
         run: node cli logs
       - name: Clean up End-to-End test resources
-        if: always()
+        if:
+          always() && !contains(toJSON(github.event.commits.*.message),
+          '[skip-cleanup]')
         run: |
           node cli drop-athena-resources
           node cli purge-iot-user-policy-principals
