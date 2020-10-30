@@ -456,6 +456,11 @@ export class BifravstStack extends CloudFormation.Stack {
 			value: `https://${cellGeoApi.api.ref}.execute-api.${this.region}.amazonaws.com/${cellGeoApi.stage.stageName}/`,
 			exportName: `${this.stackName}:geolocationApiUrl`,
 		})
+
+		new CloudFormation.CfnOutput(this, 'geolocationApiId', {
+			value: cellGeoApi.api.ref,
+			exportName: `${this.stackName}:geolocationApiId`,
+		})
 	}
 }
 
@@ -480,4 +485,5 @@ export type StackOutputs = {
 	historicalDataBucketName: string
 	historicalDataQueryResultsBucketName: string
 	geolocationApiUrl: string
+	geolocationApiId: string
 }
