@@ -60,7 +60,7 @@
     "@aws-cdk/core": "1.71.0",
     "@bifravst/cloudformation-helpers": "3.1.67",
     "@bifravst/code-style": "8.0.134",
-    "@bifravst/e2e-bdd-test-runner": "4.0.9",
+    "@bifravst/e2e-bdd-test-runner": "4.0.10",
     "@bifravst/eslint-config-typescript": "5.0.73",
     "@bifravst/package-layered-lambdas": "3.12.15",
     "@commitlint/cli": "11.0.0",
