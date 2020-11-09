@@ -4,7 +4,7 @@
   "description": "AWS-based implementation of Bifravst",
   "main": "./dist/export.js",
   "scripts": {
-    "test": "jest --detectOpenHandles",
+    "test": "jest --detectOpenHandles --forceExit",
     "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress",
     "postinstall": "check-node-version --package"
   },
