@@ -4,7 +4,8 @@ import {
 	UpdatesTableName,
 	WorkGroupName,
 } from '../../historicalData/settings'
-import { stackOutput, objectToEnv } from '@bifravst/cloudformation-helpers'
+import { stackOutput } from '@bifravst/cloudformation-helpers'
+import { objectToEnv } from '@bifravst/object-to-env'
 import { CloudFormation } from 'aws-sdk'
 import {
 	CORE_STACK_NAME,
