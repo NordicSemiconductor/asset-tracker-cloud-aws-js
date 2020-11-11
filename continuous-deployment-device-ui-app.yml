@@ -15,13 +15,10 @@ phases:
       - export SOURCE_VERSION=`aws codepipeline get-pipeline-state --name
         $INITIATOR_PIPELINE_NAME  | jq -r '.stageStates[0].actionStates[] |
         select(.actionName == "DeviceUISourceCode").currentRevision.revisionId'`
-      - export REACT_APP_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
+      - export VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
         $SOURCE_VERSION | cut -d'/' -f3 | cut -d'^' -f1`
-      - echo REACT_APP_VERSION=${REACT_APP_VERSION:-$SOURCE_VERSION} >>
-        $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local
       - cat $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_DeviceUI/.env.production.local | xargs)
-      - export EXTEND_ESLINT=true
       - cd $CODEBUILD_SRC_DIR_DeviceUI/; npm ci --no-audit; npm run build;
       - aws s3 cp $CODEBUILD_SRC_DIR_DeviceUI/build
         s3://$REACT_APP_DEVICE_UI_BUCKET_NAME --recursive --metadata-directive
