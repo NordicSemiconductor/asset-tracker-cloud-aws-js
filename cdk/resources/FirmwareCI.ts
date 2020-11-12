@@ -119,7 +119,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
 				resources: [`${this.bucket.bucketArn}/*`],
-				actions: ['s3:PutObject'],
+				actions: ['s3:PutObject', 's3:DeleteObject'],
 			}),
 		)
 
