@@ -62,6 +62,19 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Whether the continuous deployment of the Device UI is enabled or disabled.',
 		})
 
+		// CD for the Device UI is implied by enabled CD (in that case this Stack exists) and enabled Device UI
+		const enabledFirmwareCiCD = checkFlag({
+			key: 'firmware-ci',
+			component: 'Firmware CI Continuous Deployment',
+			onUndefined: 'disabled',
+		})
+		new CloudFormation.CfnOutput(this, 'firmwareCiCD', {
+			value: enabledFirmwareCiCD ? 'enabled' : 'disabled',
+			exportName: `${this.stackName}:firmwareCiCD`,
+			description:
+				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
+		})
+
 		const { bifravstAWS, deviceUI, webApp } = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
@@ -133,6 +146,10 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					{
 						name: 'DEVICEUI',
 						value: enableDeviceUICD ? '1' : '0',
+					},
+					{
+						name: 'FIRMWARECI',
+						value: enabledFirmwareCiCD ? '1' : '0',
 					},
 				],
 			},
