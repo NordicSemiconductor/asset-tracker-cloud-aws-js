@@ -7,28 +7,32 @@ import {
 import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
-import * as path from 'path'
 import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
-import { promises as fs } from 'fs'
+import { readFileSync } from 'fs'
 
 const connect = ({
 	mqttEndpoint,
 	certsDir,
+	awsIotRootCA,
 }: {
 	mqttEndpoint: string
 	certsDir: string
+	awsIotRootCA: string
 }) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
 		certsDir,
 		deviceId: clientId,
 	})
+	const { privateKey, clientCert } = JSON.parse(
+		readFileSync(deviceFiles.json, 'utf-8'),
+	)
 	return new device({
-		privateKey: deviceFiles.key,
-		clientCert: deviceFiles.certWithCA,
-		caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+		privateKey: Buffer.from(privateKey),
+		clientCert: Buffer.from(clientCert),
+		caCert: Buffer.from(awsIotRootCA),
 		clientId,
 		host: mqttEndpoint,
 		region: mqttEndpoint.split('.')[2],
@@ -38,18 +42,23 @@ const connect = ({
 const shadow = ({
 	mqttEndpoint,
 	certsDir,
+	awsIotRootCA,
 }: {
 	mqttEndpoint: string
 	certsDir: string
+	awsIotRootCA: string
 }) => (clientId: string) => {
 	const deviceFiles = deviceFileLocations({
 		certsDir,
 		deviceId: clientId,
 	})
+	const { privateKey, clientCert } = JSON.parse(
+		readFileSync(deviceFiles.json, 'utf-8'),
+	)
 	return new thingShadow({
-		privateKey: deviceFiles.key,
-		clientCert: deviceFiles.certWithCA,
-		caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+		privateKey: Buffer.from(privateKey),
+		clientCert: Buffer.from(clientCert),
+		caCert: Buffer.from(awsIotRootCA),
 		clientId,
 		host: mqttEndpoint,
 		region: mqttEndpoint.split('.')[2],
@@ -59,17 +68,21 @@ const shadow = ({
 export const bifravstStepRunners = ({
 	mqttEndpoint,
 	certsDir,
+	awsIotRootCA,
 }: {
 	mqttEndpoint: string
 	certsDir: string
+	awsIotRootCA: string
 }): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => {
 	const connectToBroker = connect({
 		mqttEndpoint,
 		certsDir,
+		awsIotRootCA,
 	})
 	const shadowOnBroker = shadow({
 		mqttEndpoint,
 		certsDir,
+		awsIotRootCA,
 	})
 	return [
 		regexMatcher<BifravstWorld>(
@@ -94,14 +107,11 @@ export const bifravstStepRunners = ({
 					certsDir,
 					deviceId: catId,
 				})
-				runner.store[`${prefix}:privateKey`] = await fs.readFile(
-					deviceFiles.key,
-					'utf-8',
+				const { privateKey, clientCert } = JSON.parse(
+					readFileSync(deviceFiles.json, 'utf-8'),
 				)
-				runner.store[`${prefix}:clientCert`] = await fs.readFile(
-					deviceFiles.certWithCA,
-					'utf-8',
-				)
+				runner.store[`${prefix}:privateKey`] = privateKey
+				runner.store[`${prefix}:clientCert`] = clientCert
 
 				// eslint-disable-next-line require-atomic-updates
 				runner.store[`${prefix}:id`] = catId
@@ -124,10 +134,13 @@ export const bifravstStepRunners = ({
 
 				return new Promise((resolve, reject) => {
 					const timeout = setTimeout(reject, 60 * 1000)
+					const { privateKey, clientCert } = JSON.parse(
+						readFileSync(deviceFiles.json, 'utf-8'),
+					)
 					const connection = new thingShadow({
-						privateKey: deviceFiles.key,
-						clientCert: deviceFiles.certWithCA,
-						caCert: path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+						privateKey: Buffer.from(privateKey),
+						clientCert: Buffer.from(clientCert),
+						caCert: Buffer.from(awsIotRootCA),
 						clientId: catId,
 						host: mqttEndpoint,
 						region: mqttEndpoint.split('.')[2],
