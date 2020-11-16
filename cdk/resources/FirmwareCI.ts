@@ -91,6 +91,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 					'iot:UpdateCertificate',
 					'iot:AttachThingPrincipal',
 					'iot:DetachThingPrincipal',
+					'iot:describeThing',
 				],
 				resources: [`*`],
 			}),
