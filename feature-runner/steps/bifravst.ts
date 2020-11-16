@@ -94,6 +94,8 @@ export const bifravstStepRunners = ({
 				await createDeviceCertificate({
 					deviceId: catId,
 					certsDir,
+					mqttEndpoint,
+					awsIotRootCA,
 					log: (...message: any[]) => {
 						// eslint-disable-next-line @typescript-eslint/no-floating-promises
 						runner.progress('IoT (cert)', ...message)

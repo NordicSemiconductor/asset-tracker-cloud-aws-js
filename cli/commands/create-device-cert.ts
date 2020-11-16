@@ -25,6 +25,11 @@ export const createDeviceCertCommand = ({
 		await createDeviceCertificate({
 			deviceId: id,
 			certsDir,
+			mqttEndpoint: endpoint,
+			awsIotRootCA: await fs.readFile(
+				path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+				'utf-8',
+			),
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},
@@ -34,31 +39,6 @@ export const createDeviceCertCommand = ({
 		})
 		console.log(
 			chalk.green(`Certificate for device ${chalk.yellow(id)} generated.`),
-		)
-
-		const certificate = deviceFileLocations({
-			certsDir,
-			deviceId: id,
-		})
-
-		// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
-		await fs.writeFile(
-			certificate.json,
-			JSON.stringify(
-				{
-					caCert: await fs.readFile(
-						path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-						'utf-8',
-					),
-					clientCert: await fs.readFile(certificate.certWithCA, 'utf-8'),
-					privateKey: await fs.readFile(certificate.key, 'utf-8'),
-					clientId: id,
-					brokerHostname: endpoint,
-				},
-				null,
-				2,
-			),
-			'utf-8',
 		)
 
 		console.log()

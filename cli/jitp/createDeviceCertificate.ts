@@ -13,9 +13,13 @@ export const createDeviceCertificate = async ({
 	log,
 	debug,
 	deviceId,
+	awsIotRootCA,
+	mqttEndpoint,
 }: {
 	certsDir: string
 	deviceId: string
+	mqttEndpoint: string
+	awsIotRootCA: string
 	log?: (...message: any[]) => void
 	debug?: (...message: any[]) => void
 }): Promise<{ deviceId: string }> => {
@@ -82,6 +86,23 @@ export const createDeviceCertificate = async ({
 	).join(os.EOL)
 
 	await fs.writeFile(deviceFiles.certWithCA, certWithCa, 'utf-8')
+
+	// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
+	await fs.writeFile(
+		deviceFiles.json,
+		JSON.stringify(
+			{
+				caCert: awsIotRootCA,
+				clientCert: certWithCa,
+				privateKey: await fs.readFile(deviceFiles.key, 'utf-8'),
+				clientId: deviceId,
+				brokerHostname: mqttEndpoint,
+			},
+			null,
+			2,
+		),
+		'utf-8',
+	)
 
 	return { deviceId }
 }
