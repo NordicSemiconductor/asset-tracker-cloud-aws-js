@@ -63,7 +63,7 @@
     "@bifravst/code-style": "8.0.134",
     "@bifravst/e2e-bdd-test-runner": "4.0.22",
     "@bifravst/eslint-config-typescript": "5.0.77",
-    "@bifravst/package-layered-lambdas": "3.13.14",
+    "@bifravst/package-layered-lambdas": "3.13.17",
     "@commitlint/cli": "11.0.0",
     "@commitlint/config-angular": "11.0.0",
     "@types/aws-iot-device-sdk": "2.2.2",
