@@ -23,6 +23,7 @@ import { purgeCAsCommand } from './commands/purge-cas'
 import { region } from '../cdk/regions'
 import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
+import { flashCommand } from './commands/flash'
 
 const iot = new Iot({
 	region,
@@ -94,6 +95,9 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 		)
 	} else {
 		commands.push(
+			flashCommand({
+				certsDir,
+			}),
 			connectCommand({
 				endpoint,
 				certsDir,

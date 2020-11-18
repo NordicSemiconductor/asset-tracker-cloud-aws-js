@@ -47,9 +47,17 @@ export const createDeviceCertCommand = ({
 			chalk.greenBright('node cli connect'),
 			chalk.blueBright(id),
 		)
+
 		console.log()
 		console.log(
-			chalk.gray('Use the file'),
+			chalk.green('You can now flash the credentials to your device'),
+			chalk.greenBright(`node cli flash ${id}`),
+			chalk.blueBright(id),
+		)
+
+		console.log()
+		console.log(
+			chalk.gray('Alternatively, use the file'),
 			chalk.yellow(deviceFileLocations({ certsDir, deviceId: id }).json),
 		)
 		console.log(
