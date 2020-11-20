@@ -51,7 +51,7 @@ export const createDeviceCertCommand = ({
 		console.log()
 		console.log(
 			chalk.green('You can now flash the credentials to your device'),
-			chalk.greenBright(`node cli flash ${id}`),
+			chalk.greenBright(`node cli flash`),
 			chalk.blueBright(id),
 		)
 

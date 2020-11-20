@@ -15,6 +15,7 @@ import * as https from 'https'
 import { v4 } from 'uuid'
 
 const defaultPort = '/dev/ttyACM0'
+const defaultSecTag = 42
 
 const getLatestFirmware = async ({
 	nbiot,
@@ -102,8 +103,15 @@ export const flashCommand = ({
 			flags: '-f, --firmware <firmware>',
 			description: `Flash application from this file`,
 		},
+		{
+			flags: '-s, --sec-tag <secTag>',
+			description: `Use this secTag, defaults to ${defaultSecTag}`,
+		},
 	],
-	action: async (deviceId: string, { dk, nbiot, nodebug, port, firmware }) => {
+	action: async (
+		deviceId: string,
+		{ dk, nbiot, nodebug, port, firmware, secTag },
+	) => {
 		const hexfile =
 			firmware ?? (await getLatestFirmware({ dk, nbiot, nodebug }))
 
@@ -135,7 +143,7 @@ export const flashCommand = ({
 				path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 				'utf-8',
 			),
-			secTag: 42,
+			secTag: secTag ?? defaultSecTag,
 			clientCert: fs.readFileSync(certs.certWithCA, 'utf-8'),
 			privateKey: fs.readFileSync(certs.key, 'utf-8'),
 		})
