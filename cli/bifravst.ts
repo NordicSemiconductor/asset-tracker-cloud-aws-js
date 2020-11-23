@@ -54,7 +54,7 @@ const confirm = (
 			input: process.stdin,
 			output: process.stdout,
 		})
-		await new Promise((resolve, reject) =>
+		await new Promise<void>((resolve, reject) =>
 			rl.question(`${chalk.blueBright(confirm)} (y,N): `, (answer) => {
 				rl.close()
 				if (answer === 'y') return resolve()

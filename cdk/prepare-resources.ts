@@ -125,7 +125,7 @@ export const prepareCDKLambdas = async ({
 				'utf-8',
 			)
 			reporter.progress('base-layer')('Installing dependencies')
-			await new Promise((resolve, reject) => {
+			await new Promise<void>((resolve, reject) => {
 				const p = spawn('npm', ['i', '--ignore-scripts', '--only=prod'], {
 					cwd: cloudFormationLayerDir,
 				})

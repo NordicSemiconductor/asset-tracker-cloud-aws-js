@@ -213,7 +213,7 @@ export const bifravstStepRunners = ({
 			}
 			const message = JSON.parse(step.interpolatedArgument)
 			const connection = connectToBroker(catId)
-			const publishPromise = await new Promise((resolve, reject) => {
+			const publishPromise = new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
 				connection.on('error', (err: any) => {
 					clearTimeout(timeout)
@@ -227,7 +227,7 @@ export const bifravstStepRunners = ({
 					resolve()
 				})
 			})
-			return await publishPromise
+			return publishPromise
 		}),
 		regexGroupMatcher(
 			/^the cat tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
@@ -290,7 +290,7 @@ export const bifravstStepRunners = ({
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
 
-			return new Promise((resolve, reject) => {
+			return new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 60 * 1000)
 				const connection = connectToBroker(catId)
 
