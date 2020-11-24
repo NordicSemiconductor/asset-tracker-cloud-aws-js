@@ -36,7 +36,7 @@
     "@octokit/rest": "18.0.9",
     "ajv": "6.12.6",
     "aws-iot-device-sdk": "2.2.6",
-    "aws-sdk": "2.798.0",
+    "aws-sdk": "2.799.0",
     "backoff": "2.5.0",
     "chalk": "4.1.0",
     "check-node-version": "4.0.3",
