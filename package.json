@@ -30,7 +30,7 @@
     "@bifravst/athena-helpers": "8.0.97",
     "@bifravst/cell-geolocation-helpers": "1.3.22",
     "@bifravst/device-ui-server": "2.0.1",
-    "@bifravst/firmware-ci": "4.1.3",
+    "@bifravst/firmware-ci": "4.1.4",
     "@bifravst/object-to-env": "1.0.0",
     "@bifravst/random-words": "4.2.1",
     "@octokit/rest": "18.0.9",
