@@ -38,7 +38,14 @@ export const createDeviceCertificate = async ({
 
 	await run({
 		command: 'openssl',
-		args: ['genrsa', '-out', deviceFiles.key, '2048'],
+		args: [
+			'ecparam',
+			'-out',
+			deviceFiles.key,
+			'-name',
+			'prime256v1',
+			'-genkey',
+		],
 		log: debug,
 	})
 
