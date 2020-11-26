@@ -9,13 +9,13 @@ Feature: Query Data
   Scenario: Query historical data
 
     Given I am authenticated with Cognito
-    When I run this query in the Athena workgroup {historicaldataWorkgroupName}
-       """
-       SELECT reported.bat.v as value
-       FROM {historicaldataDatabaseName}.{historicaldataTableName}
-       WHERE deviceId='{cat:id}' AND reported.bat IS NOT NULL LIMIT 1
-       """
-    Then "athenaQueryResult" should match this JSON
+    When I run this Timestream query
+      """
+      SELECT measure_value::double AS value
+      FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
+      WHERE deviceId='{cat:id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
+      """
+    Then "timestreamQueryResult" should match this JSON
        """
        [{"value": 3781}]
        """

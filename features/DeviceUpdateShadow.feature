@@ -7,7 +7,8 @@ Feature: Device: Update Shadow
 
   Scenario: Publish device information to reported state
 
-    Given the cat tracker updates its reported state with
+    Given I store "$millis()" into "updateShadowTs"
+    Then the cat tracker updates its reported state with
       """
       {
         "dev": {
@@ -19,11 +20,11 @@ Feature: Device: Update Shadow
             "brdV": "thingy91_nrf9160",
             "appV": "0.14.6"
           },
-          "ts": 1567921067432
+          "ts": {updateShadowTs}
         },
         "bat": {
           "v": 3781,
-          "ts": 1567942204010
+          "ts": {updateShadowTs}
         },
         "cfg": {
           "act": false,

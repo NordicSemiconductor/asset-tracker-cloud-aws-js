@@ -9,13 +9,10 @@ import { connectCommand } from './commands/connect'
 import { reactConfigCommand } from './commands/react-config'
 import { infoCommand } from './commands/info'
 import { createCACommand } from './commands/create-ca'
-import { historicalDataCommand } from './commands/historical-data'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { purgeBucketsCommand } from './commands/purge-buckets'
-import { dropAthenaResourcesCommand } from './commands/drop-athena-resources'
 import { logsCommand } from './commands/logs'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
-import { cellLocation } from './commands/cell-location'
 import { CommandDefinition } from './commands/CommandDefinition'
 import * as readline from 'readline'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
@@ -80,19 +77,13 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 		reactConfigCommand(),
 		infoCommand(),
 		cdCommand(),
-		historicalDataCommand(),
-		cellLocation(),
 		purgeIotUserPolicyPrincipals(),
 		logsCommand(),
 	]
 
 	if (isCI) {
 		console.error('Running on CI...')
-		commands.push(
-			dropAthenaResourcesCommand(),
-			purgeBucketsCommand(),
-			purgeCAsCommand(),
-		)
+		commands.push(purgeBucketsCommand(), purgeCAsCommand())
 	} else {
 		commands.push(
 			flashCommand({
@@ -104,10 +95,6 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 				version,
 			}),
 			cdUpdateTokenCommand(),
-			confirm(
-				'Do you really want to drop all Athena resources?',
-				dropAthenaResourcesCommand(),
-			),
 			confirm(
 				'Do you really purge all Bifravst buckets?',
 				purgeBucketsCommand(),

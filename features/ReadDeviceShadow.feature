@@ -26,7 +26,7 @@ Feature: Read Device Shadow
               "brdV": "thingy91_nrf9160",
               "appV": "0.14.6"
             },
-            "ts": 1567921067432
+            "ts": {updateShadowTs}
          }
        }
        """

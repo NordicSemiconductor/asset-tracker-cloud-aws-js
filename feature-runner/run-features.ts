@@ -14,13 +14,7 @@ import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { bifravstStepRunners } from './steps/bifravst'
-import {
-	DataBaseName,
-	UpdatesTableName,
-	WorkGroupName,
-} from '../historicalData/settings'
-import { athenaStepRunners } from './steps/athena'
-import { STS, CloudFormation, Iot, Athena } from 'aws-sdk'
+import { STS, CloudFormation, Iot, TimestreamQuery } from 'aws-sdk'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
 import {
@@ -31,6 +25,7 @@ import { promises as fs } from 'fs'
 import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
+import { timestreamStepRunners } from './steps/timestream'
 
 let ran = false
 
@@ -38,9 +33,8 @@ export type BifravstWorld = StackOutputs & {
 	accountId: string
 	region: string
 	userIotPolicyName: string
-	historicaldataWorkgroupName: string
-	historicaldataDatabaseName: string
 	historicaldataTableName: string
+	historicaldataDatabaseName: string
 	'firmwareCI:userAccessKeyId': string
 	'firmwareCI:userSecretAccessKey': string
 	'firmwareCI:thingGroupName': string
@@ -82,13 +76,18 @@ program
 			const cf = new CloudFormation({ region })
 			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
 
-			const firmwareCIStackConfig = await stackOutput(cf)<
-				FirmwareCIStackOutputs
-			>(ciStackName)
+			const firmwareCIStackConfig = await stackOutput(
+				cf,
+			)<FirmwareCIStackOutputs>(ciStackName)
 
 			const { Account: accountId } = await new STS({ region })
 				.getCallerIdentity()
 				.promise()
+
+			const [
+				historicaldataDatabaseName,
+				historicaldataTableName,
+			] = stackConfig.historicaldataTableInfo.split('|')
 
 			const world: BifravstWorld = {
 				...stackConfig,
@@ -98,9 +97,8 @@ program
 				'firmwareCI:thingGroupName': firmwareCIStackConfig.thingGroupName,
 				'firmwareCI:bucketName': firmwareCIStackConfig.bucketName,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
-				historicaldataWorkgroupName: WorkGroupName(),
-				historicaldataDatabaseName: DataBaseName(),
-				historicaldataTableName: UpdatesTableName(),
+				historicaldataTableName,
+				historicaldataDatabaseName,
 				region,
 				accountId: accountId as string,
 				awsIotRootCA: await fs.readFile(
@@ -146,14 +144,6 @@ program
 									endpoint: world.mqttEndpoint,
 								},
 							},
-						}),
-					)
-					.addStepRunners(
-						athenaStepRunners({
-							...world,
-							athena: new Athena({
-								region,
-							}),
 						}),
 					)
 					.addStepRunners(bifravstStepRunners(world))
@@ -221,6 +211,11 @@ program
 									)
 								},
 							}),
+						}),
+					)
+					.addStepRunners(
+						timestreamStepRunners({
+							timestream: new TimestreamQuery({ region }),
 						}),
 					)
 					.run()

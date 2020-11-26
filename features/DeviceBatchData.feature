@@ -9,7 +9,9 @@ Feature: Device: Batch Data
 
   Scenario: Devices can publish batch data
 
-    Given the cat tracker publishes this message to the topic {cat:id}/batch
+    Given I store "$millis()" into "ts"
+    And I store "$millis()+(120*1000)" into "ts2"
+    Then the cat tracker publishes this message to the topic {cat:id}/batch
       """
       {
         "gps": [
@@ -22,7 +24,7 @@ Feature: Device: Batch Data
               "spd": 0.698944,
               "hdg": 0
             },
-            "ts": 1567094051000
+            "ts": {ts}
           },
           {
             "v": {
@@ -33,7 +35,7 @@ Feature: Device: Batch Data
               "spd": 6.308265,
               "hdg": 77.472923
             },
-            "ts": 1567165503000
+            "ts": {ts2}
           }
         ]
       }
@@ -42,21 +44,21 @@ Feature: Device: Batch Data
   Scenario: Query the historical gps data
 
     Given I am authenticated with Cognito
-    When I run this query in the Athena workgroup {historicaldataWorkgroupName}
+    When I run this Timestream query
       """
-      SELECT reported.gps.v.lng as value
-      FROM {historicaldataDatabaseName}.{historicaldataTableName}
-      WHERE deviceId='{cat:id}' AND reported.gps IS NOT NULL LIMIT 2
+      SELECT measure_value::double AS value
+      FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
+      WHERE deviceId='{cat:id}' AND measure_name='gps.lng' AND measure_value::double IS NOT NULL LIMIT 2
       """
-    Then "athenaQueryResult" should match this JSON
+    Then "timestreamQueryResult" should match this JSON
       # The values are string because they have not yet run through the formatter
       """
       [
         {
-          "value": "8.669555"
+          "value": 8.669555
         },
         {
-          "value": "10.424793"
+          "value": 10.424793
         }
       ]
       """

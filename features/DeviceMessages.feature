@@ -32,13 +32,13 @@ Feature: Device: Messages
   Scenario: Query the message data
 
     Given I am authenticated with Cognito
-    When I run this query in the Athena workgroup {historicaldataWorkgroupName}
+    When I run this Timestream query
       """
-      SELECT message.btn.v as value
-      FROM {historicaldataDatabaseName}.{historicaldataTableName}
-      WHERE deviceId='{cat:id}' AND message.btn IS NOT NULL LIMIT 2
+      SELECT measure_value::double AS value
+      FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
+      WHERE deviceId='{cat:id}' AND measure_name='btn' AND measure_value::double IS NOT NULL LIMIT 2
       """
-    Then "athenaQueryResult" should match this JSON
+    Then "timestreamQueryResult" should match this JSON
       """
       [
         {

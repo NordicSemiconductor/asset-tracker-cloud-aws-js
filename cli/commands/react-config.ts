@@ -1,9 +1,4 @@
 import { CommandDefinition } from './CommandDefinition'
-import {
-	DataBaseName,
-	UpdatesTableName,
-	WorkGroupName,
-} from '../../historicalData/settings'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { objectToEnv } from '@bifravst/object-to-env'
 import { CloudFormation } from 'aws-sdk'
@@ -21,9 +16,6 @@ export const reactConfigCommand = (): CommandDefinition => ({
 		process.stdout.write(
 			objectToEnv(
 				{
-					historicaldataWorkgroupName: WorkGroupName(),
-					historicaldataDatabaseName: DataBaseName(),
-					historicaldataTableName: UpdatesTableName(),
 					...(await so(CORE_STACK_NAME)),
 					...(await so(WEBAPP_STACK_NAME)),
 					...(await so(DEVICEUI_STACK_NAME)),

@@ -28,6 +28,7 @@ Feature: Cell Geolocation API
         Given I store "$floor($random() * 100000000)" into "cellId"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
+        And I store "$millis()" into "ts"
         Then the cat tracker updates its reported state with
             """
             {
@@ -39,14 +40,15 @@ Feature: Cell Geolocation API
             "cell": {cellId},
             "ip": "10.202.80.9"
             },
-            "ts": 1572340324000
+            "ts": {ts}
             }
             }
             """
 
     Scenario: Device acquires a GPS fix
 
-        Given the cat tracker updates its reported state with
+        Given I store "$millis()+(120*1000)" into "ts"
+        Then the cat tracker updates its reported state with
             """
             {
             "gps": {
@@ -58,7 +60,7 @@ Feature: Cell Geolocation API
             "spd": 0.448984,
             "hdg": 0
             },
-            "ts": 1572340608948
+            "ts": {ts}
             }
             }
             """
