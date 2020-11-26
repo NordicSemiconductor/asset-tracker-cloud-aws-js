@@ -42,10 +42,9 @@ export const toTimestreamRecords = (
 		)
 	}
 
-	const props = ['env', 'acc', 'gps', 'dev', 'roam'] as (keyof Omit<
-		UpdatedDeviceState['reported'],
-		'cfg' | 'bat'
-	>)[]
+	const props = Object.keys(event.reported).filter(
+		(s) => !/^(cfg|bat)$/.test(s),
+	) as (keyof Omit<UpdatedDeviceState['reported'], 'cfg' | 'bat'>)[]
 
 	props.map((s) => {
 		const v = event.reported[s]?.v
