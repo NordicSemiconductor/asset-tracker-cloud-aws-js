@@ -1,91 +1,21 @@
 import * as CloudFormation from '@aws-cdk/core'
-import * as S3 from '@aws-cdk/aws-s3'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as IoT from '@aws-cdk/aws-iot'
-import * as Events from '@aws-cdk/aws-events'
-import * as EventTargets from '@aws-cdk/aws-events-targets'
 import * as Lambda from '@aws-cdk/aws-lambda'
+import * as Timestream from '@aws-cdk/aws-timestream'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { BifravstLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
 
-export const permissions = ({
-	historicalData,
-}: {
-	historicalData: HistoricalData
-}): IAM.PolicyStatement[] => {
-	const dataBucket = historicalData.dataBucket
-	const queryResultsBucket = historicalData.queryResultsBucket
-
-	return [
-		new IAM.PolicyStatement({
-			resources: ['*'],
-			actions: [
-				'athena:startQueryExecution',
-				'athena:stopQueryExecution',
-				'athena:getQueryExecution',
-				'athena:getQueryResults',
-				'glue:GetTable',
-				'glue:GetDatabase',
-			],
-		}),
-		// Users need to read from data bucket
-		new IAM.PolicyStatement({
-			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-			],
-		}),
-
-		new IAM.PolicyStatement({
-			resources: [
-				queryResultsBucket.bucketArn,
-				`${queryResultsBucket.bucketArn}/*`,
-			],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-				's3:AbortMultipartUpload',
-				's3:PutObject',
-			],
-		}),
-		new IAM.PolicyStatement({
-			resources: [dataBucket.bucketArn, `${dataBucket.bucketArn}/*`],
-			actions: ['s3:GetBucketLocation', 's3:GetObject', 's3:ListBucket'],
-		}),
-		// Users need to be able to write to the results bucket
-		new IAM.PolicyStatement({
-			resources: [
-				queryResultsBucket.bucketArn,
-				`${queryResultsBucket.bucketArn}/*`,
-			],
-			actions: [
-				's3:GetBucketLocation',
-				's3:GetObject',
-				's3:ListBucket',
-				's3:ListBucketMultipartUploads',
-				's3:ListMultipartUploadParts',
-				's3:AbortMultipartUpload',
-				's3:PutObject',
-			],
-		}),
-	]
-}
-
 /**
  * Provides resources for historical data
  */
 export class HistoricalData extends CloudFormation.Resource {
-	public readonly dataBucket: S3.IBucket
-	public readonly queryResultsBucket: S3.IBucket
+	public readonly db: Timestream.CfnDatabase
+	public readonly messagesTable: Timestream.CfnTable
+	public readonly updatesTable: Timestream.CfnTable
+
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
@@ -99,26 +29,73 @@ export class HistoricalData extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		this.dataBucket = new S3.Bucket(this, 'bucket', {
-			removalPolicy:
-				this.node.tryGetContext('isTest') === true
-					? CloudFormation.RemovalPolicy.DESTROY
-					: CloudFormation.RemovalPolicy.RETAIN,
+		this.db = new Timestream.CfnDatabase(this, 'db')
+		this.messagesTable = new Timestream.CfnTable(this, 'messagesTable', {
+			databaseName: this.db.ref,
+		})
+		this.updatesTable = new Timestream.CfnTable(this, 'updatesTable', {
+			databaseName: this.db.ref,
 		})
 
-		this.queryResultsBucket = new S3.Bucket(this, 'queryResults', {
-			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+		// User permissions
+		userRole.addToPrincipalPolicy(
+			new IAM.PolicyStatement({
+				resources: [this.messagesTable.attrArn, this.updatesTable.attrArn],
+				actions: [
+					'timestream:Select',
+					'timestream:DescribeTable',
+					'timestream:ListMeasures',
+				],
+			}),
+		)
+		userRole.addToPrincipalPolicy(
+			new IAM.PolicyStatement({
+				resources: ['*'],
+				actions: [
+					'timestream:DescribeEndpoints',
+					'timestream:SelectValues',
+					'timestream:CancelQuery',
+				],
+			}),
+		)
+
+		// Store device messages
+		// FIXME: CloudFormation currently does not support IoT actions for timestream, once it does (https://github.com/aws-cloudformation/aws-cloudformation-coverage-roadmap/issues/663) remove the lambda handling the message insert.
+
+		const storeMessagesInTimestream = new Lambda.Function(this, 'lambda', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_12_X,
+			timeout: CloudFormation.Duration.seconds(60),
+			memorySize: 1792,
+			code: lambdas.lambdas.storeMessagesInTimestream,
+			description:
+				'Processes devices messages and updates and stores them in Timestream',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['timestream:WriteRecords'],
+					resources: [this.messagesTable.attrArn, this.updatesTable.attrArn],
+				}),
+				new IAM.PolicyStatement({
+					actions: ['timestream:DescribeEndpoints'],
+					resources: ['*'],
+				}),
+			],
+			environment: {
+				MESSAGES_TABLE_NAME: this.messagesTable.ref,
+				UPDATES_TABLE_NAME: this.updatesTable.ref,
+				VERSION: this.node.tryGetContext('version'),
+			},
 		})
+
+		new LambdaLogGroup(this, 'batchLogs', storeMessagesInTimestream)
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
 			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),
 			inlinePolicies: {
 				rootPermissions: new IAM.PolicyDocument({
 					statements: [
-						new IAM.PolicyStatement({
-							actions: ['s3:PutObject'],
-							resources: [`${this.dataBucket.bucketArn}/*`],
-						}),
 						new IAM.PolicyStatement({
 							actions: ['iot:Publish'],
 							resources: [
@@ -130,105 +107,18 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		})
 
-		new IoT.CfnTopicRule(this, 'storeUpdates', {
+		const storeUpdatesRule = new IoT.CfnTopicRule(this, 'storeUpdatesRule', {
 			topicRulePayload: {
 				awsIotSqlVersion: '2016-03-23',
-				description: 'Store all updates to thing shadow documents on S3',
-				ruleDisabled: false,
-				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
-				sql:
-					'SELECT state.reported AS reported, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'$aws/things/+/shadow/update\'',
-				actions: [
-					{
-						s3: {
-							bucketName: this.dataBucket.bucketName,
-							key:
-								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${regexp_replace(clientid(), "/", "")}-${newuuid()}.json',
-							roleArn: topicRuleRole.roleArn,
-						},
-					},
-				],
-				errorAction: {
-					republish: {
-						roleArn: topicRuleRole.roleArn,
-						topic: 'errors',
-					},
-				},
-			},
-		})
-
-		new IoT.CfnTopicRule(this, 'storeMessages', {
-			topicRulePayload: {
-				awsIotSqlVersion: '2016-03-23',
-				description: 'Store all messages on S3',
-				ruleDisabled: false,
-				// Note: this timestamp is formatted for the AWS Athena TIMESTAMP datatype
-				sql:
-					'SELECT * as message, parse_time("yyyy-MM-dd HH:mm:ss.S", timestamp()) as timestamp, clientid() as deviceId FROM \'+/messages\'',
-				actions: [
-					{
-						s3: {
-							bucketName: this.dataBucket.bucketName,
-							key:
-								'updates/raw/${parse_time("yyyy/MM/dd", timestamp())}/${parse_time("yyyyMMdd\'T\'HHmmss", timestamp())}-${regexp_replace(clientid(), "/", "")}-${newuuid()}.json',
-							roleArn: topicRuleRole.roleArn,
-						},
-					},
-				],
-				errorAction: {
-					republish: {
-						roleArn: topicRuleRole.roleArn,
-						topic: 'errors',
-					},
-				},
-			},
-		})
-
-		// Batch messages
-
-		const batch = new Lambda.Function(this, 'batch', {
-			layers: lambdas.layers,
-			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
-			timeout: CloudFormation.Duration.seconds(10),
-			memorySize: 1792,
-			code: lambdas.lambdas.processBatchMessages,
-			description: 'Processes batch messages and stores them on S3',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					resources: [
-						this.dataBucket.bucketArn,
-						`${this.dataBucket.bucketArn}/*`,
-					],
-					actions: [
-						's3:ListBucket',
-						's3:GetObject',
-						's3:PutObject',
-						's3:DeleteObject',
-					],
-				}),
-			],
-			environment: {
-				HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
-				VERSION: this.node.tryGetContext('version'),
-			},
-			reservedConcurrentExecutions: 1,
-		})
-
-		new LambdaLogGroup(this, 'batchLogs', batch)
-
-		const batchRule = new IoT.CfnTopicRule(this, 'batchIotRule', {
-			topicRulePayload: {
-				awsIotSqlVersion: '2016-03-23',
-				description: 'Processes all batch messages and stores them on S3',
+				description:
+					'Store all updates to thing shadow documents in Timestream',
 				ruleDisabled: false,
 				sql:
-					"SELECT * as message, clientid() as deviceId, newuuid() as messageId, timestamp() as timestamp FROM '+/batch'",
+					"SELECT state.reported AS reported, timestamp() as timestamp, clientid() as deviceId FROM '$aws/things/+/shadow/update'",
 				actions: [
 					{
 						lambda: {
-							functionArn: batch.functionArn,
+							functionArn: storeMessagesInTimestream.functionArn,
 						},
 					},
 				],
@@ -241,62 +131,70 @@ export class HistoricalData extends CloudFormation.Resource {
 			},
 		})
 
-		batch.addPermission('batchInvokeByIot', {
+		storeMessagesInTimestream.addPermission('storeUpdatesRule', {
 			principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
-			sourceArn: batchRule.attrArn,
+			sourceArn: storeUpdatesRule.attrArn,
 		})
 
-		// Concatenate the log files
-
-		const concatenate = new Lambda.Function(this, 'concatenate', {
-			layers: lambdas.layers,
-			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
-			timeout: CloudFormation.Duration.seconds(900),
-			memorySize: 1792,
-			code: lambdas.lambdas.concatenateRawMessages,
-			description:
-				'Runs every hour and concatenates the raw device messages so it is more performant for Athena to query them.',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					resources: [
-						this.dataBucket.bucketArn,
-						`${this.dataBucket.bucketArn}/*`,
-					],
-					actions: [
-						's3:ListBucket',
-						's3:GetObject',
-						's3:PutObject',
-						's3:DeleteObject',
-					],
-				}),
-			],
-			environment: {
-				HISTORICAL_DATA_BUCKET: this.dataBucket.bucketName,
-				VERSION: this.node.tryGetContext('version'),
+		const storeMessagesRule = new IoT.CfnTopicRule(this, 'storeMessagesRule', {
+			topicRulePayload: {
+				awsIotSqlVersion: '2016-03-23',
+				description: 'Store all messages in Timestream',
+				ruleDisabled: false,
+				sql:
+					"SELECT * as message, timestamp() as timestamp, clientid() as deviceId FROM '+/messages'",
+				actions: [
+					{
+						lambda: {
+							functionArn: storeMessagesInTimestream.functionArn,
+						},
+					},
+				],
+				errorAction: {
+					republish: {
+						roleArn: topicRuleRole.roleArn,
+						topic: 'errors',
+					},
+				},
 			},
-			reservedConcurrentExecutions: 1,
 		})
 
-		new LambdaLogGroup(this, 'concatenateLogs', concatenate)
-
-		const rule = new Events.Rule(this, 'invokeconcatenateRule', {
-			schedule: Events.Schedule.expression('rate(1 hour)'),
-			description:
-				'Invoke the lambda which concatenates the raw device messages',
-			enabled: true,
-			targets: [new EventTargets.LambdaFunction(concatenate)],
+		storeMessagesInTimestream.addPermission('storeMessagesRule', {
+			principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
+			sourceArn: storeMessagesRule.attrArn,
 		})
 
-		concatenate.addPermission('InvokeByEvents', {
-			principal: new IAM.ServicePrincipal('events.amazonaws.com'),
-			sourceArn: rule.ruleArn,
-		})
-
-		// User permissions
-		permissions({ historicalData: this }).forEach((policy) =>
-			userRole.addToPolicy(policy),
+		const storeBatchUpdatesRule = new IoT.CfnTopicRule(
+			this,
+			'storeBatchUpdatesRule',
+			{
+				topicRulePayload: {
+					awsIotSqlVersion: '2016-03-23',
+					description:
+						'Processes all batch messages and store them in Timestream',
+					ruleDisabled: false,
+					sql:
+						"SELECT * as message, clientid() as deviceId, newuuid() as messageId, timestamp() as timestamp FROM '+/batch'",
+					actions: [
+						{
+							lambda: {
+								functionArn: storeMessagesInTimestream.functionArn,
+							},
+						},
+					],
+					errorAction: {
+						republish: {
+							roleArn: topicRuleRole.roleArn,
+							topic: 'errors',
+						},
+					},
+				},
+			},
 		)
+
+		storeMessagesInTimestream.addPermission('storeBatchUpdatesRule', {
+			principal: new IAM.ServicePrincipal('iot.amazonaws.com'),
+			sourceArn: storeBatchUpdatesRule.attrArn,
+		})
 	}
 }

@@ -27,7 +27,6 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@aws-sdk/client-dynamodb-v2-node": "0.1.0-preview.2",
-    "@bifravst/athena-helpers": "8.0.98",
     "@bifravst/cell-geolocation-helpers": "1.3.22",
     "@bifravst/device-ui-server": "2.0.1",
     "@bifravst/firmware-ci": "4.1.4",
@@ -48,7 +47,6 @@
   },
   "devDependencies": {
     "@aws-cdk/aws-apigatewayv2": "1.75.0",
-    "@aws-cdk/aws-athena": "1.75.0",
     "@aws-cdk/aws-cloudfront": "1.75.0",
     "@aws-cdk/aws-codebuild": "1.75.0",
     "@aws-cdk/aws-codepipeline": "1.75.0",
@@ -61,6 +59,7 @@
     "@aws-cdk/aws-ssm": "1.75.0",
     "@aws-cdk/aws-stepfunctions": "1.75.0",
     "@aws-cdk/aws-stepfunctions-tasks": "1.75.0",
+    "@aws-cdk/aws-timestream": "^1.75.0",
     "@aws-cdk/core": "1.75.0",
     "@bifravst/cloudformation-helpers": "4.0.12",
     "@bifravst/code-style": "8.0.134",

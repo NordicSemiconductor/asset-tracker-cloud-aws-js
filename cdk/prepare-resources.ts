@@ -20,8 +20,7 @@ export type CDKLambdas = {
 }
 
 export type BifravstLambdas = {
-	concatenateRawMessages: string
-	processBatchMessages: string
+	storeMessagesInTimestream: string
 	geolocateCellHttpApi: string
 	invokeStepFunctionFromSQS: string
 	geolocateCellFromCacheStepFunction: string
@@ -185,15 +184,10 @@ export const prepareBifravstLambdas = async ({
 			outDir,
 			Bucket: sourceCodeBucketName,
 			lambdas: {
-				concatenateRawMessages: path.resolve(
+				storeMessagesInTimestream: path.resolve(
 					rootDir,
 					'historicalData',
-					'concatenateRawMessagesLambda.ts',
-				),
-				processBatchMessages: path.resolve(
-					rootDir,
-					'historicalData',
-					'processBatchMessages.ts',
+					'storeMessagesInTimestream.ts',
 				),
 				invokeStepFunctionFromSQS: path.resolve(
 					rootDir,

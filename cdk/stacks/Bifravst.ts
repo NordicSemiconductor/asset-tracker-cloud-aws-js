@@ -6,7 +6,6 @@ import * as S3 from '@aws-cdk/aws-s3'
 import * as Iot from '@aws-cdk/aws-iot'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
-import { HistoricalData } from '../resources/HistoricalData'
 import {
 	BifravstLambdas,
 	CDKLambdas,
@@ -20,6 +19,7 @@ import { ThingGroup } from '../resources/ThingGroup'
 import { CORE_STACK_NAME } from './stackName'
 import { LambdasWithLayer } from '../resources/LambdasWithLayer'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
+import { HistoricalData } from '../resources/HistoricalData'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -390,14 +390,14 @@ export class BifravstStack extends CloudFormation.Stack {
 			userRole,
 		})
 
-		new CloudFormation.CfnOutput(this, 'historicalDataBucketName', {
-			value: hd.dataBucket.bucketName,
-			exportName: `${this.stackName}:historicalDataBucketName`,
+		new CloudFormation.CfnOutput(this, 'historicalMessagesTableName', {
+			value: hd.messagesTable.ref,
+			exportName: `${this.stackName}:historicalMessagesTableName`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'historicalDataQueryResultsBucketName', {
-			value: hd.queryResultsBucket.bucketName,
-			exportName: `${this.stackName}:historicalDataQueryResultsBucketName`,
+		new CloudFormation.CfnOutput(this, 'historicalUpdatesTableName', {
+			value: hd.updatesTable.ref,
+			exportName: `${this.stackName}:historicalUpdatesTableName`,
 		})
 
 		// FOTA
@@ -482,8 +482,8 @@ export type StackOutputs = {
 	userIotPolicyArn: string
 	avatarBucketName: string
 	fotaBucketName: string
-	historicalDataBucketName: string
-	historicalDataQueryResultsBucketName: string
+	historicalMessagesTableName: string
+	historicalUpdatesTableName: string
 	geolocationApiUrl: string
 	geolocationApiId: string
 }

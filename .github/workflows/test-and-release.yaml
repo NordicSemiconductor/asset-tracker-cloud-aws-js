@@ -7,7 +7,7 @@ env:
   NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: eu-central-1
+  AWS_DEFAULT_REGION: eu-west-1
   CI: 1
   FORCE_COLOR: 3
 
@@ -90,7 +90,6 @@ jobs:
           always() && !contains(toJSON(github.event.commits.*.message),
           '[skip-cleanup]')
         run: |
-          node cli drop-athena-resources
           node cli purge-iot-user-policy-principals
           node cli purge-cas -i `cat certificates/**/rootCA.id`
           # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
