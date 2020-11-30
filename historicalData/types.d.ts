@@ -25,8 +25,8 @@ type UpdatedDeviceState = {
 		dev?: NumbersAndStringsValueSensor
 		roam?: NumbersAndStringsValueSensor
 	}
-	timestamp: number
 	deviceId: string
+	messageId: string
 }
 
 type DeviceMessage = {
@@ -36,8 +36,8 @@ type DeviceMessage = {
 			ts: number
 		}
 	}
-	timestamp: number
 	deviceId: string
+	messageId: string
 }
 
 type BatchMessage = {
@@ -50,6 +50,6 @@ type BatchMessage = {
 		dev?: NumbersAndStringsValueSensor[]
 		roam?: NumbersAndStringsValueSensor[]
 	}
-	timestamp: number
 	deviceId: string
+	messageId: string
 }

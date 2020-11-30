@@ -14,6 +14,10 @@ export const batchToTimestreamRecords = (
 			Name: 'source',
 			Value: 'batch',
 		},
+		{
+			Name: 'messageId',
+			Value: event.messageId,
+		},
 	])
 
 	const Records: (TimestreamWrite.Record | undefined)[] = Object.entries(

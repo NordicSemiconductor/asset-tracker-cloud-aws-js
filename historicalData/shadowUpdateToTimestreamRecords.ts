@@ -10,6 +10,10 @@ export const shadowUpdateToTimestreamRecords = (
 			Name: 'deviceId',
 			Value: event.deviceId,
 		},
+		{
+			Name: 'messageId',
+			Value: event.messageId,
+		},
 	])
 
 	const Records: (TimestreamWrite.Record | undefined)[] = []

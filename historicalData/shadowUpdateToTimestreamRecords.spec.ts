@@ -4,6 +4,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 	it('should convert a shadow update to Timestream records', () => {
 		const Dimensions = [
 			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
+			{ Name: 'messageId', Value: '022f527b-9c73-4298-adbd-990a2fbbca33' },
 		]
 		expect(
 			shadowUpdateToTimestreamRecords({
@@ -39,8 +40,8 @@ describe('shadowUpdateToTimestreamRecords', () => {
 						ts: 1606395292763,
 					},
 				},
-				timestamp: 1606395294646,
 				deviceId: 'slipslop-particle-santalum',
+				messageId: '022f527b-9c73-4298-adbd-990a2fbbca33',
 			}),
 		).toEqual([
 			{

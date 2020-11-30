@@ -112,7 +112,7 @@ export class HistoricalData extends CloudFormation.Resource {
 					'Store all updates to thing shadow documents in Timestream',
 				ruleDisabled: false,
 				sql:
-					"SELECT state.reported AS reported, timestamp() as timestamp, clientid() as deviceId FROM '$aws/things/+/shadow/update'",
+					"SELECT state.reported AS reported, clientid() as deviceId, newuuid() as messageId FROM '$aws/things/+/shadow/update'",
 				actions: [
 					{
 						lambda: {
@@ -140,7 +140,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				description: 'Store all messages in Timestream',
 				ruleDisabled: false,
 				sql:
-					"SELECT * as message, timestamp() as timestamp, clientid() as deviceId FROM '+/messages'",
+					"SELECT * as message, clientid() as deviceId, newuuid() as messageId FROM '+/messages'",
 				actions: [
 					{
 						lambda: {
@@ -172,7 +172,7 @@ export class HistoricalData extends CloudFormation.Resource {
 						'Processes all batch messages and store them in Timestream',
 					ruleDisabled: false,
 					sql:
-						"SELECT * as batch, clientid() as deviceId, timestamp() as timestamp FROM '+/batch'",
+						"SELECT * as batch, clientid() as deviceId, newuuid() as messageId FROM '+/batch'",
 					actions: [
 						{
 							lambda: {

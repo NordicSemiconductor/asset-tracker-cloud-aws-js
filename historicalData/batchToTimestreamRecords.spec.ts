@@ -5,6 +5,7 @@ describe('batchToTimestreamRecords', () => {
 		const Dimensions = [
 			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
 			{ Name: 'source', Value: 'batch' },
+			{ Name: 'messageId', Value: '4a2785b4-421e-476f-9185-a18b36d18723' },
 		]
 		expect(
 			batchToTimestreamRecords({
@@ -35,7 +36,7 @@ describe('batchToTimestreamRecords', () => {
 					],
 				},
 				deviceId: 'slipslop-particle-santalum',
-				timestamp: 1606483144934,
+				messageId: '4a2785b4-421e-476f-9185-a18b36d18723',
 			}),
 		).toEqual([
 			{

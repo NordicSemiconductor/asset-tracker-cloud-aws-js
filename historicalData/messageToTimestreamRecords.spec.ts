@@ -4,6 +4,7 @@ describe('messageToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {
 		const Dimensions = [
 			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
+			{ Name: 'messageId', Value: '2bba2855-8858-4308-bbce-a91ca230da7a' },
 		]
 		expect(
 			messageToTimestreamRecords({
@@ -13,8 +14,8 @@ describe('messageToTimestreamRecords', () => {
 						ts: 1606474470069,
 					},
 				},
-				timestamp: 1606474470615,
 				deviceId: 'slipslop-particle-santalum',
+				messageId: '2bba2855-8858-4308-bbce-a91ca230da7a',
 			}),
 		).toEqual([
 			{
