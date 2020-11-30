@@ -1,4 +1,5 @@
 import { TimestreamWrite } from 'aws-sdk'
+import { v4 } from 'uuid'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
 import { toRecord } from './toRecord'
 
@@ -10,11 +11,9 @@ export const shadowUpdateToTimestreamRecords = (
 			Name: 'deviceId',
 			Value: event.deviceId,
 		},
-		{
-			Name: 'messageId',
-			Value: event.messageId,
-		},
 	])
+
+	const measureGroup = v4()
 
 	const Records: (TimestreamWrite.Record | undefined)[] = []
 	if (event.reported.bat !== undefined) {
@@ -23,6 +22,7 @@ export const shadowUpdateToTimestreamRecords = (
 				name: 'bat',
 				ts: event.reported.bat.ts,
 				v: event.reported.bat.v,
+				measureGroup,
 			}),
 		)
 	}
@@ -41,6 +41,7 @@ export const shadowUpdateToTimestreamRecords = (
 						name: `${s}.${k}`,
 						v,
 						ts,
+						measureGroup,
 					}),
 				),
 			)

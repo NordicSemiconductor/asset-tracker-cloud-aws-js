@@ -1,4 +1,5 @@
 import { TimestreamWrite } from 'aws-sdk'
+import { v4 } from 'uuid'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
 import { toRecord } from './toRecord'
 
@@ -10,10 +11,6 @@ export const messageToTimestreamRecords = (
 			Name: 'deviceId',
 			Value: event.deviceId,
 		},
-		{
-			Name: 'messageId',
-			Value: event.messageId,
-		},
 	])
 
 	const Records: (TimestreamWrite.Record | undefined)[] = []
@@ -23,6 +20,7 @@ export const messageToTimestreamRecords = (
 				name: 'btn',
 				ts: event.message.btn.ts,
 				v: event.message.btn.v,
+				measureGroup: v4(),
 			}),
 		)
 	}

@@ -4,7 +4,12 @@ describe('messageToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {
 		const Dimensions = [
 			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
-			{ Name: 'messageId', Value: '2bba2855-8858-4308-bbce-a91ca230da7a' },
+			{
+				Name: 'measureGroup',
+				Value: expect.stringMatching(
+					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+				),
+			},
 		]
 		expect(
 			messageToTimestreamRecords({
@@ -15,7 +20,6 @@ describe('messageToTimestreamRecords', () => {
 					},
 				},
 				deviceId: 'slipslop-particle-santalum',
-				messageId: '2bba2855-8858-4308-bbce-a91ca230da7a',
 			}),
 		).toEqual([
 			{
