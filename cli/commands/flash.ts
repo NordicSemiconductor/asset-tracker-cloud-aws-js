@@ -92,7 +92,7 @@ export const flashCommand = ({
 			description: `Flash NB-IoT firmware`,
 		},
 		{
-			flags: '--nodebug',
+			flags: '--nodebugfw',
 			description: `Flash no-debug firmware`,
 		},
 		{
@@ -107,13 +107,17 @@ export const flashCommand = ({
 			flags: '-s, --sec-tag <secTag>',
 			description: `Use this secTag, defaults to ${defaultSecTag}`,
 		},
+		{
+			flags: '--debug',
+			description: `Log debug messages`,
+		},
 	],
 	action: async (
 		deviceId: string,
-		{ dk, nbiot, nodebug, port, firmware, secTag },
+		{ dk, nbiot, nodebugfw, port, firmware, secTag, debug },
 	) => {
 		const hexfile =
-			firmware ?? (await getLatestFirmware({ dk, nbiot, nodebug }))
+			firmware ?? (await getLatestFirmware({ dk, nbiot, nodebug: nodebugfw }))
 
 		console.log(
 			chalk.magenta(`Connecting to device`),
@@ -125,6 +129,8 @@ export const flashCommand = ({
 				dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91'],
 			device: port ?? defaultPort,
 			warn: console.error,
+			debug: debug === true ? console.debug : undefined,
+			progress: debug === true ? console.log : undefined,
 		})
 
 		console.log(
