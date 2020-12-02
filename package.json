@@ -5,8 +5,7 @@
   "main": "./dist/export.js",
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
-    "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress",
-    "postinstall": "npx check-node-version --package"
+    "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress"
   },
   "repository": {
     "type": "git",
