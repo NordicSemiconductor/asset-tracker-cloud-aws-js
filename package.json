@@ -53,7 +53,7 @@
     "@bifravst/device-ui-server": "2.0.1",
     "@bifravst/e2e-bdd-test-runner": "4.0.32",
     "@bifravst/eslint-config-typescript": "5.0.79",
-    "@bifravst/firmware-ci": "4.1.7",
+    "@bifravst/firmware-ci": "4.1.8",
     "@bifravst/object-to-env": "1.0.0",
     "@bifravst/package-layered-lambdas": "3.13.44",
     "@bifravst/random-words": "4.2.1",
