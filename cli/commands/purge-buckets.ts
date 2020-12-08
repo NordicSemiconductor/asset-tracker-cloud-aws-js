@@ -44,7 +44,10 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 			buckets
 				.filter((b) => b)
 				.map(async (bucketName) => {
-					console.log('Purging bucket', bucketName)
+					console.log(
+						chalk.magenta.dim('Purging bucket'),
+						chalk.blue.dim(bucketName),
+					)
 					try {
 						await retry(
 							3,
@@ -56,11 +59,14 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 										.listObjects({ Bucket: bucketName, Marker: nextMarker })
 										.promise()
 									if (!Contents) {
-										console.log(`${bucketName} is empty.`)
+										console.log(chalk.green.dim(`${bucketName} is empty.`))
 									} else {
 										await Promise.all(
 											Contents.map(async (obj) => {
-												console.log(bucketName, obj.Key)
+												console.log(
+													chalk.magenta.dim(bucketName),
+													chalk.blue.dim(obj.Key),
+												)
 												return s3
 													.deleteObject({
 														Bucket: bucketName,
@@ -74,7 +80,7 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 								},
 							})
 							await s3.deleteBucket({ Bucket: bucketName }).promise()
-							console.log(`${bucketName} deleted.`)
+							console.log(chalk.green(`${bucketName} deleted.`))
 						})
 					} catch (err) {
 						console.error(
