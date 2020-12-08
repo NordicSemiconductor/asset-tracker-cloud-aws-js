@@ -6,17 +6,10 @@ import { toRecord } from './toRecord'
 export const messageToTimestreamRecords = (
 	event: DeviceMessage,
 ): TimestreamWrite.Records => {
-	const r = toRecord([
-		{
-			Name: 'deviceId',
-			Value: event.deviceId,
-		},
-	])
-
 	const Records: (TimestreamWrite.Record | undefined)[] = []
 	if (event.message.btn !== undefined) {
 		Records.push(
-			r({
+			toRecord({
 				name: 'btn',
 				ts: event.message.btn.ts,
 				v: event.message.btn.v,

@@ -3,8 +3,6 @@ import { batchToTimestreamRecords } from './batchToTimestreamRecords'
 describe('batchToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {
 		const Dimensions = [
-			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
-			{ Name: 'source', Value: 'batch' },
 			{
 				Name: 'measureGroup',
 				Value: expect.stringMatching(

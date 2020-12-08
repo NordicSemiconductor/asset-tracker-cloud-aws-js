@@ -6,17 +6,6 @@ import { toRecord } from './toRecord'
 export const batchToTimestreamRecords = (
 	event: BatchMessage,
 ): TimestreamWrite.Records => {
-	const r = toRecord([
-		{
-			Name: 'deviceId',
-			Value: event.deviceId,
-		},
-		{
-			Name: 'source',
-			Value: 'batch',
-		},
-	])
-
 	const Records: (TimestreamWrite.Record | undefined)[] = Object.entries(
 		event.batch,
 	)
@@ -27,7 +16,7 @@ export const batchToTimestreamRecords = (
 					const measureGroup = v4()
 					return Object.entries(m.v)
 						.map(([k, v]) =>
-							r({
+							toRecord({
 								name: `${name}.${k}`,
 								v,
 								ts,

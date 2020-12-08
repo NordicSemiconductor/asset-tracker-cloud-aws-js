@@ -16,9 +16,12 @@ const store = storeRecordsInTimeseries({
 	DatabaseName,
 	TableName,
 })
-const storeUpdate = async (Records: TimestreamWrite.Records) => {
-	console.log({ DatabaseName, TableName, Records })
-	return store(Records)
+const storeUpdate = async (
+	Records: TimestreamWrite.Records,
+	Dimensions: TimestreamWrite.Dimensions,
+) => {
+	console.log({ DatabaseName, TableName, Records, Dimensions })
+	return store(Records, { Dimensions })
 }
 
 /**
@@ -29,17 +32,30 @@ export const handler = async (
 ): Promise<void> => {
 	console.log(JSON.stringify(event))
 
+	const Dimensions = [
+		{
+			Name: 'deviceId',
+			Value: event.deviceId,
+		},
+	]
+
 	try {
 		if ('reported' in event) {
-			await storeUpdate(shadowUpdateToTimestreamRecords(event))
+			await storeUpdate(shadowUpdateToTimestreamRecords(event), Dimensions)
 			return
 		}
 		if ('message' in event) {
-			await storeUpdate(messageToTimestreamRecords(event))
+			await storeUpdate(messageToTimestreamRecords(event), Dimensions)
 			return
 		}
 		if ('batch' in event) {
-			await storeUpdate(batchToTimestreamRecords(event))
+			await storeUpdate(batchToTimestreamRecords(event), [
+				...Dimensions,
+				{
+					Name: 'source',
+					Value: 'batch',
+				},
+			])
 			return
 		}
 		console.error(
