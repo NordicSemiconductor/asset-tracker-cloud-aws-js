@@ -13,9 +13,11 @@ export const storeRecordsInTimeseries = ({
 	commonAttributes?: TimestreamWrite.Record,
 ): Promise<void> => {
 	if (Records.length === 0) {
-		console.log({
-			storeRecordsInTimeseries: 'No records to store.',
-		})
+		console.warn(
+			JSON.stringify({
+				storeRecordsInTimeseries: 'No records to store.',
+			}),
+		)
 		return
 	}
 	const request = timestream.writeRecords({

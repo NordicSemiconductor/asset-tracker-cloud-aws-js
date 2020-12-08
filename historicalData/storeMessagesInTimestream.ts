@@ -20,7 +20,9 @@ const storeUpdate = async (
 	Records: TimestreamWrite.Records,
 	Dimensions: TimestreamWrite.Dimensions,
 ) => {
-	console.log({ DatabaseName, TableName, Records, Dimensions })
+	console.debug(
+		JSON.stringify({ DatabaseName, TableName, Records, Dimensions }),
+	)
 	return store(Records, { Dimensions })
 }
 
@@ -30,7 +32,7 @@ const storeUpdate = async (
 export const handler = async (
 	event: UpdatedDeviceState | DeviceMessage | BatchMessage,
 ): Promise<void> => {
-	console.log(JSON.stringify(event))
+	console.debug(JSON.stringify(event))
 
 	const Dimensions = [
 		{
