@@ -3,7 +3,6 @@ import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecor
 describe('shadowUpdateToTimestreamRecords', () => {
 	it('should convert a shadow update to Timestream records', () => {
 		const Dimensions = [
-			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
 			{
 				Name: 'measureGroup',
 				Value: expect.stringMatching(

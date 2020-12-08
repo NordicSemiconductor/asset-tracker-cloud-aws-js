@@ -8,19 +8,24 @@ export const storeRecordsInTimeseries = ({
 	timestream: TimestreamWrite
 	DatabaseName: string
 	TableName: string
-}) => async (Records: TimestreamWrite.Records): Promise<void> => {
+}) => async (
+	Records: TimestreamWrite.Records,
+	commonAttributes?: TimestreamWrite.Record,
+): Promise<void> => {
 	if (Records.length === 0) {
-		console.log({
-			storeRecordsInTimeseries: 'No records to store.',
-		})
+		console.warn(
+			JSON.stringify({
+				storeRecordsInTimeseries: 'No records to store.',
+			}),
+		)
 		return
 	}
-	const args = {
+	const request = timestream.writeRecords({
 		DatabaseName,
 		TableName,
 		Records,
-	}
-	const request = timestream.writeRecords(args)
+		CommonAttributes: commonAttributes,
+	})
 	try {
 		await request.promise()
 	} catch (err) {

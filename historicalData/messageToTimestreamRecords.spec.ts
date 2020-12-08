@@ -3,7 +3,6 @@ import { messageToTimestreamRecords } from './messageToTimestreamRecords'
 describe('messageToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {
 		const Dimensions = [
-			{ Name: 'deviceId', Value: 'slipslop-particle-santalum' },
 			{
 				Name: 'measureGroup',
 				Value: expect.stringMatching(

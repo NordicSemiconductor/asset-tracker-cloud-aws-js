@@ -6,19 +6,12 @@ import { toRecord } from './toRecord'
 export const shadowUpdateToTimestreamRecords = (
 	event: UpdatedDeviceState,
 ): TimestreamWrite.Records => {
-	const r = toRecord([
-		{
-			Name: 'deviceId',
-			Value: event.deviceId,
-		},
-	])
-
 	const measureGroup = v4()
 
 	const Records: (TimestreamWrite.Record | undefined)[] = []
 	if (event.reported.bat !== undefined) {
 		Records.push(
-			r({
+			toRecord({
 				name: 'bat',
 				ts: event.reported.bat.ts,
 				v: event.reported.bat.v,
@@ -37,7 +30,7 @@ export const shadowUpdateToTimestreamRecords = (
 			const ts = event.reported[s]?.ts as number
 			Records.push(
 				...Object.entries(v).map(([k, v]) =>
-					r({
+					toRecord({
 						name: `${s}.${k}`,
 						v,
 						ts,
