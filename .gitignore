@@ -3,3 +3,4 @@ npm-debug.log
 dist/
 cdk.out/
 certificates/
+log.log
