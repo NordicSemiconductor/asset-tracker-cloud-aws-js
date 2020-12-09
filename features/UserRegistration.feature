@@ -21,10 +21,6 @@ Feature: Register a new account
         Then "awsSdk.res" should match this JSON
             """
             {
-                "UserConfirmed": false,
-                "CodeDeliveryDetails": {
-                    "DeliveryMedium": "EMAIL",
-                    "AttributeName": "email"
-                }
+                "UserConfirmed": false
             }
             """

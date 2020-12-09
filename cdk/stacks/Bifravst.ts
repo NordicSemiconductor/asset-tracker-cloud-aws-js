@@ -89,7 +89,8 @@ export class BifravstStack extends CloudFormation.Stack {
 				email: true,
 			},
 			autoVerify: {
-				email: true,
+				// Do not send verification emails for test accounts
+				email: this.node.tryGetContext('isTest') === true ? false : true,
 			},
 			selfSignUpEnabled: true,
 			passwordPolicy: {
