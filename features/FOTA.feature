@@ -42,7 +42,7 @@ Feature: Device Firmware Upgrade over the air
         "jobId": "{jobId}",
         "targets": ["{cat:arn}"],
         "document": {jobDocument},
-        "description": "Update {cat:id} to version 1.0.1.",
+        "description": "Upgrade {cat:id} to version 1.0.1.",
         "targetSelection": "SNAPSHOT"
       }
       """
