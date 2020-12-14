@@ -55,7 +55,7 @@
     "@bifravst/code-style": "8.0.134",
     "@bifravst/device-ui-server": "2.0.1",
     "@bifravst/e2e-bdd-test-runner": "4.0.41",
-    "@bifravst/eslint-config-typescript": "5.0.81",
+    "@bifravst/eslint-config-typescript": "5.0.82",
     "@bifravst/firmware-ci": "4.1.18",
     "@bifravst/object-to-env": "1.0.0",
     "@bifravst/package-layered-lambdas": "3.13.63",
