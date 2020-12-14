@@ -17,9 +17,9 @@ export class DeviceUIStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:cloudfrontDistributionIdDeviceUi`,
 		})
 
-		new CloudFormation.CfnOutput(this, 'deviceUiDomainName', {
-			value: deviceUIHosting.distribution.attrDomainName,
-			exportName: `${this.stackName}:deviceUiDomainName`,
+		new CloudFormation.CfnOutput(this, 'deviceUiBaseUrl', {
+			value: `https://${deviceUIHosting.distribution.attrDomainName}/`,
+			exportName: `${this.stackName}:deviceUiBaseUrl`,
 		})
 	}
 }

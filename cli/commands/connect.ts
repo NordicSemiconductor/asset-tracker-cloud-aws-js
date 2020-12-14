@@ -27,12 +27,16 @@ export const connectCommand = ({
 	action: async (deviceId: string, { endpoint: e }) => {
 		let deviceUiUrl = ''
 		try {
-			const { deviceUiDomainName } = await stackOutput(
+			const { deviceUiBaseUrl } = await stackOutput(
 				new CloudFormation({ region }),
 			)<StackOutputs>(DEVICEUI_STACK_NAME)
-			deviceUiUrl = `https://${deviceUiDomainName}`
+			deviceUiUrl = deviceUiBaseUrl
 		} catch (err) {
-			console.error(chalk.red.dim(`Could not determine Device UI URL.`))
+			console.error(
+				chalk.red.dim(
+					`Could not determine Device Simulator Web Application URL.`,
+				),
+			)
 		}
 		return connect({
 			deviceId,

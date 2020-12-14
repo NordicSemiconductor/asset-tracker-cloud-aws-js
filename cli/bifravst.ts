@@ -21,6 +21,7 @@ import { region } from '../cdk/regions'
 import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 import { flashCommand } from './commands/flash'
+import { deviceUIConfigCommand } from './commands/device-ui-config'
 
 const iot = new Iot({
 	region,
@@ -75,6 +76,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 		createCACommand({ certsDir }),
 		createDeviceCertCommand({ endpoint, certsDir }),
 		reactConfigCommand(),
+		deviceUIConfigCommand(),
 		infoCommand(),
 		cdCommand(),
 		purgeIotUserPolicyPrincipals(),

@@ -49,20 +49,20 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Whether the continuous deployment of the Web App is enabled or disabled.',
 		})
 
-		// CD for the Device UI is implied by enabled CD (in that case this Stack exists) and enabled Device UI
+		// CD for the Device Simulator Web Application is implied by enabled CD (in that case this Stack exists) and enabled Device Simulator Web Application
 		const enableDeviceUICD = checkFlag({
 			key: 'deviceui',
-			component: 'Device UI Continuous Deployment',
+			component: 'Device Simulator Web Application Continuous Deployment',
 			onUndefined: 'enabled',
 		})
 		new CloudFormation.CfnOutput(this, 'deviceUICD', {
 			value: enableDeviceUICD ? 'enabled' : 'disabled',
 			exportName: `${this.stackName}:deviceUICD`,
 			description:
-				'Whether the continuous deployment of the Device UI is enabled or disabled.',
+				'Whether the continuous deployment of the Device Simulator Web Application is enabled or disabled.',
 		})
 
-		// CD for the Device UI is implied by enabled CD (in that case this Stack exists) and enabled Device UI
+		// CD for the Device Simulator Web Application is implied by enabled CD (in that case this Stack exists) and enabled Device Simulator Web Application
 		const enabledFirmwareCiCD = checkFlag({
 			key: 'firmware-ci',
 			component: 'Firmware CI Continuous Deployment',
@@ -240,14 +240,15 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			).codeBuildProject
 		}
 
-		// Sets up the continuous deployment for the device UI
+		// Sets up the continuous deployment for the Device Simulator Web Application
 		let deviceUICDProject
 		if (enableDeviceUICD) {
 			deviceUICDProject = new WebAppCD(
 				this,
 				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
 				{
-					description: 'Continuously deploys the Bifravst Device UI',
+					description:
+						'Continuously deploys the Bifravst Device Simulator Web Application',
 					sourceCodeActions: {
 						bifravst: bifravstSourceCodeAction,
 						webApp: deviceUISourceCodeAction,

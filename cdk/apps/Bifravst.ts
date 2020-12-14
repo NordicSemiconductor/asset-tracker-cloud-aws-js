@@ -36,10 +36,10 @@ export class BifravstApp extends App {
 			onUndefined: 'enabled',
 			onEnabled: () => new WebAppStack(this),
 		})
-		// Device UI
+		// Device Simulator Web Application
 		checkFlag({
 			key: 'deviceui',
-			component: 'Device UI',
+			component: 'Device Simulator Web Application',
 			onUndefined: 'enabled',
 			onEnabled: () => new DeviceUIStack(this),
 		})
