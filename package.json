@@ -79,7 +79,7 @@
     "cdk": "1.78.0",
     "chalk": "4.1.0",
     "change-case": "4.1.2",
-    "commander": "6.2.0",
+    "commander": "6.2.1",
     "date-fns": "2.16.1",
     "eslint": "7.15.0",
     "husky": "4.3.6",
