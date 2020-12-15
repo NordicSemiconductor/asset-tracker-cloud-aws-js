@@ -65,7 +65,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_12_X,
-			timeout: CloudFormation.Duration.seconds(60),
+			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,
 			code: lambdas.lambdas.storeMessagesInTimestream,
 			description:
