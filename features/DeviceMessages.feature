@@ -35,7 +35,9 @@ Feature: Device: Messages
       """
       SELECT measure_value::double AS value
       FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
-      WHERE deviceId='{cat:id}' AND measure_name='btn' AND measure_value::double IS NOT NULL LIMIT 2
+      WHERE deviceId='{cat:id}' AND measure_name='btn' AND measure_value::double IS NOT NULL
+      ORDER BY time DESC
+      LIMIT 2
       """
     Then "timestreamQueryResult" should match this JSON
       """
