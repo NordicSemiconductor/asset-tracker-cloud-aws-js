@@ -1,6 +1,6 @@
 Feature: Device: Messages
 
-  Devices can publish arbitrary messages on a special topic
+  Devices can publish arbitrary messages on the /messages topic
 
   Background:
 
@@ -9,11 +9,13 @@ Feature: Device: Messages
   Scenario: Devices publishes that a button was pressed
 
     Given I store "$millis()" into "ts"
+    And I store "$floor($random() * 1024)" into "button1"
+    And I store "$floor($random() * 1024)" into "button2"
     Then the cat tracker publishes this message to the topic {cat:id}/messages
       """
       {
       "btn": {
-      "v": 1,
+      "v": {button1},
       "ts": {ts}
       }
       }
@@ -23,14 +25,11 @@ Feature: Device: Messages
       """
       {
       "btn": {
-      "v": 0,
+      "v": {button2},
       "ts": {ts}
       }
       }
       """
-
-  Scenario: Query the message data
-
     Given I am authenticated with Cognito
     When I run this Timestream query
       """
@@ -42,10 +41,10 @@ Feature: Device: Messages
       """
       [
         {
-          "value": 1
+          "value": {button1}
         },
         {
-          "value": 0
+          "value": {button2}
         }
       ]
       """
