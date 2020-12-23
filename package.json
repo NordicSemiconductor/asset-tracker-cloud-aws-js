@@ -57,7 +57,7 @@
     "@bifravst/e2e-bdd-test-runner": "4.0.47",
     "@bifravst/eslint-config-typescript": "5.0.84",
     "@bifravst/firmware-ci": "5.0.0",
-    "@bifravst/object-to-env": "1.0.0",
+    "@bifravst/object-to-env": "1.0.1",
     "@bifravst/package-layered-lambdas": "3.13.77",
     "@bifravst/random-words": "4.2.1",
     "@bifravst/timestream-helpers": "1.3.10",
