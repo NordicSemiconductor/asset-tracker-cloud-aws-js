@@ -51,7 +51,7 @@
     "@aws-cdk/aws-stepfunctions-tasks": "1.81.0",
     "@aws-cdk/aws-timestream": "1.81.0",
     "@aws-cdk/core": "1.81.0",
-    "@bifravst/cloudformation-helpers": "4.0.31",
+    "@bifravst/cloudformation-helpers": "4.0.34",
     "@bifravst/code-style": "8.0.134",
     "@bifravst/device-ui-server": "2.0.2",
     "@bifravst/e2e-bdd-test-runner": "4.0.52",
