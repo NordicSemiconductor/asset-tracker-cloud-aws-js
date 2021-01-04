@@ -1,5 +1,14 @@
 import { CommandDefinition } from './CommandDefinition'
-import { S3, CloudFormation } from 'aws-sdk'
+import {
+	CloudFormationClient,
+	DescribeStackResourcesCommand,
+} from '@aws-sdk/client-cloudformation'
+import {
+	DeleteBucketCommand,
+	DeleteObjectCommand,
+	ListObjectsCommand,
+	S3Client,
+} from '@aws-sdk/client-s3'
 import * as chalk from 'chalk'
 import { retry } from './retry'
 import { region } from '../../cdk/regions'
@@ -12,12 +21,12 @@ import {
 } from '../../cdk/stacks/stackName'
 import { paginate } from '../../util/paginate'
 
-const cf = new CloudFormation({ region })
+const cf = new CloudFormationClient({ region })
 
 const listBuckets = async (StackName: string) =>
 	cf
-		.describeStackResources({ StackName })
-		.promise()
+		.send(new DescribeStackResourcesCommand({ StackName }))
+
 		.then(
 			(res) =>
 				res?.StackResources?.filter(
@@ -39,7 +48,7 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 			...(await listBuckets(CONTINUOUS_DEPLOYMENT_STACK_NAME)),
 			...(await listBuckets(FIRMWARE_CI_STACK_NAME)),
 		]
-		const s3 = new S3({ region })
+		const s3 = new S3Client({ region })
 		await Promise.all(
 			buckets
 				.filter((b) => b)
@@ -55,9 +64,13 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 						)(async () => {
 							await paginate({
 								paginator: async (nextMarker?: string) => {
-									const { Contents, Marker } = await s3
-										.listObjects({ Bucket: bucketName, Marker: nextMarker })
-										.promise()
+									const { Contents, Marker } = await s3.send(
+										new ListObjectsCommand({
+											Bucket: bucketName,
+											Marker: nextMarker,
+										}),
+									)
+
 									if (!Contents) {
 										console.log(chalk.green.dim(`${bucketName} is empty.`))
 									} else {
@@ -67,19 +80,19 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 													chalk.magenta.dim(bucketName),
 													chalk.blue.dim(obj.Key),
 												)
-												return s3
-													.deleteObject({
+												return s3.send(
+													new DeleteObjectCommand({
 														Bucket: bucketName,
 														Key: `${obj.Key}`,
-													})
-													.promise()
+													}),
+												)
 											}),
 										)
 									}
 									return Marker
 								},
 							})
-							await s3.deleteBucket({ Bucket: bucketName }).promise()
+							await s3.send(new DeleteBucketCommand({ Bucket: bucketName }))
 							console.log(chalk.green(`${bucketName} deleted.`))
 						})
 					} catch (err) {

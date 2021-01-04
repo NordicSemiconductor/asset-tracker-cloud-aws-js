@@ -3,7 +3,7 @@ import * as path from 'path'
 import { connect } from '../device/connect'
 import { StackOutputs } from '../../cdk/stacks/Bifravst'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
-import { CloudFormation } from 'aws-sdk'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { region } from '../../cdk/regions'
 import * as chalk from 'chalk'
 import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName'
@@ -28,7 +28,7 @@ export const connectCommand = ({
 		let deviceUiUrl = ''
 		try {
 			const { deviceUiBaseUrl } = await stackOutput(
-				new CloudFormation({ region }),
+				new CloudFormationClient({ region }),
 			)<StackOutputs>(DEVICEUI_STACK_NAME)
 			deviceUiUrl = deviceUiBaseUrl
 		} catch (err) {

@@ -6,7 +6,7 @@ import {
 import { BifravstWorld } from '../run-features'
 import { createDevice } from '../../cli/firmware-ci/createDevice'
 import { deleteDevice } from '../../cli/firmware-ci/deleteDevice'
-import { Iot } from 'aws-sdk'
+import { IoTClient } from '@aws-sdk/client-iot'
 
 export const firmwareCIStepRunners = ({
 	mqttEndpoint,
@@ -15,7 +15,7 @@ export const firmwareCIStepRunners = ({
 }: {
 	certsDir: string
 	mqttEndpoint: string
-	iot: Iot
+	iot: IoTClient
 }): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => {
 	return [
 		regexMatcher<BifravstWorld>(/^I create a firmware CI device as "([^"]+)"$/)(

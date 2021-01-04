@@ -4,12 +4,12 @@ import {
 	prepareBifravstLambdas,
 	prepareCDKLambdas,
 } from './prepare-resources'
-import { SSM } from 'aws-sdk'
+import { SSMClient } from '@aws-sdk/client-ssm'
 import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
 import { region } from './regions'
 
 const fetchUnwiredLabsApiSettings = getApiSettings({
-	ssm: new SSM({ region }),
+	ssm: new SSMClient({ region }),
 })
 
 const rootDir = process.cwd()

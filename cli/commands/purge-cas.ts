@@ -1,5 +1,12 @@
 import { CommandDefinition } from './CommandDefinition'
-import { Iot, CloudFormation } from 'aws-sdk'
+import {
+	DeleteCACertificateCommand,
+	DescribeCACertificateCommand,
+	IoTClient,
+	ListCACertificatesCommand,
+	UpdateCACertificateCommand,
+} from '@aws-sdk/client-iot'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { paginate } from '../../util/paginate'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { region } from '../../cdk/regions'
@@ -9,14 +16,15 @@ const purgeCACertificate = ({
 	iot,
 	thingGroupName,
 }: {
-	iot: Iot
+	iot: IoTClient
 	thingGroupName: string
 }) => async (certificateId: string) => {
-	const cert = await iot
-		.describeCACertificate({
+	const cert = await iot.send(
+		new DescribeCACertificateCommand({
 			certificateId,
-		})
-		.promise()
+		}),
+	)
+
 	const config = JSON.parse(cert.registrationConfig?.templateBody ?? '{}')
 	if (
 		(
@@ -24,18 +32,19 @@ const purgeCACertificate = ({
 		).includes(thingGroupName)
 	) {
 		console.log(`Marking CA certificate ${certificateId} as INACTIVE ...`)
-		await iot
-			.updateCACertificate({
+		await iot.send(
+			new UpdateCACertificateCommand({
 				certificateId,
 				newStatus: 'INACTIVE',
-			})
-			.promise()
+			}),
+		)
+
 		console.log(`Deleting CA certificate ${certificateId}...`)
-		await iot
-			.deleteCACertificate({
+		await iot.send(
+			new DeleteCACertificateCommand({
 				certificateId,
-			})
-			.promise()
+			}),
+		)
 	} else {
 		console.log(`Not a Bifravst CA: ${certificateId}`)
 	}
@@ -50,9 +59,11 @@ export const purgeCAsCommand = (): CommandDefinition => ({
 		},
 	],
 	action: async ({ caId }: { caId: string }) => {
-		const iot = new Iot({ region })
+		const iot = new IoTClient({ region })
 		const { thingGroupName } = {
-			...(await stackOutput(new CloudFormation({ region }))(CORE_STACK_NAME)),
+			...(await stackOutput(new CloudFormationClient({ region }))(
+				CORE_STACK_NAME,
+			)),
 		} as { [key: string]: string }
 
 		const purge = purgeCACertificate({ iot, thingGroupName })
@@ -62,10 +73,12 @@ export const purgeCAsCommand = (): CommandDefinition => ({
 		return paginate({
 			paginator: async (marker?: any) =>
 				iot
-					.listCACertificates({
-						marker,
-					})
-					.promise()
+					.send(
+						new ListCACertificatesCommand({
+							marker,
+						}),
+					)
+
 					.then(async ({ certificates, nextMarker }) => {
 						await Promise.all(
 							certificates?.map(async ({ certificateId }) =>

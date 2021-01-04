@@ -1,4 +1,10 @@
-import { Iot } from 'aws-sdk'
+import {
+	AddThingToThingGroupCommand,
+	AttachThingPrincipalCommand,
+	CreateKeysAndCertificateCommand,
+	CreateThingCommand,
+	IoTClient,
+} from '@aws-sdk/client-iot'
 import { v4 } from 'uuid'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
@@ -10,38 +16,39 @@ export const createDevice = async ({
 	certsDir,
 	endpoint,
 }: {
-	iot: Iot
+	iot: IoTClient
 	certsDir: string
 	thingGroupName: string
 	endpoint: string
 }): Promise<{ thingArn: string; thingName: string }> => {
 	const thingName = `firmware-ci-${v4()}`
 
-	const { thingArn } = await iot
-		.createThing({
+	const { thingArn } = await iot.send(
+		new CreateThingCommand({
 			thingName,
-		})
-		.promise()
+		}),
+	)
 
-	await iot
-		.addThingToThingGroup({
+	await iot.send(
+		new AddThingToThingGroupCommand({
 			thingArn,
 			thingGroupName,
-		})
-		.promise()
+		}),
+	)
 
-	const certs = await iot
-		.createKeysAndCertificate({ setAsActive: true })
-		.promise()
+	const certs = await iot.send(
+		new CreateKeysAndCertificateCommand({ setAsActive: true }),
+	)
+
 	if (certs.certificateArn === undefined)
 		throw new Error(`Failed to create certificate.`)
 
-	await iot
-		.attachThingPrincipal({
+	await iot.send(
+		new AttachThingPrincipalCommand({
 			principal: certs.certificateArn,
 			thingName,
-		})
-		.promise()
+		}),
+	)
 
 	const certificate = deviceFileLocations({ certsDir, deviceId: thingName })
 

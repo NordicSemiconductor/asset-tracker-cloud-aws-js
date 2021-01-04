@@ -1,11 +1,8 @@
-import {
-	DynamoDBClient,
-	GetItemCommand,
-} from '@aws-sdk/client-dynamodb-v2-node'
+import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from './ErrorInfo'
-import { SQS } from 'aws-sdk'
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
 import { Option, some, none } from 'fp-ts/lib/Option'
 
 export type Cell = {
@@ -97,7 +94,7 @@ export const queueCellGeolocationResolutionJob = ({
 	sqs,
 	QueueUrl,
 }: {
-	sqs: SQS
+	sqs: SQSClient
 	QueueUrl: string
 }) => (cell: Cell): TE.TaskEither<ErrorInfo, void> =>
 	TE.tryCatch(
@@ -109,14 +106,14 @@ export const queueCellGeolocationResolutionJob = ({
 					},
 				}),
 			)
-			const { MessageId, SequenceNumber } = await sqs
-				.sendMessage({
+			const { MessageId, SequenceNumber } = await sqs.send(
+				new SendMessageCommand({
 					QueueUrl,
 					MessageBody: JSON.stringify(cell),
 					MessageGroupId: cellId(cell),
 					MessageDeduplicationId: cellId(cell),
-				})
-				.promise()
+				}),
+			)
 			console.debug(
 				JSON.stringify({
 					queueCellGeolocationResolutionJob: {

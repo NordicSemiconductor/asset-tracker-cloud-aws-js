@@ -1,4 +1,4 @@
-import { CloudFormation } from 'aws-sdk'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import {
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	CORE_STACK_NAME,
@@ -11,7 +11,7 @@ import { StackOutputs } from '../../cdk/stacks/ContinuousDeployment'
  * Returns the active pipelines of the CD stack
  */
 export const listPipelines = async (): Promise<string[]> => {
-	const cf = new CloudFormation({ region })
+	const cf = new CloudFormationClient({ region })
 	const config = await stackOutput(cf)<StackOutputs>(
 		CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	)

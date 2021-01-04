@@ -1,4 +1,13 @@
-import { CodePipeline, SSM } from 'aws-sdk'
+import {
+	CodePipelineClient,
+	GetPipelineCommand,
+	UpdatePipelineCommand,
+} from '@aws-sdk/client-codepipeline'
+import {
+	DeleteParameterCommand,
+	PutParameterCommand,
+	SSMClient,
+} from '@aws-sdk/client-ssm'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { region } from '../../cdk/regions'
@@ -7,44 +16,44 @@ import { listPipelines } from '../cd/listPipelines'
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',
 	action: async (token: string) => {
-		const ssm = new SSM({ region })
+		const ssm = new SSMClient({ region })
 		try {
-			await ssm
-				.deleteParameter({
+			await ssm.send(
+				new DeleteParameterCommand({
 					Name: '/codebuild/github-token',
-				})
-				.promise()
+				}),
+			)
 		} catch {
 			// pass
 		}
-		await ssm
-			.putParameter({
+		await ssm.send(
+			new PutParameterCommand({
 				Name: '/codebuild/github-token',
 				Value: token,
 				Type: 'String',
-			})
-			.promise()
-		const cp = new CodePipeline({ region })
+			}),
+		)
+
+		const cp = new CodePipelineClient({ region })
 		const pipelines = await listPipelines()
 		await Promise.all(
 			pipelines.map(async (name) => {
-				const { pipeline } = await cp
-					.getPipeline({
+				const { pipeline } = await cp.send(
+					new GetPipelineCommand({
 						name: name,
-					})
-					.promise()
-
-				if (pipeline) {
+					}),
+				)
+				if (pipeline !== undefined) {
 					console.log(JSON.stringify(pipeline, null, 2))
-					await cp
-						.updatePipeline({
+					await cp.send(
+						new UpdatePipelineCommand({
 							pipeline: {
 								...pipeline,
 								stages: [
-									...pipeline.stages.map((stage) => ({
+									...(pipeline.stages?.map((stage) => ({
 										...stage,
 										actions: [
-											...stage.actions.map((action) => ({
+											...(stage.actions?.map((action) => ({
 												...action,
 												configuration: {
 													...action.configuration,
@@ -52,13 +61,13 @@ export const cdUpdateTokenCommand = (): CommandDefinition => ({
 														? { OAuthToken: token }
 														: {}),
 												},
-											})),
+											})) ?? []),
 										],
-									})),
+									})) ?? []),
 								],
 							},
-						})
-						.promise()
+						}),
+					)
 					console.log(chalk.green(`${name}`))
 				}
 			}),

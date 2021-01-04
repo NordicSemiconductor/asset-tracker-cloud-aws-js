@@ -14,7 +14,9 @@ import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { bifravstStepRunners } from './steps/bifravst'
-import { STS, CloudFormation, Iot, TimestreamQuery } from 'aws-sdk'
+import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { IoTClient } from '@aws-sdk/client-iot'
 import { v4 } from 'uuid'
 import { region } from '../cdk/regions'
 import {
@@ -26,6 +28,7 @@ import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
 import { timestreamStepRunners } from './steps/timestream'
+import { getTimestreamQueryClient } from '../historicalData/timestreamClient'
 
 let ran = false
 
@@ -73,16 +76,16 @@ program
 				progress,
 				retry,
 			} = options
-			const cf = new CloudFormation({ region })
+			const cf = new CloudFormationClient({ region })
 			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
 
 			const firmwareCIStackConfig = await stackOutput(
 				cf,
 			)<FirmwareCIStackOutputs>(ciStackName)
 
-			const { Account: accountId } = await new STS({ region })
-				.getCallerIdentity()
-				.promise()
+			const { Account: accountId } = await new STSClient({
+				region,
+			}).send(new GetCallerIdentityCommand({}))
 
 			const [
 				historicaldataDatabaseName,
@@ -150,7 +153,7 @@ program
 					.addStepRunners(
 						firmwareCIStepRunners({
 							...world,
-							iot: new Iot({ region }),
+							iot: new IoTClient({ region }),
 						}),
 					)
 					.addStepRunners(storageStepRunners())
@@ -215,7 +218,7 @@ program
 					)
 					.addStepRunners(
 						timestreamStepRunners({
-							timestream: new TimestreamQuery({ region }),
+							timestream: await getTimestreamQueryClient({ region }),
 						}),
 					)
 					.run()

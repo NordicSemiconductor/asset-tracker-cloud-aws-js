@@ -1,7 +1,8 @@
 import * as program from 'commander'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
-import { Iot, STS } from 'aws-sdk'
+import { IoTClient } from '@aws-sdk/client-iot'
+import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import * as path from 'path'
 import { cdCommand } from './commands/cd'
 import { createDeviceCertCommand } from './commands/create-device-cert'
@@ -23,7 +24,7 @@ import { certsDir as provideCertsDir } from './jitp/certsDir'
 import { flashCommand } from './commands/flash'
 import { deviceUIConfigCommand } from './commands/device-ui-config'
 
-const iot = new Iot({
+const iot = new IoTClient({
 	region,
 })
 const version = JSON.parse(
@@ -32,7 +33,7 @@ const version = JSON.parse(
 
 const config = async () => {
 	const [accessKeyInfo, endpoint] = await Promise.all([
-		new STS().getCallerIdentity().promise(),
+		new STSClient({ region }).send(new GetCallerIdentityCommand({})),
 		getIotEndpoint(iot),
 	])
 

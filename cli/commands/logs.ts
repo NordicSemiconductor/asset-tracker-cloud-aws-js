@@ -1,4 +1,12 @@
-import { CloudFormation, CloudWatchLogs } from 'aws-sdk'
+import {
+	CloudFormationClient,
+	DescribeStackResourcesCommand,
+} from '@aws-sdk/client-cloudformation'
+import {
+	CloudWatchLogsClient,
+	DescribeLogStreamsCommand,
+	GetLogEventsCommand,
+} from '@aws-sdk/client-cloudwatch-logs'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { region } from '../../cdk/regions'
@@ -17,14 +25,14 @@ export const logsCommand = (): CommandDefinition => ({
 		},
 	],
 	action: async ({ numLogGroups, numLogStreams }) => {
-		const cf = new CloudFormation({ region })
-		const logs = new CloudWatchLogs({ region })
+		const cf = new CloudFormationClient({ region })
+		const logs = new CloudWatchLogsClient({ region })
 
 		const logGroups =
 			(
-				await cf
-					.describeStackResources({ StackName: CORE_STACK_NAME })
-					.promise()
+				await cf.send(
+					new DescribeStackResourcesCommand({ StackName: CORE_STACK_NAME }),
+				)
 			).StackResources?.filter(
 				({ ResourceType }) => ResourceType === 'AWS::Logs::LogGroup',
 			)?.map(({ PhysicalResourceId }) => PhysicalResourceId as string) ??
@@ -32,14 +40,15 @@ export const logsCommand = (): CommandDefinition => ({
 
 		const streams = await Promise.all(
 			logGroups.map(async (logGroupName) => {
-				const { logStreams } = await logs
-					.describeLogStreams({
+				const { logStreams } = await logs.send(
+					new DescribeLogStreamsCommand({
 						logGroupName,
 						orderBy: 'LastEventTime',
 						descending: true,
 						limit: numLogGroups !== undefined ? parseInt(numLogGroups, 10) : 1,
-					})
-					.promise()
+					}),
+				)
+
 				return {
 					logGroupName,
 					logStreams:
@@ -53,8 +62,8 @@ export const logsCommand = (): CommandDefinition => ({
 			streams.map(async ({ logGroupName, logStreams }) => {
 				const l = await Promise.all(
 					logStreams.map(async (logStreamName) =>
-						logs
-							.getLogEvents({
+						logs.send(
+							new GetLogEventsCommand({
 								logGroupName,
 								logStreamName,
 								startFromHead: false,
@@ -62,8 +71,8 @@ export const logsCommand = (): CommandDefinition => ({
 									numLogStreams !== undefined
 										? parseInt(numLogStreams, 10)
 										: 100,
-							})
-							.promise(),
+							}),
+						),
 					),
 				)
 				console.log(chalk.yellow(logGroupName))

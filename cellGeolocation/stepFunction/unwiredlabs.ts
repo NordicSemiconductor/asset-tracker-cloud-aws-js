@@ -1,21 +1,21 @@
-import { SSM } from 'aws-sdk'
+import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm'
 import { request as nodeRequest } from 'https'
 import { parse } from 'url'
 import { MaybeCellGeoLocation } from './types'
 import { Cell } from '../geolocateCell'
 
-export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
+export const getApiSettings = ({ ssm }: { ssm: SSMClient }) => async ({
 	api,
 }: {
 	api: 'unwiredlabs'
 }): Promise<{ apiKey: string; endpoint: string }> => {
 	const Path = `/bifravst/cellGeoLocation/${api}`
-	const { Parameters } = await ssm
-		.getParametersByPath({
+	const { Parameters } = await ssm.send(
+		new GetParametersByPathCommand({
 			Path,
 			Recursive: true,
-		})
-		.promise()
+		}),
+	)
 
 	const apiKey = Parameters?.find(
 		({ Name }) => Name?.replace(`${Path}/`, '') === 'apiKey',
@@ -31,7 +31,7 @@ export const getApiSettings = ({ ssm }: { ssm: SSM }) => async ({
 	}
 }
 
-const fetchSettings = getApiSettings({ ssm: new SSM() })
+const fetchSettings = getApiSettings({ ssm: new SSMClient({}) })
 
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	try {

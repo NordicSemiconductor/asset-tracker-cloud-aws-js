@@ -1,7 +1,8 @@
 import * as chalk from 'chalk'
 import { CommandDefinition } from './CommandDefinition'
 import { createCA } from '../jitp/createCA'
-import { Iot, CloudFormation } from 'aws-sdk'
+import { IoTClient } from '@aws-sdk/client-iot'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { region } from '../../cdk/regions'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 
@@ -12,8 +13,8 @@ export const createCACommand = ({
 }): CommandDefinition => ({
 	command: 'create-ca',
 	action: async () => {
-		const iot = new Iot({ region })
-		const cf = new CloudFormation({ region })
+		const iot = new IoTClient({ region })
+		const cf = new CloudFormationClient({ region })
 
 		const { certificateId } = await createCA({
 			certsDir,

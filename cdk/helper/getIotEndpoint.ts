@@ -1,9 +1,8 @@
-import { Iot } from 'aws-sdk'
+import { DescribeEndpointCommand, IoTClient } from '@aws-sdk/client-iot'
 
-export const getIotEndpoint = async (iot: Iot): Promise<string> =>
+export const getIotEndpoint = async (iot: IoTClient): Promise<string> =>
 	iot
-		.describeEndpoint({ endpointType: 'iot:Data-ATS' })
-		.promise()
+		.send(new DescribeEndpointCommand({ endpointType: 'iot:Data-ATS' }))
 		.then(({ endpointAddress }) => {
 			if (endpointAddress === null || endpointAddress === undefined) {
 				throw new Error(`Failed to resolved AWS IoT endpoint`)
