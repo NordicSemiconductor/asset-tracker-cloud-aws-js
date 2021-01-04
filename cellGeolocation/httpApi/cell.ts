@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import * as Ajv from 'ajv'
+import Ajv from 'ajv'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { validate } from './validate'
 import * as TE from 'fp-ts/lib/TaskEither'
@@ -35,20 +35,20 @@ const inputSchema = new Ajv().compile({
 	properties: {
 		cell: {
 			type: 'number',
-			min: 1,
+			minimum: 1,
 		},
 		area: {
 			type: 'number',
-			min: 1,
+			minimum: 1,
 		},
 		mccmnc: {
 			type: 'number',
-			min: 10000,
+			minimum: 10000,
 		},
 		// Allow cache busting
 		ts: {
 			type: 'number',
-			min: 1,
+			minimum: 1,
 		},
 	},
 	required: ['cell', 'area', 'mccmnc'],
