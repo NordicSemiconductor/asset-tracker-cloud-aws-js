@@ -3,7 +3,7 @@ import Ajv from 'ajv'
 import { pipe } from 'fp-ts/lib/pipeable'
 import { validate } from './validate'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb-v2-node'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import {
 	geolocateCellFromCache,
 	Cell,
@@ -11,7 +11,7 @@ import {
 } from '../geolocateCell'
 import { toStatusCode, ErrorType } from '../ErrorInfo'
 import { res } from './res'
-import { SQS } from 'aws-sdk'
+import { SQSClient } from '@aws-sdk/client-sqs'
 import { getOrElse } from '../../util/fp-ts'
 import { fromEnv } from '../../util/fromEnv'
 
@@ -27,7 +27,7 @@ const locator = geolocateCellFromCache({
 
 const q = queueCellGeolocationResolutionJob({
 	QueueUrl: cellGeolocationResolutionJobsQueue,
-	sqs: new SQS(),
+	sqs: new SQSClient({}),
 })
 
 const inputSchema = new Ajv().compile({

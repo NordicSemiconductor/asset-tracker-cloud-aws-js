@@ -1,5 +1,5 @@
 import { toTimestreamType } from './toTimestreamType'
-import { TimestreamWrite } from 'aws-sdk'
+import { _Record } from '@aws-sdk/client-timestream-write'
 
 export const toRecord = ({
 	name,
@@ -11,7 +11,7 @@ export const toRecord = ({
 	ts: number
 	v?: any
 	measureGroup: string
-}): TimestreamWrite.Record | undefined => {
+}): _Record | undefined => {
 	if (v === undefined) return
 	return {
 		Dimensions: [

@@ -118,9 +118,9 @@ export const bifravstStepRunners = ({
 				// eslint-disable-next-line require-atomic-updates
 				runner.store[`${prefix}:id`] = catId
 				// eslint-disable-next-line require-atomic-updates
-				runner.store[
-					`${prefix}:arn`
-				] = `arn:aws:iot:${runner.world.region}:${runner.world.accountId}:thing/${catId}`
+				runner.store[`${prefix}:arn`] = `arn:aws:iot:${
+					mqttEndpoint.split('.')[2]
+				}:${runner.world.accountId}:thing/${catId}`
 			}
 			return runner.store[`${prefix}:id`]
 		}),

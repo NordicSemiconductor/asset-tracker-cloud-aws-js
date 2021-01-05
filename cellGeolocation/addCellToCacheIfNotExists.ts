@@ -1,7 +1,4 @@
-import {
-	DynamoDBClient,
-	PutItemCommand,
-} from '@aws-sdk/client-dynamodb-v2-node'
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@bifravst/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from './ErrorInfo'

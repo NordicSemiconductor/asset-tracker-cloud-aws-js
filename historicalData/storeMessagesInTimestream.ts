@@ -1,6 +1,7 @@
-import { TimestreamWrite } from 'aws-sdk'
+import { _Record, Dimension } from '@aws-sdk/client-timestream-write'
 import { fromEnv } from '../util/fromEnv'
 import { batchToTimestreamRecords } from './batchToTimestreamRecords'
+import { getTimestreamWriteClient } from './timestreamClient'
 import { messageToTimestreamRecords } from './messageToTimestreamRecords'
 import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
 import { storeRecordsInTimeseries } from './storeRecordsInTimeseries'
@@ -10,20 +11,18 @@ const { tableInfo } = fromEnv({
 })(process.env)
 
 const [DatabaseName, TableName] = tableInfo.split('|')
+const store = (async () =>
+	storeRecordsInTimeseries({
+		timestream: await getTimestreamWriteClient(),
+		DatabaseName,
+		TableName,
+	}))()
 
-const store = storeRecordsInTimeseries({
-	timestream: new TimestreamWrite(),
-	DatabaseName,
-	TableName,
-})
-const storeUpdate = async (
-	Records: TimestreamWrite.Records,
-	Dimensions: TimestreamWrite.Dimensions,
-) => {
+const storeUpdate = async (Records: _Record[], Dimensions: Dimension[]) => {
 	console.debug(
 		JSON.stringify({ DatabaseName, TableName, Records, Dimensions }),
 	)
-	return store(Records, { Dimensions })
+	return (await store)(Records, { Dimensions })
 }
 
 /**

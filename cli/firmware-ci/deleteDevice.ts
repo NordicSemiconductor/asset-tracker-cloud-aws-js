@@ -1,4 +1,11 @@
-import { Iot } from 'aws-sdk'
+import {
+	DeleteCertificateCommand,
+	DeleteThingCommand,
+	DetachThingPrincipalCommand,
+	IoTClient,
+	RemoveThingFromThingGroupCommand,
+	UpdateCertificateCommand,
+} from '@aws-sdk/client-iot'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
 
@@ -8,7 +15,7 @@ export const deleteDevice = async ({
 	thingName,
 	certsDir,
 }: {
-	iot: Iot
+	iot: IoTClient
 	certsDir: string
 	thingGroupName: string
 	thingName: string
@@ -20,36 +27,36 @@ export const deleteDevice = async ({
 		),
 	)
 
-	await iot
-		.detachThingPrincipal({
+	await iot.send(
+		new DetachThingPrincipalCommand({
 			thingName,
 			principal: certificateArn,
-		})
-		.promise()
+		}),
+	)
 
-	await iot
-		.updateCertificate({
+	await iot.send(
+		new UpdateCertificateCommand({
 			certificateId,
 			newStatus: 'INACTIVE',
-		})
-		.promise()
+		}),
+	)
 
-	await iot
-		.deleteCertificate({
+	await iot.send(
+		new DeleteCertificateCommand({
 			certificateId,
-		})
-		.promise()
+		}),
+	)
 
-	await iot
-		.removeThingFromThingGroup({
+	await iot.send(
+		new RemoveThingFromThingGroupCommand({
 			thingName,
 			thingGroupName,
-		})
-		.promise()
+		}),
+	)
 
-	await iot
-		.deleteThing({
+	await iot.send(
+		new DeleteThingCommand({
 			thingName,
-		})
-		.promise()
+		}),
+	)
 }

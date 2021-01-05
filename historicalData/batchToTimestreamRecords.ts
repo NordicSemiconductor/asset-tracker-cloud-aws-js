@@ -1,14 +1,10 @@
-import { TimestreamWrite } from 'aws-sdk'
+import { _Record } from '@aws-sdk/client-timestream-write'
 import { v4 } from 'uuid'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
 import { toRecord } from './toRecord'
 
-export const batchToTimestreamRecords = (
-	event: BatchMessage,
-): TimestreamWrite.Records => {
-	const Records: (TimestreamWrite.Record | undefined)[] = Object.entries(
-		event.batch,
-	)
+export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
+	const Records: (_Record | undefined)[] = Object.entries(event.batch)
 		.map(([name, messages]) =>
 			(messages as (NumbersValueSensor | NumbersAndStringsValueSensor)[])
 				?.map((m) => {
@@ -30,5 +26,5 @@ export const batchToTimestreamRecords = (
 		)
 		.flat()
 
-	return Records.filter(isNotNullOrUndefined) as TimestreamWrite.Records
+	return Records.filter(isNotNullOrUndefined) as _Record[]
 }

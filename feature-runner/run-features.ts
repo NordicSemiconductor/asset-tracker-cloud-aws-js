@@ -14,9 +14,10 @@ import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/Bifravst'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { bifravstStepRunners } from './steps/bifravst'
-import { STS, CloudFormation, Iot, TimestreamQuery } from 'aws-sdk'
+import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { IoTClient } from '@aws-sdk/client-iot'
 import { v4 } from 'uuid'
-import { region } from '../cdk/regions'
 import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
@@ -26,12 +27,12 @@ import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
 import { timestreamStepRunners } from './steps/timestream'
+import { getTimestreamQueryClient } from '../historicalData/timestreamClient'
 
 let ran = false
 
 export type BifravstWorld = StackOutputs & {
 	accountId: string
-	region: string
 	userIotPolicyName: string
 	historicaldataTableName: string
 	historicaldataDatabaseName: string
@@ -73,16 +74,16 @@ program
 				progress,
 				retry,
 			} = options
-			const cf = new CloudFormation({ region })
+			const cf = new CloudFormationClient({})
 			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
 
 			const firmwareCIStackConfig = await stackOutput(
 				cf,
 			)<FirmwareCIStackOutputs>(ciStackName)
 
-			const { Account: accountId } = await new STS({ region })
-				.getCallerIdentity()
-				.promise()
+			const { Account: accountId } = await new STSClient({}).send(
+				new GetCallerIdentityCommand({}),
+			)
 
 			const [
 				historicaldataDatabaseName,
@@ -99,7 +100,6 @@ program
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				historicaldataTableName,
 				historicaldataDatabaseName,
-				region,
 				accountId: accountId as string,
 				awsIotRootCA: await fs.readFile(
 					path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
@@ -138,7 +138,6 @@ program
 					)
 					.addStepRunners(
 						awsSdkStepRunners({
-							region: world.region,
 							constructorArgs: {
 								IotData: {
 									endpoint: world.mqttEndpoint,
@@ -150,7 +149,7 @@ program
 					.addStepRunners(
 						firmwareCIStepRunners({
 							...world,
-							iot: new Iot({ region }),
+							iot: new IoTClient({}),
 						}),
 					)
 					.addStepRunners(storageStepRunners())
@@ -215,7 +214,7 @@ program
 					)
 					.addStepRunners(
 						timestreamStepRunners({
-							timestream: new TimestreamQuery({ region }),
+							timestream: await getTimestreamQueryClient(),
 						}),
 					)
 					.run()

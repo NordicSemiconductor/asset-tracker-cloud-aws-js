@@ -4,12 +4,10 @@ import {
 	prepareCDKLambdas,
 	prepareResources,
 } from './prepare-resources'
-import { region } from './regions'
 
 const rootDir = process.cwd()
 
 prepareResources({
-	region,
 	rootDir,
 })
 	.then(async (res) => ({

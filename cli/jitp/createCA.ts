@@ -1,4 +1,13 @@
-import { Iot, CloudFormation } from 'aws-sdk'
+import {
+	CloudFormationClient,
+	DescribeStacksCommand,
+} from '@aws-sdk/client-cloudformation'
+import {
+	GetRegistrationCodeCommand,
+	IoTClient,
+	RegisterCACertificateCommand,
+	UpdateEventConfigurationsCommand,
+} from '@aws-sdk/client-iot'
 import { promises as fs } from 'fs'
 import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
@@ -10,8 +19,8 @@ import { toObject } from '@bifravst/cloudformation-helpers'
  */
 export const createCA = async (args: {
 	certsDir: string
-	iot: Iot
-	cf: CloudFormation
+	iot: IoTClient
+	cf: CloudFormationClient
 	stack: string
 	subject?: string
 	log: (...message: any[]) => void
@@ -40,8 +49,7 @@ export const createCA = async (args: {
 	const [stackOutput, registrationCode] = await Promise.all([
 		// Fetch the stack configuration, we need the Thing Group and the role name
 		cf
-			.describeStacks({ StackName: args.stack })
-			.promise()
+			.send(new DescribeStacksCommand({ StackName: args.stack }))
 			.then(async ({ Stacks }) => {
 				if (Stacks?.length === 0 || Stacks?.[0].Outputs === undefined) {
 					throw new Error(`Stack ${args.stack} not found.`)
@@ -50,8 +58,7 @@ export const createCA = async (args: {
 			}),
 		// The registration code ties the CA to the individual AWS account
 		iot
-			.getRegistrationCode()
-			.promise()
+			.send(new GetRegistrationCodeCommand({}))
 			.then(({ registrationCode }) => registrationCode),
 	])
 
@@ -135,8 +142,8 @@ export const createCA = async (args: {
 		fs.readFile(caFiles.verificationCert, 'utf-8'),
 	])
 
-	await iot
-		.updateEventConfigurations({
+	await iot.send(
+		new UpdateEventConfigurationsCommand({
 			eventConfigurations: {
 				CA_CERTIFICATE: {
 					Enabled: true,
@@ -145,11 +152,11 @@ export const createCA = async (args: {
 					Enabled: true,
 				},
 			},
-		})
-		.promise()
+		}),
+	)
 
-	const res = await iot
-		.registerCACertificate({
+	const res = await iot.send(
+		new RegisterCACertificateCommand({
 			caCertificate,
 			verificationCertificate,
 			allowAutoRegistration: true,
@@ -187,8 +194,8 @@ export const createCA = async (args: {
 				}),
 				roleArn: stackOutput?.jitpRoleArn,
 			},
-		})
-		.promise()
+		}),
+	)
 
 	if (res?.certificateId === undefined) {
 		throw new Error('Failed to register CA!')

@@ -1,9 +1,21 @@
-import { Iot } from 'aws-sdk'
+import {
+	AddThingToThingGroupCommand,
+	AttachPolicyCommand,
+	CreateThingGroupCommand,
+	DeleteCertificateCommand,
+	DeleteThingCommand,
+	DetachThingPrincipalCommand,
+	IoTClient,
+	ListThingPrincipalsCommand,
+	ListThingsCommand,
+	ListThingsInThingGroupCommand,
+	UpdateCertificateCommand,
+} from '@aws-sdk/client-iot'
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { paginate } from '../util/paginate'
 import { cfnResponse, ResponseStatus } from '@bifravst/cloudformation-helpers'
 
-const iot = new Iot()
+const iot = new IoTClient({})
 
 export const handler = async (
 	event: CloudFormationCustomResourceEvent,
@@ -26,33 +38,34 @@ export const handler = async (
 
 	try {
 		if (RequestType === 'Create') {
-			const { thingGroupArn } = await iot
-				.createThingGroup({
+			const { thingGroupArn } = await iot.send(
+				new CreateThingGroupCommand({
 					thingGroupName: ThingGroupName,
 					thingGroupProperties: ThingGroupProperties,
-				})
-				.promise()
+				}),
+			)
 			if (thingGroupArn === null || thingGroupArn === undefined) {
 				throw new Error(`Failed to create thing group ${ThingGroupName}!`)
 			}
-			await iot
-				.attachPolicy({
+			await iot.send(
+				new AttachPolicyCommand({
 					policyName: PolicyName,
 					target: thingGroupArn,
-				})
-				.promise()
+				}),
+			)
+
 			// Attach all existing Things to the group
-			const { things } = await iot.listThings().promise()
+			const { things } = await iot.send(new ListThingsCommand({}))
 			if (AddExisting === '1') {
 				// Add exisiting Things to the new group
 				await Promise.all(
 					(things ?? []).map(async ({ thingName }) =>
-						iot
-							.addThingToThingGroup({
+						iot.send(
+							new AddThingToThingGroupCommand({
 								thingName,
 								thingGroupArn,
-							})
-							.promise(),
+							}),
+						),
 					),
 				)
 			}
@@ -64,21 +77,22 @@ export const handler = async (
 		} else if (RequestType === 'Delete') {
 			await paginate({
 				paginator: async (nextToken) => {
-					const { things, nextToken: n } = await iot
-						.listThingsInThingGroup({
+					const { things, nextToken: n } = await iot.send(
+						new ListThingsInThingGroupCommand({
 							thingGroupName: ThingGroupName,
 							nextToken,
-						})
-						.promise()
+						}),
+					)
+
 					// Detach all the certificates, deactivate and delete them
 					// then delete the device
 					await Promise.all(
 						things?.map(async (thing) => {
-							const { principals } = await iot
-								.listThingPrincipals({
+							const { principals } = await iot.send(
+								new ListThingPrincipalsCommand({
 									thingName: thing,
-								})
-								.promise()
+								}),
+							)
 
 							await Promise.all(
 								principals?.map(async (principal) => {
@@ -87,33 +101,35 @@ export const handler = async (
 										`Detaching certificate ${principal} from thing ${thing} ...`,
 									)
 									console.log(`Marking certificate ${principalId} as INACTIVE`)
-									await iot
-										.detachThingPrincipal({
+									await iot.send(
+										new DetachThingPrincipalCommand({
 											thingName: thing,
 											principal,
-										})
-										.promise()
-									await iot
-										.updateCertificate({
+										}),
+									)
+
+									await iot.send(
+										new UpdateCertificateCommand({
 											certificateId: principalId,
 											newStatus: 'INACTIVE',
-										})
-										.promise()
+										}),
+									)
+
 									console.log(`Deleting certificate ${principalId}`)
-									await iot
-										.deleteCertificate({
+									await iot.send(
+										new DeleteCertificateCommand({
 											certificateId: principalId,
-										})
-										.promise()
+										}),
+									)
 								}) ?? [],
 							)
 
 							console.log(`Deleting thing ${thing}...`)
-							await iot
-								.deleteThing({
+							await iot.send(
+								new DeleteThingCommand({
 									thingName: thing,
-								})
-								.promise()
+								}),
+							)
 						}) ?? [],
 					)
 					return n

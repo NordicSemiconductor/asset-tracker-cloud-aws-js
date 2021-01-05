@@ -9,6 +9,3 @@ export const supportedRegions = [
 	'us-west-2',
 	'eu-west-1',
 ]
-
-export const region =
-	process.env.AWS_DEFAULT_REGION ?? process.env.AWS_REGION ?? 'eu-west-1'

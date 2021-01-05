@@ -1,23 +1,26 @@
 import * as chalk from 'chalk'
-import { CodePipeline } from 'aws-sdk'
+import {
+	CodePipelineClient,
+	ListPipelineExecutionsCommand,
+} from '@aws-sdk/client-codepipeline'
 import { formatDistanceToNow } from 'date-fns'
 import { CommandDefinition } from './CommandDefinition'
-import { region } from '../../cdk/regions'
 import { listPipelines } from '../cd/listPipelines'
 
 export const cdCommand = (): CommandDefinition => ({
 	command: 'cd',
 	action: async () => {
 		const pipelines = await listPipelines()
-		const cp = new CodePipeline({ region })
+		const cp = new CodePipelineClient({})
 		const statuses = await Promise.all(
 			pipelines.map(async (name) =>
 				cp
-					.listPipelineExecutions({
-						pipelineName: name,
-						maxResults: 1,
-					})
-					.promise()
+					.send(
+						new ListPipelineExecutionsCommand({
+							pipelineName: name,
+							maxResults: 1,
+						}),
+					)
 					.then(({ pipelineExecutionSummaries }) => ({
 						pipelineName: name,
 						summary: {

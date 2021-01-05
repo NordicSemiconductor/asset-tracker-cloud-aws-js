@@ -1,17 +1,18 @@
-import { TimestreamWrite } from 'aws-sdk'
+import {
+	_Record,
+	TimestreamWriteClient,
+	WriteRecordsCommand,
+} from '@aws-sdk/client-timestream-write'
 
 export const storeRecordsInTimeseries = ({
 	timestream,
 	DatabaseName,
 	TableName,
 }: {
-	timestream: TimestreamWrite
+	timestream: TimestreamWriteClient
 	DatabaseName: string
 	TableName: string
-}) => async (
-	Records: TimestreamWrite.Records,
-	commonAttributes?: TimestreamWrite.Record,
-): Promise<void> => {
+}) => async (Records: _Record[], CommonAttributes?: _Record): Promise<void> => {
 	if (Records.length === 0) {
 		console.warn(
 			JSON.stringify({
@@ -20,14 +21,16 @@ export const storeRecordsInTimeseries = ({
 		)
 		return
 	}
-	const request = timestream.writeRecords({
-		DatabaseName,
-		TableName,
-		Records,
-		CommonAttributes: commonAttributes,
-	})
+	const request = timestream.send(
+		new WriteRecordsCommand({
+			DatabaseName,
+			TableName,
+			Records,
+			CommonAttributes,
+		}),
+	)
 	try {
-		await request.promise()
+		await request
 	} catch (err) {
 		const RejectedRecords = JSON.parse(
 			(request as any).response.httpResponse.body.toString(),

@@ -1,4 +1,4 @@
-import { Iot } from 'aws-sdk'
+import { IoTClient } from '@aws-sdk/client-iot'
 import * as path from 'path'
 import { promises as fs } from 'fs'
 import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
@@ -31,10 +31,8 @@ export type BifravstLambdas = {
 }
 
 export const prepareResources = async ({
-	region,
 	rootDir,
 }: {
-	region: string
 	rootDir: string
 }): Promise<{
 	mqttEndpoint: string
@@ -42,17 +40,15 @@ export const prepareResources = async ({
 	sourceCodeBucketName: string
 }> => {
 	// Detect the AWS IoT endpoint
-	const endpointAddress = await getIotEndpoint(
-		new Iot({
-			region,
-		}),
-	)
+	const endpointAddress = await getIotEndpoint(new IoTClient({}))
 
-	if (!supportedRegions.includes(region)) {
+	if (!supportedRegions.includes(process.env.AWS_REGION ?? 'us-east-1')) {
 		console.log(
 			chalk.yellow.inverse.bold(' WARNING '),
 			chalk.yellow(
-				`Your region ${region} is not in the list of supported regions!`,
+				`Your region ${
+					process.env.AWS_REGION ?? 'us-east-1'
+				} from the environment variable AWS_REGION is not in the list of supported regions!`,
 			),
 		)
 		console.log(
@@ -109,16 +105,16 @@ export const prepareCDKLambdas = async ({
 			} catch (_) {
 				await fs.mkdir(cloudFormationLayerDir)
 			}
-			const devDeps = JSON.parse(
+			const { devDependencies, dependencies } = JSON.parse(
 				await fs.readFile(path.resolve(rootDir, 'package.json'), 'utf-8'),
-			).devDependencies
+			)
 			await fs.writeFile(
 				path.join(cloudFormationLayerDir, 'package.json'),
 				JSON.stringify({
 					dependencies: {
-						'aws-sdk': devDeps['aws-sdk'],
+						'@aws-sdk/client-iot': dependencies['@aws-sdk/client-iot'],
 						'@bifravst/cloudformation-helpers':
-							devDeps['@bifravst/cloudformation-helpers'],
+							devDependencies['@bifravst/cloudformation-helpers'],
 					},
 				}),
 				'utf-8',

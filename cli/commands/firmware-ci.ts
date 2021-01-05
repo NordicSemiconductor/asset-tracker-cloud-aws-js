@@ -1,7 +1,7 @@
-import { CloudFormation, Iot } from 'aws-sdk'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { IoTClient } from '@aws-sdk/client-iot'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
-import { region } from '../../cdk/regions'
 import { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI'
 import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
@@ -33,12 +33,11 @@ export const firmwareCICommand = ({
 		},
 	],
 	action: async ({ create, showSecret, remove }) => {
-		const cf = new CloudFormation({ region })
+		const cf = new CloudFormationClient({})
 		const firmwareCIStackConfig = await stackOutput(cf)<FirmwareCIStackOutputs>(
 			FIRMWARE_CI_STACK_NAME,
 		)
 		console.log()
-		console.log(chalk.grey('  Region:            '), chalk.yellow(region))
 		console.log(
 			chalk.grey('  Bucket name:       '),
 			chalk.yellow(firmwareCIStackConfig.bucketName),
@@ -55,8 +54,7 @@ export const firmwareCICommand = ({
 					: firmwareCIStackConfig.userSecretAccessKey.substr(0, 5) + '***',
 			),
 		)
-		const iot = new Iot({
-			region,
+		const iot = new IoTClient({
 			credentials: {
 				accessKeyId: firmwareCIStackConfig.userAccessKeyId,
 				secretAccessKey: firmwareCIStackConfig.userSecretAccessKey,
