@@ -4,7 +4,7 @@ Feature: Query Data
 
   Background:
 
-    Given I am run after the "Read Device Shadow" feature
+    Given I am run after the "Device: Update Shadow" feature
 
   Scenario: Query historical data
 
