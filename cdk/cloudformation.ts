@@ -6,6 +6,7 @@ import {
 } from './prepare-resources'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
+import * as chalk from 'chalk'
 
 const fetchUnwiredLabsApiSettings = getApiSettings({
 	ssm: new SSMClient({}),
@@ -28,8 +29,11 @@ Promise.all([
 		}),
 	})),
 	fetchUnwiredLabsApiSettings({ api: 'unwiredlabs' }).catch(() => {
-		console.debug(
-			'No UnwiredLabs API key configured. Feature will be disabled.',
+		console.warn(
+			chalk.gray.bold('[Cell Geolocation]'),
+			chalk.gray(
+				'No UnwiredLabs API key configured. Feature will be disabled.',
+			),
 		)
 		return {}
 	}),
