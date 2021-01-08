@@ -41,14 +41,16 @@ Feature: Device: Batch Data
       }
       """
 
-  Scenario: Query the historical gps data
-
     Given I am authenticated with Cognito
     When I run this Timestream query
       """
       SELECT measure_value::double AS value
       FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
-      WHERE deviceId='{cat:id}' AND measure_name='gps.lng' AND measure_value::double IS NOT NULL LIMIT 2
+      WHERE deviceId='{cat:id}'
+      AND measure_name='gps.lng'
+      AND measure_value::double IS NOT NULL
+      ORDER BY time DESC
+      LIMIT 2
       """
     Then "timestreamQueryResult" should match this JSON
       # The values are string because they have not yet run through the formatter
