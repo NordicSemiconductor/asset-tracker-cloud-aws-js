@@ -27,7 +27,7 @@ import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
 import { timestreamStepRunners } from './steps/timestream'
-import { getTimestreamQueryClient } from '../historicalData/timestreamClient'
+import { queryClient } from '@bifravst/timestream-helpers'
 
 let ran = false
 
@@ -214,7 +214,7 @@ program
 					)
 					.addStepRunners(
 						timestreamStepRunners({
-							timestream: await getTimestreamQueryClient(),
+							timestream: await queryClient(),
 						}),
 					)
 					.run()

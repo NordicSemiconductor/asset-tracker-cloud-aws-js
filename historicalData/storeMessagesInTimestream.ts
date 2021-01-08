@@ -1,10 +1,10 @@
 import { _Record, Dimension } from '@aws-sdk/client-timestream-write'
 import { fromEnv } from '../util/fromEnv'
 import { batchToTimestreamRecords } from './batchToTimestreamRecords'
-import { getTimestreamWriteClient } from './timestreamClient'
 import { messageToTimestreamRecords } from './messageToTimestreamRecords'
 import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
 import { storeRecordsInTimeseries } from './storeRecordsInTimeseries'
+import { writeClient } from '@bifravst/timestream-helpers'
 
 const { tableInfo } = fromEnv({
 	tableInfo: 'TABLE_INFO',
@@ -13,7 +13,7 @@ const { tableInfo } = fromEnv({
 const [DatabaseName, TableName] = tableInfo.split('|')
 const store = (async () =>
 	storeRecordsInTimeseries({
-		timestream: await getTimestreamWriteClient(),
+		timestream: await writeClient(),
 		DatabaseName,
 		TableName,
 	}))()
