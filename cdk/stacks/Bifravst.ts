@@ -20,7 +20,6 @@ import { CORE_STACK_NAME } from './stackName'
 import { LambdasWithLayer } from '../resources/LambdasWithLayer'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import { HistoricalData } from '../resources/HistoricalData'
-import * as chalk from 'chalk'
 import { warn } from '../helper/note'
 
 export class BifravstStack extends CloudFormation.Stack {
