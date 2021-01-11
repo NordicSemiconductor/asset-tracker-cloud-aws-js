@@ -33,7 +33,7 @@ Feature: Device: Update Shadow
           "mvt": 3600,
           "gpst": 1000,
           "celt": 600,
-          "acct": 5
+          "acct": 0.5
         }
       }
       """

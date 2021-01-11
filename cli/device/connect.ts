@@ -11,7 +11,7 @@ const defaultConfig = {
 	mvt: 3600, // (movement timeout) In passive mode: Send update at least this often (in seconds)
 	gpst: 60, // GPS timeout (in seconds): timeout for GPS fix
 	celt: 600, // cellular timeout (in seconds): timeout for acquiring cellular connection
-	acct: 1, // Accelerometer threshold: minimal absolute value for and accelerometer reading to be considered movement.
+	acct: 0.1, // Accelerometer threshold: minimal absolute value for and accelerometer reading to be considered movement.
 } as const
 
 /**

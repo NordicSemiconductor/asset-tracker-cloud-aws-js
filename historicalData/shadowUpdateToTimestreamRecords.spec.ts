@@ -19,7 +19,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 					mvt: 3600,
 					gpst: 60,
 					celt: 600,
-					acct: 1,
+					acct: 0.5,
 				},
 				dev: {
 					v: {
