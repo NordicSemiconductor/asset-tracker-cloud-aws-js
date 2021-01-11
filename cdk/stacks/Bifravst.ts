@@ -20,6 +20,8 @@ import { CORE_STACK_NAME } from './stackName'
 import { LambdasWithLayer } from '../resources/LambdasWithLayer'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import { HistoricalData } from '../resources/HistoricalData'
+import * as chalk from 'chalk'
+import { warn } from '../helper/note'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(
@@ -83,6 +85,12 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:mqttEndpoint`,
 		})
 
+		const isTest = this.node.tryGetContext('isTest') === true
+
+		if (isTest) {
+			warn('UserPool', 'Disabling email verification.')
+		}
+
 		const userPool = new Cognito.UserPool(this, 'userPool', {
 			userPoolName: CORE_STACK_NAME,
 			signInAliases: {
@@ -90,7 +98,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			},
 			autoVerify: {
 				// Do not send verification emails for test accounts
-				email: this.node.tryGetContext('isTest') === true ? false : true,
+				email: isTest ? true : false,
 			},
 			selfSignUpEnabled: true,
 			passwordPolicy: {
