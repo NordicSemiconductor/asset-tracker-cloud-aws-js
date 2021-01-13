@@ -71,7 +71,7 @@
     "@bifravst/eslint-config-typescript": "5.0.87",
     "@bifravst/firmware-ci": "5.0.1",
     "@bifravst/object-to-env": "1.0.1",
-    "@bifravst/package-layered-lambdas": "4.0.6",
+    "@bifravst/package-layered-lambdas": "4.0.7",
     "@bifravst/random-words": "4.2.1",
     "@commitlint/cli": "11.0.0",
     "@commitlint/config-angular": "11.0.0",
