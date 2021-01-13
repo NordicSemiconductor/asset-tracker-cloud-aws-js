@@ -10,6 +10,7 @@ import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { paginate } from '../../util/paginate'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import * as chalk from 'chalk'
 
 const purgeCACertificate = ({
 	iot,
@@ -45,7 +46,7 @@ const purgeCACertificate = ({
 			}),
 		)
 	} else {
-		console.log(`Not a Bifravst CA: ${certificateId}`)
+		console.error(chalk.yellow.dim(`Not a Bifravst CA: ${certificateId}`))
 	}
 }
 
