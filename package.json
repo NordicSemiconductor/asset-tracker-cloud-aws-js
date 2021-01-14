@@ -64,8 +64,8 @@
     "@aws-cdk/aws-timestream": "1.84.0",
     "@aws-cdk/core": "1.84.0",
     "@aws-sdk/types": "3.1.0",
-    "@bifravst/cloudformation-helpers": "5.0.0",
-    "@bifravst/code-style": "8.0.134",
+    "@bifravst/cloudformation-helpers": "^6.0.0-export-esm.1",
+    "@bifravst/code-style": "^9.0.0-use-esm.5",
     "@bifravst/device-ui-server": "2.0.2",
     "@bifravst/e2e-bdd-test-runner": "5.0.12",
     "@bifravst/eslint-config-typescript": "5.0.87",
@@ -176,5 +176,6 @@
         "diagnostics": true
       }
     }
-  }
+  },
+  "prettier": "@bifravst/code-style/.prettierrc.cjs"
 }
