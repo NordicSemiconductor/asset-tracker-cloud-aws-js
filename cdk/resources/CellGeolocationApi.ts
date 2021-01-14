@@ -2,12 +2,12 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { BifravstLambdas, CDKLambdas } from '../prepare-resources'
-import { logToCloudWatch } from './logToCloudWatch'
-import { CellGeolocation } from './CellGeolocation'
-import { LambdasWithLayer } from './LambdasWithLayer'
+import { BifravstLambdas, CDKLambdas } from '../prepare-resources.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import { CellGeolocation } from './CellGeolocation.js'
+import { LambdasWithLayer } from './LambdasWithLayer.js'
 import * as CloudWatchLogs from '@aws-cdk/aws-logs'
-import { LambdaLogGroup } from './LambdaLogGroup'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API

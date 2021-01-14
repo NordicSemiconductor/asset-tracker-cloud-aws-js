@@ -3,7 +3,7 @@ import {
 	StepRunnerFunc,
 	InterpolatedStep,
 } from '@bifravst/e2e-bdd-test-runner'
-import { BifravstWorld } from '../run-features'
+import { BifravstWorld } from '../run-features.js'
 import {
 	QueryCommand,
 	TimestreamQueryClient,

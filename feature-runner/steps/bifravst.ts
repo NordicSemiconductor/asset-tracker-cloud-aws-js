@@ -4,13 +4,13 @@ import {
 	StepRunnerFunc,
 	InterpolatedStep,
 } from '@bifravst/e2e-bdd-test-runner'
-import { BifravstWorld } from '../run-features'
+import { BifravstWorld } from '../run-features.js'
 import { randomWords } from '@bifravst/random-words'
-import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
+import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate.js'
 import { device, thingShadow } from 'aws-iot-device-sdk'
-import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
+import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import { expect } from 'chai'
-import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
+import { isNotNullOrUndefined } from '../../util/isNullOrUndefined.js'
 import { readFileSync } from 'fs'
 
 const connect = ({

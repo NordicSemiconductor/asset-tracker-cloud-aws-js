@@ -1,11 +1,11 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import * as path from 'path'
-import { connect } from '../device/connect'
-import { StackOutputs } from '../../cdk/stacks/Bifravst'
+import { connect } from '../device/connect.js'
+import { StackOutputs } from '../../cdk/stacks/Bifravst.js'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import * as chalk from 'chalk'
-import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName'
+import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName.js'
 
 export const connectCommand = ({
 	endpoint,

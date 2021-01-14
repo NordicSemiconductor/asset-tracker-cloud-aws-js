@@ -1,4 +1,4 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
@@ -8,7 +8,7 @@ import {
 	atHostHexfile,
 	flash,
 } from '@bifravst/firmware-ci'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import { Octokit } from '@octokit/rest'
 import * as chalk from 'chalk'
 import * as https from 'https'

@@ -1,8 +1,8 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as chalk from 'chalk'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
 
 export const infoCommand = (): CommandDefinition => ({
 	command: 'info',

@@ -1,8 +1,8 @@
 import * as os from 'os'
 import { promises as fs } from 'fs'
-import { caFileLocations } from './caFileLocations'
-import { deviceFileLocations } from './deviceFileLocations'
-import { run } from '../process/run'
+import { caFileLocations } from './caFileLocations.js'
+import { deviceFileLocations } from './deviceFileLocations.js'
+import { run } from '../process/run.js'
 
 /**
  * Creates a certificate for a device, signed with the CA

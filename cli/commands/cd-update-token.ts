@@ -8,9 +8,9 @@ import {
 	PutParameterCommand,
 	SSMClient,
 } from '@aws-sdk/client-ssm'
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import * as chalk from 'chalk'
-import { listPipelines } from '../cd/listPipelines'
+import { listPipelines } from '../cd/listPipelines.js'
 
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',

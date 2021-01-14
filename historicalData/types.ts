@@ -1,21 +1,21 @@
-type SensorWithTimestamp = {
+export type SensorWithTimestamp = {
 	v: unknown
 	ts: number
 }
 
-type NumberValueSensor = SensorWithTimestamp & {
+export type NumberValueSensor = SensorWithTimestamp & {
 	v: number
 }
 
-type NumbersValueSensor = SensorWithTimestamp & {
+export type NumbersValueSensor = SensorWithTimestamp & {
 	v: Record<string, number>
 }
 
-type NumbersAndStringsValueSensor = SensorWithTimestamp & {
+export type NumbersAndStringsValueSensor = SensorWithTimestamp & {
 	v: Record<string, number | string>
 }
 
-type UpdatedDeviceState = {
+export type UpdatedDeviceState = {
 	reported: {
 		cfg?: Record<string, number | boolean>
 		bat?: NumberValueSensor
@@ -28,7 +28,7 @@ type UpdatedDeviceState = {
 	deviceId: string
 }
 
-type DeviceMessage = {
+export type DeviceMessage = {
 	message: {
 		btn?: {
 			v: number
@@ -38,7 +38,7 @@ type DeviceMessage = {
 	deviceId: string
 }
 
-type BatchMessage = {
+export type BatchMessage = {
 	batch: {
 		btn?: NumberValueSensor[]
 		bat?: NumberValueSensor[]

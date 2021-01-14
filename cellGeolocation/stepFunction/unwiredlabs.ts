@@ -1,8 +1,8 @@
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm'
 import { request as nodeRequest } from 'https'
 import { parse } from 'url'
-import { MaybeCellGeoLocation } from './types'
-import { Cell } from '../geolocateCell'
+import { MaybeCellGeoLocation } from './types.js'
+import { Cell } from '../geolocateCell.js'
 
 export const getApiSettings = ({ ssm }: { ssm: SSMClient }) => async ({
 	api,

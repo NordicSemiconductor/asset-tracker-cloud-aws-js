@@ -4,9 +4,12 @@ import * as CodeBuild from '@aws-cdk/aws-codebuild'
 import * as CodePipeline from '@aws-cdk/aws-codepipeline'
 import * as SSM from '@aws-cdk/aws-ssm'
 import * as S3 from '@aws-cdk/aws-s3'
-import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
-import { CONTINUOUS_DEPLOYMENT_STACK_NAME, CORE_STACK_NAME } from './stackName'
-import { enabledInContext } from '../helper/enabledInContext'
+import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD.js'
+import {
+	CONTINUOUS_DEPLOYMENT_STACK_NAME,
+	CORE_STACK_NAME,
+} from './stackName.js'
+import { enabledInContext } from '../helper/enabledInContext.js'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.

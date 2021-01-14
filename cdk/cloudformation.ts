@@ -1,12 +1,12 @@
-import { BifravstApp } from './apps/Bifravst'
+import { BifravstApp } from './apps/Bifravst.js'
 import {
 	prepareResources,
 	prepareBifravstLambdas,
 	prepareCDKLambdas,
-} from './prepare-resources'
+} from './prepare-resources.js'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
-import { warn } from './helper/note'
+import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs.js'
+import { warn } from './helper/note.js'
 
 const fetchUnwiredLabsApiSettings = getApiSettings({
 	ssm: new SSMClient({}),

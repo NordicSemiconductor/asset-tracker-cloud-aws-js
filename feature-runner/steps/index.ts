@@ -1,2 +1,2 @@
-export * from './bifravst'
-export * from './firmwareCI'
+export * from './bifravst.js'
+export * from './firmwareCI.js'

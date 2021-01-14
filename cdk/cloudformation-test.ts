@@ -1,9 +1,9 @@
-import { TestApp } from './apps/Test'
+import { TestApp } from './apps/Test.js'
 import {
 	prepareBifravstLambdas,
 	prepareCDKLambdas,
 	prepareResources,
-} from './prepare-resources'
+} from './prepare-resources.js'
 
 const rootDir = process.cwd()
 

@@ -1,8 +1,8 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import { objectToEnv } from '@bifravst/object-to-env'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName'
+import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName.js'
 
 export const deviceUIConfigCommand = (): CommandDefinition => ({
 	command: 'device-ui-config',

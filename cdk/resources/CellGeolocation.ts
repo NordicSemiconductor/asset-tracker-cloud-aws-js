@@ -5,13 +5,13 @@ import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
 import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { logToCloudWatch } from './logToCloudWatch'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { BifravstLambdas } from '../prepare-resources'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import { BifravstLambdas } from '../prepare-resources.js'
 import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
 import * as SQS from '@aws-cdk/aws-sqs'
-import { LambdasWithLayer } from './LambdasWithLayer'
+import { LambdasWithLayer } from './LambdasWithLayer.js'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells

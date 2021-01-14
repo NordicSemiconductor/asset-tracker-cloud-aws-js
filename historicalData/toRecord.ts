@@ -1,4 +1,4 @@
-import { toTimestreamType } from './toTimestreamType'
+import { toTimestreamType } from './toTimestreamType.js'
 import { _Record } from '@aws-sdk/client-timestream-write'
 
 export const toRecord = ({

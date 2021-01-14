@@ -1,18 +1,18 @@
 import { App } from '@aws-cdk/core'
-import { BifravstStack } from '../stacks/Bifravst'
-import { WebAppStack } from '../stacks/WebApp'
+import { BifravstStack } from '../stacks/Bifravst.js'
+import { WebAppStack } from '../stacks/WebApp.js'
 import {
 	BifravstLambdas,
 	CDKLambdas,
 	PackedLambdas,
-} from '../prepare-resources'
-import { DeviceUIStack } from '../stacks/DeviceUI'
-import { FirmwareCIStack } from '../stacks/FirmwareCI'
+} from '../prepare-resources.js'
+import { DeviceUIStack } from '../stacks/DeviceUI.js'
+import { FirmwareCIStack } from '../stacks/FirmwareCI.js'
 import * as path from 'path'
 import { readFileSync } from 'fs'
-import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
-import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
-import { enabledInContext } from '../helper/enabledInContext'
+import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment.js'
+import { extractRepoAndOwner } from '../helper/extract-repo-and-owner.js'
+import { enabledInContext } from '../helper/enabledInContext.js'
 
 export class BifravstApp extends App {
 	public constructor(args: {

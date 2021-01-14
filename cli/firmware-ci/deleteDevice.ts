@@ -6,7 +6,7 @@ import {
 	RemoveThingFromThingGroupCommand,
 	UpdateCertificateCommand,
 } from '@aws-sdk/client-iot'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import { promises as fs } from 'fs'
 
 export const deleteDevice = async ({

@@ -2,10 +2,10 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as T from 'fp-ts/lib/Task'
 import { pipe } from 'fp-ts/lib/pipeable'
-import { geolocateCellFromCache, Cell } from '../geolocateCell'
+import { geolocateCellFromCache, Cell } from '../geolocateCell.js'
 import { isSome } from 'fp-ts/lib/Option'
-import { MaybeCellGeoLocation } from './types'
-import { fromEnv } from '../../util/fromEnv'
+import { MaybeCellGeoLocation } from './types.js'
+import { fromEnv } from '../../util/fromEnv.js'
 
 const { cacheTable } = fromEnv({
 	cacheTable: 'CACHE_TABLE',

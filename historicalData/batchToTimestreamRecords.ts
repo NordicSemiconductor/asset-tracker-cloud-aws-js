@@ -1,7 +1,12 @@
 import { _Record } from '@aws-sdk/client-timestream-write'
 import { v4 } from 'uuid'
-import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
-import { toRecord } from './toRecord'
+import { isNotNullOrUndefined } from '../util/isNullOrUndefined.js'
+import { toRecord } from './toRecord.js'
+import {
+	BatchMessage,
+	NumbersAndStringsValueSensor,
+	NumbersValueSensor,
+} from './types.js'
 
 export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 	const Records: (_Record | undefined)[] = Object.entries(event.batch)

@@ -1,16 +1,16 @@
 import { IoTClient } from '@aws-sdk/client-iot'
 import * as path from 'path'
 import { promises as fs } from 'fs'
-import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName.js'
 import {
 	LayeredLambdas,
 	packBaseLayer,
 	packLayeredLambdas,
 	WebpackMode,
 } from '@bifravst/package-layered-lambdas'
-import { supportedRegions } from './regions'
+import { supportedRegions } from './regions.js'
 import * as chalk from 'chalk'
-import { getIotEndpoint } from './helper/getIotEndpoint'
+import { getIotEndpoint } from './helper/getIotEndpoint.js'
 import { spawn } from 'child_process'
 import { ConsoleProgressReporter } from '@bifravst/package-layered-lambdas/dist/src/reporter'
 

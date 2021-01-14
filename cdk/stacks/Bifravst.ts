@@ -4,23 +4,23 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as Iot from '@aws-cdk/aws-iot'
-import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
-import { AvatarStorage } from '../resources/AvatarStorage'
+import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig.js'
+import { AvatarStorage } from '../resources/AvatarStorage.js'
 import {
 	BifravstLambdas,
 	CDKLambdas,
 	PackedLambdas,
-} from '../prepare-resources'
-import { FOTAStorage } from '../resources/FOTAStorage'
-import { CellGeolocation } from '../resources/CellGeolocation'
-import { CellGeolocationApi } from '../resources/CellGeolocationApi'
-import { ThingGroupLambda } from '../resources/ThingGroupLambda'
-import { ThingGroup } from '../resources/ThingGroup'
-import { CORE_STACK_NAME } from './stackName'
-import { LambdasWithLayer } from '../resources/LambdasWithLayer'
-import { lambdasOnS3 } from '../resources/lambdasOnS3'
-import { HistoricalData } from '../resources/HistoricalData'
-import { warn } from '../helper/note'
+} from '../prepare-resources.js'
+import { FOTAStorage } from '../resources/FOTAStorage.js'
+import { CellGeolocation } from '../resources/CellGeolocation.js'
+import { CellGeolocationApi } from '../resources/CellGeolocationApi.js'
+import { ThingGroupLambda } from '../resources/ThingGroupLambda.js'
+import { ThingGroup } from '../resources/ThingGroup.js'
+import { CORE_STACK_NAME } from './stackName.js'
+import { LambdasWithLayer } from '../resources/LambdasWithLayer.js'
+import { lambdasOnS3 } from '../resources/lambdasOnS3.js'
+import { HistoricalData } from '../resources/HistoricalData.js'
+import { warn } from '../helper/note.js'
 
 export class BifravstStack extends CloudFormation.Stack {
 	public constructor(

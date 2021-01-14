@@ -4,8 +4,8 @@ import {
 	ListPipelineExecutionsCommand,
 } from '@aws-sdk/client-codepipeline'
 import { formatDistanceToNow } from 'date-fns'
-import { CommandDefinition } from './CommandDefinition'
-import { listPipelines } from '../cd/listPipelines'
+import { CommandDefinition } from './CommandDefinition.js'
+import { listPipelines } from '../cd/listPipelines.js'
 
 export const cdCommand = (): CommandDefinition => ({
 	command: 'cd',

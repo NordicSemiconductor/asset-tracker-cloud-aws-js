@@ -11,9 +11,9 @@ import {
 import { stackOutput } from '@bifravst/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/Bifravst'
-import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
-import { bifravstStepRunners } from './steps/bifravst'
+import { StackOutputs } from '../cdk/stacks/Bifravst.js'
+import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI.js'
+import { bifravstStepRunners } from './steps/bifravst.js'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
@@ -21,12 +21,12 @@ import { v4 } from 'uuid'
 import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
-} from '../cdk/stacks/stackName'
+} from '../cdk/stacks/stackName.js'
 import { promises as fs } from 'fs'
 import * as path from 'path'
-import { firmwareCIStepRunners } from './steps/firmwareCI'
-import { certsDir } from '../cli/jitp/certsDir'
-import { timestreamStepRunners } from './steps/timestream'
+import { firmwareCIStepRunners } from './steps/firmwareCI.js'
+import { certsDir } from '../cli/jitp/certsDir.js'
+import { timestreamStepRunners } from './steps/timestream.js'
 import { queryClient } from '@bifravst/timestream-helpers'
 
 let ran = false

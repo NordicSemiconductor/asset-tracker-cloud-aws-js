@@ -3,10 +3,10 @@ import * as IAM from '@aws-cdk/aws-iam'
 import * as IoT from '@aws-cdk/aws-iot'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import * as Timestream from '@aws-cdk/aws-timestream'
-import { logToCloudWatch } from './logToCloudWatch'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { BifravstLambdas } from '../prepare-resources'
-import { LambdasWithLayer } from './LambdasWithLayer'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import { BifravstLambdas } from '../prepare-resources.js'
+import { LambdasWithLayer } from './LambdasWithLayer.js'
 
 /**
  * Provides resources for historical data

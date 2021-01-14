@@ -1,11 +1,11 @@
 import { App } from '@aws-cdk/core'
-import { BifravstStack } from '../stacks/Bifravst'
+import { BifravstStack } from '../stacks/Bifravst.js'
 import {
 	BifravstLambdas,
 	CDKLambdas,
 	PackedLambdas,
-} from '../prepare-resources'
-import { FirmwareCIStack } from '../stacks/FirmwareCI'
+} from '../prepare-resources.js'
+import { FirmwareCIStack } from '../stacks/FirmwareCI.js'
 
 /**
  * This sets up the parts of the app needed for the end-to-end tests

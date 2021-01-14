@@ -4,7 +4,7 @@
   "description": "AWS-based implementation of Bifravst",
   "main": "./dist/export.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --forceExit",
+    "test": "node --unhandled-rejections=strict --loader ts-node/esm tests.ts './**/*.spec.ts'",
     "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress"
   },
   "repository": {
@@ -83,7 +83,6 @@
     "@types/chai-subset": "1.3.3",
     "@types/chalk": "2.2.0",
     "@types/commander": "2.12.2",
-    "@types/jest": "26.0.20",
     "@types/node": "14.14.20",
     "@types/uuid": "8.3.0",
     "aws-iot-device-sdk": "2.2.6",
@@ -94,19 +93,20 @@
     "commander": "6.2.1",
     "date-fns": "2.16.1",
     "eslint": "7.17.0",
+    "glob": "^7.1.6",
+    "hamjest": "^3.7.1",
     "husky": "4.3.7",
-    "jest": "26.6.3",
     "lint-staged": "10.5.3",
     "nock": "13.0.5",
     "octokit-auth-netrc": "1.0.0",
     "prettier": "2.2.1",
-    "ts-jest": "26.4.4",
+    "ts-node": "^9.1.1",
     "typescript": "4.1.3"
   },
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "lint-staged && npx jest --onlyChanged"
+      "pre-commit": "lint-staged && npm test"
     }
   },
   "lint-staged": {
@@ -159,24 +159,7 @@
       "branch": "saga"
     }
   },
-  "jest": {
-    "testURL": "http://localhost",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "json"
-    ],
-    "transform": {
-      ".+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": ".+\\.spec\\.ts$",
-    "globals": {
-      "ts-jest": {
-        "diagnostics": true
-      }
-    }
-  },
   "prettier": "@bifravst/code-style/.prettierrc.cjs",
-  "type": "module"
+  "type": "module",
+  "exports": "./dist/export.js"
 }

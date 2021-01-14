@@ -2,8 +2,8 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Iot from '@aws-cdk/aws-iot'
 import * as S3 from '@aws-cdk/aws-s3'
-import { ThingGroup } from './ThingGroup'
-import { ThingGroupLambda } from './ThingGroupLambda'
+import { ThingGroup } from './ThingGroup.js'
+import { ThingGroupLambda } from './ThingGroupLambda.js'
 
 export class FirmwareCI extends CloudFormation.Resource {
 	public readonly thingGroupName

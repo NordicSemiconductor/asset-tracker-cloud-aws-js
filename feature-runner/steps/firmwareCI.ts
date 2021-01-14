@@ -3,9 +3,9 @@ import {
 	StepRunnerFunc,
 	InterpolatedStep,
 } from '@bifravst/e2e-bdd-test-runner'
-import { BifravstWorld } from '../run-features'
-import { createDevice } from '../../cli/firmware-ci/createDevice'
-import { deleteDevice } from '../../cli/firmware-ci/deleteDevice'
+import { BifravstWorld } from '../run-features.js'
+import { createDevice } from '../../cli/firmware-ci/createDevice.js'
+import { deleteDevice } from '../../cli/firmware-ci/deleteDevice.js'
 import { IoTClient } from '@aws-sdk/client-iot'
 
 export const firmwareCIStepRunners = ({

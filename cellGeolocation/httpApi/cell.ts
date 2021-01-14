@@ -1,19 +1,19 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import Ajv from 'ajv'
 import { pipe } from 'fp-ts/lib/pipeable'
-import { validate } from './validate'
+import { validate } from './validate.js'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import {
 	geolocateCellFromCache,
 	Cell,
 	queueCellGeolocationResolutionJob,
-} from '../geolocateCell'
-import { toStatusCode, ErrorType } from '../ErrorInfo'
-import { res } from './res'
+} from '../geolocateCell.js'
+import { toStatusCode, ErrorType } from '../ErrorInfo.js'
+import { res } from './res.js'
 import { SQSClient } from '@aws-sdk/client-sqs'
-import { getOrElse } from '../../util/fp-ts'
-import { fromEnv } from '../../util/fromEnv'
+import { getOrElse } from '../../util/fp-ts.js'
+import { fromEnv } from '../../util/fromEnv.js'
 
 const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
 	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',
