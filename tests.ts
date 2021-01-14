@@ -16,6 +16,8 @@ const main = async (testFiles: string[]) => {
 	if (allPass !== true) process.exit(1)
 }
 
-const testFiles = glob.sync(process.argv[process.argv.length - 1])
+const testFiles = glob
+	.sync(process.argv[process.argv.length - 1])
+	.filter((s) => !s.includes('node_modules'))
 
 void main(testFiles)
