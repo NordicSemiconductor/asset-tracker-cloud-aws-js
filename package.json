@@ -177,5 +177,6 @@
       }
     }
   },
-  "prettier": "@bifravst/code-style/.prettierrc.cjs"
+  "prettier": "@bifravst/code-style/.prettierrc.cjs",
+  "type": "module"
 }
