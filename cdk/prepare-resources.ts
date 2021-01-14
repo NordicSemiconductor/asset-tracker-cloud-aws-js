@@ -12,7 +12,7 @@ import { supportedRegions } from './regions.js'
 import * as chalk from 'chalk'
 import { getIotEndpoint } from './helper/getIotEndpoint.js'
 import { spawn } from 'child_process'
-import { ConsoleProgressReporter } from '@bifravst/package-layered-lambdas/dist/src/reporter'
+import { ConsoleProgressReporter } from '@bifravst/package-layered-lambdas/dist/src/reporter.js'
 
 export type CDKLambdas = {
 	createThingGroup: string
