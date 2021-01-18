@@ -39,6 +39,10 @@ export const firmwareCICommand = ({
 		)
 		console.log()
 		console.log(
+			chalk.grey('  Region:            '),
+			chalk.yellow(endpoint.split('.')[2]),
+		)
+		console.log(
 			chalk.grey('  Bucket name:       '),
 			chalk.yellow(firmwareCIStackConfig.bucketName),
 		)
