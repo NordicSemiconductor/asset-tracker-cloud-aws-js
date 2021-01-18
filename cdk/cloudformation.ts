@@ -7,6 +7,8 @@ import {
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
 import { warn } from './helper/note'
+import { STSClient } from '@aws-sdk/client-sts'
+import { loadContext } from './helper/loadContext'
 
 const fetchUnwiredLabsApiSettings = getApiSettings({
 	ssm: new SSMClient({}),
@@ -35,13 +37,15 @@ Promise.all([
 		)
 		return {}
 	}),
+	loadContext({ sts: new STSClient({}) }),
 ])
-	.then(([args, ulApiSettings]) =>
+	.then(([args, ulApiSettings, context]) =>
 		new BifravstApp({
 			...args,
 			enableUnwiredApi: 'apiKey' in ulApiSettings,
 			context: {
 				version: process.env.VERSION ?? '0.0.0-development',
+				...context,
 			},
 		}).synth(),
 	)

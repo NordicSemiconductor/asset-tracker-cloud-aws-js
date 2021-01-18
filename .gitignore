@@ -4,3 +4,4 @@ dist/
 cdk.out/
 certificates/
 log.log
+*.cfg

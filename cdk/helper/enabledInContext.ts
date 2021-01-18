@@ -27,23 +27,11 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 			chalk.blueBright(component),
 			chalk.green('enabled.'),
 		)
-		if (v === undefined && onUndefined === ENABLED) {
-			help.push(
-				chalk.gray(`Pass`),
-				chalk.grey.bold(`-c ${key}=0`),
-				chalk.gray(`to`),
-				chalk.grey.bold(`npx cdk deploy '*'`),
-				chalk.grey(`to disable.`),
-			)
-		} else {
-			help.push(
-				chalk.gray(`Do not pass`),
-				chalk.grey.bold(`-c ${key}=${truthy ?? '1'}`),
-				chalk.gray(`to`),
-				chalk.grey.bold(`npx cdk deploy '*'`),
-				chalk.grey(`to disable.`),
-			)
-		}
+		help.push(
+			chalk.gray(`Set context`),
+			chalk.grey.bold(`${key}=0`),
+			chalk.gray(`to disable.`),
+		)
 		console.error(...help)
 		onEnabled?.()
 		return true
@@ -53,23 +41,11 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 		chalk.grey.bold(component),
 		chalk.gray('disabled.'),
 	]
-	if (onUndefined === ENABLED) {
-		help.push(
-			chalk.gray(`Do not pass`),
-			chalk.grey.bold(`-c ${key}=${v}`),
-			chalk.gray(`to`),
-			chalk.grey.bold(`npx cdk deploy '*'`),
-			chalk.grey(`to enable.`),
-		)
-	} else {
-		help.push(
-			chalk.gray(`Pass`),
-			chalk.grey.bold(`-c ${key}=${truthy ?? '1'}`),
-			chalk.gray(`to`),
-			chalk.grey.bold(`npx cdk deploy '*'`),
-			chalk.grey(`to enable.`),
-		)
-	}
+	help.push(
+		chalk.gray(`Set context`),
+		chalk.grey.bold(`${key}=${truthy ?? '1'}`),
+		chalk.grey(`to enable.`),
+	)
 	console.error(...help)
 	onDisabled?.()
 	return false
