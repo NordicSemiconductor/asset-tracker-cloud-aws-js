@@ -4,8 +4,10 @@ import * as S3 from '@aws-cdk/aws-s3'
 import { FirmwareCI } from '../resources/FirmwareCI'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
 import { CDKLambdas, PackedLambdas } from '../prepare-resources'
-import { FIRMWARE_CI_STACK_NAME } from './stackName'
+import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from './stackName'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
+import * as IAM from '@aws-cdk/aws-iam'
+import { Fn } from '@aws-cdk/core'
 
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(
@@ -50,6 +52,11 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 
 		const firmwareCI = new FirmwareCI(this, 'firmwareCI', {
 			thingGroupLambda,
+			jitpRole: IAM.Role.fromRoleArn(
+				this,
+				'jitpRole',
+				Fn.importValue(`${CORE_STACK_NAME}:jitpRoleArn`),
+			),
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {

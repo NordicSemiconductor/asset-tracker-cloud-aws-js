@@ -1,9 +1,10 @@
 import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
 import * as Iot from '@aws-cdk/aws-iot'
 import * as S3 from '@aws-cdk/aws-s3'
 import { ThingGroup } from './ThingGroup'
 import { ThingGroupLambda } from './ThingGroupLambda'
+import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../stacks/stackName'
+import * as IAM from '@aws-cdk/aws-iam'
 
 export class FirmwareCI extends CloudFormation.Resource {
 	public readonly thingGroupName
@@ -12,7 +13,10 @@ export class FirmwareCI extends CloudFormation.Resource {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
-		{ thingGroupLambda }: { thingGroupLambda: ThingGroupLambda },
+		{
+			thingGroupLambda,
+			jitpRole,
+		}: { thingGroupLambda: ThingGroupLambda; jitpRole: IAM.IRole },
 	) {
 		super(parent, id)
 
@@ -91,9 +95,19 @@ export class FirmwareCI extends CloudFormation.Resource {
 					'iot:UpdateCertificate',
 					'iot:AttachThingPrincipal',
 					'iot:DetachThingPrincipal',
-					'iot:describeThing',
+					'iot:DescribeThing',
+					'iot:DescribeEndpoint',
+					'iot:GetRegistrationCode',
+					'iot:UpdateEventConfigurations',
+					'iot:RegisterCACertificate',
 				],
 				resources: [`*`],
+			}),
+		)
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: ['iam:PassRole'],
+				resources: [jitpRole.roleArn],
 			}),
 		)
 		ciUser.addToPolicy(
@@ -121,6 +135,16 @@ export class FirmwareCI extends CloudFormation.Resource {
 			new IAM.PolicyStatement({
 				resources: [`${this.bucket.bucketArn}/*`],
 				actions: ['s3:PutObject', 's3:DeleteObject'],
+			}),
+		)
+
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				resources: [
+					`arn:aws:cloudformation:${this.stack.region}:${this.stack.account}:stack/${FIRMWARE_CI_STACK_NAME}/*`,
+					`arn:aws:cloudformation:${this.stack.region}:${this.stack.account}:stack/${CORE_STACK_NAME}/*`,
+				],
+				actions: ['cloudformation:DescribeStacks'],
 			}),
 		)
 
