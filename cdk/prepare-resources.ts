@@ -16,7 +16,6 @@ import { ConsoleProgressReporter } from '@bifravst/package-layered-lambdas/dist/
 
 export type CDKLambdas = {
 	createThingGroup: string
-	httpApiHealth: string
 }
 
 export type BifravstLambdas = {
@@ -148,7 +147,6 @@ export const prepareCDKLambdas = async ({
 			Bucket: sourceCodeBucketName,
 			lambdas: {
 				createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
-				httpApiHealth: path.resolve(rootDir, 'cdk', 'httpApiHealth.ts'),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
 		}),

@@ -451,7 +451,6 @@ export class BifravstStack extends CloudFormation.Stack {
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			lambdas,
-			cdkLambdas,
 			cellgeo,
 		})
 

@@ -2,7 +2,7 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { BifravstLambdas, CDKLambdas } from '../prepare-resources'
+import { BifravstLambdas } from '../prepare-resources'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
@@ -25,11 +25,9 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		{
 			cellgeo,
 			lambdas,
-			cdkLambdas,
 		}: {
 			cellgeo: CellGeolocation
 			lambdas: LambdasWithLayer<BifravstLambdas>
-			cdkLambdas: LambdasWithLayer<CDKLambdas>
 		},
 	) {
 		super(parent, id)
@@ -135,47 +133,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		}
 		this.stage.node.addDependency(httpApiLogGroup)
 
-		// GET __health
-
-		const healthCheck = new Lambda.Function(this, 'healthCheck', {
-			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
-			timeout: CloudFormation.Duration.seconds(10),
-			code: cdkLambdas.lambdas.httpApiHealth,
-			description: 'HTTP API Health Check',
-			initialPolicy: [logToCloudWatch],
-			environment: {
-				VERSION: this.node.tryGetContext('version'),
-			},
-		})
-
-		new LambdaLogGroup(this, 'healthCheckLogs', healthCheck)
-
 		const integrationUri = (f: Lambda.IFunction) =>
 			`arn:aws:apigateway:${this.stack.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${this.stack.region}:${this.stack.account}:function:${f.functionName}/invocations`
-
-		const healthCheckIntegration = new HttpApi.CfnIntegration(
-			this,
-			'healthCheckIntegration',
-			{
-				apiId: this.api.ref,
-				integrationType: 'AWS_PROXY',
-				integrationUri: integrationUri(healthCheck),
-				integrationMethod: 'POST',
-				payloadFormatVersion: '1.0',
-			},
-		)
-
-		const healthCheckRoute = new HttpApi.CfnRoute(this, 'healthCheckRoute', {
-			apiId: this.api.ref,
-			routeKey: 'GET /__health',
-			target: `integrations/${healthCheckIntegration.ref}`,
-		})
-
-		healthCheck.addPermission('invokeByHttpApi', {
-			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/__health`,
-		})
 
 		// GET /cell
 
@@ -238,7 +197,6 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			stageName: this.stage.stageName,
 		})
 		deployment.node.addDependency(this.stage)
-		deployment.node.addDependency(healthCheckRoute)
 		deployment.node.addDependency(geolocateRoute)
 		deployment.node.addDependency(geolocationRoute)
 	}
