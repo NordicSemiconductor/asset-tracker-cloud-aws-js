@@ -25,6 +25,9 @@ export const firmwareCIStepRunners = ({
 					certsDir,
 					iot,
 					thingGroupName: runner.world['firmwareCI:thingGroupName'],
+					attributes: {
+						test: 'e2e',
+					},
 				})
 				runner.store[`${storageName}:name`] = thingName
 				runner.store[`${storageName}:arn`] = thingArn

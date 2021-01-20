@@ -23,6 +23,7 @@ export const createCA = async (args: {
 	cf: CloudFormationClient
 	stack: string
 	subject?: string
+	attributes?: Record<string, string>
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
 }): Promise<{ certificateId: string }> => {
@@ -155,6 +156,41 @@ export const createCA = async (args: {
 		}),
 	)
 
+	const jitpTemplate: any = {
+		Parameters: {
+			'AWS::IoT::Certificate::CommonName': {
+				Type: 'String',
+			},
+			'AWS::IoT::Certificate::Id': {
+				Type: 'String',
+			},
+		},
+		Resources: {
+			thing: {
+				Type: 'AWS::IoT::Thing',
+				Properties: {
+					ThingName: {
+						Ref: 'AWS::IoT::Certificate::CommonName',
+					},
+					ThingGroups: [stackOutput?.thingGroupName],
+				},
+			},
+			cert: {
+				Type: 'AWS::IoT::Certificate',
+				Properties: {
+					CertificateId: {
+						Ref: 'AWS::IoT::Certificate::Id',
+					},
+					Status: 'ACTIVE',
+				},
+			},
+		},
+	}
+
+	if (args.attributes !== undefined) {
+		jitpTemplate.Resources.thing.Properties.AttributePayload = args.attributes
+	}
+
 	const res = await iot.send(
 		new RegisterCACertificateCommand({
 			caCertificate,
@@ -162,36 +198,7 @@ export const createCA = async (args: {
 			allowAutoRegistration: true,
 			setAsActive: true,
 			registrationConfig: {
-				templateBody: JSON.stringify({
-					Parameters: {
-						'AWS::IoT::Certificate::CommonName': {
-							Type: 'String',
-						},
-						'AWS::IoT::Certificate::Id': {
-							Type: 'String',
-						},
-					},
-					Resources: {
-						thing: {
-							Type: 'AWS::IoT::Thing',
-							Properties: {
-								ThingName: {
-									Ref: 'AWS::IoT::Certificate::CommonName',
-								},
-								ThingGroups: [stackOutput?.thingGroupName],
-							},
-						},
-						cert: {
-							Type: 'AWS::IoT::Certificate',
-							Properties: {
-								CertificateId: {
-									Ref: 'AWS::IoT::Certificate::Id',
-								},
-								Status: 'ACTIVE',
-							},
-						},
-					},
-				}),
+				templateBody: JSON.stringify(jitpTemplate),
 				roleArn: stackOutput?.jitpRoleArn,
 			},
 		}),
