@@ -15,17 +15,23 @@ export const createDevice = async ({
 	thingGroupName,
 	certsDir,
 	endpoint,
+	attributes,
 }: {
 	iot: IoTClient
 	certsDir: string
 	thingGroupName: string
 	endpoint: string
-}): Promise<{ thingArn: string; thingName: string }> => {
+	attributes?: Record<string, string>
+}): Promise<{
+	thingArn: string
+	thingName: string
+}> => {
 	const thingName = `firmware-ci-${v4()}`
 
 	const { thingArn } = await iot.send(
 		new CreateThingCommand({
 			thingName,
+			attributePayload: { attributes },
 		}),
 	)
 

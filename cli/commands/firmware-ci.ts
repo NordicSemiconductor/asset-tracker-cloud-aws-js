@@ -71,6 +71,9 @@ export const firmwareCICommand = ({
 				thingGroupName: firmwareCIStackConfig.thingGroupName,
 				endpoint,
 				certsDir,
+				attributes: {
+					test: 'firmware',
+				},
 			})
 			console.log()
 			console.log(
