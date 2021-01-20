@@ -73,8 +73,7 @@ export class FirmwareCI extends CloudFormation.Resource {
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
 				actions: [
-					'iot:createThing',
-					'iot:deleteThing',
+					'iot:CreateThing',
 					'iot:AddThingToThingGroup',
 					'iot:RemoveThingFromThingGroup',
 					'iot:AttachThingPrincipal',
@@ -102,6 +101,8 @@ export class FirmwareCI extends CloudFormation.Resource {
 					'iot:GetRegistrationCode',
 					'iot:UpdateEventConfigurations',
 					'iot:RegisterCACertificate',
+					'iot:ListThingPrincipals',
+					'iot:DeleteThing',
 				],
 				resources: [`*`],
 			}),
