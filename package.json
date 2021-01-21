@@ -63,7 +63,7 @@
     "@aws-cdk/aws-timestream": "1.85.0",
     "@aws-cdk/core": "1.85.0",
     "@aws-sdk/types": "3.1.0",
-    "@bifravst/cloudformation-helpers": "5.0.0",
+    "@bifravst/cloudformation-helpers": "5.0.2",
     "@bifravst/code-style": "8.0.134",
     "@bifravst/device-ui-server": "2.0.2",
     "@bifravst/eslint-config-typescript": "5.0.89",
