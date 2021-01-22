@@ -72,7 +72,7 @@
     "@bifravst/package-layered-lambdas": "4.0.12",
     "@commitlint/cli": "11.0.0",
     "@commitlint/config-angular": "11.0.0",
-    "@octokit/rest": "18.0.12",
+    "@octokit/rest": "18.0.14",
     "@types/aws-iot-device-sdk": "2.2.2",
     "@types/aws-lambda": "8.10.71",
     "@types/backoff": "2.5.1",
