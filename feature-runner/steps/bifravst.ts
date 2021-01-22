@@ -4,7 +4,6 @@ import {
 	StepRunnerFunc,
 	InterpolatedStep,
 } from '@bifravst/e2e-bdd-test-runner'
-import { BifravstWorld } from '../run-features'
 import { randomWords } from '@bifravst/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
 import { device, thingShadow } from 'aws-iot-device-sdk'
@@ -65,6 +64,10 @@ const shadow = ({
 	})
 }
 
+type World = {
+	accountId: string
+}
+
 export const bifravstStepRunners = ({
 	mqttEndpoint,
 	certsDir,
@@ -73,7 +76,7 @@ export const bifravstStepRunners = ({
 	mqttEndpoint: string
 	certsDir: string
 	awsIotRootCA: string
-}): ((step: InterpolatedStep) => StepRunnerFunc<BifravstWorld> | false)[] => {
+}): ((step: InterpolatedStep) => StepRunnerFunc<World> | false)[] => {
 	const connectToBroker = connect({
 		mqttEndpoint,
 		certsDir,
@@ -85,7 +88,7 @@ export const bifravstStepRunners = ({
 		awsIotRootCA,
 	})
 	return [
-		regexMatcher<BifravstWorld>(
+		regexMatcher<World>(
 			/^(?:a cat exists|I generate a certificate)(?: for the cat tracker "([^"]+)")?$/,
 		)(async ([deviceId], __, runner) => {
 			const catId = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
@@ -124,7 +127,7 @@ export const bifravstStepRunners = ({
 			}
 			return runner.store[`${prefix}:id`]
 		}),
-		regexMatcher<BifravstWorld>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
+		regexMatcher<World>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
 			async ([deviceId], __, runner) => {
 				const catId = deviceId ?? runner.store['cat:id']
 				await runner.progress('IoT', catId)
@@ -162,7 +165,7 @@ export const bifravstStepRunners = ({
 				})
 			},
 		),
-		regexMatcher<BifravstWorld>(
+		regexMatcher<World>(
 			/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
 		)(async ([deviceId], step, runner) => {
 			if (step.interpolatedArgument === undefined) {
@@ -204,7 +207,7 @@ export const bifravstStepRunners = ({
 			})
 			return await updatePromise
 		}),
-		regexMatcher<BifravstWorld>(
+		regexMatcher<World>(
 			/^the cat tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
 		)(async ([deviceId, topic], step, runner) => {
 			const catId = deviceId ?? runner.store['cat:id']
