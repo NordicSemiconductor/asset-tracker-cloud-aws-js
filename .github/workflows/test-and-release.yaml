@@ -19,7 +19,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-      max-parallel: 1
     steps:
       - uses: actions/checkout@v2
       - name: Set up Node.js 14
