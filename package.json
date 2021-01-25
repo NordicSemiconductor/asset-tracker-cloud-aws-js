@@ -66,7 +66,7 @@
     "@aws-sdk/types": "3.1.0",
     "@bifravst/code-style": "8.0.134",
     "@bifravst/device-ui-server": "2.0.2",
-    "@bifravst/eslint-config-typescript": "5.0.89",
+    "@bifravst/eslint-config-typescript": "5.0.90",
     "@bifravst/firmware-ci": "5.0.2",
     "@bifravst/object-to-env": "1.0.1",
     "@bifravst/package-layered-lambdas": "4.1.1",
