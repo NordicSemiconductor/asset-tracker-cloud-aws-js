@@ -104,17 +104,27 @@ export const prepareCDKLambdas = async ({
 			} catch (_) {
 				await fs.mkdir(cloudFormationLayerDir)
 			}
-			const { devDependencies, dependencies } = JSON.parse(
+			const { dependencies } = JSON.parse(
 				await fs.readFile(path.resolve(rootDir, 'package.json'), 'utf-8'),
 			)
+			const cdkLambdaDeps = {
+				'@aws-sdk/client-iot': dependencies['@aws-sdk/client-iot'],
+				'@bifravst/cloudformation-helpers':
+					dependencies['@bifravst/cloudformation-helpers'],
+			}
+			if (
+				Object.values(cdkLambdaDeps).find((v) => v === undefined) !== undefined
+			) {
+				throw new Error(
+					`Could not resolve all dependencies in "${JSON.stringify(
+						cdkLambdaDeps,
+					)}"`!,
+				)
+			}
 			await fs.writeFile(
 				path.join(cloudFormationLayerDir, 'package.json'),
 				JSON.stringify({
-					dependencies: {
-						'@aws-sdk/client-iot': dependencies['@aws-sdk/client-iot'],
-						'@bifravst/cloudformation-helpers':
-							devDependencies['@bifravst/cloudformation-helpers'],
-					},
+					dependencies: cdkLambdaDeps,
 				}),
 				'utf-8',
 			)
