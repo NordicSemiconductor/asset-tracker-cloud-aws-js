@@ -61,14 +61,14 @@ const confirm = (
 	},
 })
 
-const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
+const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 	const { accountId, endpoint } = await config()
 	const certsDir = await provideCertsDir({
 		iotEndpoint: endpoint,
 		accountId,
 	})
 
-	program.description('Bifravst Command Line Interface')
+	program.description('Asset Tracker Command Line Interface')
 
 	const commands = [
 		createCACommand({ certsDir }),
@@ -96,11 +96,11 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 			}),
 			cdUpdateTokenCommand(),
 			confirm(
-				'Do you really purge all Bifravst buckets?',
+				'Do you really purge all Asset Tracker buckets?',
 				purgeBucketsCommand(),
 			),
 			confirm(
-				'Do you really want to purge all Bifravst CAs?',
+				'Do you really want to purge all Asset Tracker CAs?',
 				purgeCAsCommand(),
 			),
 			firmwareCICommand({
@@ -147,7 +147,7 @@ const bifravstCLI = async ({ isCI }: { isCI: boolean }) => {
 	}
 }
 
-bifravstCLI({
+assetTrackerCLI({
 	isCI: process.env.CI === '1',
 }).catch((err) => {
 	console.error(chalk.red(err))

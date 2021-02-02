@@ -28,7 +28,7 @@ export class WebAppCD extends CloudFormation.Construct {
 			githubToken,
 		}: {
 			sourceCodeActions: {
-				bifravst: {
+				core: {
 					action: CodePipeline.CfnPipeline.ActionDeclarationProperty
 					outputName: string
 				}
@@ -132,7 +132,7 @@ export class WebAppCD extends CloudFormation.Construct {
 				{
 					name: 'Source',
 					actions: [
-						sourceCodeActions.bifravst.action,
+						sourceCodeActions.core.action,
 						sourceCodeActions.webApp.action,
 					],
 				},
@@ -143,7 +143,7 @@ export class WebAppCD extends CloudFormation.Construct {
 							name: 'DeployWebApp',
 							inputArtifacts: [
 								{
-									name: sourceCodeActions.bifravst.outputName,
+									name: sourceCodeActions.core.outputName,
 								},
 								{
 									name: sourceCodeActions.webApp.outputName,
@@ -152,7 +152,7 @@ export class WebAppCD extends CloudFormation.Construct {
 							actionTypeId: BuildActionCodeBuild,
 							configuration: {
 								ProjectName: this.codeBuildProject.name,
-								PrimarySource: sourceCodeActions.bifravst.outputName,
+								PrimarySource: sourceCodeActions.core.outputName,
 							},
 							outputArtifacts: [
 								{

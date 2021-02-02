@@ -7,7 +7,7 @@ import {
 	connect,
 	atHostHexfile,
 	flash,
-} from '@bifravst/firmware-ci'
+} from '@nordicsemiconductor/firmware-ci-device-helpers'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { Octokit } from '@octokit/rest'
 import * as chalk from 'chalk'
@@ -38,15 +38,15 @@ const getLatestFirmware = async ({
 	})
 	const latestRelease = (
 		await octokit.repos.listReleases({
-			owner: 'bifravst',
-			repo: 'firmware',
+			owner: 'NordicSemiconductor',
+			repo: 'asset-tracker-cloud-firmware',
 			per_page: 1,
 		})
 	).data[0]
 	const assets = (
 		await octokit.repos.listReleaseAssets({
-			owner: 'bifravst',
-			repo: 'firmware',
+			owner: 'NordicSemiconductor',
+			repo: 'asset-tracker-cloud-firmware',
 			release_id: latestRelease.id,
 		})
 	).data

@@ -1,6 +1,6 @@
 import { TestApp } from './apps/Test'
 import {
-	prepareBifravstLambdas,
+	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
 	prepareResources,
 } from './prepare-resources'
@@ -12,7 +12,7 @@ prepareResources({
 })
 	.then(async (res) => ({
 		...res,
-		packedLambdas: await prepareBifravstLambdas({
+		packedLambdas: await prepareAssetTrackerLambdas({
 			...res,
 			rootDir,
 		}),

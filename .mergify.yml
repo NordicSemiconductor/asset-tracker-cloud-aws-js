@@ -2,16 +2,16 @@ pull_request_rules:
   - name: Automatic merge security PRs when all status checks pass
     conditions:
       - author~=^(snyk-bot|dependabot\[bot\])$
-      - status-success=security/snyk (Bifravst)
+      - status-success=security/snyk (Asset Tracker Cloud)
       - status-success=tests (ubuntu-latest)
       - status-success=tests (macos-latest)
     actions:
       merge:
         method: rebase
         rebase_fallback: squash
-        bot_account: bifravst-ci
+        bot_account: asset-tracker-cloud-ci
       label:
         add:
-         - mergify
+          - mergify
       rebase:
-        bot_account: bifravst-ci
+        bot_account: asset-tracker-cloud-ci

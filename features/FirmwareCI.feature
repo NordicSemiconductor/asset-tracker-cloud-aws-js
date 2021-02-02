@@ -6,7 +6,7 @@ Feature: Schedule CI runs of firmware builds
 
     Note: the resources provided in this project are
     used to control the actual CI runner.
-    See https://github.com/bifravst/firmware-ci
+    See https://github.com/NordicSemiconductor/firmware-ci
 
     Background:
 

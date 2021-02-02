@@ -7,7 +7,7 @@ import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { BifravstLambdas } from '../prepare-resources'
+import { AssetTrackerLambdas } from '../prepare-resources'
 import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
 import * as SQS from '@aws-cdk/aws-sqs'
@@ -30,7 +30,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			lambdas,
 			enableUnwiredApi,
 		}: {
-			lambdas: LambdasWithLayer<BifravstLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 			enableUnwiredApi: boolean
 		},
 	) {
@@ -179,7 +179,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					new IAM.PolicyStatement({
 						actions: ['ssm:GetParametersByPath'],
 						resources: [
-							`arn:aws:ssm:${parent.region}:${parent.account}:parameter/bifravst/cellGeoLocation/unwiredlabs`,
+							`arn:aws:ssm:${parent.region}:${parent.account}:parameter/asset-tracker/cellGeoLocation/unwiredlabs`,
 						],
 					}),
 				],

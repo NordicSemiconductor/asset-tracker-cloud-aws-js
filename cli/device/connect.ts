@@ -2,7 +2,10 @@ import { promises as fs } from 'fs'
 import { thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import * as chalk from 'chalk'
-import { uiServer, WebSocketConnection } from '@bifravst/device-ui-server'
+import {
+	uiServer,
+	WebSocketConnection,
+} from '@nordicsemiconductor/asset-tracker-cloud-device-ui-server'
 
 const defaultConfig = {
 	act: false, // Whether to enable the active mode

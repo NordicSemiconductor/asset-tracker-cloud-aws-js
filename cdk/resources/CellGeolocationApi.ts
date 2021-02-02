@@ -2,7 +2,7 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { BifravstLambdas } from '../prepare-resources'
+import { AssetTrackerLambdas } from '../prepare-resources'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
@@ -27,7 +27,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			lambdas,
 		}: {
 			cellgeo: CellGeolocation
-			lambdas: LambdasWithLayer<BifravstLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 		},
 	) {
 		super(parent, id)
@@ -186,7 +186,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cell`,
 		})
 
-		// Add $default route, this is a attempt to fix https://github.com/bifravst/aws/issues/455
+		// Add $default route, this is a attempt to fix https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js/issues/455
 		new HttpApi.CfnRoute(this, 'defaultRoute', {
 			apiId: this.api.ref,
 			routeKey: '$default',

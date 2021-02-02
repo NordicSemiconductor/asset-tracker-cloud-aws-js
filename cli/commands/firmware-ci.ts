@@ -4,7 +4,7 @@ import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI'
 import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName'
-import { stackOutput } from '@bifravst/cloudformation-helpers'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import { createDevice } from '../firmware-ci/createDevice'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { deleteDevice } from '../firmware-ci/deleteDevice'
@@ -90,7 +90,9 @@ export const firmwareCICommand = ({
 				chalk.gray('with the'),
 				chalk.blue.italic('Firmware CI runner'),
 			)
-			console.log(chalk.gray('https://github.com/bifravst/firmware-ci'))
+			console.log(
+				chalk.gray('https://github.com/NordicSemiconductor/firmware-ci'),
+			)
 		}
 
 		if (remove !== undefined) {

@@ -1,5 +1,5 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb'
-import { cellId } from '@bifravst/cell-geolocation-helpers'
+import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { MaybeCellGeoLocation } from './types'
 import { isSome } from 'fp-ts/lib/Option'
 import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'

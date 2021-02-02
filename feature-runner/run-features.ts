@@ -7,13 +7,13 @@ import {
 	restStepRunners,
 	randomStepRunners,
 	RestClient,
-} from '@bifravst/e2e-bdd-test-runner'
-import { stackOutput } from '@bifravst/cloudformation-helpers'
+} from '@nordicsemiconductor/e2e-bdd-test-runner'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/Bifravst'
+import { StackOutputs } from '../cdk/stacks/AssetTracker'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
-import { bifravstStepRunners } from './steps/bifravst'
+import { assetTrackerStepRunners } from './steps/asset-tracker'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
@@ -27,11 +27,11 @@ import * as path from 'path'
 import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
 import { timestreamStepRunners } from './steps/timestream'
-import { queryClient } from '@bifravst/timestream-helpers'
+import { queryClient } from '@nordicsemiconductor/timestream-helpers'
 
 let ran = false
 
-export type BifravstWorld = StackOutputs & {
+export type AssetTrackerWorld = StackOutputs & {
 	accountId: string
 	userIotPolicyName: string
 	historicaldataTableName: string
@@ -90,7 +90,7 @@ program
 				historicaldataTableName,
 			] = stackConfig.historicaldataTableInfo.split('|')
 
-			const world: BifravstWorld = {
+			const world: AssetTrackerWorld = {
 				...stackConfig,
 				'firmwareCI:userAccessKeyId': firmwareCIStackConfig.userAccessKeyId,
 				'firmwareCI:userSecretAccessKey':
@@ -116,7 +116,7 @@ program
 			console.log(world)
 			console.log()
 
-			const runner = new FeatureRunner<BifravstWorld>(world, {
+			const runner = new FeatureRunner<AssetTrackerWorld>(world, {
 				dir: featureDir,
 				reporters: [
 					new ConsoleReporter({
@@ -145,7 +145,7 @@ program
 							},
 						}),
 					)
-					.addStepRunners(bifravstStepRunners(world))
+					.addStepRunners(assetTrackerStepRunners(world))
 					.addStepRunners(
 						firmwareCIStepRunners({
 							...world,

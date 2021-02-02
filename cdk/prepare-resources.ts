@@ -7,18 +7,18 @@ import {
 	packBaseLayer,
 	packLayeredLambdas,
 	WebpackMode,
-} from '@bifravst/package-layered-lambdas'
+} from '@nordicsemiconductor/package-layered-lambdas'
 import { supportedRegions } from './regions'
 import * as chalk from 'chalk'
 import { getIotEndpoint } from './helper/getIotEndpoint'
 import { spawn } from 'child_process'
-import { ConsoleProgressReporter } from '@bifravst/package-layered-lambdas/dist/src/reporter'
+import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
 
 export type CDKLambdas = {
 	createThingGroup: string
 }
 
-export type BifravstLambdas = {
+export type AssetTrackerLambdas = {
 	storeMessagesInTimestream: string
 	geolocateCellHttpApi: string
 	invokeStepFunctionFromSQS: string
@@ -109,8 +109,8 @@ export const prepareCDKLambdas = async ({
 			)
 			const cdkLambdaDeps = {
 				'@aws-sdk/client-iot': dependencies['@aws-sdk/client-iot'],
-				'@bifravst/cloudformation-helpers':
-					dependencies['@bifravst/cloudformation-helpers'],
+				'@nordicsemiconductor/cloudformation-helpers':
+					dependencies['@nordicsemiconductor/cloudformation-helpers'],
 			}
 			if (
 				Object.values(cdkLambdaDeps).find((v) => v === undefined) !== undefined
@@ -163,7 +163,7 @@ export const prepareCDKLambdas = async ({
 	}
 }
 
-export const prepareBifravstLambdas = async ({
+export const prepareAssetTrackerLambdas = async ({
 	rootDir,
 	outDir,
 	sourceCodeBucketName,
@@ -171,8 +171,8 @@ export const prepareBifravstLambdas = async ({
 	rootDir: string
 	outDir: string
 	sourceCodeBucketName: string
-}): Promise<PackedLambdas<BifravstLambdas>> => {
-	const reporter = ConsoleProgressReporter('Bifravst Lambdas')
+}): Promise<PackedLambdas<AssetTrackerLambdas>> => {
+	const reporter = ConsoleProgressReporter('Asset Tracker Lambdas')
 	return {
 		layerZipFileName: await packBaseLayer({
 			reporter,
@@ -180,9 +180,9 @@ export const prepareBifravstLambdas = async ({
 			outDir,
 			Bucket: sourceCodeBucketName,
 		}),
-		lambdas: await packLayeredLambdas<BifravstLambdas>({
+		lambdas: await packLayeredLambdas<AssetTrackerLambdas>({
 			reporter,
-			id: 'bifravst',
+			id: 'asset-tracker',
 			mode: WebpackMode.production,
 			srcDir: rootDir,
 			outDir,

@@ -1,7 +1,7 @@
-import { BifravstApp } from './apps/Bifravst'
+import { AssetTrackerApp } from './apps/AssetTracker'
 import {
 	prepareResources,
-	prepareBifravstLambdas,
+	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
 } from './prepare-resources'
 import { SSMClient } from '@aws-sdk/client-ssm'
@@ -21,7 +21,7 @@ Promise.all([
 		rootDir,
 	}).then(async (res) => ({
 		...res,
-		packedLambdas: await prepareBifravstLambdas({
+		packedLambdas: await prepareAssetTrackerLambdas({
 			...res,
 			rootDir,
 		}),
@@ -40,7 +40,7 @@ Promise.all([
 	loadContext({ sts: new STSClient({}) }),
 ])
 	.then(([args, ulApiSettings, context]) =>
-		new BifravstApp({
+		new AssetTrackerApp({
 			...args,
 			enableUnwiredApi: 'apiKey' in ulApiSettings,
 			context: {

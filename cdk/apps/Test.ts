@@ -1,7 +1,7 @@
 import { App } from '@aws-cdk/core'
-import { BifravstStack } from '../stacks/Bifravst'
+import { AssetTrackerStack } from '../stacks/AssetTracker'
 import {
-	BifravstLambdas,
+	AssetTrackerLambdas,
 	CDKLambdas,
 	PackedLambdas,
 } from '../prepare-resources'
@@ -14,12 +14,12 @@ export class TestApp extends App {
 	public constructor(args: {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<BifravstLambdas>
+		packedLambdas: PackedLambdas<AssetTrackerLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })
-		new BifravstStack(this, {
+		new AssetTrackerStack(this, {
 			...args,
 			enableUnwiredApi: false, // FIXME: implement e2e test
 		})

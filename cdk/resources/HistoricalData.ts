@@ -5,7 +5,7 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as Timestream from '@aws-cdk/aws-timestream'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { BifravstLambdas } from '../prepare-resources'
+import { AssetTrackerLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
 
 /**
@@ -21,7 +21,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			lambdas,
 			userRole,
 		}: {
-			lambdas: LambdasWithLayer<BifravstLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 			userRole: IAM.IRole
 		},
 	) {

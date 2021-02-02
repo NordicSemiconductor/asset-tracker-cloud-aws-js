@@ -1,8 +1,8 @@
 import { App } from '@aws-cdk/core'
-import { BifravstStack } from '../stacks/Bifravst'
+import { AssetTrackerStack } from '../stacks/AssetTracker'
 import { WebAppStack } from '../stacks/WebApp'
 import {
-	BifravstLambdas,
+	AssetTrackerLambdas,
 	CDKLambdas,
 	PackedLambdas,
 } from '../prepare-resources'
@@ -14,18 +14,18 @@ import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
 import { enabledInContext } from '../helper/enabledInContext'
 
-export class BifravstApp extends App {
+export class AssetTrackerApp extends App {
 	public constructor(args: {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<BifravstLambdas>
+		packedLambdas: PackedLambdas<AssetTrackerLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		enableUnwiredApi: boolean
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })
 		// Core
-		new BifravstStack(this, {
+		new AssetTrackerStack(this, {
 			...args,
 		})
 		const checkFlag = enabledInContext(this.node)
@@ -60,7 +60,7 @@ export class BifravstApp extends App {
 					readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
 				)
 				new ContinuousDeploymentStack(this, {
-					bifravstAWS: {
+					core: {
 						...extractRepoAndOwner(pjson.repository.url),
 						branch: pjson.deploy.branch ?? 'saga',
 					},

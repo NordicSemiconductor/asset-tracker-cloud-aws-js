@@ -1,2 +1,2 @@
-export * from './bifravst'
+export * from './asset-tracker'
 export * from './firmwareCI'

@@ -15,7 +15,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		properties: {
-			bifravstAWS: {
+			core: {
 				owner: string
 				repo: string
 				branch: string
@@ -75,7 +75,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
 		})
 
-		const { bifravstAWS, deviceUI, webApp } = properties
+		const { core, deviceUI, webApp } = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
@@ -113,7 +113,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: CONTINUOUS_DEPLOYMENT_STACK_NAME,
-			description: 'Continuous deploys the Bifravst project',
+			description: 'Continuous deploys the Asset Tracker Example project',
 			source: {
 				type: 'CODEPIPELINE',
 				buildSpec: 'continuous-deployment.yml',
@@ -195,12 +195,12 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			},
 		})
 
-		const bifravstSourceCodeAction = sourceCodeAction({
-			name: 'BifravstAWSSourceCode',
-			outputName: 'BifravstAWS',
-			Branch: bifravstAWS.branch,
-			Owner: bifravstAWS.owner,
-			Repo: bifravstAWS.repo,
+		const coreSourceCodeAction = sourceCodeAction({
+			name: 'AssetTrackerAWSSourceCode',
+			outputName: 'AssetTrackerAWS',
+			Branch: core.branch,
+			Owner: core.owner,
+			Repo: core.repo,
 			githubToken,
 		})
 
@@ -229,9 +229,9 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				this,
 				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-webAppCD`,
 				{
-					description: 'Continuously deploys the Bifravst Web App',
+					description: 'Continuously deploys the Asset Tracker Web App',
 					sourceCodeActions: {
-						bifravst: bifravstSourceCodeAction,
+						core: coreSourceCodeAction,
 						webApp: webAppSourceCodeAction,
 					},
 					buildSpec: 'continuous-deployment-web-app.yml',
@@ -248,9 +248,9 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
 				{
 					description:
-						'Continuously deploys the Bifravst Device Simulator Web Application',
+						'Continuously deploys the Asset Tracker device simulator web application',
 					sourceCodeActions: {
-						bifravst: bifravstSourceCodeAction,
+						core: coreSourceCodeAction,
 						webApp: deviceUISourceCodeAction,
 					},
 					buildSpec: 'continuous-deployment-device-ui-app.yml',
@@ -259,7 +259,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			).codeBuildProject
 		}
 
-		// Set up the continuous deployment for Bifravst.
+		// Set up the continuous deployment for the Asset Tracker.
 		// This will also run the deployment of the WebApp and DeviceUI after a deploy
 		// (in case some outputs have changed and need to be made available to the apps).
 
@@ -304,7 +304,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				{
 					name: 'Source',
 					actions: [
-						bifravstSourceCodeAction.action,
+						coreSourceCodeAction.action,
 						...(enableWebAppCD ? [webAppSourceCodeAction.action] : []),
 						...(enableDeviceUICD ? [deviceUISourceCodeAction.action] : []),
 					],
@@ -313,10 +313,10 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					name: 'Deploy',
 					actions: [
 						{
-							name: 'DeployBifravst',
+							name: 'DeployCore',
 							inputArtifacts: [
 								{
-									name: bifravstSourceCodeAction.outputName,
+									name: coreSourceCodeAction.outputName,
 								},
 							],
 							actionTypeId: BuildActionCodeBuild,
@@ -325,7 +325,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 							},
 							outputArtifacts: [
 								{
-									name: 'BifravstBuildId',
+									name: 'CoreBuildId',
 								},
 							],
 							runOrder: 1,
@@ -336,7 +336,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 										name: 'DeployWebApp',
 										inputArtifacts: [
 											{
-												name: bifravstSourceCodeAction.outputName,
+												name: coreSourceCodeAction.outputName,
 											},
 											{
 												name: webAppSourceCodeAction.outputName,
@@ -345,7 +345,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 										actionTypeId: BuildActionCodeBuild,
 										configuration: {
 											ProjectName: webAppCDProject.name,
-											PrimarySource: bifravstSourceCodeAction.outputName,
+											PrimarySource: coreSourceCodeAction.outputName,
 										},
 										outputArtifacts: [
 											{
@@ -362,7 +362,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 										name: 'DeployDeviceUI',
 										inputArtifacts: [
 											{
-												name: bifravstSourceCodeAction.outputName,
+												name: coreSourceCodeAction.outputName,
 											},
 											{
 												name: deviceUISourceCodeAction.outputName,
@@ -371,7 +371,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 										actionTypeId: BuildActionCodeBuild,
 										configuration: {
 											ProjectName: deviceUICDProject.name,
-											PrimarySource: bifravstSourceCodeAction.outputName,
+											PrimarySource: coreSourceCodeAction.outputName,
 										},
 										outputArtifacts: [
 											{
@@ -396,7 +396,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			filters: [
 				{
 					jsonPath: '$.ref',
-					matchEquals: `refs/heads/${bifravstAWS.branch}`,
+					matchEquals: `refs/heads/${core.branch}`,
 				},
 			],
 			authentication: 'GITHUB_HMAC',

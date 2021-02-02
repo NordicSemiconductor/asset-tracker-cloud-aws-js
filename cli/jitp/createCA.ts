@@ -11,7 +11,7 @@ import {
 import { promises as fs } from 'fs'
 import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
-import { toObject } from '@bifravst/cloudformation-helpers'
+import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 
 /**
  * Creates a CA certificate and registers it for Just-in-time provisioning

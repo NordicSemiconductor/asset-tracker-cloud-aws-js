@@ -3,8 +3,8 @@ import {
 	regexMatcher,
 	StepRunnerFunc,
 	InterpolatedStep,
-} from '@bifravst/e2e-bdd-test-runner'
-import { randomWords } from '@bifravst/random-words'
+} from '@nordicsemiconductor/e2e-bdd-test-runner'
+import { randomWords } from '@nordicsemiconductor/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
 import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
@@ -68,7 +68,7 @@ type World = {
 	accountId: string
 }
 
-export const bifravstStepRunners = ({
+export const assetTrackerStepRunners = ({
 	mqttEndpoint,
 	certsDir,
 	awsIotRootCA,

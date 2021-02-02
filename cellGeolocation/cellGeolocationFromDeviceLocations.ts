@@ -1,4 +1,4 @@
-import { cellFromGeolocations } from '@bifravst/cell-geolocation-helpers'
+import { cellFromGeolocations } from '@nordicsemiconductor/cell-geolocation-helpers'
 
 export const fromDeviceLocations = cellFromGeolocations({
 	minCellDiameterInMeters: 5000,

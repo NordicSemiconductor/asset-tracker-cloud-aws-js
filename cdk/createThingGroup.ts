@@ -13,7 +13,10 @@ import {
 } from '@aws-sdk/client-iot'
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { paginate } from '../util/paginate'
-import { cfnResponse, ResponseStatus } from '@bifravst/cloudformation-helpers'
+import {
+	cfnResponse,
+	ResponseStatus,
+} from '@nordicsemiconductor/cloudformation-helpers'
 
 const iot = new IoTClient({})
 

@@ -1,5 +1,5 @@
 import { CommandDefinition } from './CommandDefinition'
-import { stackOutput } from '@bifravst/cloudformation-helpers'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import {
 	DetachPrincipalPolicyCommand,
 	IoTClient,

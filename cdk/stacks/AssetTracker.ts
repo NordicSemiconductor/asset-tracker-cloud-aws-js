@@ -7,7 +7,7 @@ import * as Iot from '@aws-cdk/aws-iot'
 import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../resources/AvatarStorage'
 import {
-	BifravstLambdas,
+	AssetTrackerLambdas,
 	CDKLambdas,
 	PackedLambdas,
 } from '../prepare-resources'
@@ -22,7 +22,7 @@ import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import { HistoricalData } from '../resources/HistoricalData'
 import { warn } from '../helper/note'
 
-export class BifravstStack extends CloudFormation.Stack {
+export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		{
@@ -34,7 +34,7 @@ export class BifravstStack extends CloudFormation.Stack {
 		}: {
 			mqttEndpoint: string
 			sourceCodeBucketName: string
-			packedLambdas: PackedLambdas<BifravstLambdas>
+			packedLambdas: PackedLambdas<AssetTrackerLambdas>
 			packedCDKLambdas: PackedLambdas<CDKLambdas>
 			enableUnwiredApi: boolean
 		},
@@ -388,7 +388,7 @@ export class BifravstStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:avatarBucketName`,
 		})
 
-		const lambdas: LambdasWithLayer<BifravstLambdas> = {
+		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
 			lambdas: lambasOnBucket(packedLambdas),
 			layers: [baseLayer],
 		}

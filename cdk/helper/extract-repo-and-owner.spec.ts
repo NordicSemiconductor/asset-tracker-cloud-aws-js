@@ -3,10 +3,12 @@ import { extractRepoAndOwner } from './extract-repo-and-owner'
 describe('extractRepoAndOwner()', () => {
 	it('should parse a git repo', () => {
 		expect(
-			extractRepoAndOwner('git+https://github.com/bifravst/aws.git'),
+			extractRepoAndOwner(
+				'git+https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js.git',
+			),
 		).toEqual({
-			owner: 'bifravst',
-			repo: 'aws',
+			owner: 'NordicSemiconductor',
+			repo: 'asset-tracker-cloud-aws-js',
 		})
 	})
 })

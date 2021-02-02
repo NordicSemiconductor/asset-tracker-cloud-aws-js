@@ -1,6 +1,6 @@
 import { CommandDefinition } from './CommandDefinition'
-import { stackOutput } from '@bifravst/cloudformation-helpers'
-import { objectToEnv } from '@bifravst/object-to-env'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
+import { objectToEnv } from '@nordicsemiconductor/object-to-env'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { DEVICEUI_STACK_NAME } from '../../cdk/stacks/stackName'
 

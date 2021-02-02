@@ -1,5 +1,5 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
-import { cellId } from '@bifravst/cell-geolocation-helpers'
+import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Cell } from '../geolocateCell'
 import { MaybeCellGeoLocation } from './types'
 import { fromEnv } from '../../util/fromEnv'

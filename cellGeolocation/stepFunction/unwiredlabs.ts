@@ -9,7 +9,7 @@ export const getApiSettings = ({ ssm }: { ssm: SSMClient }) => async ({
 }: {
 	api: 'unwiredlabs'
 }): Promise<{ apiKey: string; endpoint: string }> => {
-	const Path = `/bifravst/cellGeoLocation/${api}`
+	const Path = `/asset-tracker/cellGeoLocation/${api}`
 	const { Parameters } = await ssm.send(
 		new GetParametersByPathCommand({
 			Path,

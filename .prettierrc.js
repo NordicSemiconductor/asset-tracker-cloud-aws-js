@@ -1,3 +1,3 @@
 module.exports = {
-	...require('@bifravst/code-style/.prettierrc'),
+	...require('@nordicsemiconductor/asset-tracker-cloud-code-style/.prettierrc'),
 }

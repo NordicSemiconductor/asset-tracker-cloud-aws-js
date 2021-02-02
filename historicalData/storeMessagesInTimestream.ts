@@ -4,7 +4,7 @@ import { batchToTimestreamRecords } from './batchToTimestreamRecords'
 import { messageToTimestreamRecords } from './messageToTimestreamRecords'
 import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
 import { storeRecordsInTimeseries } from './storeRecordsInTimeseries'
-import { writeClient } from '@bifravst/timestream-helpers'
+import { writeClient } from '@nordicsemiconductor/timestream-helpers'
 
 const { tableInfo } = fromEnv({
 	tableInfo: 'TABLE_INFO',

@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { paginate } from '../../util/paginate'
-import { stackOutput } from '@bifravst/cloudformation-helpers'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import * as chalk from 'chalk'
 
@@ -46,7 +46,7 @@ const purgeCACertificate = ({
 			}),
 		)
 	} else {
-		console.error(chalk.yellow.dim(`Not a Bifravst CA: ${certificateId}`))
+		console.error(chalk.yellow.dim(`Not a Asset Tracker CA: ${certificateId}`))
 	}
 }
 
@@ -87,5 +87,5 @@ export const purgeCAsCommand = (): CommandDefinition => ({
 					}),
 		})
 	},
-	help: 'Purges all Bifravst CAs',
+	help: 'Purges all Asset Tracker CAs',
 })

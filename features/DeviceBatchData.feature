@@ -1,7 +1,7 @@
 Feature: Device: Batch Data
   Devices can publish batch data
 
-  See https://github.com/bifravst/bifravst/blob/saga/docs/firmware/Protocol.md#3-past-state
+  See https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/saga/docs/firmware/Protocol.md#3-past-state
 
   Background:
 
