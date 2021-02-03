@@ -42,7 +42,7 @@
     "@nordicsemiconductor/random-words": "5.0.0",
     "@nordicsemiconductor/timestream-helpers": "3.0.1",
     "ajv": "7.0.4",
-    "fp-ts": "2.9.4",
+    "fp-ts": "2.9.5",
     "uuid": "8.3.2"
   },
   "devDependencies": {
@@ -66,11 +66,11 @@
     "@commitlint/config-angular": "11.0.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "9.0.2",
     "@nordicsemiconductor/asset-tracker-cloud-device-ui-server": "3.0.0",
-    "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "7.0.0",
+    "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "7.0.1",
     "@nordicsemiconductor/firmware-ci-device-helpers": "6.0.0",
     "@nordicsemiconductor/object-to-env": "2.0.1",
     "@nordicsemiconductor/package-layered-lambdas": "5.0.0",
-    "@octokit/rest": "18.0.15",
+    "@octokit/rest": "18.1.0",
     "@types/aws-iot-device-sdk": "2.2.2",
     "@types/aws-lambda": "8.10.71",
     "@types/backoff": "2.5.1",
