@@ -11,4 +11,4 @@ process.on('uncaughtException', die)
 process.on('unhandledRejection', die)
 
 // eslint-disable-next-line
-require('../dist/cli/asset-tracker')
+require('../dist/cli/cli')

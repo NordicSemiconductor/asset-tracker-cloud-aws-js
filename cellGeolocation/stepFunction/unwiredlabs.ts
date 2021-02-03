@@ -1,44 +1,43 @@
-import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm'
+import { SSMClient } from '@aws-sdk/client-ssm'
 import { request as nodeRequest } from 'https'
-import { parse } from 'url'
+import { URL } from 'url'
 import { MaybeCellGeoLocation } from './types'
 import { Cell } from '../geolocateCell'
+import { fromEnv } from '../../util/fromEnv'
+import { getApiSettings } from '../../util/apiConfiguration'
 
-export const getApiSettings = ({ ssm }: { ssm: SSMClient }) => async ({
-	api,
+export const getUnwiredLabsApiSettings = ({
+	ssm,
+	stackName,
 }: {
-	api: 'unwiredlabs'
-}): Promise<{ apiKey: string; endpoint: string }> => {
-	const Path = `/asset-tracker/cellGeoLocation/${api}`
-	const { Parameters } = await ssm.send(
-		new GetParametersByPathCommand({
-			Path,
-			Recursive: true,
-		}),
-	)
-
-	const apiKey = Parameters?.find(
-		({ Name }) => Name?.replace(`${Path}/`, '') === 'apiKey',
-	)?.Value
+	ssm: SSMClient
+	stackName: string
+}) => async (): Promise<{ apiKey: string; endpoint: string }> => {
+	const p = await getApiSettings({
+		ssm,
+		stackName,
+		scope: 'cellGeoLocation',
+		api: 'unwiredlabs',
+	})()
+	const { apiKey, endpoint } = p
 	if (apiKey === undefined) throw new Error('No API key configured!')
-	const endpoint =
-		Parameters?.find(({ Name }) => Name?.replace(`${Path}/`, '') === 'endpoint')
-			?.Value ?? 'https://eu1.unwiredlabs.com/'
-
 	return {
 		apiKey,
-		endpoint,
+		endpoint: endpoint ?? 'https://eu1.unwiredlabs.com/',
 	}
 }
 
-const fetchSettings = getApiSettings({ ssm: new SSMClient({}) })
+const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
+
+const fetchSettings = getUnwiredLabsApiSettings({
+	ssm: new SSMClient({}),
+	stackName,
+})
 
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	try {
-		const { apiKey, endpoint } = await fetchSettings({
-			api: 'unwiredlabs',
-		})
-		const { hostname, path } = parse(endpoint)
+		const { apiKey, endpoint } = await fetchSettings()
+		const { hostname, pathname } = new URL(endpoint)
 
 		// See https://eu1.unwiredlabs.com/docs-html/index.html#response
 		const {
@@ -61,7 +60,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 		} = await new Promise((resolve, reject) => {
 			const options = {
 				host: hostname,
-				path: `${path?.replace(/\/*$/, '') ?? ''}/v2/process.php`,
+				path: `${pathname?.replace(/\/*$/, '') ?? ''}/v2/process.php`,
 				method: 'POST',
 				agent: false,
 			}

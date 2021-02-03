@@ -5,13 +5,18 @@ import {
 	prepareCDKLambdas,
 } from './prepare-resources'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
+import { getUnwiredLabsApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
 import { warn } from './helper/note'
 import { STSClient } from '@aws-sdk/client-sts'
 import { loadContext } from './helper/loadContext'
+import { CORE_STACK_NAME } from './stacks/stackName'
+import { getApiSettings } from '../util/apiConfiguration'
+import * as chalk from 'chalk'
 
-const fetchUnwiredLabsApiSettings = getApiSettings({
-	ssm: new SSMClient({}),
+const ssm = new SSMClient({})
+const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
+	ssm,
+	stackName: CORE_STACK_NAME,
 })
 
 const rootDir = process.cwd()
@@ -30,25 +35,47 @@ Promise.all([
 			rootDir,
 		}),
 	})),
-	fetchUnwiredLabsApiSettings({ api: 'unwiredlabs' }).catch(() => {
-		warn(
-			'Cell Geolocation',
-			'No UnwiredLabs API key configured. Feature will be disabled.',
-		)
-		return {}
-	}),
+	fetchUnwiredLabsApiSettings().catch(() => ({})),
+	getApiSettings({
+		ssm,
+		stackName: CORE_STACK_NAME,
+		scope: 'codebuild',
+		api: 'github',
+	})().catch(() => ({})),
 	loadContext({ sts: new STSClient({}) }),
 ])
-	.then(([args, ulApiSettings, context]) =>
-		new AssetTrackerApp({
+	.then(([args, ulApiSettings, codebuildSettings, context]) => {
+		const ctx = {
+			version: process.env.VERSION ?? '0.0.0-development',
+			...context,
+		} as Record<string, any>
+		const enableUnwiredApi = 'apiKey' in ulApiSettings
+		if (!enableUnwiredApi) {
+			warn(
+				'Cell Geolocation',
+				'No UnwiredLabs API key configured. Feature will be disabled.',
+			)
+			warn(
+				'Cell Geolocation',
+				`Use ${chalk.greenBright(
+					`node cli configure-api codebuild github token <token>`,
+				)} to set the token`,
+			)
+			ctx.unwiredlabs = '0'
+		}
+		const enableCD = 'token' in codebuildSettings
+		if (!enableCD) {
+			warn(
+				'Continuous Deployment',
+				'No GitHub API key configured. Continuous deployment will be disabled.',
+			)
+			ctx.cd = '0'
+		}
+		return new AssetTrackerApp({
 			...args,
-			enableUnwiredApi: 'apiKey' in ulApiSettings,
-			context: {
-				version: process.env.VERSION ?? '0.0.0-development',
-				...context,
-			},
-		}).synth(),
-	)
+			context: ctx,
+		}).synth()
+	})
 	.catch((err) => {
 		console.error(err)
 		process.exit(1)

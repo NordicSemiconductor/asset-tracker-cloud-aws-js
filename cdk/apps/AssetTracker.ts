@@ -20,7 +20,6 @@ export class AssetTrackerApp extends App {
 		sourceCodeBucketName: string
 		packedLambdas: PackedLambdas<AssetTrackerLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
-		enableUnwiredApi: boolean
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })

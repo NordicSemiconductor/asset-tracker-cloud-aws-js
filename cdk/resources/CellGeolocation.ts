@@ -12,6 +12,8 @@ import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
 import * as SQS from '@aws-cdk/aws-sqs'
 import { LambdasWithLayer } from './LambdasWithLayer'
+import { CORE_STACK_NAME } from '../stacks/stackName'
+import { enabledInContext } from '../helper/enabledInContext'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -28,10 +30,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 		id: string,
 		{
 			lambdas,
-			enableUnwiredApi,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
-			enableUnwiredApi: boolean
 		},
 	) {
 		super(parent, id)
@@ -165,31 +165,37 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		// Optional step
 		let fromUnwiredLabs: Lambda.IFunction | undefined = undefined
-		if (enableUnwiredApi) {
-			fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
-				layers: lambdas.layers,
-				handler: 'index.handler',
-				runtime: Lambda.Runtime.NODEJS_12_X,
-				timeout: CloudFormation.Duration.seconds(10),
-				memorySize: 1792,
-				code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
-				description: 'Resolve cell geolocation using the UnwiredLabs API',
-				initialPolicy: [
-					logToCloudWatch,
-					new IAM.PolicyStatement({
-						actions: ['ssm:GetParametersByPath'],
-						resources: [
-							`arn:aws:ssm:${parent.region}:${parent.account}:parameter/asset-tracker/cellGeoLocation/unwiredlabs`,
-						],
-					}),
-				],
-				environment: {
-					VERSION: this.node.tryGetContext('version'),
-				},
-			})
+		const checkFlag = enabledInContext(this.node)
+		const unwiredLabsEnabled = checkFlag({
+			key: 'unwiredlabs',
+			component: 'UnwiredLabs API',
+			onUndefined: 'disabled',
+			onEnabled: () => {
+				fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
+					layers: lambdas.layers,
+					handler: 'index.handler',
+					runtime: Lambda.Runtime.NODEJS_12_X,
+					timeout: CloudFormation.Duration.seconds(10),
+					memorySize: 1792,
+					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
+					description: 'Resolve cell geolocation using the UnwiredLabs API',
+					initialPolicy: [
+						logToCloudWatch,
+						new IAM.PolicyStatement({
+							actions: ['ssm:GetParametersByPath'],
+							resources: [
+								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/cellGeoLocation/unwiredlabs`,
+							],
+						}),
+					],
+					environment: {
+						VERSION: this.node.tryGetContext('version'),
+					},
+				})
 
-			new LambdaLogGroup(this, 'fromUnwiredLabsLogs', fromUnwiredLabs)
-		}
+				new LambdaLogGroup(this, 'fromUnwiredLabsLogs', fromUnwiredLabs)
+			},
+		})
 
 		const isGeolocated = StepFunctions.Condition.booleanEquals(
 			'$.cellgeo.located',
@@ -243,7 +249,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 								)
 								.otherwise(
 									(() => {
-										if (!fromUnwiredLabs) {
+										if (!unwiredLabsEnabled) {
 											return new StepFunctions.Fail(this, 'Failed (No API)', {
 												error: 'NO_API',
 												cause:
@@ -255,7 +261,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 											'Resolve using UnwiredLabs API',
 											{
 												task: new StepFunctionTasks.InvokeFunction(
-													fromUnwiredLabs,
+													(fromUnwiredLabs as unknown) as Lambda.IFunction,
 												),
 												resultPath: '$.cellgeo',
 											},

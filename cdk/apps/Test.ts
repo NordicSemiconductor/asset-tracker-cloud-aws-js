@@ -21,7 +21,6 @@ export class TestApp extends App {
 		super({ context: args.context })
 		new AssetTrackerStack(this, {
 			...args,
-			enableUnwiredApi: false, // FIXME: implement e2e test
 		})
 		new FirmwareCIStack(this, args)
 	}

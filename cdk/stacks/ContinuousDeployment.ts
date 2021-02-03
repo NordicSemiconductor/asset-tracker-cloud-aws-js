@@ -106,7 +106,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			this,
 			'ghtoken',
 			{
-				parameterName: '/codebuild/github-token',
+				parameterName: `/${CORE_STACK_NAME}/codebuild/github/token`,
 				version: 1,
 			},
 		)

@@ -30,13 +30,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			sourceCodeBucketName,
 			packedLambdas,
 			packedCDKLambdas,
-			enableUnwiredApi,
 		}: {
 			mqttEndpoint: string
 			sourceCodeBucketName: string
 			packedLambdas: PackedLambdas<AssetTrackerLambdas>
 			packedCDKLambdas: PackedLambdas<CDKLambdas>
-			enableUnwiredApi: boolean
 		},
 	) {
 		super(parent, CORE_STACK_NAME)
@@ -435,7 +433,6 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			lambdas,
-			enableUnwiredApi,
 		})
 
 		cellgeo.stateMachine.grantStartExecution(userRole)

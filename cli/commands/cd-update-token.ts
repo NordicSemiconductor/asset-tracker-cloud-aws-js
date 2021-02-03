@@ -3,35 +3,27 @@ import {
 	GetPipelineCommand,
 	UpdatePipelineCommand,
 } from '@aws-sdk/client-codepipeline'
-import {
-	DeleteParameterCommand,
-	PutParameterCommand,
-	SSMClient,
-} from '@aws-sdk/client-ssm'
+import { SSMClient } from '@aws-sdk/client-ssm'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { listPipelines } from '../cd/listPipelines'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { putApiSetting } from '../../util/apiConfiguration'
 
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',
 	action: async (token: string) => {
 		const ssm = new SSMClient({})
-		try {
-			await ssm.send(
-				new DeleteParameterCommand({
-					Name: '/codebuild/github-token',
-				}),
-			)
-		} catch {
-			// pass
-		}
-		await ssm.send(
-			new PutParameterCommand({
-				Name: '/codebuild/github-token',
-				Value: token,
-				Type: 'String',
-			}),
-		)
+
+		await putApiSetting({
+			ssm,
+			stackName: CORE_STACK_NAME,
+			scope: 'codebuild',
+			api: 'github',
+		})({
+			property: 'token',
+			value: token,
+		})
 
 		const cp = new CodePipelineClient({})
 		const pipelines = await listPipelines()
