@@ -7,6 +7,8 @@ import * as S3 from '@aws-cdk/aws-s3'
 import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
 import { CONTINUOUS_DEPLOYMENT_STACK_NAME, CORE_STACK_NAME } from './stackName'
 import { enabledInContext } from '../helper/enabledInContext'
+import { info } from '../helper/note'
+import * as chalk from 'chalk'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
@@ -34,6 +36,13 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 	) {
 		super(parent, CONTINUOUS_DEPLOYMENT_STACK_NAME)
 
+		const { core, deviceUI, webApp } = properties
+
+		info(
+			'Continuous Deployment',
+			`Monitoring ${chalk.white(`${core.owner}/${core.repo}@${core.branch}`)}`,
+		)
+
 		const checkFlag = enabledInContext(this.node)
 
 		// CD for the Web App is implied by enabled CD (in that case this Stack exists) and enabled Web App
@@ -48,6 +57,14 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			description:
 				'Whether the continuous deployment of the Web App is enabled or disabled.',
 		})
+		if (enableWebAppCD) {
+			info(
+				'Continuous Deployment',
+				`Monitoring ${chalk.white(
+					`${webApp.owner}/${webApp.repo}@${webApp.branch}`,
+				)}`,
+			)
+		}
 
 		// CD for the Device Simulator Web Application is implied by enabled CD (in that case this Stack exists) and enabled Device Simulator Web Application
 		const enableDeviceUICD = checkFlag({
@@ -61,6 +78,14 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			description:
 				'Whether the continuous deployment of the Device Simulator Web Application is enabled or disabled.',
 		})
+		if (enableDeviceUICD) {
+			info(
+				'Continuous Deployment',
+				`Monitoring ${chalk.white(
+					`${deviceUI.owner}/${deviceUI.repo}@${deviceUI.branch}`,
+				)}`,
+			)
+		}
 
 		// CD for the Device Simulator Web Application is implied by enabled CD (in that case this Stack exists) and enabled Device Simulator Web Application
 		const enabledFirmwareCiCD = checkFlag({
@@ -74,8 +99,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			description:
 				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
 		})
-
-		const { core, deviceUI, webApp } = properties
 
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),

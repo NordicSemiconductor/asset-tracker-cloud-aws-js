@@ -146,11 +146,11 @@
       "saga"
     ],
     "webApp": {
-      "repository": "https://github.com/NordicSemiconductor/app.git",
+      "repository": "https://github.com/NordicSemiconductor/asset-tracker-cloud-app-js.git",
       "branch": "saga"
     },
     "deviceUI": {
-      "repository": "https://github.com/NordicSemiconductor/device-ui.git",
+      "repository": "https://github.com/NordicSemiconductor/asset-tracker-cloud-device-ui-js.git",
       "branch": "saga"
     }
   },
