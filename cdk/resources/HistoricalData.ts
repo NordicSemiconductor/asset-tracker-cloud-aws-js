@@ -7,6 +7,7 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { AssetTrackerLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
+import { NodeJS14Runtime } from './NodeJS14Runtime'
 
 /**
  * Provides resources for historical data
@@ -65,9 +66,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
-			}),
+			runtime: NodeJS14Runtime,
 			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,
 			code: lambdas.lambdas.storeMessagesInTimestream,

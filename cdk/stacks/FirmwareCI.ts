@@ -8,6 +8,7 @@ import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from './stackName'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import * as IAM from '@aws-cdk/aws-iam'
 import { Fn } from '@aws-cdk/core'
+import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
 
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(
@@ -40,11 +41,7 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 					packedCDKLambdas.layerZipFileName,
 				),
 				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-				compatibleRuntimes: [
-					new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-						supportsInlineCode: false,
-					}),
-				],
+				compatibleRuntimes: [NodeJS14Runtime],
 			},
 		)
 

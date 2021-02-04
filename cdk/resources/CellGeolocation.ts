@@ -14,6 +14,7 @@ import * as SQS from '@aws-cdk/aws-sqs'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
+import { NodeJS14Runtime } from './NodeJS14Runtime'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -56,9 +57,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
-			}),
+			runtime: NodeJS14Runtime,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
@@ -120,9 +119,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
-			}),
+			runtime: NodeJS14Runtime,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
@@ -150,9 +147,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
-			}),
+			runtime: NodeJS14Runtime,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
 			code: lambdas.lambdas.cacheCellGeolocationStepFunction,
@@ -184,11 +179,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					layers: lambdas.layers,
 					handler: 'index.handler',
 					// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-					runtime: new Lambda.Runtime(
-						'nodejs14.x',
-						Lambda.RuntimeFamily.NODEJS,
-						{ supportsInlineCode: true },
-					),
+					runtime: NodeJS14Runtime,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
 					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
@@ -427,9 +418,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromSQS = new Lambda.Function(this, 'fromSQS', {
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
-			}),
+			runtime: NodeJS14Runtime,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.invokeStepFunctionFromSQS,
