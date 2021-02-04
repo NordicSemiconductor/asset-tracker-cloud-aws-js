@@ -64,7 +64,10 @@ export class HistoricalData extends CloudFormation.Resource {
 		const storeMessagesInTimestream = new Lambda.Function(this, 'lambda', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
+			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
+			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
+				supportsInlineCode: true,
+			}),
 			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,
 			code: lambdas.lambdas.storeMessagesInTimestream,

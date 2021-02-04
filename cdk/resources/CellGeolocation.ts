@@ -55,7 +55,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromCache = new Lambda.Function(this, 'fromCache', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
+			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
+			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
+				supportsInlineCode: true,
+			}),
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
@@ -116,7 +119,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromDevices = new Lambda.Function(this, 'fromDevices', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
+			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
+			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
+				supportsInlineCode: true,
+			}),
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
@@ -143,7 +149,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const addToCache = new Lambda.Function(this, 'addToCache', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
+			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
+			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
+				supportsInlineCode: true,
+			}),
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
 			code: lambdas.lambdas.cacheCellGeolocationStepFunction,
@@ -174,7 +183,12 @@ export class CellGeolocation extends CloudFormation.Resource {
 				fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
-					runtime: Lambda.Runtime.NODEJS_12_X,
+					// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
+					runtime: new Lambda.Runtime(
+						'nodejs14.x',
+						Lambda.RuntimeFamily.NODEJS,
+						{ supportsInlineCode: true },
+					),
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
 					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
@@ -412,7 +426,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		const fromSQS = new Lambda.Function(this, 'fromSQS', {
 			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_12_X,
+			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
+			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
+				supportsInlineCode: true,
+			}),
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.invokeStepFunctionFromSQS,
