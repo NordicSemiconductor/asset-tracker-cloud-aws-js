@@ -37,7 +37,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
 			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
+				supportsInlineCode: false,
 			}),
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -69,7 +69,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
 			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
+				supportsInlineCode: false,
 			}),
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,

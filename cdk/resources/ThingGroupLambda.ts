@@ -27,7 +27,7 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 			handler: 'index.handler',
 			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support
 			runtime: new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
-				supportsInlineCode: true,
+				supportsInlineCode: false,
 			}),
 			timeout: CloudFormation.Duration.minutes(1),
 			initialPolicy: [
