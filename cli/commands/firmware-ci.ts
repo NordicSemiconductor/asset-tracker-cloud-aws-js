@@ -91,7 +91,9 @@ export const firmwareCICommand = ({
 				chalk.blue.italic('Firmware CI runner'),
 			)
 			console.log(
-				chalk.gray('https://github.com/NordicSemiconductor/firmware-ci'),
+				chalk.gray(
+					'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-ci',
+				),
 			)
 		}
 
