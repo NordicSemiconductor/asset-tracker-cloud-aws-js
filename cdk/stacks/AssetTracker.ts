@@ -21,6 +21,7 @@ import { LambdasWithLayer } from '../resources/LambdasWithLayer'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import { HistoricalData } from '../resources/HistoricalData'
 import { warn } from '../helper/note'
+import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -56,7 +57,8 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					sourceCodeBucket,
 					packedLambdas.layerZipFileName,
 				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
+				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
+				compatibleRuntimes: [NodeJS14Runtime],
 			},
 		)
 
@@ -68,7 +70,8 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					sourceCodeBucket,
 					packedCDKLambdas.layerZipFileName,
 				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_12_X],
+				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
+				compatibleRuntimes: [NodeJS14Runtime],
 			},
 		)
 
