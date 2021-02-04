@@ -56,7 +56,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					sourceCodeBucket,
 					packedLambdas.layerZipFileName,
 				),
-				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support
+				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
 				compatibleRuntimes: [
 					new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
 						supportsInlineCode: false,
@@ -73,7 +73,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					sourceCodeBucket,
 					packedCDKLambdas.layerZipFileName,
 				),
-				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support
+				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
 				compatibleRuntimes: [
 					new Lambda.Runtime('nodejs14.x', Lambda.RuntimeFamily.NODEJS, {
 						supportsInlineCode: false,
