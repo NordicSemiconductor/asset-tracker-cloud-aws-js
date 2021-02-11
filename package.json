@@ -41,7 +41,7 @@
     "@aws-sdk/client-timestream-write": "3.4.1",
     "@nordicsemiconductor/cell-geolocation-helpers": "2.0.3",
     "@nordicsemiconductor/cloudformation-helpers": "6.0.4",
-    "@nordicsemiconductor/e2e-bdd-test-runner": "12.0.4",
+    "@nordicsemiconductor/e2e-bdd-test-runner": "12.0.5",
     "@nordicsemiconductor/random-words": "5.0.0",
     "@nordicsemiconductor/timestream-helpers": "3.0.1",
     "ajv": "7.1.0",
