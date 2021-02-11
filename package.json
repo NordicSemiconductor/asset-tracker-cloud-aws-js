@@ -75,7 +75,7 @@
     "@nordicsemiconductor/package-layered-lambdas": "5.1.5",
     "@octokit/rest": "18.1.0",
     "@types/aws-iot-device-sdk": "2.2.2",
-    "@types/aws-lambda": "8.10.71",
+    "@types/aws-lambda": "8.10.72",
     "@types/backoff": "2.5.1",
     "@types/cfn-response": "1.0.4",
     "@types/chai-subset": "1.3.3",
