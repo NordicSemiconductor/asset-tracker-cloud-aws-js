@@ -86,6 +86,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			environment: {
 				TABLE_INFO: this.table.ref,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 

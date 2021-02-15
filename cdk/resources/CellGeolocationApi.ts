@@ -58,6 +58,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE:
 					cellgeo.resolutionJobsQueue.queueUrl,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 
@@ -87,6 +88,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				DEVICE_CELL_GEOLOCATION_TABLE:
 					cellgeo.deviceCellGeolocationTable.tableName,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 

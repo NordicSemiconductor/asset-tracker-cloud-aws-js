@@ -72,6 +72,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			environment: {
 				CACHE_TABLE: this.cacheTable.tableName,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 
@@ -138,6 +139,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				LOCATIONS_TABLE: this.deviceCellGeolocationTable.tableName,
 				LOCATIONS_TABLE_CELLID_INDEX,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 
@@ -162,6 +164,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			environment: {
 				CACHE_TABLE: this.cacheTable.tableName,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 
@@ -195,6 +198,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					],
 					environment: {
 						VERSION: this.node.tryGetContext('version'),
+						STACK_NAME: this.stack.stackName,
 					},
 				})
 
@@ -438,6 +442,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			environment: {
 				STEP_FUNCTION_ARN: this.stateMachine.stateMachineArn,
 				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
 
