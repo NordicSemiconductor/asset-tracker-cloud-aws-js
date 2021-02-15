@@ -100,6 +100,14 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
 		})
 
+		// Wheter the UnwiredLabs API is enabled
+		const unwiredLabsEnabled = checkFlag({
+			key: 'unwiredlabs',
+			component: 'UnwiredLabs API',
+			onUndefined: 'disabled',
+			silent: true,
+		})
+
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
 			inlinePolicies: {
@@ -173,6 +181,10 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					{
 						name: 'FIRMWARECI',
 						value: enabledFirmwareCiCD ? '1' : '0',
+					},
+					{
+						name: 'UNWIREDLABS',
+						value: unwiredLabsEnabled ? '1' : '0',
 					},
 				],
 			},

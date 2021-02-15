@@ -11,6 +11,7 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 	onDisabled,
 	onEnabled,
 	onUndefined,
+	silent,
 }: {
 	key: string
 	component: string
@@ -18,6 +19,7 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 	onEnabled?: () => void
 	onDisabled?: () => void
 	onUndefined?: typeof ENABLED | typeof DISABLED
+	silent?: boolean
 }): boolean => {
 	const v = node.tryGetContext(key)
 	if (v === (truthy ?? '1') || (v === undefined && onUndefined === ENABLED)) {
@@ -32,7 +34,7 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 			chalk.grey.bold(`${key}=0`),
 			chalk.gray(`to disable.`),
 		)
-		console.error(...help)
+		!(silent ?? false) && console.error(...help)
 		onEnabled?.()
 		return true
 	}
@@ -46,7 +48,7 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 		chalk.grey.bold(`${key}=${truthy ?? '1'}`),
 		chalk.grey(`to enable.`),
 	)
-	console.error(...help)
+	!(silent ?? false) && console.error(...help)
 	onDisabled?.()
 	return false
 }

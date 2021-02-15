@@ -9,4 +9,5 @@ phases:
   build:
     commands:
       - npx cdk deploy --trace -v --require-approval never '*' -c webapp=$WEBAPP
-        -c deviceui=$DEVICEUI -c firmware-ci=$FIRMWARECI
+        -c deviceui=$DEVICEUI -c firmware-ci=$FIRMWARECI -c cd=1 -c
+        unwiredlabs=$UNWIREDLABS
