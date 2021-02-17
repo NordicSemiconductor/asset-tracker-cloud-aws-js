@@ -21,10 +21,8 @@ phases:
       - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
       - export EXTEND_ESLINT=true
-      - cd $CODEBUILD_SRC_DIR_WebApp/; cat package.json | jq --arg homepage
-        "https://$REACT_APP_WEB_APP_DOMAIN_NAME" '.homepage = $homepage' >
-        package.new.json; mv package.new.json package.json; npm ci --no-audit;
-        npm run build;
+      - export PUBLIC_URL="https://$REACT_APP_WEB_APP_DOMAIN_NAME"
+      - npm run build
       - aws s3 cp $CODEBUILD_SRC_DIR_WebApp/build
         s3://$REACT_APP_WEB_APP_BUCKET_NAME --recursive --metadata-directive
         REPLACE --cache-control 'public,max-age=600' --expires ''
