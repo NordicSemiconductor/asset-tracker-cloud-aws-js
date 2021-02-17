@@ -172,7 +172,7 @@ export const prepareAssetTrackerLambdas = async ({
 	outDir: string
 	sourceCodeBucketName: string
 }): Promise<PackedLambdas<AssetTrackerLambdas>> => {
-	const reporter = ConsoleProgressReporter('Asset Tracker Lambdas')
+	const reporter = ConsoleProgressReporter('Cat Tracker Lambdas')
 	return {
 		layerZipFileName: await packBaseLayer({
 			reporter,
