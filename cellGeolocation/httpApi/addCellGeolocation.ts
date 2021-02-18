@@ -57,7 +57,7 @@ const inputSchema = new Ajv().compile({
 		},
 		accuracy: {
 			type: 'number',
-			minimum: 0,
+			minimum: 1,
 			maximum: 50000,
 		},
 	},
@@ -87,6 +87,15 @@ export const handler = async (
 				lng: toFloatOr0(b.lng),
 				accuracy: toFloatOr0(b.accuracy),
 			})()
+		}),
+		E.flatten,
+		E.map((cellgeolocation) => {
+			if (cellgeolocation.lat === 0 && cellgeolocation.lng === 0)
+				return E.left<ErrorInfo, Cell & Location>({
+					message: `Both lat and lng are 0, ignoring. This is probably bogus test data.`,
+					type: ErrorType.BadRequest,
+				})
+			return E.right<ErrorInfo, Cell & Location>(cellgeolocation)
 		}),
 		E.flatten,
 		TE.fromEither,
