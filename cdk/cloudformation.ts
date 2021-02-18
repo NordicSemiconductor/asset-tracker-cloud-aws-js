@@ -5,7 +5,7 @@ import {
 	prepareCDKLambdas,
 } from './prepare-resources'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getUnwiredLabsApiSettings } from '../cellGeolocation/stepFunction/unwiredlabs'
+import { getUnwiredLabsApiSettings } from '../cellGeolocation/settings/unwiredlabs'
 import { warn } from './helper/note'
 import { STSClient } from '@aws-sdk/client-sts'
 import { loadContext } from './helper/loadContext'
