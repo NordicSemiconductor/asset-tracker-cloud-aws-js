@@ -13,40 +13,42 @@ import { Octokit } from '@octokit/rest'
 import * as chalk from 'chalk'
 import * as https from 'https'
 import { v4 } from 'uuid'
+import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
 
 const defaultPort = '/dev/ttyACM0'
 const defaultSecTag = 42
+const defaultFirmwareRepository =
+	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware'
+const netrclocation = path.resolve(process.env.HOME as 'string', '.netrcx')
 
 const getLatestFirmware = async ({
 	nbiot,
 	nodebug,
 	dk,
+	firmwareRepository,
+	ghToken,
 }: {
 	nbiot: boolean
 	nodebug: boolean
 	dk: boolean
+	firmwareRepository: string
+	ghToken: string
 }) => {
+	const { owner, repo } = extractRepoAndOwner(firmwareRepository)
 	const octokit = new Octokit({
-		auth: fs
-			.readFileSync(
-				path.resolve(process.env.HOME as 'string', '.netrc'),
-				'utf-8',
-			)
-			.split(os.EOL)
-			.find((s) => s.includes('machine api.github.com'))
-			?.split(' ')[5],
+		auth: ghToken,
 	})
 	const latestRelease = (
 		await octokit.repos.listReleases({
-			owner: 'NordicSemiconductor',
-			repo: 'asset-tracker-cloud-firmware',
+			owner,
+			repo,
 			per_page: 1,
 		})
 	).data[0]
 	const assets = (
 		await octokit.repos.listReleaseAssets({
-			owner: 'NordicSemiconductor',
-			repo: 'asset-tracker-cloud-firmware',
+			owner,
+			repo,
 			release_id: latestRelease.id,
 		})
 	).data
@@ -108,16 +110,137 @@ export const flashCommand = ({
 			description: `Use this secTag, defaults to ${defaultSecTag}`,
 		},
 		{
+			flags: '-a, --at-client <atClient>',
+			description: `Flash at_client from this file`,
+		},
+		{
 			flags: '--debug',
 			description: `Log debug messages`,
+		},
+		{
+			flags: '--gh-token <ghToken>',
+			description: `GitHub token`,
+		},
+		{
+			flags: '--repo <firmwareRepository>',
+			description: `Firmware repository, defaults to ${defaultFirmwareRepository}`,
 		},
 	],
 	action: async (
 		deviceId: string,
-		{ dk, nbiot, nodebugfw, port, firmware, secTag, debug },
+		{
+			dk,
+			nbiot,
+			nodebugfw,
+			port,
+			firmware,
+			secTag,
+			debug,
+			ghToken,
+			firmwareRepository,
+			atClient,
+		},
 	) => {
+		if (ghToken === undefined) {
+			try {
+				ghToken = fs
+					.readFileSync(netrclocation, 'utf-8')
+					.split(os.EOL)
+					.find((s) => s.includes('machine api.github.com'))
+					?.split(' ')[5]
+			} catch {
+				console.error('')
+				console.error(
+					'',
+					chalk.red('⚠️'),
+					chalk.red(
+						`Failed to read GitHub token from ${chalk.blue(netrclocation)}.`,
+					),
+				)
+				console.error('')
+				console.error(
+					'',
+					chalk.gray('ℹ️'),
+					chalk.gray(`We use your GitHub token to query the release page of`),
+				)
+				console.error(
+					'  ',
+					chalk.gray(firmwareRepository ?? defaultFirmwareRepository),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.yellowBright('Please provide a valid GitHub token in .netrc.'),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.yellowBright(
+						`Add a line like this to ${chalk.blue(netrclocation)}:`,
+					),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.white(
+						'machine api.github.com login <your GitHub username> password <your personal access token>',
+					),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.yellow.dim(
+						'Learn more about .netrc: https://everything.curl.dev/usingcurl/netrc',
+					),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.yellowBright(`Alternatively pass it as an argument:`),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.greenBright(`node cli flash --gh-token`),
+					chalk.blueBright(`"your personal access token"`),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.yellowBright(
+						`You can also download the latest release for your board manually from`,
+					),
+				)
+				console.error(
+					'  ',
+					chalk.yellow(
+						`${firmwareRepository ?? defaultFirmwareRepository}/releases`,
+					),
+				)
+				console.error(
+					'  ',
+					chalk.yellowBright(
+						`and provide the location to the hexfile as an argument:`,
+					),
+				)
+				console.error('')
+				console.error(
+					'  ',
+					chalk.greenBright(`node cli flash --firmware`),
+					chalk.blueBright(`/path/to/firmware.hex`),
+				)
+				process.exit(1)
+			}
+		}
 		const hexfile =
-			firmware ?? (await getLatestFirmware({ dk, nbiot, nodebug: nodebugfw }))
+			firmware ??
+			(await getLatestFirmware({
+				dk,
+				nbiot,
+				nodebug: nodebugfw,
+				ghToken,
+				firmwareRepository: firmwareRepository ?? defaultFirmwareRepository,
+			}))
 
 		console.log(
 			chalk.magenta(`Connecting to device`),
@@ -126,7 +249,8 @@ export const flashCommand = ({
 
 		const connection = await connect({
 			atHostHexfile:
-				dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91'],
+				atClient ??
+				(dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91']),
 			device: port ?? defaultPort,
 			warn: console.error,
 			debug: debug === true ? console.debug : undefined,
