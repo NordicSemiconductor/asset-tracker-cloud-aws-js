@@ -104,6 +104,13 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			passwordPolicy: {
 				requireSymbols: false,
 			},
+			accountRecovery: Cognito.AccountRecovery.EMAIL_ONLY,
+			userVerification: {
+				emailBody:
+					'The verification code to your new Cat Tracker account is {####}',
+				emailStyle: Cognito.VerificationEmailStyle.CODE,
+				emailSubject: 'Verify your new Cat Tracker account',
+			},
 		})
 
 		new CloudFormation.CfnOutput(this, 'userPoolId', {
