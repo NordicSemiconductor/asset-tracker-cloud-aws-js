@@ -1,4 +1,4 @@
-const STACK_NAME = process.env.STACK_NAME ?? 'asset-tracker'
+const STACK_NAME = process.env.STACK_NAME ?? 'cat-tracker'
 export const CORE_STACK_NAME = STACK_NAME
 export const WEBAPP_STACK_NAME = `${STACK_NAME}-webapp`
 export const DEVICEUI_STACK_NAME = `${STACK_NAME}-deviceui`

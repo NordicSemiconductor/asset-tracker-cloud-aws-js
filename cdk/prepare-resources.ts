@@ -182,7 +182,7 @@ export const prepareAssetTrackerLambdas = async ({
 		}),
 		lambdas: await packLayeredLambdas<AssetTrackerLambdas>({
 			reporter,
-			id: 'asset-tracker',
+			id: 'cat-tracker',
 			mode: WebpackMode.production,
 			srcDir: rootDir,
 			outDir,
