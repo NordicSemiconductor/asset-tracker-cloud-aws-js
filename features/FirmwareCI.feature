@@ -6,7 +6,7 @@ Feature: Schedule CI runs of firmware builds
 
     Note: the resources provided in this project are
     used to control the actual CI runner.
-    See https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-ci
+    See https://github.com/NordicSemiconductor/cloud-aws-firmware-ci-runner-js
 
     Background:
 
