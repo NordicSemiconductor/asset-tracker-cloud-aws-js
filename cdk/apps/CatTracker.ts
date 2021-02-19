@@ -1,5 +1,5 @@
 import { App } from '@aws-cdk/core'
-import { AssetTrackerStack } from '../stacks/AssetTracker'
+import { CatTrackerStack } from '../stacks/CatTracker'
 import { WebAppStack } from '../stacks/WebApp'
 import {
 	AssetTrackerLambdas,
@@ -14,7 +14,7 @@ import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
 import { enabledInContext } from '../helper/enabledInContext'
 
-export class AssetTrackerApp extends App {
+export class CatTrackerApp extends App {
 	public constructor(args: {
 		mqttEndpoint: string
 		sourceCodeBucketName: string
@@ -24,7 +24,7 @@ export class AssetTrackerApp extends App {
 	}) {
 		super({ context: args.context })
 		// Core
-		new AssetTrackerStack(this, {
+		new CatTrackerStack(this, {
 			...args,
 		})
 		const checkFlag = enabledInContext(this.node)

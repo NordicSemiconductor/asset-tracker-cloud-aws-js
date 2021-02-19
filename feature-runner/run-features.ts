@@ -11,7 +11,7 @@ import {
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/AssetTracker'
+import { StackOutputs } from '../cdk/stacks/CatTracker'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { assetTrackerStepRunners } from './steps/asset-tracker'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'

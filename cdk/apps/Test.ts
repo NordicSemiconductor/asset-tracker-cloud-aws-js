@@ -1,5 +1,5 @@
 import { App } from '@aws-cdk/core'
-import { AssetTrackerStack } from '../stacks/AssetTracker'
+import { CatTrackerStack } from '../stacks/CatTracker'
 import {
 	AssetTrackerLambdas,
 	CDKLambdas,
@@ -19,7 +19,7 @@ export class TestApp extends App {
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })
-		new AssetTrackerStack(this, {
+		new CatTrackerStack(this, {
 			...args,
 		})
 		new FirmwareCIStack(this, args)

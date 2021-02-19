@@ -1,4 +1,4 @@
-import { AssetTrackerApp } from './apps/AssetTracker'
+import { CatTrackerApp } from './apps/CatTracker'
 import {
 	prepareResources,
 	prepareAssetTrackerLambdas,
@@ -71,7 +71,7 @@ Promise.all([
 			)
 			ctx.cd = '0'
 		}
-		return new AssetTrackerApp({
+		return new CatTrackerApp({
 			...args,
 			context: ctx,
 		}).synth()

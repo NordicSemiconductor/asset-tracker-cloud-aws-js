@@ -23,7 +23,7 @@ import { HistoricalData } from '../resources/HistoricalData'
 import { warn } from '../helper/note'
 import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
 
-export class AssetTrackerStack extends CloudFormation.Stack {
+export class CatTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		{
