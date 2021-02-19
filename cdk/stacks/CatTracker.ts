@@ -98,7 +98,9 @@ export class CatTrackerStack extends CloudFormation.Stack {
 			},
 			autoVerify: {
 				// Do not send verification emails for test accounts
-				email: isTest ? true : false,
+				// https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-autoverifiedattributes means that for attributes included Cognito will start the verification automatically.
+				// This is a little confusing: it DOES NOT mean that these attributes are set to "verified" automatically
+				email: isTest ? false : true,
 			},
 			selfSignUpEnabled: true,
 			passwordPolicy: {
