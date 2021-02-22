@@ -19,7 +19,7 @@ const defaultPort = '/dev/ttyACM0'
 const defaultSecTag = 42
 const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware'
-const netrclocation = path.resolve(process.env.HOME as 'string', '.netrcx')
+const netrclocation = path.resolve(process.env.HOME as 'string', '.netrc')
 
 const getLatestFirmware = async ({
 	nbiot,
