@@ -1,7 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import Ajv from 'ajv'
 import { pipe } from 'fp-ts/lib/pipeable'
-import { validate } from './validate'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as E from 'fp-ts/lib/Either'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
@@ -12,6 +10,8 @@ import { addDeviceCellGeolocation } from '../addDeviceCellGeolocation'
 import { addCellToCacheIfNotExists } from '../addCellToCacheIfNotExists'
 import { sequenceT } from 'fp-ts/lib/Apply'
 import { fromEnv } from '../../util/fromEnv'
+import { Type } from '@sinclair/typebox'
+import { validateWithJSONSchema } from './validateWithJSONSchema'
 
 const { deviceCellGeolocationTable, cacheTable } = fromEnv({
 	deviceCellGeolocationTable: 'DEVICE_CELL_GEOLOCATION_TABLE',
@@ -30,40 +30,34 @@ const addToCellGeolocation = addCellToCacheIfNotExists({
 	TableName: cacheTable,
 })
 
-const inputSchema = new Ajv().compile({
-	type: 'object',
-	properties: {
-		cell: {
-			type: 'number',
+const cellGeolocationInputSchema = Type.Object(
+	{
+		cell: Type.Number({
 			minimum: 1,
-		},
-		area: {
-			type: 'number',
+		}),
+		area: Type.Number({
 			minimum: 1,
-		},
-		mccmnc: {
-			type: 'number',
+		}),
+		mccmnc: Type.Number({
 			minimum: 10000,
-		},
-		lat: {
-			type: 'number',
+		}),
+		lat: Type.Number({
 			minimum: -90,
 			maximum: 90,
-		},
-		lng: {
-			type: 'number',
+		}),
+		lng: Type.Number({
 			minimum: -180,
 			maximum: 180,
-		},
-		accuracy: {
-			type: 'number',
+		}),
+		accuracy: Type.Number({
 			minimum: 1,
 			maximum: 50000,
-		},
+		}),
 	},
-	required: ['cell', 'area', 'mccmnc', 'lat', 'lng', 'accuracy'],
-	additionalProperties: false,
-})
+	{ additionalProperties: false },
+)
+
+const validateInput = validateWithJSONSchema(cellGeolocationInputSchema)
 
 const toIntOr0 = (v?: any) => parseInt(v ?? '0', 10)
 const toFloatOr0 = (v?: any) => parseFloat(v ?? '0')
@@ -79,14 +73,14 @@ export const handler = async (
 		})),
 		E.map((body) => {
 			const b = body as any
-			return validate<Cell & Location>(inputSchema)({
+			return validateInput({
 				cell: toIntOr0(b.cell),
 				area: toIntOr0(b.area),
 				mccmnc: toIntOr0(b.mccmnc),
 				lat: toFloatOr0(b.lat),
 				lng: toFloatOr0(b.lng),
 				accuracy: toFloatOr0(b.accuracy),
-			})()
+			})
 		}),
 		E.flatten,
 		E.map((cellgeolocation) => {
