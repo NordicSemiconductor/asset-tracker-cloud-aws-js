@@ -39,7 +39,6 @@ export class CatTrackerApp extends App {
 		checkFlag({
 			key: 'deviceui',
 			component: 'Device Simulator Web Application',
-			onUndefined: 'enabled',
 			onEnabled: () => new DeviceUIStack(this),
 		})
 		// Firmware CI
