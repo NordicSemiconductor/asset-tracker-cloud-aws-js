@@ -1,5 +1,6 @@
 import * as path from 'path'
 import { promises as fs } from 'fs'
+import * as chalk from 'chalk'
 
 /**
  * Ensures the directory for storing certificates is available
@@ -24,7 +25,7 @@ export const certsDir = async ({
 		await fs.stat(dir)
 	} catch {
 		await fs.mkdir(dir, { recursive: true })
-		console.error(`[certsDir]`, `${dir} created.`)
+		console.error(chalk.magenta(`[certsDir]`), chalk.grey(`${dir} created.`))
 	}
 	return dir
 }
