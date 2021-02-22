@@ -70,7 +70,7 @@
     "@commitlint/config-angular": "11.0.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "9.0.2",
     "@nordicsemiconductor/asset-tracker-cloud-device-ui-server": "3.0.0",
-    "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "7.0.5",
+    "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "7.0.6",
     "@nordicsemiconductor/firmware-ci-device-helpers": "6.1.2",
     "@nordicsemiconductor/object-to-env": "2.0.1",
     "@nordicsemiconductor/package-layered-lambdas": "5.1.15",
