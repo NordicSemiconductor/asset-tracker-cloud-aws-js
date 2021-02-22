@@ -123,7 +123,7 @@ export const flashCommand = ({
 		},
 		{
 			flags: '--repo <firmwareRepository>',
-			description: `Firmware repository, defaults to ${defaultFirmwareRepository}`,
+			description: `Firmware repository to pull the release from.`,
 		},
 	],
 	action: async (
@@ -141,97 +141,110 @@ export const flashCommand = ({
 			atClient,
 		},
 	) => {
-		if (ghToken === undefined) {
-			try {
-				ghToken = fs
-					.readFileSync(netrclocation, 'utf-8')
-					.split(os.EOL)
-					.find((s) => s.includes('machine api.github.com'))
-					?.split(' ')[5]
-			} catch {
-				console.error('')
-				console.error(
-					'',
-					chalk.red('⚠️'),
-					chalk.red(
-						`Failed to read GitHub token from ${chalk.blue(netrclocation)}.`,
-					),
-				)
-				console.error('')
-				console.error(
-					'',
-					chalk.gray('ℹ️'),
-					chalk.gray(`We use your GitHub token to query the release page of`),
-				)
-				console.error(
-					'  ',
-					chalk.gray(firmwareRepository ?? defaultFirmwareRepository),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.yellowBright('Please provide a valid GitHub token in .netrc.'),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.yellowBright(
-						`Add a line like this to ${chalk.blue(netrclocation)}:`,
-					),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.white(
-						'machine api.github.com login <your GitHub username> password <your personal access token>',
-					),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.yellow.dim(
-						'Learn more about .netrc: https://everything.curl.dev/usingcurl/netrc',
-					),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.yellowBright(`Alternatively pass it as an argument:`),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.greenBright(`node cli flash --gh-token`),
-					chalk.blueBright(`"your personal access token"`),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.yellowBright(
-						`You can also download the latest release for your board manually from`,
-					),
-				)
-				console.error(
-					'  ',
-					chalk.yellow(
-						`${firmwareRepository ?? defaultFirmwareRepository}/releases`,
-					),
-				)
-				console.error(
-					'  ',
-					chalk.yellowBright(
-						`and provide the location to the hexfile as an argument:`,
-					),
-				)
-				console.error('')
-				console.error(
-					'  ',
-					chalk.greenBright(`node cli flash --firmware`),
-					chalk.blueBright(`/path/to/firmware.hex`),
-				)
-				process.exit(1)
+		if (
+			(firmwareRepository === undefined && firmware === undefined) || // None provided
+			(firmwareRepository !== undefined && firmware !== undefined) // Both provided
+		) {
+			throw new Error(
+				`Must provide either -f <firmware> or --repo <firmware repository URL>`,
+			)
+		}
+		if (firmwareRepository !== undefined) {
+			if (ghToken === undefined) {
+				try {
+					ghToken = fs
+						.readFileSync(netrclocation, 'utf-8')
+						.split(os.EOL)
+						.find((s) => s.includes('machine api.github.com'))
+						?.split(' ')[5]
+				} catch {
+					console.error('')
+					console.error(
+						'',
+						chalk.red('⚠️'),
+						chalk.red(
+							`Failed to read GitHub token from ${chalk.blue(netrclocation)}.`,
+						),
+					)
+					console.error('')
+					console.error(
+						'',
+						chalk.gray('ℹ️'),
+						chalk.gray(`We use your GitHub token to query the release page of`),
+					)
+					console.error(
+						'  ',
+						chalk.gray(firmwareRepository ?? defaultFirmwareRepository),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.yellowBright(
+							'Please provide a valid GitHub token in .netrc.',
+						),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.yellowBright(
+							`Add a line like this to ${chalk.blue(netrclocation)}:`,
+						),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.white(
+							'machine api.github.com login <your GitHub username> password <your personal access token>',
+						),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.yellow.dim(
+							'Learn more about .netrc: https://everything.curl.dev/usingcurl/netrc',
+						),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.yellowBright(`Alternatively pass it as an argument:`),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.greenBright(`node cli flash --gh-token`),
+						chalk.blueBright(`"your personal access token"`),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.yellowBright(
+							`You can also download the latest release for your board manually from`,
+						),
+					)
+					console.error(
+						'  ',
+						chalk.yellow(
+							`${firmwareRepository ?? defaultFirmwareRepository}/releases`,
+						),
+					)
+					console.error(
+						'  ',
+						chalk.yellowBright(
+							`and provide the location to the hexfile as an argument:`,
+						),
+					)
+					console.error('')
+					console.error(
+						'  ',
+						chalk.greenBright(`node cli flash --firmware`),
+						chalk.blueBright(`/path/to/firmware.hex`),
+					)
+					process.exit(1)
+				}
 			}
 		}
+
 		const hexfile =
 			firmware ??
 			(await getLatestFirmware({
