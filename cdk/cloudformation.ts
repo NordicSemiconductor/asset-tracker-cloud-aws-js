@@ -58,8 +58,8 @@ Promise.all([
 			warn(
 				'Cell Geolocation',
 				`Use ${chalk.greenBright(
-					`node cli configure-api codebuild github token <token>`,
-				)} to set the token`,
+					`node cli configure-api cellGeoLocation unwiredlabs apiKey <API key>`,
+				)} to set the API key`,
 			)
 			ctx.unwiredlabs = '0'
 		}
@@ -68,6 +68,13 @@ Promise.all([
 			warn(
 				'Continuous Deployment',
 				'No GitHub API key configured. Continuous deployment will be disabled.',
+			)
+
+			warn(
+				'Cell Geolocation',
+				`Use ${chalk.greenBright(
+					`node cli configure-api codebuild github token <token>`,
+				)} to set the token`,
 			)
 			ctx.cd = '0'
 		}
