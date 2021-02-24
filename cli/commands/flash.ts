@@ -122,7 +122,7 @@ export const flashCommand = ({
 			description: `GitHub token`,
 		},
 		{
-			flags: '--repo <firmwareRepository>',
+			flags: '-r, --firmware-repository <firmwareRepository>',
 			description: `Firmware repository to pull the release from.`,
 		},
 	],
@@ -137,8 +137,8 @@ export const flashCommand = ({
 			secTag,
 			debug,
 			ghToken,
-			firmwareRepository,
 			atClient,
+			firmwareRepository,
 		},
 	) => {
 		if (
