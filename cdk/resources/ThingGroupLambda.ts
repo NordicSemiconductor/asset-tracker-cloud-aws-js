@@ -2,10 +2,10 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
-import { CDKLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { NodeJS14Runtime } from './NodeJS14Runtime'
+import { CDKLambdas } from '../stacks/CatTracker/lambdas'
 
 export class ThingGroupLambda extends CloudFormation.Resource {
 	public readonly function: Lambda.IFunction

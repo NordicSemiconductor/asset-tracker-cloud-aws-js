@@ -3,12 +3,13 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as S3 from '@aws-cdk/aws-s3'
 import { FirmwareCI } from '../resources/FirmwareCI'
 import { ThingGroupLambda } from '../resources/ThingGroupLambda'
-import { CDKLambdas, PackedLambdas } from '../prepare-resources'
 import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from './stackName'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import * as IAM from '@aws-cdk/aws-iam'
 import { Fn } from '@aws-cdk/core'
 import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
+import { CDKLambdas } from './CatTracker/lambdas'
+import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(

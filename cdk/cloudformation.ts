@@ -1,9 +1,4 @@
 import { CatTrackerApp } from './apps/CatTracker'
-import {
-	prepareResources,
-	prepareAssetTrackerLambdas,
-	prepareCDKLambdas,
-} from './prepare-resources'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getUnwiredLabsApiSettings } from '../cellGeolocation/settings/unwiredlabs'
 import { warn } from './helper/note'
@@ -12,6 +7,12 @@ import { loadContext } from './helper/loadContext'
 import { CORE_STACK_NAME } from './stacks/stackName'
 import { getApiSettings } from '../util/apiConfiguration'
 import * as chalk from 'chalk'
+import {
+	prepareAssetTrackerLambdas,
+	prepareCDKLambdas,
+} from './stacks/CatTracker/lambdas'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
 
 const ssm = new SSMClient({})
 const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
@@ -22,17 +23,22 @@ const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
 const rootDir = process.cwd()
 
 Promise.all([
-	prepareResources({
-		rootDir,
-	}).then(async (res) => ({
-		...res,
-		packedLambdas: await prepareAssetTrackerLambdas({
-			...res,
+	Promise.all([
+		preparePackagedLambdaStorageDir({
 			rootDir,
 		}),
-		packedCDKLambdas: await prepareCDKLambdas({
-			...res,
+		getLambdaSourceCodeBucketName(),
+	]).then(async ([outDir, sourceCodeBucketName]) => ({
+		sourceCodeBucketName,
+		packedLambdas: await prepareAssetTrackerLambdas({
 			rootDir,
+			outDir,
+			sourceCodeBucketName,
+		}),
+		packedCDKLambdas: await prepareCDKLambdas({
+			rootDir,
+			outDir,
+			sourceCodeBucketName,
 		}),
 	})),
 	fetchUnwiredLabsApiSettings().catch(() => ({})),
@@ -44,7 +50,7 @@ Promise.all([
 	})().catch(() => ({})),
 	loadContext({ sts: new STSClient({}) }),
 ])
-	.then(([args, ulApiSettings, codebuildSettings, context]) => {
+	.then(([lambdaResources, ulApiSettings, codebuildSettings, context]) => {
 		const ctx = {
 			version: process.env.VERSION ?? '0.0.0-development',
 			...context,
@@ -79,7 +85,7 @@ Promise.all([
 			ctx.cd = '0'
 		}
 		return new CatTrackerApp({
-			...args,
+			...lambdaResources,
 			context: ctx,
 		}).synth()
 	})

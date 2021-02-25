@@ -2,13 +2,13 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Lambda from '@aws-cdk/aws-lambda'
-import { AssetTrackerLambdas } from '../prepare-resources'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import * as CloudWatchLogs from '@aws-cdk/aws-logs'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { NodeJS14Runtime } from './NodeJS14Runtime'
+import { CatTrackerLambdas } from '../stacks/CatTracker/lambdas'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -28,7 +28,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			lambdas,
 		}: {
 			cellgeo: CellGeolocation
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<CatTrackerLambdas>
 		},
 	) {
 		super(parent, id)

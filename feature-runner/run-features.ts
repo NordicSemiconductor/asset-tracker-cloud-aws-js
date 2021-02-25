@@ -11,8 +11,9 @@ import {
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/CatTracker'
+import { StackOutputs } from '../cdk/stacks/CatTracker/stack'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
+import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack'
 import { assetTrackerStepRunners } from './steps/asset-tracker'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
@@ -21,6 +22,7 @@ import { v4 } from 'uuid'
 import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
+	HTTP_MOCK_HTTP_API_STACK_NAME,
 } from '../cdk/stacks/stackName'
 import { promises as fs } from 'fs'
 import * as path from 'path'
@@ -28,6 +30,9 @@ import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
 import { timestreamStepRunners } from './steps/timestream'
 import { queryClient } from '@nordicsemiconductor/timestream-helpers'
+import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
+import { httpApiMockStepRunners } from './steps/httpApiMock'
+import { SQSClient } from '@aws-sdk/client-sqs'
 
 let ran = false
 
@@ -42,6 +47,10 @@ export type AssetTrackerWorld = StackOutputs & {
 	'firmwareCI:bucketName': string
 	awsIotRootCA: string
 	certsDir: string
+	mqttEndpoint: string
+	'httpApiMock:requestQueueURL': string
+	'httpApiMock:responseQueueURL': string
+	'httpApiMock:apiURL': string
 }
 
 program
@@ -76,10 +85,14 @@ program
 			} = options
 			const cf = new CloudFormationClient({})
 			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
+			const mqttEndpoint = await getIotEndpoint(new IoTClient({}))
 
 			const firmwareCIStackConfig = await stackOutput(
 				cf,
 			)<FirmwareCIStackOutputs>(ciStackName)
+			const httpApiMockStackConfig = await stackOutput(
+				cf,
+			)<HttpApiMockStackOutputs>(HTTP_MOCK_HTTP_API_STACK_NAME)
 
 			const { Account: accountId } = await new STSClient({}).send(
 				new GetCallerIdentityCommand({}),
@@ -106,9 +119,13 @@ program
 					'utf-8',
 				),
 				certsDir: await certsDir({
-					iotEndpoint: stackConfig.mqttEndpoint,
+					iotEndpoint: mqttEndpoint,
 					accountId: accountId as string,
 				}),
+				mqttEndpoint,
+				'httpApiMock:requestQueueURL': httpApiMockStackConfig.requestQueueURL,
+				'httpApiMock:responseQueueURL': httpApiMockStackConfig.responseQueueURL,
+				'httpApiMock:apiURL': httpApiMockStackConfig.apiURL,
 			}
 
 			console.log(chalk.yellow.bold(' World:'))
@@ -215,6 +232,11 @@ program
 					.addStepRunners(
 						timestreamStepRunners({
 							timestream: await queryClient(),
+						}),
+					)
+					.addStepRunners(
+						httpApiMockStepRunners({
+							sqs: new SQSClient({}),
 						}),
 					)
 					.run()

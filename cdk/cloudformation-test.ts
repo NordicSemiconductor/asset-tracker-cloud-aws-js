@@ -1,32 +1,39 @@
 import { TestApp } from './apps/Test'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
-	prepareResources,
-} from './prepare-resources'
+} from './stacks/CatTracker/lambdas'
 
 const rootDir = process.cwd()
 
-prepareResources({
-	rootDir,
-})
-	.then(async (res) => ({
-		...res,
+Promise.all([
+	preparePackagedLambdaStorageDir({
+		rootDir,
+	}),
+	getLambdaSourceCodeBucketName(),
+])
+	.then(async ([outDir, sourceCodeBucketName]) => ({
+		sourceCodeBucketName,
 		packedLambdas: await prepareAssetTrackerLambdas({
-			...res,
+			sourceCodeBucketName,
 			rootDir,
+			outDir,
 		}),
 		packedCDKLambdas: await prepareCDKLambdas({
-			...res,
+			sourceCodeBucketName,
 			rootDir,
+			outDir,
 		}),
 	}))
-	.then((args) =>
+	.then((lambdaResources) =>
 		new TestApp({
-			...args,
+			...lambdaResources,
 			context: {
 				version: process.env.VERSION ?? '0.0.0-development',
 				isTest: true,
+				unwiredlabs: '1',
 			},
 		}).synth(),
 	)

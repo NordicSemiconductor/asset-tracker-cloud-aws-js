@@ -1,7 +1,7 @@
 import { CommandDefinition } from './CommandDefinition'
 import * as path from 'path'
 import { connect } from '../device/connect'
-import { StackOutputs } from '../../cdk/stacks/CatTracker'
+import { StackOutputs } from '../../cdk/stacks/CatTracker/stack'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import * as chalk from 'chalk'
