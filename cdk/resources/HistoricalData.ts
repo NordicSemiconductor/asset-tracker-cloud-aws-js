@@ -5,9 +5,9 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as Timestream from '@aws-cdk/aws-timestream'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { AssetTrackerLambdas } from '../prepare-resources'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { NodeJS14Runtime } from './NodeJS14Runtime'
+import { CatTrackerLambdas } from '../stacks/CatTracker/lambdas'
 
 /**
  * Provides resources for historical data
@@ -22,7 +22,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			lambdas,
 			userRole,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<CatTrackerLambdas>
 			userRole: IAM.IRole
 		},
 	) {

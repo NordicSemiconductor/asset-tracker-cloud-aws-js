@@ -1,11 +1,6 @@
 import { App } from '@aws-cdk/core'
-import { CatTrackerStack } from '../stacks/CatTracker'
+import { CatTrackerStack } from '../stacks/CatTracker/stack'
 import { WebAppStack } from '../stacks/WebApp'
-import {
-	AssetTrackerLambdas,
-	CDKLambdas,
-	PackedLambdas,
-} from '../prepare-resources'
 import { DeviceUIStack } from '../stacks/DeviceUI'
 import { FirmwareCIStack } from '../stacks/FirmwareCI'
 import * as path from 'path'
@@ -13,12 +8,13 @@ import { readFileSync } from 'fs'
 import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
 import { enabledInContext } from '../helper/enabledInContext'
+import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import { CatTrackerLambdas, CDKLambdas } from '../stacks/CatTracker/lambdas'
 
 export class CatTrackerApp extends App {
 	public constructor(args: {
-		mqttEndpoint: string
 		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<AssetTrackerLambdas>
+		packedLambdas: PackedLambdas<CatTrackerLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		context?: Record<string, any>
 	}) {

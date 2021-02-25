@@ -1,10 +1,7 @@
 import { App } from '@aws-cdk/core'
-import { CatTrackerStack } from '../stacks/CatTracker'
-import {
-	AssetTrackerLambdas,
-	CDKLambdas,
-	PackedLambdas,
-} from '../prepare-resources'
+import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import { CatTrackerLambdas, CDKLambdas } from '../stacks/CatTracker/lambdas'
+import { CatTrackerStack } from '../stacks/CatTracker/stack'
 import { FirmwareCIStack } from '../stacks/FirmwareCI'
 
 /**
@@ -12,9 +9,8 @@ import { FirmwareCIStack } from '../stacks/FirmwareCI'
  */
 export class TestApp extends App {
 	public constructor(args: {
-		mqttEndpoint: string
 		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<AssetTrackerLambdas>
+		packedLambdas: PackedLambdas<CatTrackerLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		context?: Record<string, any>
 	}) {

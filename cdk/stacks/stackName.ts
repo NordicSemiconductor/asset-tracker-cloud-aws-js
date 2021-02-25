@@ -5,3 +5,4 @@ export const DEVICEUI_STACK_NAME = `${STACK_NAME}-deviceui`
 export const SOURCECODE_STACK_NAME = `${STACK_NAME}-sourcecode`
 export const CONTINUOUS_DEPLOYMENT_STACK_NAME = `${STACK_NAME}-continuous-deployment`
 export const FIRMWARE_CI_STACK_NAME = `${STACK_NAME}-firmware-ci`
+export const HTTP_MOCK_HTTP_API_STACK_NAME = `${STACK_NAME}-mock-http-api`

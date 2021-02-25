@@ -4,37 +4,32 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as S3 from '@aws-cdk/aws-s3'
 import * as Iot from '@aws-cdk/aws-iot'
-import { RepublishDesiredConfig } from '../resources/RepublishDesiredConfig'
-import { AvatarStorage } from '../resources/AvatarStorage'
-import {
-	AssetTrackerLambdas,
-	CDKLambdas,
-	PackedLambdas,
-} from '../prepare-resources'
-import { FOTAStorage } from '../resources/FOTAStorage'
-import { CellGeolocation } from '../resources/CellGeolocation'
-import { CellGeolocationApi } from '../resources/CellGeolocationApi'
-import { ThingGroupLambda } from '../resources/ThingGroupLambda'
-import { ThingGroup } from '../resources/ThingGroup'
-import { CORE_STACK_NAME } from './stackName'
-import { LambdasWithLayer } from '../resources/LambdasWithLayer'
-import { lambdasOnS3 } from '../resources/lambdasOnS3'
-import { HistoricalData } from '../resources/HistoricalData'
-import { warn } from '../helper/note'
-import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
+import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
+import { AvatarStorage } from '../../resources/AvatarStorage'
+import { FOTAStorage } from '../../resources/FOTAStorage'
+import { CellGeolocation } from '../../resources/CellGeolocation'
+import { CellGeolocationApi } from '../../resources/CellGeolocationApi'
+import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
+import { ThingGroup } from '../../resources/ThingGroup'
+import { CORE_STACK_NAME } from '../stackName'
+import { LambdasWithLayer } from '../../resources/LambdasWithLayer'
+import { lambdasOnS3 } from '../../resources/lambdasOnS3'
+import { HistoricalData } from '../../resources/HistoricalData'
+import { warn } from '../../helper/note'
+import { NodeJS14Runtime } from '../../resources/NodeJS14Runtime'
+import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
+import { CatTrackerLambdas, CDKLambdas } from './lambdas'
 
 export class CatTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		{
-			mqttEndpoint,
 			sourceCodeBucketName,
 			packedLambdas,
 			packedCDKLambdas,
 		}: {
-			mqttEndpoint: string
 			sourceCodeBucketName: string
-			packedLambdas: PackedLambdas<AssetTrackerLambdas>
+			packedLambdas: PackedLambdas<CatTrackerLambdas>
 			packedCDKLambdas: PackedLambdas<CDKLambdas>
 		},
 	) {
@@ -78,11 +73,6 @@ export class CatTrackerStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'cloudformationLayerVersionArn', {
 			value: cloudFormationLayer.layerVersionArn,
 			exportName: `${this.stackName}:cloudformationLayerVersionArn`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'mqttEndpoint', {
-			value: mqttEndpoint,
-			exportName: `${this.stackName}:mqttEndpoint`,
 		})
 
 		const isTest = this.node.tryGetContext('isTest') === true
@@ -398,7 +388,7 @@ export class CatTrackerStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:avatarBucketName`,
 		})
 
-		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
+		const lambdas: LambdasWithLayer<CatTrackerLambdas> = {
 			lambdas: lambasOnBucket(packedLambdas),
 			layers: [baseLayer],
 		}
@@ -476,7 +466,6 @@ export class CatTrackerStack extends CloudFormation.Stack {
 }
 
 export type StackOutputs = {
-	mqttEndpoint: string
 	userPoolId: string
 	identityPoolId: string
 	developerProviderName: string

@@ -75,6 +75,9 @@ jobs:
         run: |
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk bootstrap
+          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-http-api-mock.js' deploy '*' --require-approval never
+          node cli configure-api cellGeoLocation unwiredlabs apiKey my-secret
+          node cli configure-api cellGeoLocation unwiredlabs endpoint `aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue'`unwiredlabs/
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' deploy '*' --require-approval never
           node cli create-ca
       - run: node --unhandled-rejections=strict dist/cdk/helper/addFakeRoute.js
@@ -94,6 +97,7 @@ jobs:
           # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
           node cli purge-buckets
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' destroy -f '*'
+          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-http-api-mock.js' destroy -f '*'
           # Delete sourcecode bucket
           SOURCE_CODE_BUCKET=`aws cloudformation describe-stacks --stack-name $STACK_NAME-sourcecode | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "bucketName") | .OutputValue'`
           aws s3 rb s3://$SOURCE_CODE_BUCKET --force
