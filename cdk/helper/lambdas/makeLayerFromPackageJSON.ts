@@ -1,51 +1,55 @@
 import * as path from 'path'
 import { promises as fs } from 'fs'
 import { packBaseLayer } from '@nordicsemiconductor/package-layered-lambdas'
-import { spawn } from 'child_process'
 import { ProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
 
 /**
  * Creates a layer by selecting dependencies from the provided package.json.
- * Should not be used for production lambdas.
  */
-export const makeLayerFromPackageJSON__Unsafe = async ({
+export const makeLayerFromPackageJSON = async ({
 	dir,
-	packageJson,
+	packageJsonFile,
+	packageLockJsonFile,
 	requiredDependencies,
 	reporter,
 	sourceCodeBucketName,
 	outDir,
+	layerName,
 }: {
 	dir: string
 	requiredDependencies: string[]
-	packageJson: string
+	packageJsonFile: string
+	packageLockJsonFile: string
 	reporter: ProgressReporter
 	sourceCodeBucketName: string
 	outDir: string
+	layerName: string
 }): Promise<string> => {
-	const { dependencies } = JSON.parse(await fs.readFile(packageJson, 'utf-8'))
+	const { dependencies } = JSON.parse(
+		await fs.readFile(packageJsonFile, 'utf-8'),
+	)
 
 	try {
 		await fs.stat(dir)
-		reporter.progress('base-layer')(`${dir} exists`)
+		reporter.progress(layerName)(`${dir} exists`)
 	} catch (_) {
-		reporter.progress('base-layer')(`Creating ${dir} ...`)
+		reporter.progress(layerName)(`Creating ${dir} ...`)
 		await fs.mkdir(dir)
 	}
 
 	const deps = requiredDependencies.reduce((resolved, dep) => {
 		if (dependencies[dep] === undefined)
 			throw new Error(
-				`Could not resolve dependency "${dep}" in ${packageJson}`!,
+				`Could not resolve dependency "${dep}" in ${packageJsonFile}`!,
 			)
-		reporter.progress('base-layer')(`${dep}: ${dependencies[dep]}`)
+		reporter.progress(layerName)(`${dep}: ${dependencies[dep]}`)
 		return {
 			...resolved,
 			[dep]: dependencies[dep],
 		}
 	}, {} as Record<string, string>)
 
-	reporter.progress('base-layer')('Writing package.json ...')
+	reporter.progress(layerName)('Writing package.json ...')
 	await fs.writeFile(
 		path.join(dir, 'package.json'),
 		JSON.stringify({
@@ -53,21 +57,10 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 		}),
 		'utf-8',
 	)
-
-	reporter.progress('base-layer')('Installing dependencies ...')
-	await new Promise<void>((resolve, reject) => {
-		const p = spawn('npm', ['i', '--ignore-scripts', '--only=prod'], {
-			cwd: dir,
-		})
-		p.on('close', (code) => {
-			if (code !== 0) {
-				const msg = `[CloudFormation Layer] npm i in ${dir} exited with code ${code}.`
-				return reject(new Error(msg))
-			}
-			return resolve()
-		})
-	})
+	reporter.progress(layerName)('Copying package-lock.json ...')
+	await fs.copyFile(packageLockJsonFile, path.join(dir, 'package-lock.json'))
 	return packBaseLayer({
+		layerName,
 		reporter,
 		srcDir: dir,
 		outDir,

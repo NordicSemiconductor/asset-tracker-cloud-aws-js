@@ -15,10 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Node.js 14
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: "14.x"
+          node-version: "15.x"
 
       - name: Keep npm cache around to speed up installs
         uses: actions/cache@v2

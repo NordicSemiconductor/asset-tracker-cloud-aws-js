@@ -4,7 +4,7 @@ import {
 	packLayeredLambdas,
 } from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
-import { makeLayerFromPackageJSON__Unsafe } from '../../helper/lambdas/makeLayerFromPackageJSON'
+import { makeLayerFromPackageJSON } from '../../helper/lambdas/makeLayerFromPackageJSON'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 
 export type CatTrackerLambdas = {
@@ -34,10 +34,19 @@ export const prepareAssetTrackerLambdas = async ({
 	const reporter = ConsoleProgressReporter('Cat Tracker Lambdas')
 	return {
 		layerZipFileName: await packBaseLayer({
+			layerName: 'cat-tracker-layer',
 			reporter,
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,
+			installCommand: [
+				'npm',
+				'i', // do not use ci, it will install unneccessary dependencies
+				'--ignore-scripts',
+				'--only=prod',
+				'--no-audit',
+				'--legacy-peer-deps',
+			],
 		}),
 		lambdas: await packLayeredLambdas<CatTrackerLambdas>({
 			reporter,
@@ -117,8 +126,10 @@ export const prepareCDKLambdas = async ({
 				'lambdas',
 				'cloudFormationLayer',
 			)
-			return makeLayerFromPackageJSON__Unsafe({
-				packageJson: path.resolve(rootDir, 'package.json'),
+			return makeLayerFromPackageJSON({
+				layerName: 'cdk-layer',
+				packageJsonFile: path.resolve(rootDir, 'package.json'),
+				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
 				requiredDependencies: [
 					'@aws-sdk/client-iot',
 					'@nordicsemiconductor/cloudformation-helpers',

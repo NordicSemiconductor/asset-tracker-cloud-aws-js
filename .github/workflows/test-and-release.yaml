@@ -21,10 +21,9 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Node.js 14
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: "14.x"
+          node-version: "15.x"
       - name: Cache AWS CLI (Linux)
         if: runner.OS == 'Linux'
         id: cache-aws-cli-linux
@@ -102,6 +101,11 @@ jobs:
           aws s3 rb s3://$SOURCE_CODE_BUCKET --force
           # Delete the sourceode stack
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' destroy -f '*'
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: lambdas
+          path: dist/**/*.zip
 
   release:
     needs: tests
@@ -110,10 +114,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Node.js 14
-        uses: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: "14.x"
+          node-version: "15.x"
 
       - name: Keep npm cache around to speed up installs
         uses: actions/cache@v2
