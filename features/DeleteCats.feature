@@ -1,4 +1,5 @@
 @Last
+@Only
 Feature: Delete cats
   As a user
   I can delete cats

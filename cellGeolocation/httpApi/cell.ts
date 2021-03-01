@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import {
 	geolocateCellFromCache,
 	queueCellGeolocationResolutionJob,
@@ -31,6 +32,7 @@ const q = queueCellGeolocationResolutionJob({
 
 const cellInputSchema = Type.Object(
 	{
+		nw: Type.Enum(NetworkMode),
 		cell: Type.Number({
 			minimum: 1,
 		}),
@@ -50,6 +52,8 @@ const cellInputSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
+console.log(JSON.stringify(cellInputSchema, null, 2))
+
 const validateInput = validateWithJSONSchema(cellInputSchema)
 
 const allMembersToInt = (o: Record<string, any>): Record<string, number> =>
@@ -64,7 +68,10 @@ export const handler = async (
 	console.log(JSON.stringify(event))
 
 	return pipe(
-		validateInput(allMembersToInt(event.queryStringParameters ?? {})),
+		validateInput({
+			...allMembersToInt(event.queryStringParameters ?? {}),
+			nw: event?.queryStringParameters?.nw ?? '',
+		}),
 		TE.fromEither,
 		TE.chain((cell) =>
 			pipe(

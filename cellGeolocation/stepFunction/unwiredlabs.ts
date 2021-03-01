@@ -5,6 +5,7 @@ import { MaybeCellGeoLocation } from './types'
 import { Cell } from '../geolocateCell'
 import { fromEnv } from '../../util/fromEnv'
 import { getUnwiredLabsApiSettings } from '../settings/unwiredlabs'
+import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -33,7 +34,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			lon: number
 			accuracy: number
 			aged?: boolean
-			fallback?: 'ipf' | 'lacf' | 'scf'
+			fallback?: 'ipf' | 'lacf' | 'scf' | 'ncf'
 			// address: string (not requested)
 			// address_details?: string (not requested)
 		} = await new Promise((resolve, reject) => {
@@ -76,7 +77,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 
 			const payload = JSON.stringify({
 				token: apiKey,
-				radio: 'lte',
+				radio: cell.nw === NetworkMode.NBIoT ? 'nbiot' : 'lte',
 				mcc: Math.floor(cell.mccmnc / 100),
 				mnc: cell.mccmnc % 100,
 				cells: [

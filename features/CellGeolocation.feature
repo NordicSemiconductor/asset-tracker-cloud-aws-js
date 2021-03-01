@@ -1,3 +1,4 @@
+@Only
 Feature: Cell Geolocation API
 
     GPS fixes will be stored with the cell id
@@ -24,6 +25,7 @@ Feature: Cell Geolocation API
             "rsrp": 0,
             "area": 211,
             "mccmnc": 26201,
+            "nw": "ltem",
             "cell": {cellId},
             "ip": "10.202.80.9"
             },
@@ -58,14 +60,14 @@ Feature: Cell Geolocation API
         available and has to be calculated, therefore the API will return 409 (Conflict)
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&ts={ts}
+        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&nw=ltem&ts={ts}
         Then the response status code should be 409
         And the response Access-Control-Allow-Origin should be "*"
 
     Scenario: Query a cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&ts={ts}
+        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&nw=ltem&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"

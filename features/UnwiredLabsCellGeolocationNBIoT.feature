@@ -1,14 +1,14 @@
 @Only
-Feature: Unwired Labs Cell Geolocation
+Feature: Unwired Labs Cell Geolocation (NB-IoT)
 
-    Optionally, cell locations can be resolved using the Unwired Labs API
+    Depending on the network mode, use a different radio mode for Unwired Labs
 
     Background:
 
         This enques a mock response on the mock HTTP API the stack is configure
         to use for the Unwired Labs integration
 
-        Given I am run after the "Cell Geolocation API" feature
+        Given I am run after the "Unwired Labs Cell Geolocation" feature
         And the endpoint is "{geolocationApiUrl}"
         Given I store "$floor($random() * 100000000)" into "cellId"
         And I store "$floor($random() * 20000)" into "accuracy"
@@ -19,7 +19,7 @@ Feature: Unwired Labs Cell Geolocation
         {
             "accuracy": {accuracy},
             "balance": 100,
-            "fallback": "scf",
+            "fallback": "ncf",
             "lat": {lat},
             "lon": {lng},
             "status": "ok"
@@ -29,7 +29,7 @@ Feature: Unwired Labs Cell Geolocation
     Scenario: Query the cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=ltem&ts={ts}
+        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=nbiot&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
@@ -48,7 +48,7 @@ Feature: Unwired Labs Cell Geolocation
         """
         {
             "token": "my-secret",
-            "radio": "lte",
+            "radio": "nbiot",
             "mcc": 242,
             "mnc": 1,
             "cells": [
