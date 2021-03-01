@@ -4,6 +4,12 @@ Feature: Cell Geolocation API
     so that the UI can show an approximate tracker location
     based on the cell id even if a device has no current GPS fix
 
+    Contexts:
+
+    | nw    | nw-modem   |
+    | ltem  | LTE-M GPS  |
+    | nbiot | NB-IoT GPS |
+
     Background:
 
         Given I am run after the "Connect a Cat Tracker" feature
@@ -24,6 +30,7 @@ Feature: Cell Geolocation API
             "rsrp": 0,
             "area": 211,
             "mccmnc": 26201,
+            "nw": "<nw-modem>",
             "cell": {cellId},
             "ip": "10.202.80.9"
             },
@@ -58,14 +65,14 @@ Feature: Cell Geolocation API
         available and has to be calculated, therefore the API will return 409 (Conflict)
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&ts={ts}
+        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&nw=<nw>&ts={ts}
         Then the response status code should be 409
         And the response Access-Control-Allow-Origin should be "*"
 
     Scenario: Query a cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&ts={ts}
+        When I GET /cell?cell={cellId}&area=211&mccmnc=26201&nw=<nw>&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"

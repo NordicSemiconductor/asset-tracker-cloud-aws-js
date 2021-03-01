@@ -13,12 +13,17 @@ Feature: Device: Update Shadow
       {
         "dev": {
           "v": {
-            "band": 3,
-            "nw": "NB-IoT GPS",
             "iccid": "89882806660004909182",
             "modV": "mfw_nrf9160_1.0.0",
             "brdV": "thingy91_nrf9160",
             "appV": "0.14.6"
+          },
+          "ts": {updateShadowTs}
+        },
+        "roam": {
+          "v": {
+            "band": 3,
+            "nw": "NB-IoT GPS"
           },
           "ts": {updateShadowTs}
         },

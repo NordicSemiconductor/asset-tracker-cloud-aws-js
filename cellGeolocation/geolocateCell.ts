@@ -5,11 +5,7 @@ import { ErrorInfo, ErrorType } from './ErrorInfo'
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
 import { Option, some, none } from 'fp-ts/lib/Option'
 
-export type Cell = {
-	area: number
-	mccmnc: number
-	cell: number
-}
+export type Cell = Parameters<typeof cellId>[0]
 
 export type Location = {
 	lat: number
@@ -40,7 +36,7 @@ export const geolocateCellFromCache = ({
 							S: id,
 						},
 					},
-					ProjectionExpression: 'lat,lng,accuracy,unresolved',
+					ProjectionExpression: 'nw,lat,lng,accuracy,unresolved',
 				}),
 			)
 			if (Item) {

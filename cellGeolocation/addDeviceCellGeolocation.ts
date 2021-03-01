@@ -31,6 +31,9 @@ export const addDeviceCellGeolocation = ({
 						cellId: {
 							S: cellId(cellgeolocation),
 						},
+						nw: {
+							S: `${cellgeolocation.nw}`,
+						},
 						cell: {
 							N: `${cellgeolocation.cell}`,
 						},

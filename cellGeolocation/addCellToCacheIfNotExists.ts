@@ -14,6 +14,7 @@ export const addCellToCacheIfNotExists = ({
 	dynamodb: DynamoDBClient
 	TableName: string
 }) => ({
+	nw,
 	area,
 	mccmnc,
 	cell,
@@ -42,7 +43,7 @@ export const addCellToCacheIfNotExists = ({
 					TableName,
 					Item: {
 						cellId: {
-							S: cellId({ area, mccmnc, cell }),
+							S: cellId({ nw, area, mccmnc, cell }),
 						},
 						lat: {
 							N: `${cellGeoLocation.lat}`,
