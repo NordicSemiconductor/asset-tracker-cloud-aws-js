@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { packLayeredLambdas } from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
-import { makeLayerFromPackageJSON__Unsafe } from '../helper/lambdas/makeLayerFromPackageJSON'
+import { makeLayerFromPackageJSON } from '../helper/lambdas/makeLayerFromPackageJSON'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 
 export type HTTPAPIMockLambdas = {
@@ -26,8 +26,10 @@ export const prepareHTTPAPIMockLambdas = async ({
 				'lambdas',
 				'httpApiMockLayer',
 			)
-			return makeLayerFromPackageJSON__Unsafe({
-				packageJson: path.resolve(rootDir, 'package.json'),
+			return makeLayerFromPackageJSON({
+				layerName: 'httpApiMock-layer',
+				packageJsonFile: path.resolve(rootDir, 'package.json'),
+				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
 				requiredDependencies: ['@aws-sdk/client-sqs'],
 				dir: httpApiMockLayerDir,
 				reporter,
