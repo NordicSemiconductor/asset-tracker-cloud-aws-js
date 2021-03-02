@@ -102,7 +102,7 @@ export const handler = async (
 						expires: 86400,
 					})({
 						type: ErrorType.EntityNotFound,
-						message: `cell geolocation for ${cell} not found!`,
+						message: `cell geolocation for ${JSON.stringify(cell)} not found!`,
 					})
 				}
 				return res(200, {
