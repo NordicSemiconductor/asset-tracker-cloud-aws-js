@@ -362,10 +362,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 					'SELECT',
 					'newuuid() as uuid,',
 					'current.state.reported.roam.v.cell as cell,',
+					'current.state.reported.roam.v.nw as nw,',
 					'current.state.reported.roam.v.mccmnc as mccmnc,',
 					'current.state.reported.roam.v.area as area,',
-					// see cellGeolocation/cellId.ts for format of cellId
-					'concat(current.state.reported.roam.v.cell,',
+					// see cellId in @nordicsemiconductor/cell-geolocation-helpers for format of cellId
+					'concat(current.state.reported.roam.v.nw,',
+					'"-",',
+					'current.state.reported.roam.v.cell,',
 					'"-",',
 					'current.state.reported.roam.v.mccmnc,',
 					'"-",',
@@ -378,7 +381,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 					`FROM '$aws/things/+/shadow/update/documents'`,
 					'WHERE',
 					// only if it actually has roaming information
-					'current.state.reported.roam.v.area <> NULL',
+					'current.state.reported.roam.v.nw <> NULL',
+					'AND current.state.reported.roam.v.area <> NULL',
 					'AND current.state.reported.roam.v.mccmnc <> NULL',
 					'AND current.state.reported.roam.v.cell <> NULL',
 					// and if it has GPS location

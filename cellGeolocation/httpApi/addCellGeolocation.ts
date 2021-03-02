@@ -82,6 +82,7 @@ export const handler = async (
 				lat: toFloatOr0(b.lat),
 				lng: toFloatOr0(b.lng),
 				accuracy: toFloatOr0(b.accuracy),
+				nw: b.nw,
 			})
 		}),
 		E.flatten,
