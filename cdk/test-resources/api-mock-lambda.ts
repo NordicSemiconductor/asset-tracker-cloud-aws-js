@@ -90,5 +90,5 @@ export const handler = async (
 		}
 	}
 
-	return { statusCode: 202, body: '' }
+	return { statusCode: 404, body: '' }
 }
