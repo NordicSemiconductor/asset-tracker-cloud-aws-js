@@ -15,6 +15,7 @@ const fetchSettings = getUnwiredLabsApiSettings({
 })
 
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
+	console.log(JSON.stringify(cell))
 	try {
 		const { apiKey, endpoint } = await fetchSettings()
 		const { hostname, pathname } = new URL(endpoint)
@@ -54,23 +55,24 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 						},
 					}),
 				)
+				const body: Uint8Array[] = []
 				res.on('data', (d) => {
-					const responseBody = JSON.parse(d.toString())
-					console.debug(
-						JSON.stringify({
-							responseBody,
-						}),
-					)
+					body.push(d)
+				})
+				res.on('end', () => {
 					if (res.statusCode === undefined) {
 						return reject(new Error('No response received!'))
 					}
 					if (res.statusCode >= 400) {
-						reject(new Error(responseBody.description))
+						return reject(
+							`Error ${res.statusCode}: "${new Error(
+								Buffer.concat(body).toString(),
+							)}"`,
+						)
 					}
-					resolve(responseBody)
+					resolve(JSON.parse(Buffer.concat(body).toString()))
 				})
 			})
-
 			req.on('error', (e) => {
 				reject(new Error(e.message))
 			})
@@ -92,7 +94,9 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			req.end()
 		})
 
-		if (status === 'ok' && lat && lon) {
+		console.debug(JSON.stringify({ status, lat, lon }))
+
+		if (status === 'ok' && lat !== undefined && lon !== undefined) {
 			return {
 				lat,
 				lng: lon,
@@ -101,7 +105,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			}
 		}
 	} catch (err) {
-		console.error(JSON.stringify({ error: err }))
+		console.error(JSON.stringify({ error: err.message }))
 	}
 	return {
 		located: false,
