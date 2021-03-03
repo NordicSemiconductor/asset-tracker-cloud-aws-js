@@ -56,9 +56,13 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 
 	reporter.progress('base-layer')('Installing dependencies ...')
 	await new Promise<void>((resolve, reject) => {
-		const p = spawn('npm', ['i', '--ignore-scripts', '--only=prod'], {
-			cwd: dir,
-		})
+		const p = spawn(
+			'npm',
+			['i', '--ignore-scripts', '--only=prod', '--legacy-peer-deps'],
+			{
+				cwd: dir,
+			},
+		)
 		p.on('close', (code) => {
 			if (code !== 0) {
 				const msg = `[CloudFormation Layer] npm i in ${dir} exited with code ${code}.`
