@@ -353,66 +353,81 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		new IoT.CfnTopicRule(this, 'storeCellGeolocationsFromDevices', {
-			topicRulePayload: {
-				awsIotSqlVersion: '2016-03-23',
-				description: 'Stores the geolocations for cells from devices',
-				ruleDisabled: false,
-				sql: [
-					'SELECT',
-					'newuuid() as uuid,',
-					'current.state.reported.roam.v.cell as cell,',
-					'current.state.reported.roam.v.mccmnc as mccmnc,',
-					'current.state.reported.roam.v.area as area,',
-					// see cellGeolocation/cellId.ts for format of cellId
-					'concat(current.state.reported.roam.v.cell,',
-					'"-",',
-					'current.state.reported.roam.v.mccmnc,',
-					'"-",',
-					'current.state.reported.roam.v.area) AS cellId,',
-					'current.state.reported.gps.v.lat AS lat,',
-					'current.state.reported.gps.v.lng AS lng,',
-					'current.state.reported.gps.v.acc AS accuracy,',
-					'concat("device:", topic(3)) as source,',
-					"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
-					`FROM '$aws/things/+/shadow/update/documents'`,
-					'WHERE',
-					// only if it actually has roaming information
-					'current.state.reported.roam.v.area <> NULL',
-					'AND current.state.reported.roam.v.mccmnc <> NULL',
-					'AND current.state.reported.roam.v.cell <> NULL',
-					// and if it has GPS location
-					'AND current.state.reported.gps.v.lat <> NULL AND current.state.reported.gps.v.lat <> 0',
-					'AND current.state.reported.gps.v.lng <> NULL AND current.state.reported.gps.v.lng <> 0',
-					// only if the location has changed
-					'AND (',
-					'isUndefined(previous.state.reported.gps.v.lat)',
-					'OR',
-					'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
-					'OR',
-					'isUndefined(previous.state.reported.gps.v.lng)',
-					'OR',
-					'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
-					')',
-				].join(' '),
-				actions: [
-					{
-						dynamoDBv2: {
-							putItem: {
-								tableName: this.deviceCellGeolocationTable.tableName,
+		const storeCellGeolocationsFromDevicesSQL = (nwLocation: 'dev' | 'roam') =>
+			new IoT.CfnTopicRule(
+				this,
+				`storeCellGeolocationsFromDevices${nwLocation}`,
+				{
+					topicRulePayload: {
+						awsIotSqlVersion: '2016-03-23',
+						description: `Stores the geolocations for cells from devices (with nw in ${nwLocation})`,
+						ruleDisabled: false,
+						sql: [
+							'SELECT',
+							'newuuid() as uuid,',
+							'current.state.reported.roam.v.cell as cell,',
+							`current.state.reported.${nwLocation}.v.nw as nw,`,
+							'current.state.reported.roam.v.mccmnc as mccmnc,',
+							'current.state.reported.roam.v.area as area,',
+							// see cellId in @nordicsemiconductor/cell-geolocation-helpers for format of cellId
+							'concat(',
+							`CASE startswith(current.state.reported.${nwLocation}.v.nw, "NB-IoT") WHEN true THEN "nbiot" ELSE "ltem" END,`,
+							'"-",',
+							'current.state.reported.roam.v.cell,',
+							'"-",',
+							'current.state.reported.roam.v.mccmnc,',
+							'"-",',
+							'current.state.reported.roam.v.area',
+							') AS cellId,',
+							'current.state.reported.gps.v.lat AS lat,',
+							'current.state.reported.gps.v.lng AS lng,',
+							'current.state.reported.gps.v.acc AS accuracy,',
+							'concat("device:", topic(3)) as source,',
+							"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
+							`FROM '$aws/things/+/shadow/update/documents'`,
+							'WHERE',
+							// only if it actually has roaming information
+							'current.state.reported.roam.v.area <> NULL',
+							'AND current.state.reported.roam.v.mccmnc <> NULL',
+							'AND current.state.reported.roam.v.cell <> NULL',
+							`AND current.state.reported.${nwLocation}.v.nw <> NULL`,
+							// and if it has GPS location
+							'AND current.state.reported.gps.v.lat <> NULL AND current.state.reported.gps.v.lat <> 0',
+							'AND current.state.reported.gps.v.lng <> NULL AND current.state.reported.gps.v.lng <> 0',
+							// only if the location has changed
+							'AND (',
+							'isUndefined(previous.state.reported.gps.v.lat)',
+							'OR',
+							'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
+							'OR',
+							'isUndefined(previous.state.reported.gps.v.lng)',
+							'OR',
+							'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
+							')',
+						].join(' '),
+						actions: [
+							{
+								dynamoDBv2: {
+									putItem: {
+										tableName: this.deviceCellGeolocationTable.tableName,
+									},
+									roleArn: topicRuleRole.roleArn,
+								},
 							},
-							roleArn: topicRuleRole.roleArn,
+						],
+						errorAction: {
+							republish: {
+								roleArn: topicRuleRole.roleArn,
+								topic: 'errors',
+							},
 						},
 					},
-				],
-				errorAction: {
-					republish: {
-						roleArn: topicRuleRole.roleArn,
-						topic: 'errors',
-					},
 				},
-			},
-		})
+			)
+
+		storeCellGeolocationsFromDevicesSQL('roam')
+		// FIXME: remove fallback for current firmware revision, which has nw in dev, not in roam
+		storeCellGeolocationsFromDevicesSQL('dev')
 
 		this.resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
 			fifo: true,

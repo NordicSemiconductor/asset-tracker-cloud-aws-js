@@ -22,6 +22,7 @@ Feature: Cell Geolocation Publish API
             "cell": {cellId},
             "area": {area},
             "mccmnc": {mccmnc},
+            "nw": "ltem",
             "lat": {lat},
             "lng": {lng},
             "accuracy": {accuracy}
@@ -32,7 +33,7 @@ Feature: Cell Geolocation Publish API
     Scenario: Query a cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area={area}&mccmnc={mccmnc}&ts={ts}
+        When I GET /cell?cell={cellId}&area={area}&mccmnc={mccmnc}&nw=ltem&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"

@@ -2,7 +2,6 @@ import * as path from 'path'
 import {
 	packBaseLayer,
 	packLayeredLambdas,
-	WebpackMode,
 } from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
 import { makeLayerFromPackageJSON__Unsafe } from '../../helper/lambdas/makeLayerFromPackageJSON'
@@ -43,7 +42,6 @@ export const prepareAssetTrackerLambdas = async ({
 		lambdas: await packLayeredLambdas<CatTrackerLambdas>({
 			reporter,
 			id: 'cat-tracker',
-			mode: WebpackMode.production,
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,
@@ -134,7 +132,6 @@ export const prepareCDKLambdas = async ({
 		lambdas: await packLayeredLambdas<CDKLambdas>({
 			reporter,
 			id: 'CDK',
-			mode: WebpackMode.production,
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,

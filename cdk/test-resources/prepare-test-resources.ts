@@ -1,8 +1,5 @@
 import * as path from 'path'
-import {
-	packLayeredLambdas,
-	WebpackMode,
-} from '@nordicsemiconductor/package-layered-lambdas'
+import { packLayeredLambdas } from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
 import { makeLayerFromPackageJSON__Unsafe } from '../helper/lambdas/makeLayerFromPackageJSON'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
@@ -41,7 +38,6 @@ export const prepareHTTPAPIMockLambdas = async ({
 		lambdas: await packLayeredLambdas<HTTPAPIMockLambdas>({
 			reporter,
 			id: 'HTTPAPIMock',
-			mode: WebpackMode.production,
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,

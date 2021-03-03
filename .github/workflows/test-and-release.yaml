@@ -82,8 +82,7 @@ jobs:
           node cli create-ca
       - run: node --unhandled-rejections=strict dist/cdk/helper/addFakeRoute.js
       - name: Run End-to-End Tests
-        run: |
-          npm run test:e2e
+        run: npm run test:e2e
       - name: Get logs
         if: failure()
         run: node cli logs
