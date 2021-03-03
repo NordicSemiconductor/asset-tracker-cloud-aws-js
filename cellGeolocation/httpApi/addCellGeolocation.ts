@@ -12,6 +12,7 @@ import { sequenceT } from 'fp-ts/lib/Apply'
 import { fromEnv } from '../../util/fromEnv'
 import { Type } from '@sinclair/typebox'
 import { validateWithJSONSchema } from './validateWithJSONSchema'
+import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 
 const { deviceCellGeolocationTable, cacheTable } = fromEnv({
 	deviceCellGeolocationTable: 'DEVICE_CELL_GEOLOCATION_TABLE',
@@ -32,6 +33,7 @@ const addToCellGeolocation = addCellToCacheIfNotExists({
 
 const cellGeolocationInputSchema = Type.Object(
 	{
+		nw: Type.Enum(NetworkMode),
 		cell: Type.Number({
 			minimum: 1,
 		}),
@@ -80,6 +82,7 @@ export const handler = async (
 				lat: toFloatOr0(b.lat),
 				lng: toFloatOr0(b.lng),
 				accuracy: toFloatOr0(b.accuracy),
+				nw: b.nw,
 			})
 		}),
 		E.flatten,

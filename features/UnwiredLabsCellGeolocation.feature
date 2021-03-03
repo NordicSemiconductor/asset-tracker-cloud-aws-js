@@ -2,6 +2,12 @@ Feature: Unwired Labs Cell Geolocation
 
     Optionally, cell locations can be resolved using the Unwired Labs API
 
+    Contexts:
+
+    | nw    | radio | fallback |
+    | ltem  | lte   | scf      |
+    | nbiot | nbiot | ncf      |
+
     Background:
 
         This enques a mock response on the mock HTTP API the stack is configure
@@ -18,7 +24,7 @@ Feature: Unwired Labs Cell Geolocation
         {
             "accuracy": {accuracy},
             "balance": 100,
-            "fallback": "scf",
+            "fallback": "<fallback>",
             "lat": {lat},
             "lon": {lng},
             "status": "ok"
@@ -28,7 +34,7 @@ Feature: Unwired Labs Cell Geolocation
     Scenario: Query the cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&ts={ts}
+        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=<nw>&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
@@ -47,7 +53,7 @@ Feature: Unwired Labs Cell Geolocation
         """
         {
             "token": "my-secret",
-            "radio": "lte",
+            "radio": "<radio>",
             "mcc": 242,
             "mnc": 1,
             "cells": [
