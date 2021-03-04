@@ -63,7 +63,8 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 			'npx',
 			'--yes',
 			'npm@6',
-			'ci',
+			// No lockfile, so do not use 'ci'
+			'i',
 			'--no-audit',
 			'--ignore-scripts',
 			'--only=prod',
