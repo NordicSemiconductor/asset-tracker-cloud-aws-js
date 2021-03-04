@@ -1,7 +1,6 @@
 import * as path from 'path'
 import { promises as fs } from 'fs'
 import { packBaseLayer } from '@nordicsemiconductor/package-layered-lambdas'
-import { spawn } from 'child_process'
 import { ProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
 
 /**
