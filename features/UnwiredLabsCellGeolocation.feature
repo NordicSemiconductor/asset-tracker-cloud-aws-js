@@ -19,21 +19,21 @@ Feature: Unwired Labs Cell Geolocation
         And I store "$floor($random() * 20000)" into "accuracy"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
-        Given I enqueue this mock HTTP API response with status code 200 for a POST request to /unwiredlabs/v2/process.php
-        """
-        {
-            "accuracy": {accuracy},
-            "balance": 100,
-            "fallback": "<fallback>",
-            "lat": {lat},
-            "lon": {lng},
-            "status": "ok"
-        }
-        """
             
     Scenario: Query the cell
 
-        Given I store "$millis()" into "ts"
+        Given I enqueue this mock HTTP API response with status code 200 for a POST request to /unwiredlabs/v2/process.php
+            """
+            {
+                "accuracy": {accuracy},
+                "balance": 100,
+                "fallback": "<fallback>",
+                "lat": {lat},
+                "lon": {lng},
+                "status": "ok"
+            }
+            """
+        And I store "$millis()" into "ts"
         When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=<nw>&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
@@ -41,26 +41,26 @@ Feature: Unwired Labs Cell Geolocation
         And the response should equal this JSON
             """
             {
-            "accuracy": {accuracy},
-            "lat": {lat},
-            "lng": {lng}
+                "accuracy": {accuracy},
+                "lat": {lat},
+                "lng": {lng}
             }
             """
 
     Scenario: The Unwired Labs API should have been called
 
         Then the mock HTTP API should have been call with a POST request to /unwiredlabs/v2/process.php
-        """
-        {
-            "token": "my-secret",
-            "radio": "<radio>",
-            "mcc": 242,
-            "mnc": 1,
-            "cells": [
-                {
-                "lac": 30401,
-                "cid": {cellId}
-                }
-            ]
-        }
-        """
+            """
+            {
+                "token": "my-secret",
+                "radio": "<radio>",
+                "mcc": 242,
+                "mnc": 1,
+                "cells": [
+                    {
+                    "lac": 30401,
+                    "cid": {cellId}
+                    }
+                ]
+            }
+            """
