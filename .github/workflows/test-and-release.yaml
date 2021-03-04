@@ -101,6 +101,10 @@ jobs:
           aws s3 rb s3://$SOURCE_CODE_BUCKET --force
           # Delete the sourceode stack
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' destroy -f '*'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lambdas
+          path: dist/**/*.zip
 
   release:
     needs: tests
