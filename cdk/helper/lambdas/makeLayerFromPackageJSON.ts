@@ -54,27 +54,20 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 		'utf-8',
 	)
 
-	reporter.progress('base-layer')('Installing dependencies ...')
-	await new Promise<void>((resolve, reject) => {
-		const p = spawn(
-			'npm',
-			['i', '--ignore-scripts', '--only=prod', '--legacy-peer-deps'],
-			{
-				cwd: dir,
-			},
-		)
-		p.on('close', (code) => {
-			if (code !== 0) {
-				const msg = `[CloudFormation Layer] npm i in ${dir} exited with code ${code}.`
-				return reject(new Error(msg))
-			}
-			return resolve()
-		})
-	})
 	return packBaseLayer({
 		reporter,
 		srcDir: dir,
 		outDir,
 		Bucket: sourceCodeBucketName,
+		// See https://github.com/aws/aws-sdk-js-v3/issues/2051
+		installCommand: [
+			'npx',
+			'--yes',
+			'npm@6',
+			'ci',
+			'--no-audit',
+			'--ignore-scripts',
+			'--only=prod',
+		],
 	})
 }

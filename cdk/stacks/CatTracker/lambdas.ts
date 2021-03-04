@@ -38,6 +38,16 @@ export const prepareAssetTrackerLambdas = async ({
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,
+			// See https://github.com/aws/aws-sdk-js-v3/issues/2051
+			installCommand: [
+				'npx',
+				'--yes',
+				'npm@6',
+				'ci',
+				'--no-audit',
+				'--ignore-scripts',
+				'--only=prod',
+			],
 		}),
 		lambdas: await packLayeredLambdas<CatTrackerLambdas>({
 			reporter,
