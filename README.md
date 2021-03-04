@@ -1,4 +1,4 @@
-# Asset Tracker Example for AWS [![npm version](https://img.shields.io/npm/v/@nordicsemiconductor/asset-tracker-cloud-aws.svg)](https://www.npmjs.com/package/@nordicsemiconductor/asset-tracker-cloud-aws)
+# nRF Asset Tracker for AWS [![npm version](https://img.shields.io/npm/v/@nordicsemiconductor/asset-tracker-cloud-aws.svg)](https://www.npmjs.com/package/@nordicsemiconductor/asset-tracker-cloud-aws)
 
 [![GitHub Actions](https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js/workflows/Test%20and%20Release/badge.svg)](https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js/actions)
 [![Known Vulnerabilities](https://snyk.io/test/github/NordicSemiconductor/asset-tracker-cloud-aws-js/badge.svg?targetFile=package.json)](https://snyk.io/test/github/NordicSemiconductor/asset-tracker-cloud-aws-js?targetFile=package.json)
@@ -14,4 +14,4 @@ using [AWS CDK](https://aws.amazon.com/cdk) in
 [TypeScript](https://www.typescriptlang.org/).
 
 > :information_source:
-> [Read the complete Asset Tracker Cloud Example documentation](https://nordicsemiconductor.github.io/asset-tracker-cloud-docs/).
+> [Read the complete nRF Asset Tracker documentation](https://nordicsemiconductor.github.io/asset-tracker-cloud-docs/).
