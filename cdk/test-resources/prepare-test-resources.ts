@@ -27,7 +27,7 @@ export const prepareHTTPAPIMockLambdas = async ({
 				'httpApiMockLayer',
 			)
 			return makeLayerFromPackageJSON__Unsafe({
-				layerName: 'httpApiMock',
+				layerName: 'httpApiMock-layer',
 				packageJson: path.resolve(rootDir, 'package.json'),
 				requiredDependencies: ['@aws-sdk/client-sqs'],
 				dir: httpApiMockLayerDir,

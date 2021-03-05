@@ -34,7 +34,7 @@ export const prepareAssetTrackerLambdas = async ({
 	const reporter = ConsoleProgressReporter('Cat Tracker Lambdas')
 	return {
 		layerZipFileName: await packBaseLayer({
-			layerName: 'cat-tracker',
+			layerName: 'cat-tracker-layer',
 			reporter,
 			srcDir: rootDir,
 			outDir,
@@ -129,7 +129,7 @@ export const prepareCDKLambdas = async ({
 				'cloudFormationLayer',
 			)
 			return makeLayerFromPackageJSON__Unsafe({
-				layerName: 'cdk',
+				layerName: 'cdk-layer',
 				packageJson: path.resolve(rootDir, 'package.json'),
 				requiredDependencies: [
 					'@aws-sdk/client-iot',
