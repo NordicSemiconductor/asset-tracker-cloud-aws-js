@@ -14,6 +14,7 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 	reporter,
 	sourceCodeBucketName,
 	outDir,
+	layerName,
 }: {
 	dir: string
 	requiredDependencies: string[]
@@ -21,6 +22,7 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 	reporter: ProgressReporter
 	sourceCodeBucketName: string
 	outDir: string
+	layerName: string
 }): Promise<string> => {
 	const { dependencies } = JSON.parse(await fs.readFile(packageJson, 'utf-8'))
 
@@ -54,6 +56,7 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 	)
 
 	return packBaseLayer({
+		layerName,
 		reporter,
 		srcDir: dir,
 		outDir,
