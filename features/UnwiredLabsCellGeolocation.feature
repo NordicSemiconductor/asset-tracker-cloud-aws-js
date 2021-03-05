@@ -19,10 +19,7 @@ Feature: Unwired Labs Cell Geolocation
         And I store "$floor($random() * 20000)" into "accuracy"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
-            
-    Scenario: Query the cell
-
-        Given I enqueue this mock HTTP API response with status code 200 for a POST request to /unwiredlabs/v2/process.php
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to /unwiredlabs/v2/process.php
             """
             {
                 "accuracy": {accuracy},
@@ -33,7 +30,10 @@ Feature: Unwired Labs Cell Geolocation
                 "status": "ok"
             }
             """
-        And I store "$millis()" into "ts"
+            
+    Scenario: Query the cell
+
+        Given I store "$millis()" into "ts"
         When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=<nw>&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
