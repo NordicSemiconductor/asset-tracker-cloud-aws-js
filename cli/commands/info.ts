@@ -3,6 +3,8 @@ import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as chalk from 'chalk'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint'
+import { IoTClient } from '@aws-sdk/client-iot'
 
 export const infoCommand = (): CommandDefinition => ({
 	command: 'info',
@@ -13,9 +15,10 @@ export const infoCommand = (): CommandDefinition => ({
 		},
 	],
 	action: async ({ output }) => {
-		const outputs = await stackOutput(new CloudFormationClient({}))(
-			CORE_STACK_NAME,
-		)
+		const outputs = {
+			...(await stackOutput(new CloudFormationClient({}))(CORE_STACK_NAME)),
+			mqttEndpoint: await getIotEndpoint(new IoTClient({})),
+		} as Record<string, string>
 		if (output !== undefined) {
 			if (outputs[output] === undefined) {
 				throw new Error(`${output} is not defined.`)
