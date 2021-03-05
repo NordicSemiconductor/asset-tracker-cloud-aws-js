@@ -28,9 +28,9 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 
 	try {
 		await fs.stat(dir)
-		reporter.progress('base-layer')(`${dir} exists`)
+		reporter.progress(layerName)(`${dir} exists`)
 	} catch (_) {
-		reporter.progress('base-layer')(`Creating ${dir} ...`)
+		reporter.progress(layerName)(`Creating ${dir} ...`)
 		await fs.mkdir(dir)
 	}
 
@@ -39,14 +39,14 @@ export const makeLayerFromPackageJSON__Unsafe = async ({
 			throw new Error(
 				`Could not resolve dependency "${dep}" in ${packageJson}`!,
 			)
-		reporter.progress('base-layer')(`${dep}: ${dependencies[dep]}`)
+		reporter.progress(layerName)(`${dep}: ${dependencies[dep]}`)
 		return {
 			...resolved,
 			[dep]: dependencies[dep],
 		}
 	}, {} as Record<string, string>)
 
-	reporter.progress('base-layer')('Writing package.json ...')
+	reporter.progress(layerName)('Writing package.json ...')
 	await fs.writeFile(
 		path.join(dir, 'package.json'),
 		JSON.stringify({
