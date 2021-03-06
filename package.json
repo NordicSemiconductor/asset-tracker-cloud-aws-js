@@ -43,7 +43,7 @@
     "@nordicsemiconductor/cloudformation-helpers": "6.0.8",
     "@nordicsemiconductor/e2e-bdd-test-runner": "12.1.7",
     "@nordicsemiconductor/random-words": "5.0.0",
-    "@nordicsemiconductor/timestream-helpers": "3.1.0",
+    "@nordicsemiconductor/timestream-helpers": "3.1.1",
     "@sinclair/typebox": "0.12.9",
     "ajv": "7.1.1",
     "fp-ts": "2.9.5",
