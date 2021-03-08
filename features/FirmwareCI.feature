@@ -40,12 +40,12 @@ Feature: Schedule CI runs of firmware builds
         Then I store "awsSdk.res" into "ciJobReportTarget"
         And I encode "ciJobReportTarget.fields" into "ciJobReportTargetQuery" using querystring
 
-        # Create a blank new IoT thing (a regular cat with certificates generated locally)
+        # Create a blank new IoT thing (a regular tracker with certificates generated locally)
         # to be used for this specific test run.
         # The firmware is then build specifically for this device.
-        When I generate a certificate for the cat tracker "firmwaretest-{ciJobId}"
-        Then I encode "$lookup($, 'cat:firmwaretest-{ciJobId}:clientCert')" into "firmwareTestDeviceCertificatePEM" using replaceNewLines
-        And I encode "$lookup($, 'cat:firmwaretest-{ciJobId}:privateKey')" into "firmwareTestDeviceCertificatePrivateKey" using replaceNewLines
+        When I generate a certificate for the tracker "firmwaretest-{ciJobId}"
+        Then I encode "$lookup($, 'tracker:firmwaretest-{ciJobId}:clientCert')" into "firmwareTestDeviceCertificatePEM" using replaceNewLines
+        And I encode "$lookup($, 'tracker:firmwaretest-{ciJobId}:privateKey')" into "firmwareTestDeviceCertificatePrivateKey" using replaceNewLines
         And I encode "'{awsIotRootCA}'" into "awsIotRootCAEncoded" using replaceNewLines
 
         # Create a job for the AWS IoT thing used to manage the firmware CI runs
@@ -53,7 +53,7 @@ Feature: Schedule CI runs of firmware builds
             """
             {
                 "reportUrl": "{ciJobReportTarget.url}?{ciJobReportTargetQuery}",
-                "fw": "https://example.com/cat-tracker-Thingy91-ltem-debug-firmwaretest-{ciJobId}.hex",
+                "fw": "https://example.com/asset-tracker-Thingy91-ltem-debug-firmwaretest-{ciJobId}.hex",
                 "target": "thingy91_nrf9160ns:ltem",
                 "credentials": {
                     "secTag": 42,

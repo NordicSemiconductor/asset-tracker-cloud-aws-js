@@ -13,7 +13,7 @@ Feature: Query Data
       """
       SELECT measure_value::double AS value
       FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
-      WHERE deviceId='{cat:id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
+      WHERE deviceId='{tracker:id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
       """
     Then "timestreamQueryResult" should match this JSON
        """

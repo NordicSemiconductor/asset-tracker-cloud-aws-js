@@ -11,7 +11,7 @@ Feature: Read Device Shadow
     Given I am authenticated with Cognito
     When I execute "getThingShadow" of the AWS IotData SDK with
        """
-       {"thingName": "{cat:id}"}
+       {"thingName": "{tracker:id}"}
        """
     And I parse "awsSdk.res.payload" into "shadow"
     Then "shadow.state.reported" should match this JSON

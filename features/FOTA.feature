@@ -5,7 +5,7 @@ Feature: Device Firmware Upgrade over the air
 
   Background:
 
-    Given I am run after the "Connect a Cat Tracker" feature
+    Given I am run after the "Connect a tracker" feature
 
   Scenario: Create a new firmware upgrade as a user
 
@@ -40,9 +40,9 @@ Feature: Device Firmware Upgrade over the air
       """
       {
         "jobId": "{jobId}",
-        "targets": ["{cat:arn}"],
+        "targets": ["{tracker:arn}"],
         "document": {jobDocument},
-        "description": "Upgrade {cat:id} to version 1.0.1.",
+        "description": "Upgrade {tracker:id} to version 1.0.1.",
         "targetSelection": "SNAPSHOT"
       }
       """
@@ -53,7 +53,7 @@ Feature: Device Firmware Upgrade over the air
 
   Scenario: Fetch the job as a device and mark as in progress
 
-    When the cat tracker fetches the next job into "job"
+    When the tracker fetches the next job into "job"
     Then "job" should match this JSON
       """
       {
@@ -61,7 +61,7 @@ Feature: Device Firmware Upgrade over the air
         "status": "QUEUED"
       }
       """
-    And the cat tracker marks the job in "job" as in progress
+    And the tracker marks the job in "job" as in progress
 
   Scenario: describe the job
 
@@ -69,7 +69,7 @@ Feature: Device Firmware Upgrade over the air
       """
       {
         "jobId": "{jobId}",
-        "thingName": "{cat:id}"
+        "thingName": "{tracker:id}"
       }
       """
     Then "awsSdk.res.execution" should match this JSON
@@ -88,14 +88,14 @@ Feature: Device Firmware Upgrade over the air
       {
         "jobId": "{jobId}",
         "force": true,
-        "thingName": "{cat:id}"
+        "thingName": "{tracker:id}"
       }
       """
     When I execute "describeJobExecution" of the AWS Iot SDK with
       """
       {
         "jobId": "{jobId}",
-        "thingName": "{cat:id}"
+        "thingName": "{tracker:id}"
       }
       """
     Then "awsSdk.res.execution" should match this JSON
@@ -119,7 +119,7 @@ Feature: Device Firmware Upgrade over the air
       """
       {
         "jobId": "{jobId}",
-        "thingName": "{cat:id}",
+        "thingName": "{tracker:id}",
         "executionNumber": 1
       }
       """

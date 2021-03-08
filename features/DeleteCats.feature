@@ -1,18 +1,18 @@
 @Last
-Feature: Delete cats
+Feature: Delete trackers
   As a user
-  I can delete cats
+  I can delete trackers
 
   Background:
 
     Given I am authenticated with Cognito
 
-  Scenario: Delete the cat
+  Scenario: Delete the tracker
 
     When I execute "listThingPrincipals" of the AWS Iot SDK with
       """
       {
-        "thingName": "{cat:id}"
+        "thingName": "{tracker:id}"
       }
       """
     Then "$count(awsSdk.res.principals)" should equal 1
@@ -21,7 +21,7 @@ Feature: Delete cats
     Given I execute "detachThingPrincipal" of the AWS Iot SDK with
       """
       {
-        "thingName": "{cat:id}",
+        "thingName": "{tracker:id}",
         "principal": "{certificateArn}"
       }
       """
@@ -41,6 +41,6 @@ Feature: Delete cats
     And I execute "deleteThing" of the AWS Iot SDK with
       """
       {
-        "thingName": "{cat:id}"
+        "thingName": "{tracker:id}"
       }
       """

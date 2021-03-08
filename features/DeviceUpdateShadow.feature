@@ -3,12 +3,12 @@ Feature: Device: Update Shadow
 
   Background:
 
-    Given I am run after the "Connect a Cat Tracker" feature
+    Given I am run after the "Connect a tracker" feature
 
   Scenario: Publish device information to reported state
 
     Given I store "$millis()" into "updateShadowTs"
-    Then the cat tracker updates its reported state with
+    Then the tracker updates its reported state with
       """
       {
         "dev": {

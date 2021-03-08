@@ -31,7 +31,7 @@ Feature: Update Device Configuration
     When I execute "updateThingShadow" of the AWS IotData SDK with
        """
        {
-         "thingName": "{cat:id}",
+         "thingName": "{tracker:id}",
          "payload": {payload}
        }
        """

@@ -11,7 +11,7 @@ Feature: Device: Batch Data
 
   Scenario: Devices can publish batch data
 
-    Given the cat tracker publishes this message to the topic {cat:id}/batch
+    Given the tracker publishes this message to the topic {tracker:id}/batch
       """
       {
         "gps": [
@@ -45,7 +45,7 @@ Feature: Device: Batch Data
       """
       SELECT measure_value::double AS value
       FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
-      WHERE deviceId='{cat:id}'
+      WHERE deviceId='{tracker:id}'
       AND measure_name='gps.lng'
       AND measure_value::double IS NOT NULL
       ORDER BY time DESC

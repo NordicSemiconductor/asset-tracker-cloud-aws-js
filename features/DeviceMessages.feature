@@ -11,7 +11,7 @@ Feature: Device: Messages
   Scenario: Devices publishes that a button was pressed
 
     Given I store "$millis()" into "ts"
-    Then the cat tracker publishes this message to the topic {cat:id}/messages
+    Then the tracker publishes this message to the topic {tracker:id}/messages
       """
       {
       "btn": {
@@ -21,7 +21,7 @@ Feature: Device: Messages
       }
       """
     Given I store "$millis()" into "ts"
-    Then the cat tracker publishes this message to the topic {cat:id}/messages
+    Then the tracker publishes this message to the topic {tracker:id}/messages
       """
       {
       "btn": {
@@ -35,7 +35,7 @@ Feature: Device: Messages
       """
       SELECT measure_value::double AS value
       FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
-      WHERE deviceId='{cat:id}' AND measure_name='btn' AND measure_value::double IS NOT NULL
+      WHERE deviceId='{tracker:id}' AND measure_name='btn' AND measure_value::double IS NOT NULL
       ORDER BY time DESC
       """
     Then "timestreamQueryResult" should match this JSON

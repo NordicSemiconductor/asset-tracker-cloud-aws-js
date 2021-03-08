@@ -69,7 +69,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		accountId,
 	})
 
-	program.description('Cat Tracker Command Line Interface')
+	program.description('nRF Asset Tracker Command Line Interface')
 
 	const commands = [
 		createCACommand({ certsDir }),
@@ -98,11 +98,11 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 			}),
 			cdUpdateTokenCommand(),
 			confirm(
-				'Do you really purge all Cat Tracker buckets?',
+				'Do you really purge all nRF Asset Tracker buckets?',
 				purgeBucketsCommand(),
 			),
 			confirm(
-				'Do you really want to purge all Cat Tracker CAs?',
+				'Do you really want to purge all nRF Asset Tracker CAs?',
 				purgeCAsCommand(),
 			),
 			firmwareCICommand({
