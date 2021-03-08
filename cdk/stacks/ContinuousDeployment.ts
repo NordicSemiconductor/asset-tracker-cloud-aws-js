@@ -144,7 +144,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 
 		const project = new CodeBuild.CfnProject(this, 'CodeBuildProject', {
 			name: CONTINUOUS_DEPLOYMENT_STACK_NAME,
-			description: 'Continuous deploys the Cat Tracker resources',
+			description: 'Continuous deploys the nRF Asset Tracker resources',
 			source: {
 				type: 'CODEPIPELINE',
 				buildSpec: 'continuous-deployment.yml',
@@ -294,7 +294,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			).codeBuildProject
 		}
 
-		// Set up the continuous deployment for the Cat Tracker resources.
+		// Set up the continuous deployment for the nRF Asset Tracker resources.
 		// This will also run the deployment of the WebApp and DeviceUI after a deploy
 		// (in case some outputs have changed and need to be made available to the apps).
 

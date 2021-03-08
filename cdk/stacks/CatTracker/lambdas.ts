@@ -31,10 +31,10 @@ export const prepareAssetTrackerLambdas = async ({
 	outDir: string
 	sourceCodeBucketName: string
 }): Promise<PackedLambdas<CatTrackerLambdas>> => {
-	const reporter = ConsoleProgressReporter('Cat Tracker Lambdas')
+	const reporter = ConsoleProgressReporter('nRF Asset Tracker Lambdas')
 	return {
 		layerZipFileName: await packBaseLayer({
-			layerName: 'cat-tracker-layer',
+			layerName: 'asset-tracker-layer',
 			reporter,
 			srcDir: rootDir,
 			outDir,
@@ -50,7 +50,7 @@ export const prepareAssetTrackerLambdas = async ({
 		}),
 		lambdas: await packLayeredLambdas<CatTrackerLambdas>({
 			reporter,
-			id: 'cat-tracker',
+			id: 'asset-tracker',
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,

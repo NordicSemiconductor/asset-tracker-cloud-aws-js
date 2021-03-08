@@ -89,10 +89,10 @@ export const assetTrackerStepRunners = ({
 	})
 	return [
 		regexMatcher<World>(
-			/^(?:a cat exists|I generate a certificate)(?: for the cat tracker "([^"]+)")?$/,
+			/^(?:I generate a certificate)(?: for the tracker "([^"]+)")?$/,
 		)(async ([deviceId], __, runner) => {
 			const catId = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
-			const prefix = deviceId === undefined ? 'cat' : `cat:${catId}`
+			const prefix = deviceId === undefined ? 'tracker' : `tracker:${catId}`
 			if (runner.store[`${prefix}:id`] === undefined) {
 				await createDeviceCertificate({
 					deviceId: catId,
@@ -127,9 +127,9 @@ export const assetTrackerStepRunners = ({
 			}
 			return runner.store[`${prefix}:id`]
 		}),
-		regexMatcher<World>(/^I connect the cat tracker(?: ([^ ]+))?$/)(
+		regexMatcher<World>(/^I connect the tracker(?: ([^ ]+))?$/)(
 			async ([deviceId], __, runner) => {
-				const catId = deviceId ?? runner.store['cat:id']
+				const catId = deviceId ?? runner.store['tracker:id']
 				await runner.progress('IoT', catId)
 				const deviceFiles = deviceFileLocations({
 					certsDir,
@@ -166,13 +166,13 @@ export const assetTrackerStepRunners = ({
 			},
 		),
 		regexMatcher<World>(
-			/^the cat tracker(?: ([^ ]+))? updates its reported state with$/,
+			/^the tracker(?: ([^ ]+))? updates its reported state with$/,
 		)(async ([deviceId], step, runner) => {
 			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
 			}
 			const reported = JSON.parse(step.interpolatedArgument)
-			const catId = deviceId ?? runner.store['cat:id']
+			const catId = deviceId ?? runner.store['tracker:id']
 			const connection = shadowOnBroker(catId)
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
@@ -208,9 +208,9 @@ export const assetTrackerStepRunners = ({
 			return await updatePromise
 		}),
 		regexMatcher<World>(
-			/^the cat tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
+			/^the tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
 		)(async ([deviceId, topic], step, runner) => {
-			const catId = deviceId ?? runner.store['cat:id']
+			const catId = deviceId ?? runner.store['tracker:id']
 			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
 			}
@@ -233,9 +233,9 @@ export const assetTrackerStepRunners = ({
 			return publishPromise
 		}),
 		regexGroupMatcher(
-			/^the cat tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
+			/^the tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
-			const catId = deviceId ?? runner.store['cat:id']
+			const catId = deviceId ?? runner.store['tracker:id']
 
 			return new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 60 * 1000)
@@ -287,9 +287,9 @@ export const assetTrackerStepRunners = ({
 			})
 		}),
 		regexGroupMatcher(
-			/^the cat tracker(?: (?<deviceId>[^ ]+))? marks the job in "(?<storeName>[^"]+)" as in progress$/,
+			/^the tracker(?: (?<deviceId>[^ ]+))? marks the job in "(?<storeName>[^"]+)" as in progress$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
-			const catId = deviceId ?? runner.store['cat:id']
+			const catId = deviceId ?? runner.store['tracker:id']
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
 

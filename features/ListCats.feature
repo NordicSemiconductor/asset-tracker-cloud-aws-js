@@ -4,13 +4,13 @@ Feature: List cats
 
   Background:
 
-    Given I am run after the "Connect a Cat Tracker" feature
+    Given I am run after the "Connect a tracker" feature
     And I am authenticated with Cognito
 
   Scenario: The user should be able to list cats
 
     When I execute "listThings" of the AWS Iot SDK
-    Then "awsSdk.res.things[thingName='{cat:id}'].thingName" should equal this JSON
+    Then "awsSdk.res.things[thingName='{tracker:id}'].thingName" should equal this JSON
       """
-      "{cat:id}"
+      "{tracker:id}"
       """

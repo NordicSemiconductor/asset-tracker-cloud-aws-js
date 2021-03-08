@@ -46,7 +46,9 @@ const purgeCACertificate = ({
 			}),
 		)
 	} else {
-		console.error(chalk.yellow.dim(`Not a Cat Tracker CA: ${certificateId}`))
+		console.error(
+			chalk.yellow.dim(`Not a nRF Asset Tracker CA: ${certificateId}`),
+		)
 	}
 }
 
@@ -87,5 +89,5 @@ export const purgeCAsCommand = (): CommandDefinition => ({
 					}),
 		})
 	},
-	help: 'Purges all Cat Tracker CAs',
+	help: 'Purges all nRF Asset Tracker CAs',
 })

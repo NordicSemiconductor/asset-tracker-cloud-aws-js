@@ -12,7 +12,7 @@ Feature: Cell Geolocation API
 
     Background:
 
-        Given I am run after the "Connect a Cat Tracker" feature
+        Given I am run after the "Connect a tracker" feature
         And I am run after the "Device: Update Shadow" feature
         And the endpoint is "{geolocationApiUrl}"
 
@@ -22,7 +22,7 @@ Feature: Cell Geolocation API
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
         And I store "$millis()" into "ts"
-        Then the cat tracker updates its reported state with
+        Then the tracker updates its reported state with
             """
             {
             "roam": {
@@ -42,7 +42,7 @@ Feature: Cell Geolocation API
     Scenario: Device acquires a GPS fix
 
         Given I store "$millis()+(120*1000)" into "ts"
-        Then the cat tracker updates its reported state with
+        Then the tracker updates its reported state with
             """
             {
             "gps": {

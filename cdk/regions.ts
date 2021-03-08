@@ -1,7 +1,7 @@
 /**
  * Note that not all AWS features are available in all AWS regions.
  * Here we keep a list of regions that are known to work with the
- * Cat Tracker implementation.
+ * nRF Asset Tracker implementation.
  */
 export const supportedRegions = [
 	'us-east-1',
