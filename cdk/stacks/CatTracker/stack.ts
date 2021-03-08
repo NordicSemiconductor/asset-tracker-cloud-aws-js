@@ -368,7 +368,7 @@ export class CatTrackerStack extends CloudFormation.Stack {
 
 		new ThingGroup(this, 'deviceThingGroup', {
 			name: CORE_STACK_NAME,
-			description: 'Group created for Bifravst Things',
+			description: 'Group created for nRF Asset Tracker things',
 			addExisting: this.node.tryGetContext('isTest') === false,
 			PolicyName: iotThingPolicy.ref,
 			thingGroupLambda: thingGroupLambda.function,
