@@ -68,7 +68,8 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		accountId,
 	})
 
-	program.description('nRF Asset Tracker Command Line Interface')
+	program.description(`nRF Asset Tracker ${version} Command Line Interface`)
+	program.version(version)
 
 	const commands = [
 		createCACommand({ certsDir }),
