@@ -41,11 +41,15 @@ export const createDeviceCertCommand = ({
 			chalk.green(`Certificate for device ${chalk.yellow(id)} generated.`),
 		)
 
+		const certJSON = deviceFileLocations({ certsDir, deviceId: id }).json
+
 		console.log()
 		console.log(
 			chalk.green('You can now connect to the broker:'),
-			chalk.greenBright('node cli connect'),
-			chalk.blueBright(id),
+			chalk.greenBright(
+				'npm exec -- @nordicsemiconductor/asset-tracker-cloud-device-simulator-aws',
+			),
+			chalk.blueBright(certJSON),
 		)
 
 		console.log()
@@ -58,7 +62,7 @@ export const createDeviceCertCommand = ({
 		console.log()
 		console.log(
 			chalk.gray('Alternatively, use the file'),
-			chalk.yellow(deviceFileLocations({ certsDir, deviceId: id }).json),
+			chalk.yellow(certJSON),
 		)
 		console.log(
 			chalk.gray('with the'),

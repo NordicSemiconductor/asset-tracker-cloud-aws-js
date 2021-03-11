@@ -6,7 +6,6 @@ import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import * as path from 'path'
 import { cdCommand } from './commands/cd'
 import { createDeviceCertCommand } from './commands/create-device-cert'
-import { connectCommand } from './commands/connect'
 import { reactConfigCommand } from './commands/react-config'
 import { infoCommand } from './commands/info'
 import { createCACommand } from './commands/create-ca'
@@ -90,11 +89,6 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		commands.push(
 			flashCommand({
 				certsDir,
-			}),
-			connectCommand({
-				endpoint,
-				certsDir,
-				version,
 			}),
 			cdUpdateTokenCommand(),
 			confirm(
