@@ -80,4 +80,34 @@ describe('batchToTimestreamRecords', () => {
 		// measureGroups should be different for each batch messages
 		expect(g1lng?.Value).not.toEqual(g2lng?.Value)
 	})
+	it('should convert a batch message with a single value', () => {
+		const r = batchToTimestreamRecords({
+			batch: {
+				bat: [
+					{
+						v: 4460,
+						ts: 1614959974018,
+					},
+				],
+			},
+			deviceId: '352656100248049',
+		})
+		const Dimensions = [
+			{
+				Name: 'measureGroup',
+				Value: expect.stringMatching(
+					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+				),
+			},
+		]
+		expect(r).toEqual([
+			{
+				Dimensions,
+				MeasureName: 'bat',
+				MeasureValue: '4460',
+				MeasureValueType: 'DOUBLE',
+				Time: '1614959974018',
+			},
+		])
+	})
 })
