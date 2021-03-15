@@ -71,7 +71,7 @@
     "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "7.0.12",
     "@nordicsemiconductor/firmware-ci-device-helpers": "6.1.2",
     "@nordicsemiconductor/object-to-env": "2.0.1",
-    "@nordicsemiconductor/package-layered-lambdas": "6.2.14",
+    "@nordicsemiconductor/package-layered-lambdas": "6.2.15",
     "@octokit/rest": "18.3.5",
     "@types/aws-iot-device-sdk": "2.2.2",
     "@types/aws-lambda": "8.10.72",
