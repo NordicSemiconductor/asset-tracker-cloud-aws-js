@@ -44,7 +44,7 @@
     "@nordicsemiconductor/e2e-bdd-test-runner": "12.1.17",
     "@nordicsemiconductor/random-words": "5.0.0",
     "@nordicsemiconductor/timestream-helpers": "3.1.2",
-    "@sinclair/typebox": "0.12.9",
+    "@sinclair/typebox": "0.14.1",
     "ajv": "7.2.1",
     "fp-ts": "2.9.5",
     "uuid": "8.3.2"
