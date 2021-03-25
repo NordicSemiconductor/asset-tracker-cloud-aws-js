@@ -131,6 +131,4 @@ jobs:
         run: npx tsc
 
       - name: Semantic release
-        run: |
-          npm i --no-save semantic-release
-          npx semantic-release
+        run: npx semantic-release

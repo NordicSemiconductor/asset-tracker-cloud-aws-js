@@ -38,6 +38,4 @@ jobs:
         # Don't mark this as an error, semantic-release won't work if force-pushing to the branch
         # https://github.com/semantic-release/semantic-release/blob/master/docs/support/troubleshooting.md#release-not-found-release-branch-after-git-push---force
         continue-on-error: true
-        run: |
-          npm i --no-save semantic-release
-          npx semantic-release
+        run: npx semantic-release
