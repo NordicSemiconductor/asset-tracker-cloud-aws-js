@@ -1,6 +1,13 @@
 name: Test and Release
 
-on: push
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      skipCleanup:
+        description: "Skip cleanup"
+        required: false
+        default: "no"
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,7 +95,7 @@ jobs:
       - name: Clean up End-to-End test resources
         if:
           always() && !contains(toJSON(github.event.commits.*.message),
-          '[skip-cleanup]')
+          '[skip-cleanup]') && github.event.inputs.skipCleanup != 'yes'
         run: |
           node cli purge-iot-user-policy-principals
           node cli purge-cas -i `cat certificates/**/rootCA.id`
