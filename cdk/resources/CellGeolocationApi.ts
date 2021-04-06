@@ -105,11 +105,14 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			autoDeploy: true,
 		})
 
+		const isTest = this.node.tryGetContext('isTest') === true
 		const httpApiLogGroup = new CloudWatchLogs.LogGroup(
 			this,
 			`HttpApiLogGroup`,
 			{
-				removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+				removalPolicy: isTest
+					? CloudFormation.RemovalPolicy.DESTROY
+					: CloudFormation.RemovalPolicy.RETAIN,
 				logGroupName: `/${this.stack.stackName}/cell/apiAccessLogs`,
 				retention:
 					this.node.tryGetContext('isTest') === true

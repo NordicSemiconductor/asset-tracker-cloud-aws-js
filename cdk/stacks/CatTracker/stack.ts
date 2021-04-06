@@ -103,6 +103,9 @@ export class CatTrackerStack extends CloudFormation.Stack {
 				emailStyle: Cognito.VerificationEmailStyle.CODE,
 				emailSubject: 'Verify your new Cat Tracker account',
 			},
+			removalPolicy: isTest
+				? CloudFormation.RemovalPolicy.DESTROY
+				: CloudFormation.RemovalPolicy.RETAIN,
 		})
 
 		new CloudFormation.CfnOutput(this, 'userPoolId', {

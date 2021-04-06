@@ -9,13 +9,15 @@ export class LambdaLogGroup extends CloudFormation.Resource {
 		lambda: Lambda.IFunction,
 	) {
 		super(parent, id)
+		const isTest = this.node.tryGetContext('isTest') === true
 		new CloudWatchLogs.LogGroup(this, 'LogGroup', {
-			removalPolicy: CloudFormation.RemovalPolicy.RETAIN,
+			removalPolicy: isTest
+				? CloudFormation.RemovalPolicy.DESTROY
+				: CloudFormation.RemovalPolicy.RETAIN,
 			logGroupName: `/aws/lambda/${lambda.functionName}`,
-			retention:
-				this.node.tryGetContext('isTest') === true
-					? CloudWatchLogs.RetentionDays.ONE_DAY
-					: CloudWatchLogs.RetentionDays.ONE_WEEK,
+			retention: isTest
+				? CloudWatchLogs.RetentionDays.ONE_DAY
+				: CloudWatchLogs.RetentionDays.ONE_WEEK,
 		})
 	}
 }
