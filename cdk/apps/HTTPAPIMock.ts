@@ -14,7 +14,11 @@ export class HTTPAPIMockApp extends App {
 		sourceCodeBucketName: string
 		packedHTTPAPIMockLambdas: PackedLambdas<HTTPAPIMockLambdas>
 	}) {
-		super()
+		super({
+			context: {
+				isTest: true,
+			},
+		})
 		new HttpApiMockStack(this, {
 			packedHTTPAPIMockLambdas,
 			sourceCodeBucketName,
