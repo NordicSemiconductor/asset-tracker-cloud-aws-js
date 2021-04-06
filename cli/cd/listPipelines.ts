@@ -16,8 +16,6 @@ export const listPipelines = async (): Promise<string[]> => {
 	)
 
 	const pipelines = [`${CORE_STACK_NAME}-continuous-deployment`]
-	if (config.deviceUICD === 'enabled')
-		pipelines.push(`${CORE_STACK_NAME}-continuous-deployment-deviceUICD`)
 	if (config.webAppCD === 'enabled')
 		pipelines.push(`${CORE_STACK_NAME}-continuous-deployment-webAppCD`)
 	return pipelines

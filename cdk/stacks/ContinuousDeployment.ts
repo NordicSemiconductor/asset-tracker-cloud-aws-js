@@ -27,16 +27,11 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				repo: string
 				branch: string
 			}
-			deviceUI: {
-				owner: string
-				repo: string
-				branch: string
-			}
 		},
 	) {
 		super(parent, CONTINUOUS_DEPLOYMENT_STACK_NAME)
 
-		const { core, deviceUI, webApp } = properties
+		const { core, webApp } = properties
 
 		info(
 			'Continuous Deployment',
@@ -62,27 +57,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Continuous Deployment',
 				`Monitoring ${chalk.white(
 					`${webApp.owner}/${webApp.repo}@${webApp.branch}`,
-				)}`,
-			)
-		}
-
-		// CD for the Device Simulator Web Application is implied by enabled CD (in that case this Stack exists) and enabled Device Simulator Web Application
-		const enableDeviceUICD = checkFlag({
-			key: 'deviceui',
-			component: 'Device Simulator Web Application Continuous Deployment',
-			onUndefined: 'enabled',
-		})
-		new CloudFormation.CfnOutput(this, 'deviceUICD', {
-			value: enableDeviceUICD ? 'enabled' : 'disabled',
-			exportName: `${this.stackName}:deviceUICD`,
-			description:
-				'Whether the continuous deployment of the Device Simulator Web Application is enabled or disabled.',
-		})
-		if (enableDeviceUICD) {
-			info(
-				'Continuous Deployment',
-				`Monitoring ${chalk.white(
-					`${deviceUI.owner}/${deviceUI.repo}@${deviceUI.branch}`,
 				)}`,
 			)
 		}
@@ -175,10 +149,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 						value: enableWebAppCD ? '1' : '0',
 					},
 					{
-						name: 'DEVICEUI',
-						value: enableDeviceUICD ? '1' : '0',
-					},
-					{
 						name: 'FIRMWARECI',
 						value: enabledFirmwareCiCD ? '1' : '0',
 					},
@@ -248,15 +218,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			githubToken,
 		})
 
-		const deviceUISourceCodeAction = sourceCodeAction({
-			name: 'DeviceUISourceCode',
-			outputName: 'DeviceUI',
-			Branch: deviceUI.branch,
-			Owner: deviceUI.owner,
-			Repo: deviceUI.repo,
-			githubToken,
-		})
-
 		// Sets up the continuous deployment for the web app
 		let webAppCDProject
 		if (enableWebAppCD) {
@@ -275,26 +236,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			).codeBuildProject
 		}
 
-		// Sets up the continuous deployment for the Device Simulator Web Application
-		let deviceUICDProject
-		if (enableDeviceUICD) {
-			deviceUICDProject = new WebAppCD(
-				this,
-				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
-				{
-					description: 'Continuously deploys the device simulator UI',
-					sourceCodeActions: {
-						core: coreSourceCodeAction,
-						webApp: deviceUISourceCodeAction,
-					},
-					buildSpec: 'continuous-deployment-device-ui-app.yml',
-					githubToken,
-				},
-			).codeBuildProject
-		}
-
 		// Set up the continuous deployment for the nRF Asset Tracker resources.
-		// This will also run the deployment of the WebApp and DeviceUI after a deploy
+		// This will also run the deployment of the WebApp after a deploy
 		// (in case some outputs have changed and need to be made available to the apps).
 
 		const codePipelineRole = new IAM.Role(this, 'CodePipelineRole', {
@@ -307,9 +250,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 								project.attrArn,
 								...(webAppCDProject !== undefined
 									? [webAppCDProject.attrArn]
-									: []),
-								...(deviceUICDProject !== undefined
-									? [deviceUICDProject.attrArn]
 									: []),
 							],
 							actions: ['codebuild:*'],
@@ -340,7 +280,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					actions: [
 						coreSourceCodeAction.action,
 						...(enableWebAppCD ? [webAppSourceCodeAction.action] : []),
-						...(enableDeviceUICD ? [deviceUISourceCodeAction.action] : []),
 					],
 				},
 				{
@@ -390,32 +329,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 									},
 							  ]
 							: []),
-						...(deviceUICDProject
-							? [
-									{
-										name: 'DeployDeviceUI',
-										inputArtifacts: [
-											{
-												name: coreSourceCodeAction.outputName,
-											},
-											{
-												name: deviceUISourceCodeAction.outputName,
-											},
-										],
-										actionTypeId: BuildActionCodeBuild,
-										configuration: {
-											ProjectName: deviceUICDProject.name,
-											PrimarySource: coreSourceCodeAction.outputName,
-										},
-										outputArtifacts: [
-											{
-												name: 'DeviceUIBuildId',
-											},
-										],
-										runOrder: 2,
-									},
-							  ]
-							: []),
 					],
 				},
 			],
@@ -444,5 +357,4 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 
 export type StackOutputs = {
 	webAppCD: 'enabled' | 'disabled'
-	deviceUICD: 'enabled' | 'disabled'
 }

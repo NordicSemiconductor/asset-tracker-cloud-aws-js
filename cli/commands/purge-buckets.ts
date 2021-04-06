@@ -13,7 +13,6 @@ import * as chalk from 'chalk'
 import { retry } from './retry'
 import {
 	CORE_STACK_NAME,
-	DEVICEUI_STACK_NAME,
 	WEBAPP_STACK_NAME,
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
@@ -43,7 +42,6 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 		const buckets = [
 			...(await listBuckets(CORE_STACK_NAME)),
 			...(await listBuckets(WEBAPP_STACK_NAME)),
-			...(await listBuckets(DEVICEUI_STACK_NAME)),
 			...(await listBuckets(CONTINUOUS_DEPLOYMENT_STACK_NAME)),
 			...(await listBuckets(FIRMWARE_CI_STACK_NAME)),
 		]

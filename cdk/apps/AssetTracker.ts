@@ -1,7 +1,6 @@
 import { App } from '@aws-cdk/core'
 import { AssetTrackerStack } from '../stacks/AssetTracker/stack'
 import { WebAppStack } from '../stacks/WebApp'
-import { DeviceUIStack } from '../stacks/DeviceUI'
 import { FirmwareCIStack } from '../stacks/FirmwareCI'
 import * as path from 'path'
 import { readFileSync } from 'fs'
@@ -31,12 +30,6 @@ export class AssetTrackerApp extends App {
 			onUndefined: 'enabled',
 			onEnabled: () => new WebAppStack(this),
 		})
-		// Device Simulator Web Application
-		checkFlag({
-			key: 'deviceui',
-			component: 'Device Simulator Web Application',
-			onEnabled: () => new DeviceUIStack(this),
-		})
 		// Firmware CI
 		checkFlag({
 			key: 'firmware-ci',
@@ -61,10 +54,6 @@ export class AssetTrackerApp extends App {
 					webApp: {
 						...extractRepoAndOwner(pjson.deploy.webApp.repository),
 						branch: pjson.deploy.webApp.branch ?? 'saga',
-					},
-					deviceUI: {
-						...extractRepoAndOwner(pjson.deploy.deviceUI.repository),
-						branch: pjson.deploy.deviceUI.branch ?? 'saga',
 					},
 				})
 			},
