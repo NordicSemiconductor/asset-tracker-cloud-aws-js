@@ -8,7 +8,7 @@ import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import * as IAM from '@aws-cdk/aws-iam'
 import { Fn } from '@aws-cdk/core'
 import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
-import { CDKLambdas } from './CatTracker/lambdas'
+import { CDKLambdas } from './AssetTracker/lambdas'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 
 export class FirmwareCIStack extends CloudFormation.Stack {

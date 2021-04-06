@@ -4,7 +4,7 @@ import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
-} from './stacks/CatTracker/lambdas'
+} from './stacks/AssetTracker/lambdas'
 
 const rootDir = process.cwd()
 

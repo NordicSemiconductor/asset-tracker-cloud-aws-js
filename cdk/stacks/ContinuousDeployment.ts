@@ -282,8 +282,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				this,
 				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-deviceUICD`,
 				{
-					description:
-						'Continuously deploys the Cat Tracker device simulator web application',
+					description: 'Continuously deploys the device simulator UI',
 					sourceCodeActions: {
 						core: coreSourceCodeAction,
 						webApp: deviceUISourceCodeAction,

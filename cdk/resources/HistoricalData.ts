@@ -7,7 +7,7 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { NodeJS14Runtime } from './NodeJS14Runtime'
-import { CatTrackerLambdas } from '../stacks/CatTracker/lambdas'
+import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 
 /**
  * Provides resources for historical data
@@ -22,7 +22,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			lambdas,
 			userRole,
 		}: {
-			lambdas: LambdasWithLayer<CatTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 			userRole: IAM.IRole
 		},
 	) {

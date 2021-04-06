@@ -1,5 +1,5 @@
 import { App } from '@aws-cdk/core'
-import { CatTrackerStack } from '../stacks/CatTracker/stack'
+import { AssetTrackerStack } from '../stacks/AssetTracker/stack'
 import { WebAppStack } from '../stacks/WebApp'
 import { DeviceUIStack } from '../stacks/DeviceUI'
 import { FirmwareCIStack } from '../stacks/FirmwareCI'
@@ -9,18 +9,18 @@ import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
 import { enabledInContext } from '../helper/enabledInContext'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
-import { CatTrackerLambdas, CDKLambdas } from '../stacks/CatTracker/lambdas'
+import { AssetTrackerLambdas, CDKLambdas } from '../stacks/AssetTracker/lambdas'
 
-export class CatTrackerApp extends App {
+export class AssetTrackerApp extends App {
 	public constructor(args: {
 		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<CatTrackerLambdas>
+		packedLambdas: PackedLambdas<AssetTrackerLambdas>
 		packedCDKLambdas: PackedLambdas<CDKLambdas>
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })
 		// Core
-		new CatTrackerStack(this, {
+		new AssetTrackerStack(this, {
 			...args,
 		})
 		const checkFlag = enabledInContext(this.node)

@@ -18,9 +18,9 @@ import { HistoricalData } from '../../resources/HistoricalData'
 import { warn } from '../../helper/note'
 import { NodeJS14Runtime } from '../../resources/NodeJS14Runtime'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
-import { CatTrackerLambdas, CDKLambdas } from './lambdas'
+import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 
-export class CatTrackerStack extends CloudFormation.Stack {
+export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		{
@@ -29,7 +29,7 @@ export class CatTrackerStack extends CloudFormation.Stack {
 			packedCDKLambdas,
 		}: {
 			sourceCodeBucketName: string
-			packedLambdas: PackedLambdas<CatTrackerLambdas>
+			packedLambdas: PackedLambdas<AssetTrackerLambdas>
 			packedCDKLambdas: PackedLambdas<CDKLambdas>
 		},
 	) {
@@ -391,7 +391,7 @@ export class CatTrackerStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:avatarBucketName`,
 		})
 
-		const lambdas: LambdasWithLayer<CatTrackerLambdas> = {
+		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
 			lambdas: lambasOnBucket(packedLambdas),
 			layers: [baseLayer],
 		}

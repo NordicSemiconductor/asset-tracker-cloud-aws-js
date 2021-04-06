@@ -11,7 +11,7 @@ import {
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as program from 'commander'
 import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/CatTracker/stack'
+import { StackOutputs } from '../cdk/stacks/AssetTracker/stack'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
 import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack'
 import { assetTrackerStepRunners } from './steps/asset-tracker'

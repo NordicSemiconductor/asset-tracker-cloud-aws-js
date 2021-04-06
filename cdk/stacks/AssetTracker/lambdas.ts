@@ -7,7 +7,7 @@ import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-la
 import { makeLayerFromPackageJSON } from '../../helper/lambdas/makeLayerFromPackageJSON'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 
-export type CatTrackerLambdas = {
+export type AssetTrackerLambdas = {
 	storeMessagesInTimestream: string
 	geolocateCellHttpApi: string
 	invokeStepFunctionFromSQS: string
@@ -30,7 +30,7 @@ export const prepareAssetTrackerLambdas = async ({
 	rootDir: string
 	outDir: string
 	sourceCodeBucketName: string
-}): Promise<PackedLambdas<CatTrackerLambdas>> => {
+}): Promise<PackedLambdas<AssetTrackerLambdas>> => {
 	const reporter = ConsoleProgressReporter('nRF Asset Tracker Lambdas')
 	return {
 		layerZipFileName: await packBaseLayer({
@@ -48,7 +48,7 @@ export const prepareAssetTrackerLambdas = async ({
 				'--legacy-peer-deps',
 			],
 		}),
-		lambdas: await packLayeredLambdas<CatTrackerLambdas>({
+		lambdas: await packLayeredLambdas<AssetTrackerLambdas>({
 			reporter,
 			id: 'asset-tracker',
 			srcDir: rootDir,

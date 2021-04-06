@@ -14,7 +14,7 @@ import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
 import { NodeJS14Runtime } from './NodeJS14Runtime'
-import { CatTrackerLambdas } from '../stacks/CatTracker/lambdas'
+import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
@@ -32,7 +32,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		{
 			lambdas,
 		}: {
-			lambdas: LambdasWithLayer<CatTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 		},
 	) {
 		super(parent, id)

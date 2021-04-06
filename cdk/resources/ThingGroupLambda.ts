@@ -5,7 +5,7 @@ import { logToCloudWatch } from './logToCloudWatch'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { NodeJS14Runtime } from './NodeJS14Runtime'
-import { CDKLambdas } from '../stacks/CatTracker/lambdas'
+import { CDKLambdas } from '../stacks/AssetTracker/lambdas'
 
 export class ThingGroupLambda extends CloudFormation.Resource {
 	public readonly function: Lambda.IFunction

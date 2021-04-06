@@ -1,4 +1,4 @@
-import { CatTrackerApp } from './apps/CatTracker'
+import { AssetTrackerApp } from './apps/AssetTracker'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getUnwiredLabsApiSettings } from '../cellGeolocation/settings/unwiredlabs'
 import { warn } from './helper/note'
@@ -10,7 +10,7 @@ import * as chalk from 'chalk'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
-} from './stacks/CatTracker/lambdas'
+} from './stacks/AssetTracker/lambdas'
 import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
 import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
 
@@ -84,7 +84,7 @@ Promise.all([
 			)
 			ctx.cd = '0'
 		}
-		return new CatTrackerApp({
+		return new AssetTrackerApp({
 			...lambdaResources,
 			context: ctx,
 		}).synth()
