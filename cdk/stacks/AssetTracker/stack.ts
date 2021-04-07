@@ -476,9 +476,6 @@ export type StackOutputs = {
 	webAppBucketName: string
 	cloudfrontDistributionIdWebApp: string
 	webAppDomainName: string
-	deviceUiBucketName: string
-	cloudfrontDistributionIdDeviceUi: string
-	deviceUiBaseUrl: string
 	jitpRoleArn: string
 	thingPolicyArn: string
 	thingGroupName: string
