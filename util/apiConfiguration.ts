@@ -5,6 +5,9 @@ import {
 	DeleteParameterCommand,
 } from '@aws-sdk/client-ssm'
 
+type ApiSettingsScopes = 'cellGeoLocation' | 'codebuild'
+type ApiScopes = 'unwiredlabs' | 'github' | 'nrfconnectforcloud'
+
 export const getApiSettings = ({
 	ssm,
 	stackName,
@@ -13,8 +16,8 @@ export const getApiSettings = ({
 }: {
 	ssm: SSMClient
 	stackName: string
-	scope: 'cellGeoLocation' | 'codebuild'
-	api: 'unwiredlabs' | 'github'
+	scope: ApiSettingsScopes
+	api: ApiScopes
 }) => async (): Promise<Record<string, string>> => {
 	const Path = `/${stackName}/${scope}/${api}`
 	const { Parameters } = await ssm.send(
@@ -46,8 +49,8 @@ export const putApiSetting = ({
 }: {
 	ssm: SSMClient
 	stackName: string
-	scope: 'cellGeoLocation' | 'codebuild'
-	api: 'unwiredlabs' | 'github'
+	scope: ApiSettingsScopes
+	api: ApiScopes
 }) => async ({
 	property,
 	value,

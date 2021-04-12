@@ -1,6 +1,6 @@
-Feature: Unwired Labs Cell Geolocation
+Feature: nRF Connect for Cloud Cell Geolocation
 
-    Optionally, cell locations can be resolved using the Unwired Labs API
+    Optionally, cell locations can be resolved using the nRF Connect for Cloud API
 
     Contexts:
 
@@ -11,23 +11,22 @@ Feature: Unwired Labs Cell Geolocation
     Background:
 
         This enques a mock response on the mock HTTP API the stack is configure
-        to use for the Unwired Labs integration
+        to use for the nRF Connect for Cloud integration
 
         Given I am run after the "Cell Geolocation API" feature
         And the endpoint is "{geolocationApiUrl}"
         Given I store "$floor($random() * 100000000)" into "cellId"
-        And I store "$floor($random() * 20000)" into "accuracy"
+        And I store "$floor($random() * 20000)" into "uncertainty"
+        And I store "$floor($random() * 8000)" into "alt"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a POST request to eu1.unwiredlabs.com/v2/process.php
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/single-cell?deviceIdentifier={nrfConnectForCloudAPIDevice}&eci={cellId}&format=json&mcc=242&mnc=1&tac=30401
             """
             {
-                "accuracy": {accuracy},
-                "balance": 100,
-                "fallback": "<fallback>",
                 "lat": {lat},
                 "lon": {lng},
-                "status": "ok"
+                "alt": {alt},
+                "uncertainty": {uncertainty}
             }
             """
             
@@ -47,20 +46,14 @@ Feature: Unwired Labs Cell Geolocation
             }
             """
 
-    Scenario: The Unwired Labs API should have been called
+    Scenario: The nRF Connect for Cloud API should have been called
 
-        Then the mock HTTP API should have been call with a POST request to eu1.unwiredlabs.com/v2/process.php
+        Then the mock HTTP API should have been call with a POST request to api.nrfcloud.com/v1/location/single-cell?deviceIdentifier={nrfConnectForCloudAPIDevice}&eci={cellId}&format=json&mcc=242&mnc=1&tac=30401
             """
             {
-                "token": "my-secret",
-                "radio": "<radio>",
-                "mcc": 242,
-                "mnc": 1,
-                "cells": [
-                    {
-                    "lac": 30401,
-                    "cid": {cellId}
-                    }
-                ]
+                "lat": {lat},
+                "lon": {lng},
+                "alt": {alt},
+                "uncertainty": {uncertainty}
             }
             """

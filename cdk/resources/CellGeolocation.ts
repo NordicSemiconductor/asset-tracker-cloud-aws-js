@@ -7,7 +7,7 @@ import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { StateMachineType } from '@aws-cdk/aws-stepfunctions'
+import { IChainable, StateMachineType } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
 import * as SQS from '@aws-cdk/aws-sqs'
 import { LambdasWithLayer } from './LambdasWithLayer'
@@ -170,12 +170,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'addToCacheLogs', addToCache)
 
-		// Optional step
-		let fromUnwiredLabs: Lambda.IFunction | undefined = undefined
 		const checkFlag = enabledInContext(this.node)
+
+		// Optional step: resolve using Unwired Labs API
+		let fromUnwiredLabs: Lambda.IFunction | undefined = undefined
 		const unwiredLabsEnabled = checkFlag({
 			key: 'unwiredlabs',
-			component: 'UnwiredLabs API',
+			component: 'Unwired Labs API',
 			onUndefined: 'disabled',
 			onEnabled: () => {
 				fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
@@ -186,7 +187,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
 					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
-					description: 'Resolve cell geolocation using the UnwiredLabs API',
+					description: 'Resolve cell geolocation using the Unwired Labs API',
 					initialPolicy: [
 						logToCloudWatch,
 						new IAM.PolicyStatement({
@@ -203,6 +204,51 @@ export class CellGeolocation extends CloudFormation.Resource {
 				})
 
 				new LambdaLogGroup(this, 'fromUnwiredLabsLogs', fromUnwiredLabs)
+			},
+		})
+
+		// Optional step: resolve using nRF Connect for Cloud API
+		let fromNrfConnectForCloud: Lambda.IFunction | undefined = undefined
+		const nrfConnectForCloudEnabled = checkFlag({
+			key: 'nrfconnectforcloud',
+			component: 'nRF Connect for Cloud API',
+			onUndefined: 'disabled',
+			onEnabled: () => {
+				fromNrfConnectForCloud = new Lambda.Function(
+					this,
+					'fromNrfConnectForCloud',
+					{
+						layers: lambdas.layers,
+						handler: 'index.handler',
+						// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
+						runtime: NodeJS14Runtime,
+						timeout: CloudFormation.Duration.seconds(10),
+						memorySize: 1792,
+						code:
+							lambdas.lambdas.geolocateCellFromNrfConnectForCloudStepFunction,
+						description:
+							'Resolve cell geolocation using the nRF Connect for Cloud API',
+						initialPolicy: [
+							logToCloudWatch,
+							new IAM.PolicyStatement({
+								actions: ['ssm:GetParametersByPath'],
+								resources: [
+									`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/cellGeoLocation/nrfconnectforcloud`,
+								],
+							}),
+						],
+						environment: {
+							VERSION: this.node.tryGetContext('version'),
+							STACK_NAME: this.stack.stackName,
+						},
+					},
+				)
+
+				new LambdaLogGroup(
+					this,
+					'fromNrfConnectForCloudLogs',
+					fromNrfConnectForCloud,
+				)
 			},
 		})
 
@@ -258,68 +304,96 @@ export class CellGeolocation extends CloudFormation.Resource {
 								)
 								.otherwise(
 									(() => {
-										if (!unwiredLabsEnabled) {
+										if (!unwiredLabsEnabled && nrfConnectForCloudEnabled) {
 											return new StepFunctions.Fail(this, 'Failed (No API)', {
 												error: 'NO_API',
 												cause:
 													'No third party API is configured to resolve the cell geolocation',
 											})
 										}
-										return new StepFunctions.Task(
-											this,
-											'Resolve using UnwiredLabs API',
-											{
-												task: new StepFunctionTasks.InvokeFunction(
-													(fromUnwiredLabs as unknown) as Lambda.IFunction,
+										const branches: IChainable[] = []
+										if (unwiredLabsEnabled) {
+											branches.push(
+												new StepFunctions.Task(
+													this,
+													'Resolve using UnwiredLabs API',
+													{
+														task: new StepFunctionTasks.InvokeFunction(
+															(fromUnwiredLabs as unknown) as Lambda.IFunction,
+														),
+														resultPath: '$.cellgeo',
+													},
 												),
+											)
+										}
+										if (nrfConnectForCloudEnabled) {
+											branches.push(
+												new StepFunctions.Task(
+													this,
+													'Resolve using nRF Connect for Cloud API',
+													{
+														task: new StepFunctionTasks.InvokeFunction(
+															(fromNrfConnectForCloud as unknown) as Lambda.IFunction,
+														),
+														resultPath: '$.cellgeo',
+													},
+												),
+											)
+										}
+										return new StepFunctions.Parallel(
+											this,
+											'Resolve using third party API',
+											{
 												resultPath: '$.cellgeo',
 											},
-										).next(
-											new StepFunctions.Choice(
-												this,
-												'Resolved from UnwiredLabs API?',
-											)
-												.when(
-													isGeolocated,
-													new StepFunctions.Task(
-														this,
-														'Cache result from UnwiredLabs API',
-														{
-															task: new StepFunctionTasks.InvokeFunction(
-																addToCache,
-															),
-															resultPath: '$.storedInCache',
-														},
-													).next(
-														new StepFunctions.Succeed(
-															this,
-															'Done (resolved using UnwiredLabs API)',
-														),
-													),
-												)
-												.otherwise(
-													new StepFunctions.Task(
-														this,
-														'Cache result (not resolved)',
-														{
-															task: new StepFunctionTasks.InvokeFunction(
-																addToCache,
-															),
-															resultPath: '$.storedInCache',
-														},
-													).next(
-														new StepFunctions.Fail(
-															this,
-															'Failed (no resolution)',
-															{
-																error: 'FAILED',
-																cause:
-																	'The cell geolocation could not be resolved',
-															},
-														),
-													),
-												),
 										)
+											.branch(...branches)
+											.next(
+												new StepFunctions.Choice(
+													this,
+													'Resolved from third party API?',
+												)
+													.when(
+														isGeolocated,
+														new StepFunctions.Task(
+															this,
+															'Cache result from third party API',
+															{
+																task: new StepFunctionTasks.InvokeFunction(
+																	addToCache,
+																),
+																resultPath: '$.storedInCache',
+															},
+														).next(
+															new StepFunctions.Succeed(
+																this,
+																'Done (resolved using third party API)',
+															),
+														),
+													)
+													.otherwise(
+														new StepFunctions.Task(
+															this,
+															'Cache result (not resolved)',
+															{
+																task: new StepFunctionTasks.InvokeFunction(
+																	addToCache,
+																),
+																resultPath: '$.storedInCache',
+															},
+														).next(
+															new StepFunctions.Fail(
+																this,
+																'Failed (no resolution)',
+																{
+																	error: 'FAILED',
+																	cause:
+																		'The cell geolocation could not be resolved',
+																},
+															),
+														),
+													),
+											)
 									})(),
 								),
 						),

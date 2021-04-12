@@ -20,7 +20,7 @@ export const handler = async (
 		},
 		path: {
 			DataType: 'String',
-			StringValue: event.path,
+			StringValue: event.path.replace(/^\//, ''),
 		},
 		...Object.keys(event.headers)
 			.filter((key) => !/^(CloudFront-|X-|Host|Via)/.test(key))
@@ -69,7 +69,7 @@ export const handler = async (
 			if (
 				msg.MessageAttributes?.method?.StringValue === event.httpMethod &&
 				msg.MessageAttributes?.path?.StringValue ===
-					event.path.replace(/^\/prod/, '')
+					event.path.replace(/^\/prod\//, '')
 			) {
 				console.log('match')
 				console.log(JSON.stringify(msg))

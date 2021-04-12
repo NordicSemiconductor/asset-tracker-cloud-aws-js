@@ -74,10 +74,18 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
 		})
 
-		// Wheter the UnwiredLabs API is enabled
+		// Whether the Unwired Labs API is enabled
 		const unwiredLabsEnabled = checkFlag({
 			key: 'unwiredlabs',
-			component: 'UnwiredLabs API',
+			component: 'Unwired Labs API',
+			onUndefined: 'disabled',
+			silent: true,
+		})
+
+		// Whether the nRF Connect for Cloud API is enabled
+		const nrfConnectForCloudEnabled = checkFlag({
+			key: 'nrfconnectforcloud',
+			component: 'nRF Connect for Cloud API',
 			onUndefined: 'disabled',
 			silent: true,
 		})
@@ -155,6 +163,10 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					{
 						name: 'UNWIREDLABS',
 						value: unwiredLabsEnabled ? '1' : '0',
+					},
+					{
+						name: 'NRFCONNECTFORCLOUD',
+						value: nrfConnectForCloudEnabled ? '1' : '0',
 					},
 				],
 			},

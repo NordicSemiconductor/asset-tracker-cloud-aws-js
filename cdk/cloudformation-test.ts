@@ -34,6 +34,7 @@ Promise.all([
 				version: process.env.VERSION ?? '0.0.0-development',
 				isTest: true,
 				unwiredlabs: '1',
+				nrfconnectforcloud: '1',
 			},
 		}).synth(),
 	)
