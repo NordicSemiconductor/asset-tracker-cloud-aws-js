@@ -64,5 +64,5 @@ export const cdUpdateTokenCommand = (): CommandDefinition => ({
 			}),
 		)
 	},
-	help: 'Show continuous deployment status',
+	help: 'Update the GitHub token used in the continuous deployment pipeline',
 })
