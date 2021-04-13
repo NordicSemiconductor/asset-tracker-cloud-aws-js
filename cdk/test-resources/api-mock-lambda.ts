@@ -7,11 +7,19 @@ import {
 	SQSClient,
 } from '@aws-sdk/client-sqs'
 const sqs = new SQSClient({})
+import * as querystring from 'querystring'
 
 export const handler = async (
 	event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(JSON.stringify(event))
+
+	const path = `${event.path.replace(/^\//, '')}${
+		event.queryStringParameters !== null &&
+		event.queryStringParameters !== undefined
+			? `?${querystring.stringify(event.queryStringParameters)}`
+			: ''
+	}`
 
 	const MessageAttributes = {
 		method: {
@@ -20,7 +28,7 @@ export const handler = async (
 		},
 		path: {
 			DataType: 'String',
-			StringValue: event.path.replace(/^\//, ''),
+			StringValue: path,
 		},
 		...Object.keys(event.headers)
 			.filter((key) => !/^(CloudFront-|X-|Host|Via)/.test(key))
@@ -41,38 +49,34 @@ export const handler = async (
 
 	await sqs.send(
 		new SendMessageCommand({
-			MessageBody: event.body as string,
+			MessageBody: event.body ?? '{}',
 			MessageAttributes,
 			QueueUrl: process.env.SQS_REQUEST_QUEUE,
-			MessageGroupId: event.path, // Use the path to group messages, so multiple consumers can use the mock API
+			MessageGroupId: path, // Use the path to group messages, so multiple consumers can use the mock API
 			MessageDeduplicationId: event.requestContext.requestId,
 		}),
 	)
 
 	// Check if response exists
-	console.log(
-		`Checking if response exists for ${event.httpMethod} ${event.path.replace(
-			/^\/prod/,
-			'',
-		)}...`,
-	)
+	await new Promise((resolve) => setTimeout(resolve, 1000 * 2)) // Wait for visibility timeout of other requests
+	console.log(`Checking if response exists for ${event.httpMethod} ${path}...`)
 	const { Messages } = await sqs.send(
 		new ReceiveMessageCommand({
 			QueueUrl: process.env.SQS_RESPONSE_QUEUE,
 			MessageAttributeNames: ['statusCode', 'method', 'path'],
 			WaitTimeSeconds: 0,
 			MaxNumberOfMessages: 10,
+			VisibilityTimeout: 1,
 		}),
 	)
 	if (Messages !== undefined) {
 		for (const msg of Messages) {
+			console.log(JSON.stringify(msg))
 			if (
 				msg.MessageAttributes?.method?.StringValue === event.httpMethod &&
-				msg.MessageAttributes?.path?.StringValue ===
-					event.path.replace(/^\/prod\//, '')
+				msg.MessageAttributes?.path?.StringValue === path
 			) {
 				console.log('match')
-				console.log(JSON.stringify(msg))
 				await sqs.send(
 					new DeleteMessageCommand({
 						QueueUrl: process.env.SQS_RESPONSE_QUEUE,
@@ -86,8 +90,12 @@ export const handler = async (
 					),
 					body: msg.Body ?? '',
 				}
+			} else {
+				console.log('no match')
 			}
 		}
+	} else {
+		console.log('no responses found')
 	}
 
 	return { statusCode: 404, body: '' }

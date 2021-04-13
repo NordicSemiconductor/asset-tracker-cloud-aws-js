@@ -51,12 +51,13 @@ export const httpApiMockStepRunners = ({
 			)
 		}),
 		regexGroupMatcher<AssetTrackerWorld>(
-			/^the mock HTTP API should have been call with a (?<method>[A-Z]+) request to (?<path>.+)$/,
+			/^the mock HTTP API should have been called with a (?<method>[A-Z]+) request to (?<path>.+)$/,
 		)(async ({ method, path }, step, runner) => {
-			if (step.interpolatedArgument === undefined) {
-				throw new Error('Must provide argument!')
+			let expectedBody: Record<string, any> | undefined = undefined
+			if (step.interpolatedArgument !== undefined) {
+				expectedBody = JSON.parse(step.interpolatedArgument)
 			}
-			const expected = JSON.parse(step.interpolatedArgument)
+
 			const { Messages } = await sqs.send(
 				new ReceiveMessageCommand({
 					QueueUrl: runner.world['httpApiMock:requestQueueURL'],
@@ -73,8 +74,10 @@ export const httpApiMockStepRunners = ({
 					msg.MessageAttributes?.method?.StringValue === method
 				) {
 					try {
-						const actual = JSON.parse(msg.Body as string)
-						expect(actual).to.deep.equal(expected)
+						if (expectedBody !== undefined) {
+							const actual = JSON.parse(msg.Body as string)
+							expect(actual).to.deep.equal(expectedBody)
+						}
 						await sqs.send(
 							new DeleteMessageCommand({
 								QueueUrl: runner.world['httpApiMock:requestQueueURL'],

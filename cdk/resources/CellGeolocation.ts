@@ -389,7 +389,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 											),
 											new StepFunctions.Pass(
 												this,
-												`write location data from result ${n} to input`,
+												`yes: write location data from result ${n} to input`,
 												{
 													resultPath: '$.cellgeo',
 													inputPath: `$.cellgeo[${n}]`,
@@ -415,11 +415,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 													.otherwise(
 														new StepFunctions.Pass(
 															this,
-															'mark cell as not located',
+															'no: mark cell as not located',
 															{
-																parameters: {
-																	'$.cellgeo.located': 'false',
-																},
+																resultPath: '$.cellgeo',
+																result: Result.fromObject({ located: false }),
 															},
 														).next(
 															new StepFunctionTasks.LambdaInvoke(

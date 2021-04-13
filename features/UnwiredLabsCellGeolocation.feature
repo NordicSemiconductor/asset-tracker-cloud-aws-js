@@ -49,7 +49,7 @@ Feature: Unwired Labs Cell Geolocation
 
     Scenario: The Unwired Labs API should have been called
 
-        Then the mock HTTP API should have been call with a POST request to eu1.unwiredlabs.com/v2/process.php
+        Then the mock HTTP API should have been called with a POST request to eu1.unwiredlabs.com/v2/process.php
             """
             {
                 "token": "my-secret",
