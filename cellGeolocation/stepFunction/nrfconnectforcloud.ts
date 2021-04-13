@@ -4,12 +4,13 @@ import { URL } from 'url'
 import { MaybeCellGeoLocation } from './types'
 import { Cell } from '../geolocateCell'
 import { fromEnv } from '../../util/fromEnv'
-import { getUnwiredLabsApiSettings } from '../settings/unwiredlabs'
-import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
+import { getNrfConnectForCloudApiSettings } from '../settings/nrfconnectforcloud'
+import * as querystring from 'querystring'
+import { RequestOptions } from 'node:https'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getUnwiredLabsApiSettings({
+const fetchSettings = getNrfConnectForCloudApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
@@ -17,34 +18,42 @@ const fetchSettings = getUnwiredLabsApiSettings({
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 	try {
-		const { apiKey, endpoint } = await fetchSettings()
+		const { apiKey, endpoint, apiDevice } = await fetchSettings()
 		const { hostname, pathname } = new URL(endpoint)
 
-		// See https://eu1.unwiredlabs.com/docs-html/index.html#response
+		// See https://api.nrfcloud.com/v1#operation/GetSingleCellLocation
 		const {
-			status,
 			lat,
 			lon,
-			accuracy,
+			uncertainty,
 		}: {
-			status: 'ok' | 'error'
-			message?: string
-			balance: number
-			balance_slots?: number
 			lat: number
 			lon: number
-			accuracy: number
-			aged?: boolean
-			fallback?: 'ipf' | 'lacf' | 'scf' | 'ncf'
-			// address: string (not requested)
-			// address_details?: string (not requested)
+			uncertainty: number
 		} = await new Promise((resolve, reject) => {
-			const options = {
+			const mccmnc = cell.mccmnc.toFixed(0)
+			const options: RequestOptions = {
 				host: hostname,
-				path: `${pathname?.replace(/\/*$/, '') ?? ''}/v2/process.php`,
-				method: 'POST',
+				path: `${
+					pathname?.replace(/\/*$/, '') ?? ''
+				}/v1/location/single-cell?${querystring.stringify({
+					deviceIdentifier: apiDevice,
+					eci: cell.cell,
+					format: 'json',
+					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
+					mnc: parseInt(mccmnc.substr(-2), 10),
+					tac: cell.area,
+				})}`,
+				method: 'GET',
 				agent: false,
+				headers: {
+					authorization: `Bearer ${apiKey}`,
+				},
 			}
+
+			console.debug(
+				JSON.stringify(options).replace(apiKey, `${apiKey.substr(0, 3)}***`),
+			)
 
 			const req = nodeRequest(options, (res) => {
 				console.debug(
@@ -77,30 +86,16 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 				reject(new Error(e.message))
 			})
 
-			const payload = JSON.stringify({
-				token: apiKey,
-				radio: cell.nw === NetworkMode.NBIoT ? 'nbiot' : 'lte',
-				mcc: Math.floor(cell.mccmnc / 100),
-				mnc: cell.mccmnc % 100,
-				cells: [
-					{
-						lac: cell.area,
-						cid: cell.cell,
-					},
-				],
-			})
-			console.log(payload.replace(apiKey, '***'))
-			req.write(payload)
 			req.end()
 		})
 
-		console.debug(JSON.stringify({ status, lat, lon }))
+		console.debug(JSON.stringify({ lat, lon, uncertainty }))
 
-		if (status === 'ok' && lat !== undefined && lon !== undefined) {
+		if (lat !== undefined && lon !== undefined) {
 			return {
 				lat,
 				lng: lon,
-				accuracy,
+				accuracy: uncertainty,
 				located: true,
 			}
 		}

@@ -95,6 +95,12 @@ Promise.all([
 						`node cli configure-api cellGeoLocation nrfconnectforcloud apiKey <API key>`,
 					)} to set the API key`,
 				)
+				warn(
+					'Cell Geolocation',
+					`Use ${chalk.greenBright(
+						`node cli configure-api cellGeoLocation nrfconnectforcloud apiDevice <API device>`,
+					)} to set the API device`,
+				)
 				ctx.nrfconnectforcloud = '0'
 			}
 			const enableCD = 'token' in codebuildSettings
