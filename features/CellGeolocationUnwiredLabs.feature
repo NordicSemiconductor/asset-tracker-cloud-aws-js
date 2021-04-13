@@ -19,7 +19,7 @@ Feature: Unwired Labs Cell Geolocation
         And I store "$floor($random() * 20000)" into "accuracy"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a POST request to /unwiredlabs/v2/process.php
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to eu1.unwiredlabs.com/v2/process.php
             """
             {
                 "accuracy": {accuracy},
@@ -49,7 +49,7 @@ Feature: Unwired Labs Cell Geolocation
 
     Scenario: The Unwired Labs API should have been called
 
-        Then the mock HTTP API should have been call with a POST request to /unwiredlabs/v2/process.php
+        Then the mock HTTP API should have been called with a POST request to eu1.unwiredlabs.com/v2/process.php
             """
             {
                 "token": "my-secret",

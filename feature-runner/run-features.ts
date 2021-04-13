@@ -32,7 +32,7 @@ import { timestreamStepRunners } from './steps/timestream'
 import { queryClient } from '@nordicsemiconductor/timestream-helpers'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { httpApiMockStepRunners } from './steps/httpApiMock'
-import { SQSClient } from '@aws-sdk/client-sqs'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 let ran = false
 
@@ -48,8 +48,8 @@ export type AssetTrackerWorld = StackOutputs & {
 	awsIotRootCA: string
 	certsDir: string
 	mqttEndpoint: string
-	'httpApiMock:requestQueueURL': string
-	'httpApiMock:responseQueueURL': string
+	'httpApiMock:requestsTableName': string
+	'httpApiMock:responsesTableName': string
 	'httpApiMock:apiURL': string
 }
 
@@ -123,8 +123,10 @@ program
 					accountId: accountId as string,
 				}),
 				mqttEndpoint,
-				'httpApiMock:requestQueueURL': httpApiMockStackConfig.requestQueueURL,
-				'httpApiMock:responseQueueURL': httpApiMockStackConfig.responseQueueURL,
+				'httpApiMock:requestsTableName':
+					httpApiMockStackConfig.requestsTableName,
+				'httpApiMock:responsesTableName':
+					httpApiMockStackConfig.responsesTableName,
 				'httpApiMock:apiURL': httpApiMockStackConfig.apiURL,
 			}
 
@@ -236,7 +238,7 @@ program
 					)
 					.addStepRunners(
 						httpApiMockStepRunners({
-							sqs: new SQSClient({}),
+							db: new DynamoDBClient({}),
 						}),
 					)
 					.run()

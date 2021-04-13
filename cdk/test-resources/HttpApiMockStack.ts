@@ -1,6 +1,6 @@
 import * as CDK from '@aws-cdk/core'
-import * as SQS from '@aws-cdk/aws-sqs'
 import * as Lambda from '@aws-cdk/aws-lambda'
+import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as ApiGateway from '@aws-cdk/aws-apigateway'
 import { LambdaLogGroup } from '../resources/LambdaLogGroup'
@@ -27,20 +27,32 @@ export class HttpApiMockStack extends CDK.Stack {
 	) {
 		super(parent, HTTP_MOCK_HTTP_API_STACK_NAME)
 
-		// This queue will store all the requests made to the API Gateway
-		const requestQueue = new SQS.Queue(this, 'requestQueue', {
-			fifo: true,
-			visibilityTimeout: CDK.Duration.seconds(5),
-			queueName: `${this.stackName}-request.fifo`,
-			retentionPeriod: CDK.Duration.minutes(5),
+		// This table will store all the requests made to the API Gateway
+		const requestsTable = new DynamoDB.Table(this, 'requests', {
+			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
+			partitionKey: {
+				name: 'methodPathQuery',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'requestId',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			pointInTimeRecovery: true,
+			removalPolicy: CDK.RemovalPolicy.DESTROY,
+			timeToLiveAttribute: 'ttl',
 		})
 
-		// This queue will store optional responses to be sent
-		const responseQueue = new SQS.Queue(this, 'responseQueue', {
-			fifo: true,
-			visibilityTimeout: CDK.Duration.seconds(1),
-			queueName: `${this.stackName}-response.fifo`,
-			retentionPeriod: CDK.Duration.minutes(5),
+		// This table will store optional responses to be sent
+		const responsesTable = new DynamoDB.Table(this, 'responses', {
+			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
+			partitionKey: {
+				name: 'methodPathQuery',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			pointInTimeRecovery: true,
+			removalPolicy: CDK.RemovalPolicy.DESTROY,
+			timeToLiveAttribute: 'ttl',
 		})
 
 		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
@@ -89,20 +101,14 @@ export class HttpApiMockStack extends CDK.Stack {
 						'logs:PutLogEvents',
 					],
 				}),
-				new IAM.PolicyStatement({
-					resources: [requestQueue.queueArn],
-					actions: ['sqs:SendMessage'],
-				}),
-				new IAM.PolicyStatement({
-					resources: [responseQueue.queueArn],
-					actions: ['sqs:ReceiveMessage', 'sqs:DeleteMessage'],
-				}),
 			],
 			environment: {
-				SQS_REQUEST_QUEUE: requestQueue.queueUrl,
-				SQS_RESPONSE_QUEUE: responseQueue.queueUrl,
+				REQUESTS_TABLE_NAME: requestsTable.tableName,
+				RESPONSES_TABLE_NAME: responsesTable.tableName,
 			},
 		})
+		responsesTable.grantReadWriteData(lambda)
+		requestsTable.grantReadWriteData(lambda)
 
 		// Create the log group here, so we can control the retention
 		new LambdaLogGroup(this, 'LambdaLogGroup', lambda)
@@ -124,19 +130,19 @@ export class HttpApiMockStack extends CDK.Stack {
 			value: api.url,
 			exportName: `${this.stackName}:apiURL`,
 		})
-		new CDK.CfnOutput(this, 'responseQueueURL', {
-			value: responseQueue.queueUrl,
-			exportName: `${this.stackName}:responseQueueURL`,
+		new CDK.CfnOutput(this, 'responsesTableName', {
+			value: responsesTable.tableName,
+			exportName: `${this.stackName}:responsesTableName`,
 		})
-		new CDK.CfnOutput(this, 'requestQueueURL', {
-			value: requestQueue.queueUrl,
-			exportName: `${this.stackName}:requestQueueURL`,
+		new CDK.CfnOutput(this, 'requestsTableName', {
+			value: requestsTable.tableName,
+			exportName: `${this.stackName}:requestsTableName`,
 		})
 	}
 }
 
 export type StackOutputs = {
 	apiURL: string
-	requestQueueURL: string
-	responseQueueURL: string
+	requestsTableName: string
+	responsesTableName: string
 }

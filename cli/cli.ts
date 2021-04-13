@@ -21,6 +21,7 @@ import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 import { flashCommand } from './commands/flash'
 import { configureAPICommand } from './commands/configure-api'
+import { showAPIConfigurationCommand } from './commands/show-api-configuration'
 
 const iot = new IoTClient({})
 const version = JSON.parse(
@@ -79,6 +80,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		purgeIotUserPolicyPrincipals(),
 		logsCommand(),
 		configureAPICommand(),
+		showAPIConfigurationCommand(),
 	]
 
 	if (isCI) {

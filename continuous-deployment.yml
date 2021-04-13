@@ -10,4 +10,5 @@ phases:
   build:
     commands:
       - npx cdk deploy --trace -v --require-approval never '*' -c webapp=$WEBAPP
-        -c firmware-ci=$FIRMWARECI -c cd=1 -c unwiredlabs=$UNWIREDLABS
+        -c firmware-ci=$FIRMWARECI -c cd=1 -c unwiredlabs=$UNWIREDLABS -c
+        nrfconnectforcloud=$NRFCONNECTFORCLOUD
