@@ -14,7 +14,7 @@ Feature: nRF Connect for Cloud Cell Geolocation
         This enques a mock response on the mock HTTP API the stack is configure
         to use for the nRF Connect for Cloud integration
 
-        Given I am run after the "Cell Geolocation API" feature
+        # Given I am run after the "Cell Geolocation API" feature
         And the endpoint is "{geolocationApiUrl}"
         Given I store "$floor($random() * 100000000)" into "cellId"
         And I store "$floor($random() * 20000)" into "accuracy"
