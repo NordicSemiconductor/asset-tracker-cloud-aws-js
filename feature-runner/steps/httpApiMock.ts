@@ -5,18 +5,17 @@ import {
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { AssetTrackerWorld } from '../run-features'
 import {
-	DeleteMessageCommand,
-	ReceiveMessageCommand,
-	SendMessageCommand,
-	SQSClient,
-} from '@aws-sdk/client-sqs'
-import { v4 } from 'uuid'
+	DeleteItemCommand,
+	DynamoDBClient,
+	PutItemCommand,
+	QueryCommand,
+} from '@aws-sdk/client-dynamodb'
 import { expect } from 'chai'
 
 export const httpApiMockStepRunners = ({
-	sqs,
+	db,
 }: {
-	sqs: SQSClient
+	db: DynamoDBClient
 }): ((
 	step: InterpolatedStep,
 ) => StepRunnerFunc<AssetTrackerWorld> | false)[] => {
@@ -27,24 +26,21 @@ export const httpApiMockStepRunners = ({
 			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
 			}
-			await sqs.send(
-				new SendMessageCommand({
-					MessageBody: JSON.stringify(JSON.parse(step.interpolatedArgument)),
-					QueueUrl: runner.world['httpApiMock:responseQueueURL'],
-					MessageGroupId: v4(),
-					MessageDeduplicationId: v4(),
-					MessageAttributes: {
+			await db.send(
+				new PutItemCommand({
+					TableName: runner.world['httpApiMock:responsesTableName'],
+					Item: {
+						methodPathQuery: {
+							S: `${method} ${path}`,
+						},
 						statusCode: {
-							DataType: 'String',
-							StringValue: statusCode,
+							N: statusCode,
 						},
-						path: {
-							DataType: 'String',
-							StringValue: path,
+						body: {
+							S: JSON.stringify(JSON.parse(step.interpolatedArgument)),
 						},
-						method: {
-							DataType: 'String',
-							StringValue: method,
+						ttl: {
+							N: `${Math.round(Date.now() / 1000) + 5 * 60}`,
 						},
 					},
 				}),
@@ -58,36 +54,39 @@ export const httpApiMockStepRunners = ({
 				expectedBody = JSON.parse(step.interpolatedArgument)
 			}
 
-			const { Messages } = await sqs.send(
-				new ReceiveMessageCommand({
-					QueueUrl: runner.world['httpApiMock:requestQueueURL'],
-					VisibilityTimeout: 1,
-					MessageAttributeNames: ['method', 'path'],
-					MaxNumberOfMessages: 10,
+			const res = await db.send(
+				new QueryCommand({
+					TableName: runner.world['httpApiMock:requestsTableName'],
+					KeyConditionExpression: 'methodPathQuery = :methodPathQuery',
+					ExpressionAttributeValues: {
+						[':methodPathQuery']: {
+							S: `${method} ${path}`,
+						},
+					},
+					ProjectionExpression: 'methodPathQuery,requestId,body',
+					Limit: 1000,
 				}),
 			)
-			if (Messages === undefined)
-				throw new Error('No messages in request queue!')
-			for (const msg of Messages) {
-				if (
-					msg.MessageAttributes?.path?.StringValue === path &&
-					msg.MessageAttributes?.method?.StringValue === method
-				) {
-					try {
-						if (expectedBody !== undefined) {
-							const actual = JSON.parse(msg.Body as string)
-							expect(actual).to.deep.equal(expectedBody)
-						}
-						await sqs.send(
-							new DeleteMessageCommand({
-								QueueUrl: runner.world['httpApiMock:requestQueueURL'],
-								ReceiptHandle: msg.ReceiptHandle,
-							}),
-						)
-						return
-					} catch {
-						// Ignore this, there could be multiple messages in the queue that do not match
+			const { Items } = res
+			if (Items === undefined) throw new Error('No requests found!')
+			for (const request of Items) {
+				try {
+					if (expectedBody !== undefined) {
+						const actual = JSON.parse(request.body?.S ?? '{}')
+						expect(actual).to.deep.equal(expectedBody)
 					}
+					await db.send(
+						new DeleteItemCommand({
+							TableName: runner.world['httpApiMock:requestsTableName'],
+							Key: {
+								methodPathQuery: request.methodPathQuery,
+								requestId: request.requestId,
+							},
+						}),
+					)
+					return
+				} catch {
+					// Ignore this, there could be multiple requests that do not match
 				}
 			}
 			throw new Error('No requests matched.')

@@ -1,98 +1,85 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {
-	DeleteMessageCommand,
-	MessageAttributeValue,
-	ReceiveMessageCommand,
-	SendMessageCommand,
-	SQSClient,
-} from '@aws-sdk/client-sqs'
-const sqs = new SQSClient({})
+	DeleteItemCommand,
+	DynamoDBClient,
+	GetItemCommand,
+	PutItemCommand,
+} from '@aws-sdk/client-dynamodb'
 import * as querystring from 'querystring'
+import { v4 } from 'uuid'
+
+const db = new DynamoDBClient({})
 
 export const handler = async (
 	event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(JSON.stringify(event))
 
-	const path = `${event.path.replace(/^\//, '')}${
+	const pathWithQuery = `${event.path.replace(/^\//, '')}${
 		event.queryStringParameters !== null &&
 		event.queryStringParameters !== undefined
 			? `?${querystring.stringify(event.queryStringParameters)}`
 			: ''
 	}`
 
-	const MessageAttributes = {
-		method: {
-			DataType: 'String',
-			StringValue: event.httpMethod,
-		},
-		path: {
-			DataType: 'String',
-			StringValue: path,
-		},
-		...Object.keys(event.headers)
-			.filter((key) => !/^(CloudFront-|X-|Host|Via)/.test(key))
-			.slice(0, 8) // max number of MessageAttributes is 10
-			.reduce(
-				(hdrs, key) => ({
-					...hdrs,
-					[key]: {
-						DataType: 'String',
-						StringValue: event.headers[key] ?? '',
-					},
-				}),
-				{} as {
-					[key: string]: MessageAttributeValue
+	await db.send(
+		new PutItemCommand({
+			TableName: process.env.REQUESTS_TABLE_NAME,
+			Item: {
+				methodPathQuery: {
+					S: `${event.httpMethod} ${pathWithQuery}`,
 				},
-			),
-	}
-
-	await sqs.send(
-		new SendMessageCommand({
-			MessageBody: event.body ?? '{}',
-			MessageAttributes,
-			QueueUrl: process.env.SQS_REQUEST_QUEUE,
-			MessageGroupId: path, // Use the path to group messages, so multiple consumers can use the mock API
-			MessageDeduplicationId: event.requestContext.requestId,
+				requestId: {
+					S: v4(),
+				},
+				method: {
+					S: event.httpMethod,
+				},
+				path: {
+					S: pathWithQuery,
+				},
+				body: {
+					S: event.body ?? '{}',
+				},
+				headers: {
+					S: JSON.stringify(event.headers),
+				},
+				ttl: {
+					N: `${Math.round(Date.now() / 1000) + 5 * 60}`,
+				},
+			},
 		}),
 	)
 
 	// Check if response exists
-	await new Promise((resolve) => setTimeout(resolve, 1000 * 2)) // Wait for visibility timeout of other requests
-	console.log(`Checking if response exists for ${event.httpMethod} ${path}...`)
-	const { Messages } = await sqs.send(
-		new ReceiveMessageCommand({
-			QueueUrl: process.env.SQS_RESPONSE_QUEUE,
-			MessageAttributeNames: ['statusCode', 'method', 'path'],
-			WaitTimeSeconds: 0,
-			MaxNumberOfMessages: 10,
-			VisibilityTimeout: 1,
+	console.log(
+		`Checking if response exists for ${event.httpMethod} ${pathWithQuery}...`,
+	)
+	const { Item } = await db.send(
+		new GetItemCommand({
+			TableName: process.env.RESPONSES_TABLE_NAME,
+			Key: {
+				methodPathQuery: {
+					S: `${event.httpMethod} ${pathWithQuery}`,
+				},
+			},
 		}),
 	)
-	if (Messages !== undefined) {
-		for (const msg of Messages) {
-			console.log(JSON.stringify(msg))
-			if (
-				msg.MessageAttributes?.method?.StringValue === event.httpMethod &&
-				msg.MessageAttributes?.path?.StringValue === path
-			) {
-				console.log('match')
-				await sqs.send(
-					new DeleteMessageCommand({
-						QueueUrl: process.env.SQS_RESPONSE_QUEUE,
-						ReceiptHandle: msg.ReceiptHandle,
-					}),
-				)
-				return {
-					statusCode: parseInt(
-						msg.MessageAttributes?.statusCode?.StringValue ?? '200',
-						10,
-					),
-					body: msg.Body ?? '',
-				}
-			} else {
-				console.log('no match')
-			}
+	if (Item !== undefined) {
+		console.log(JSON.stringify(Item))
+		await db.send(
+			new DeleteItemCommand({
+				TableName: process.env.RESPONSES_TABLE_NAME,
+				Key: {
+					methodPathQuery: {
+						S: `${event.httpMethod} ${pathWithQuery}`,
+					},
+				},
+			}),
+		)
+		return {
+			statusCode: parseInt(Item.statusCode.N ?? '200', 10),
+			body: Item.body.S ?? '',
 		}
 	} else {
 		console.log('no responses found')

@@ -30,7 +30,7 @@ export const prepareHTTPAPIMockLambdas = async ({
 				layerName: 'httpApiMock-layer',
 				packageJsonFile: path.resolve(rootDir, 'package.json'),
 				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
-				requiredDependencies: ['@aws-sdk/client-sqs', 'uuid'],
+				requiredDependencies: ['@aws-sdk/client-dynamodb', 'uuid'],
 				dir: httpApiMockLayerDir,
 				reporter,
 				sourceCodeBucketName,
