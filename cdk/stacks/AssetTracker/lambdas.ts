@@ -2,9 +2,9 @@ import * as path from 'path'
 import {
 	packBaseLayer,
 	packLayeredLambdas,
+	makeLayerFromPackageJSON,
 } from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
-import { makeLayerFromPackageJSON } from '../../helper/lambdas/makeLayerFromPackageJSON'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 
 export type AssetTrackerLambdas = {
@@ -40,14 +40,6 @@ export const prepareAssetTrackerLambdas = async ({
 			srcDir: rootDir,
 			outDir,
 			Bucket: sourceCodeBucketName,
-			installCommand: [
-				'npm',
-				'i', // do not use ci, it will install unneccessary dependencies
-				'--ignore-scripts',
-				'--only=prod',
-				'--no-audit',
-				'--legacy-peer-deps',
-			],
 		}),
 		lambdas: await packLayeredLambdas<AssetTrackerLambdas>({
 			reporter,
