@@ -1,7 +1,9 @@
 import * as path from 'path'
-import { packLayeredLambdas } from '@nordicsemiconductor/package-layered-lambdas'
+import {
+	packLayeredLambdas,
+	makeLayerFromPackageJSON,
+} from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
-import { makeLayerFromPackageJSON } from '../helper/lambdas/makeLayerFromPackageJSON'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 
 export type HTTPAPIMockLambdas = {
