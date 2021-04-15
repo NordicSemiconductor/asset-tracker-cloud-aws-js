@@ -18,7 +18,7 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 	try {
-		const { apiKey, endpoint, apiDevice } = await fetchSettings()
+		const { apiKey, endpoint } = await fetchSettings()
 		const { hostname, pathname } = new URL(endpoint)
 
 		// See https://api.nrfcloud.com/v1#operation/GetSingleCellLocation
@@ -37,7 +37,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 				path: `${
 					pathname?.replace(/\/*$/, '') ?? ''
 				}/v1/location/single-cell?${querystring.stringify({
-					deviceIdentifier: apiDevice,
+					deviceIdentifier: 'nRFAssetTrackerForAWS',
 					eci: cell.cell,
 					format: 'json',
 					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),

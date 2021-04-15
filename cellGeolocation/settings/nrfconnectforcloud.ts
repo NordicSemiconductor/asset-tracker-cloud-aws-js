@@ -10,7 +10,6 @@ export const getNrfConnectForCloudApiSettings = ({
 }) => async (): Promise<{
 	apiKey: string
 	endpoint: string
-	apiDevice: string
 }> => {
 	const p = await getApiSettings({
 		ssm,
@@ -18,12 +17,10 @@ export const getNrfConnectForCloudApiSettings = ({
 		scope: 'cellGeoLocation',
 		api: 'nrfconnectforcloud',
 	})()
-	const { apiKey, endpoint, apiDevice } = p
+	const { apiKey, endpoint } = p
 	if (apiKey === undefined) throw new Error('No API key configured!')
-	if (apiDevice === undefined) throw new Error('No API device configured!')
 	return {
 		apiKey,
-		apiDevice,
 		endpoint: endpoint ?? 'https://api.nrfcloud.com/',
 	}
 }
