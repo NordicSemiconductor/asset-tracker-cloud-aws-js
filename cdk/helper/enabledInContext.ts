@@ -7,7 +7,6 @@ const DISABLED = 'disabled'
 export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 	key,
 	component,
-	truthy,
 	onDisabled,
 	onEnabled,
 	onUndefined,
@@ -15,14 +14,13 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 }: {
 	key: string
 	component: string
-	truthy?: string
 	onEnabled?: () => void
 	onDisabled?: () => void
 	onUndefined?: typeof ENABLED | typeof DISABLED
 	silent?: boolean
 }): boolean => {
 	const v = node.tryGetContext(key)
-	if (v === (truthy ?? '1') || (v === undefined && onUndefined === ENABLED)) {
+	if (v === '1' || (v === undefined && onUndefined === ENABLED)) {
 		const help = []
 		help.push(
 			chalk.gray(`Component`),
@@ -30,8 +28,8 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 			chalk.green('enabled.'),
 		)
 		help.push(
-			chalk.gray(`Set context`),
-			chalk.grey.bold(`${key}=0`),
+			chalk.gray(`Run`),
+			chalk.yellow.dim(`node cli configure-api context stack ${key} 0`),
 			chalk.gray(`to disable.`),
 		)
 		!(silent ?? false) && console.error(...help)
@@ -44,8 +42,8 @@ export const enabledInContext = (node: CloudFormation.ConstructNode) => ({
 		chalk.gray('disabled.'),
 	]
 	help.push(
-		chalk.gray(`Set context`),
-		chalk.grey.bold(`${key}=${truthy ?? '1'}`),
+		chalk.gray(`Run`),
+		chalk.yellow.dim(`node cli configure-api context stack ${key} 1`),
 		chalk.grey(`to enable.`),
 	)
 	!(silent ?? false) && console.error(...help)

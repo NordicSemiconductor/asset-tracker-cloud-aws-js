@@ -11,3 +11,6 @@ export const info = (category: string, note: string): void => {
 		chalk.gray(note),
 	)
 }
+export const setting = (property: string, value: string): void => {
+	console.debug('', chalk.blueBright(property), chalk.yellow(value))
+}

@@ -1,5 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getApiSettings } from '../../util/apiConfiguration'
+import { getSettings } from '../../util/settings'
 
 export const getNrfConnectForCloudApiSettings = ({
 	ssm,
@@ -11,11 +11,11 @@ export const getNrfConnectForCloudApiSettings = ({
 	apiKey: string
 	endpoint: string
 }> => {
-	const p = await getApiSettings({
+	const p = await getSettings({
 		ssm,
 		stackName,
 		scope: 'cellGeoLocation',
-		api: 'nrfconnectforcloud',
+		system: 'nrfconnectforcloud',
 	})()
 	const { apiKey, endpoint } = p
 	if (apiKey === undefined) throw new Error('No API key configured!')

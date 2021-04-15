@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { putApiSetting } from '../../util/apiConfiguration'
+import { putSettings } from '../../util/settings'
 
 export const configureAPICommand = (): CommandDefinition => ({
 	command: 'configure-api <scope> <api> <property> <value>',
@@ -21,11 +21,11 @@ export const configureAPICommand = (): CommandDefinition => ({
 	) => {
 		const ssm = new SSMClient({})
 
-		const { name } = await putApiSetting({
+		const { name } = await putSettings({
 			ssm,
 			stackName: CORE_STACK_NAME,
 			scope,
-			api,
+			system: api,
 		})({
 			property,
 			value,

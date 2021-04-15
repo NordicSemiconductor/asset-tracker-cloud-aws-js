@@ -5,21 +5,21 @@ import {
 	DeleteParameterCommand,
 } from '@aws-sdk/client-ssm'
 
-type ApiSettingsScopes = 'cellGeoLocation' | 'codebuild'
-type ApiScopes = 'unwiredlabs' | 'github' | 'nrfconnectforcloud'
+type Scopes = 'context' | 'cellGeoLocation' | 'codebuild'
+type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfconnectforcloud'
 
-export const getApiSettings = ({
+export const getSettings = <Settings extends Record<string, string>>({
 	ssm,
 	stackName,
 	scope,
-	api,
+	system,
 }: {
 	ssm: SSMClient
 	stackName: string
-	scope: ApiSettingsScopes
-	api: ApiScopes
-}) => async (): Promise<Record<string, string>> => {
-	const Path = `/${stackName}/${scope}/${api}`
+	scope: Scopes
+	system: Systems
+}) => async (): Promise<Settings> => {
+	const Path = `/${stackName}/${scope}/${system}`
 	const { Parameters } = await ssm.send(
 		new GetParametersByPathCommand({
 			Path,
@@ -27,7 +27,8 @@ export const getApiSettings = ({
 		}),
 	)
 
-	if (Parameters === undefined) throw new Error(`API not configured: ${Path}!`)
+	if (Parameters === undefined)
+		throw new Error(`System not configured: ${Path}!`)
 
 	return Parameters.map(({ Name, ...rest }) => ({
 		...rest,
@@ -37,20 +38,20 @@ export const getApiSettings = ({
 			...settings,
 			[Name ?? '']: Value ?? '',
 		}),
-		{} as Record<string, string>,
+		{} as Settings,
 	)
 }
 
-export const putApiSetting = ({
+export const putSettings = ({
 	ssm,
 	stackName,
 	scope,
-	api,
+	system,
 }: {
 	ssm: SSMClient
 	stackName: string
-	scope: ApiSettingsScopes
-	api: ApiScopes
+	scope: Scopes
+	system: Systems
 }) => async ({
 	property,
 	value,
@@ -63,7 +64,7 @@ export const putApiSetting = ({
 	 */
 	deleteBeforeUpdate?: boolean
 }): Promise<{ name: string }> => {
-	const Name = `/${stackName}/${scope}/${api}/${property}`
+	const Name = `/${stackName}/${scope}/${system}/${property}`
 	if (deleteBeforeUpdate ?? false) {
 		try {
 			await ssm.send(

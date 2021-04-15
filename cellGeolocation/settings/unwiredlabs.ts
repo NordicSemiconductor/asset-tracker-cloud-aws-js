@@ -1,5 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getApiSettings } from '../../util/apiConfiguration'
+import { getSettings } from '../../util/settings'
 
 export const getUnwiredLabsApiSettings = ({
 	ssm,
@@ -8,11 +8,11 @@ export const getUnwiredLabsApiSettings = ({
 	ssm: SSMClient
 	stackName: string
 }) => async (): Promise<{ apiKey: string; endpoint: string }> => {
-	const p = await getApiSettings({
+	const p = await getSettings({
 		ssm,
 		stackName,
 		scope: 'cellGeoLocation',
-		api: 'unwiredlabs',
+		system: 'unwiredlabs',
 	})()
 	const { apiKey, endpoint } = p
 	if (apiKey === undefined) throw new Error('No API key configured!')

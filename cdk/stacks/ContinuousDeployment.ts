@@ -74,22 +74,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
 		})
 
-		// Whether the Unwired Labs API is enabled
-		const unwiredLabsEnabled = checkFlag({
-			key: 'unwiredlabs',
-			component: 'Unwired Labs API',
-			onUndefined: 'disabled',
-			silent: true,
-		})
-
-		// Whether the nRF Connect for Cloud API is enabled
-		const nrfConnectForCloudEnabled = checkFlag({
-			key: 'nrfconnectforcloud',
-			component: 'nRF Connect for Cloud API',
-			onUndefined: 'disabled',
-			silent: true,
-		})
-
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
 			inlinePolicies: {
@@ -151,22 +135,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 					{
 						name: 'STACK_NAME',
 						value: CORE_STACK_NAME,
-					},
-					{
-						name: 'WEBAPP',
-						value: enableWebAppCD ? '1' : '0',
-					},
-					{
-						name: 'FIRMWARECI',
-						value: enabledFirmwareCiCD ? '1' : '0',
-					},
-					{
-						name: 'UNWIREDLABS',
-						value: unwiredLabsEnabled ? '1' : '0',
-					},
-					{
-						name: 'NRFCONNECTFORCLOUD',
-						value: nrfConnectForCloudEnabled ? '1' : '0',
 					},
 				],
 			},

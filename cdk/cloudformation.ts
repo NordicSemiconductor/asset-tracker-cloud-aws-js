@@ -3,10 +3,8 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { getUnwiredLabsApiSettings } from '../cellGeolocation/settings/unwiredlabs'
 import { getNrfConnectForCloudApiSettings } from '../cellGeolocation/settings/nrfconnectforcloud'
 import { warn } from './helper/note'
-import { STSClient } from '@aws-sdk/client-sts'
-import { loadContext } from './helper/loadContext'
 import { CORE_STACK_NAME } from './stacks/stackName'
-import { getApiSettings } from '../util/apiConfiguration'
+import { getSettings } from '../util/settings'
 import * as chalk from 'chalk'
 import {
 	prepareAssetTrackerLambdas,
@@ -14,6 +12,7 @@ import {
 } from './stacks/AssetTracker/lambdas'
 import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
 import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
+import { getStackContexts } from './helper/getStackContexts'
 
 const ssm = new SSMClient({})
 const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
@@ -21,6 +20,10 @@ const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
 	stackName: CORE_STACK_NAME,
 })
 const fetchNrfConnectForCloudApiSettings = getNrfConnectForCloudApiSettings({
+	ssm,
+	stackName: CORE_STACK_NAME,
+})
+const fetchStackContexts = getStackContexts({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
@@ -48,13 +51,13 @@ Promise.all([
 	})),
 	fetchUnwiredLabsApiSettings().catch(() => ({})),
 	fetchNrfConnectForCloudApiSettings().catch(() => ({})),
-	getApiSettings({
+	getSettings<{ token: string }>({
 		ssm,
 		stackName: CORE_STACK_NAME,
 		scope: 'codebuild',
-		api: 'github',
+		system: 'github',
 	})().catch(() => ({})),
-	loadContext({ sts: new STSClient({}) }),
+	fetchStackContexts(),
 ])
 	.then(
 		([
@@ -68,6 +71,7 @@ Promise.all([
 				version: process.env.VERSION ?? '0.0.0-development',
 				...context,
 			} as Record<string, any>
+
 			const enableUnwiredApi = 'apiKey' in unwiredLabsApiSettings
 			if (!enableUnwiredApi) {
 				warn(
@@ -82,6 +86,7 @@ Promise.all([
 				)
 				ctx.unwiredlabs = '0'
 			}
+
 			const enableNrfConnectForCloudApi =
 				'apiKey' in nrfConnectForCloudApiSettings
 			if (!enableNrfConnectForCloudApi) {
@@ -97,6 +102,7 @@ Promise.all([
 				)
 				ctx.nrfconnectforcloud = '0'
 			}
+
 			const enableCD = 'token' in codebuildSettings
 			if (!enableCD) {
 				warn(
@@ -112,6 +118,7 @@ Promise.all([
 				)
 				ctx.cd = '0'
 			}
+
 			return new AssetTrackerApp({
 				...lambdaResources,
 				context: ctx,

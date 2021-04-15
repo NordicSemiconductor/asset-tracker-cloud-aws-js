@@ -8,18 +8,18 @@ import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { listPipelines } from '../cd/listPipelines'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { putApiSetting } from '../../util/apiConfiguration'
+import { putSettings } from '../../util/settings'
 
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',
 	action: async (token: string) => {
 		const ssm = new SSMClient({})
 
-		await putApiSetting({
+		await putSettings({
 			ssm,
 			stackName: CORE_STACK_NAME,
 			scope: 'codebuild',
-			api: 'github',
+			system: 'github',
 		})({
 			property: 'token',
 			value: token,
