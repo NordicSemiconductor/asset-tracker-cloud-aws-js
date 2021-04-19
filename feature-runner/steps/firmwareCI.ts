@@ -3,9 +3,9 @@ import {
 	StepRunnerFunc,
 	InterpolatedStep,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
-import { AssetTrackerWorld } from '../run-features'
-import { createDevice } from '../../cli/firmware-ci/createDevice'
-import { deleteDevice } from '../../cli/firmware-ci/deleteDevice'
+import { AssetTrackerWorld } from '../run-features.js'
+import { createDevice } from '../../cli/firmware-ci/createDevice.js'
+import { deleteDevice } from '../../cli/firmware-ci/deleteDevice.js'
 import { IoTClient } from '@aws-sdk/client-iot'
 
 export const firmwareCIStepRunners = ({

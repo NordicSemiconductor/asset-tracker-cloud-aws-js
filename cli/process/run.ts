@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import * as os from 'os'
+import os from 'os'
 
 export const run = async (args: {
 	command: string

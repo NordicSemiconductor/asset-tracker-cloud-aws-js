@@ -1,5 +1,5 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as Lambda from '@aws-cdk/aws-lambda'
+import CloudFormation from '@aws-cdk/core'
+import Lambda from '@aws-cdk/aws-lambda'
 
 export class ThingGroup extends CloudFormation.Resource {
 	public constructor(

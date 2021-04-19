@@ -9,8 +9,8 @@ import {
 	UpdateEventConfigurationsCommand,
 } from '@aws-sdk/client-iot'
 import { promises as fs } from 'fs'
-import { caFileLocations } from './caFileLocations'
-import { run } from '../process/run'
+import { caFileLocations } from './caFileLocations.js'
+import { run } from '../process/run.js'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 
 /**

@@ -1,5 +1,5 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as chalk from 'chalk'
+import CloudFormation from '@aws-cdk/core'
+import chalk from 'chalk'
 
 const ENABLED = 'enabled'
 const DISABLED = 'disabled'

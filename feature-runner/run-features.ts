@@ -9,12 +9,12 @@ import {
 	RestClient,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import * as program from 'commander'
-import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/AssetTracker/stack'
-import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
-import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack'
-import { assetTrackerStepRunners } from './steps/asset-tracker'
+import program from 'commander'
+import chalk from 'chalk'
+import { StackOutputs } from '../cdk/stacks/AssetTracker/stack.js'
+import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI.js'
+import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
+import { assetTrackerStepRunners } from './steps/asset-tracker.js'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
@@ -23,15 +23,15 @@ import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
 	HTTP_MOCK_HTTP_API_STACK_NAME,
-} from '../cdk/stacks/stackName'
+} from '../cdk/stacks/stackName.js'
 import { promises as fs } from 'fs'
-import * as path from 'path'
-import { firmwareCIStepRunners } from './steps/firmwareCI'
-import { certsDir } from '../cli/jitp/certsDir'
-import { timestreamStepRunners } from './steps/timestream'
+import path from 'path'
+import { firmwareCIStepRunners } from './steps/firmwareCI.js'
+import { certsDir } from '../cli/jitp/certsDir.js'
+import { timestreamStepRunners } from './steps/timestream.js'
 import { queryClient } from '@nordicsemiconductor/timestream-helpers'
-import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
-import { httpApiMockStepRunners } from './steps/httpApiMock'
+import { getIotEndpoint } from '../cdk/helper/getIotEndpoint.js'
+import { httpApiMockStepRunners } from './steps/httpApiMock.js'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 let ran = false

@@ -2,9 +2,11 @@
   "name": "@nordicsemiconductor/asset-tracker-cloud-aws",
   "version": "0.0.0-development",
   "description": "A reference implementation of a serverless backend for an IoT product developed using AWS CDK in TypeScript.",
-  "main": "./dist/export.js",
+  "exports": "./dist/export.js",
+  "typings": "./dist/export.d.ts",
+  "type": "module",
   "scripts": {
-    "test": "jest --detectOpenHandles --forceExit",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' npm exec -- jest --detectOpenHandles --forceExit",
     "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress",
     "postinstall": "husky install",
     "prepublishOnly": "pinst --disable",
@@ -92,13 +94,12 @@
     "date-fns": "2.21.1",
     "eslint": "7.24.0",
     "husky": "6.0.0",
-    "jest": "26.6.3",
+    "jest": "^27.0.0-next.8",
     "lint-staged": "10.5.4",
     "nock": "13.0.11",
     "octokit-auth-netrc": "1.0.0",
     "pinst": "2.1.6",
     "prettier": "2.2.1",
-    "ts-jest": "26.5.5",
     "typescript": "4.2.4"
   },
   "lint-staged": {
@@ -150,19 +151,11 @@
   "jest": {
     "testURL": "http://localhost",
     "moduleFileExtensions": [
-      "ts",
-      "tsx",
       "js",
       "json"
     ],
-    "transform": {
-      ".+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": ".+\\.spec\\.ts$",
-    "globals": {
-      "ts-jest": {
-        "diagnostics": true
-      }
-    }
-  }
+    "transform": {},
+    "testRegex": ".+\\.spec\\.js$"
+  },
+  "prettier": "@nordicsemiconductor/asset-tracker-cloud-code-style/.prettierrc"
 }

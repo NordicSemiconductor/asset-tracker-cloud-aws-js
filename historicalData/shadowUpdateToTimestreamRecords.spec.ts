@@ -1,4 +1,4 @@
-import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
+import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords.js'
 
 describe('shadowUpdateToTimestreamRecords', () => {
 	it('should convert a shadow update to Timestream records', () => {

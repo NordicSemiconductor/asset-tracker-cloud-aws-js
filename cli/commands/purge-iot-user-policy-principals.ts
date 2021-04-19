@@ -1,4 +1,4 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import {
 	DetachPrincipalPolicyCommand,
@@ -6,8 +6,8 @@ import {
 	ListPolicyPrincipalsCommand,
 } from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { paginate } from '../../util/paginate'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { paginate } from '../../util/paginate.js'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
 
 export const purgeIotUserPolicyPrincipals = (): CommandDefinition => ({
 	command: 'purge-iot-user-policy-principals',

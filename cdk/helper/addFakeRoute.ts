@@ -4,8 +4,8 @@ import {
 	CreateRouteCommand,
 } from '@aws-sdk/client-apigatewayv2'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { StackOutputs } from '../stacks/AssetTracker/stack'
-import { CORE_STACK_NAME } from '../stacks/stackName'
+import { StackOutputs } from '../stacks/AssetTracker/stack.js'
+import { CORE_STACK_NAME } from '../stacks/stackName.js'
 import { v4 } from 'uuid'
 
 /**

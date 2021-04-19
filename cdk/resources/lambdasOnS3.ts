@@ -1,6 +1,6 @@
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as S3 from '@aws-cdk/aws-s3'
-import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import Lambda from '@aws-cdk/aws-lambda'
+import S3 from '@aws-cdk/aws-s3'
+import { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 
 export const lambdasOnS3 = (sourceCodeBucket: S3.IBucket) => <
 	A extends {

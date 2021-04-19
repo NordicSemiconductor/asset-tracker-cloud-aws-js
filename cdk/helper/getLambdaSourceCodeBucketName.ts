@@ -2,7 +2,7 @@ import {
 	CloudFormationClient,
 	DescribeStacksCommand,
 } from '@aws-sdk/client-cloudformation'
-import { SOURCECODE_STACK_NAME } from '../stacks/stackName'
+import { SOURCECODE_STACK_NAME } from '../stacks/stackName.js'
 
 const cf = new CloudFormationClient({})
 

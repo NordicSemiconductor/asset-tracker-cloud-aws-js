@@ -1,4 +1,4 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import {
 	CloudFormationClient,
 	DescribeStackResourcesCommand,
@@ -9,15 +9,15 @@ import {
 	ListObjectsCommand,
 	S3Client,
 } from '@aws-sdk/client-s3'
-import * as chalk from 'chalk'
-import { retry } from './retry'
+import chalk from 'chalk'
+import { retry } from './retry.js'
 import {
 	CORE_STACK_NAME,
 	WEBAPP_STACK_NAME,
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
-} from '../../cdk/stacks/stackName'
-import { paginate } from '../../util/paginate'
+} from '../../cdk/stacks/stackName.js'
+import { paginate } from '../../util/paginate.js'
 
 const cf = new CloudFormationClient({})
 

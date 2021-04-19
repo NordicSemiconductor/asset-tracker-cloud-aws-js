@@ -1,12 +1,12 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as IoT from '@aws-cdk/aws-iot'
-import * as DynamoDB from '@aws-cdk/aws-dynamodb'
-import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
-import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import { logToCloudWatch } from './logToCloudWatch'
-import { LambdaLogGroup } from './LambdaLogGroup'
+import CloudFormation from '@aws-cdk/core'
+import IAM from '@aws-cdk/aws-iam'
+import IoT from '@aws-cdk/aws-iot'
+import DynamoDB from '@aws-cdk/aws-dynamodb'
+import StepFunctions from '@aws-cdk/aws-stepfunctions'
+import StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
+import Lambda from '@aws-cdk/aws-lambda'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
 import {
 	Condition,
 	IChainable,
@@ -14,12 +14,12 @@ import {
 	StateMachineType,
 } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
-import * as SQS from '@aws-cdk/aws-sqs'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { CORE_STACK_NAME } from '../stacks/stackName'
-import { enabledInContext } from '../helper/enabledInContext'
-import { NodeJS14Runtime } from './NodeJS14Runtime'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import SQS from '@aws-cdk/aws-sqs'
+import { LambdasWithLayer } from './LambdasWithLayer.js'
+import { CORE_STACK_NAME } from '../stacks/stackName.js'
+import { enabledInContext } from '../helper/enabledInContext.js'
+import { NodeJS14Runtime } from './NodeJS14Runtime.js'
+import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells

@@ -1,6 +1,6 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as CloudWatchLogs from '@aws-cdk/aws-logs'
+import CloudFormation from '@aws-cdk/core'
+import Lambda from '@aws-cdk/aws-lambda'
+import CloudWatchLogs from '@aws-cdk/aws-logs'
 
 export class LambdaLogGroup extends CloudFormation.Resource {
 	public constructor(

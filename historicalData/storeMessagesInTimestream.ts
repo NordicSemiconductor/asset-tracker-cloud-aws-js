@@ -1,9 +1,9 @@
 import { _Record, Dimension } from '@aws-sdk/client-timestream-write'
-import { fromEnv } from '../util/fromEnv'
-import { batchToTimestreamRecords } from './batchToTimestreamRecords'
-import { messageToTimestreamRecords } from './messageToTimestreamRecords'
-import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
-import { storeRecordsInTimeseries } from './storeRecordsInTimeseries'
+import { fromEnv } from '../util/fromEnv.js'
+import { batchToTimestreamRecords } from './batchToTimestreamRecords.js'
+import { messageToTimestreamRecords } from './messageToTimestreamRecords.js'
+import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords.js'
+import { storeRecordsInTimeseries } from './storeRecordsInTimeseries.js'
 import { writeClient } from '@nordicsemiconductor/timestream-helpers'
 
 const { tableInfo } = fromEnv({

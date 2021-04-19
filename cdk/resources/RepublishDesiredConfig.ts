@@ -1,6 +1,6 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IoT from '@aws-cdk/aws-iot'
-import * as IAM from '@aws-cdk/aws-iam'
+import CloudFormation from '@aws-cdk/core'
+import IoT from '@aws-cdk/aws-iot'
+import IAM from '@aws-cdk/aws-iam'
 
 /**
  * This sets up the rules to republish the desired config

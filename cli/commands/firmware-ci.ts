@@ -1,13 +1,13 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
-import { CommandDefinition } from './CommandDefinition'
-import * as chalk from 'chalk'
-import { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI'
-import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName'
+import { CommandDefinition } from './CommandDefinition.js'
+import chalk from 'chalk'
+import { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI.js'
+import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName.js'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import { createDevice } from '../firmware-ci/createDevice'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
-import { deleteDevice } from '../firmware-ci/deleteDevice'
+import { createDevice } from '../firmware-ci/createDevice.js'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
+import { deleteDevice } from '../firmware-ci/deleteDevice.js'
 
 export const firmwareCICommand = ({
 	endpoint,
