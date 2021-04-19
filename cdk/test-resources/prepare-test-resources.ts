@@ -3,7 +3,7 @@ import {
 	packLayeredLambdas,
 	makeLayerFromPackageJSON,
 } from '@nordicsemiconductor/package-layered-lambdas'
-import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
+import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 
 export type HTTPAPIMockLambdas = {
