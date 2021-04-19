@@ -39,7 +39,7 @@
     "@aws-sdk/client-sts": "3.13.0",
     "@aws-sdk/client-timestream-query": "^3.9.0",
     "@aws-sdk/client-timestream-write": "^3.9.0",
-    "@nordicsemiconductor/cell-geolocation-helpers": "3.0.2",
+    "@nordicsemiconductor/cell-geolocation-helpers": "3.0.5",
     "@nordicsemiconductor/cloudformation-helpers": "6.0.18",
     "@nordicsemiconductor/e2e-bdd-test-runner": "13.0.32",
     "@nordicsemiconductor/random-words": "5.0.0",
