@@ -1,6 +1,6 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as CloudFront from '@aws-cdk/aws-cloudfront'
-import * as S3 from '@aws-cdk/aws-s3'
+import CloudFormation from '@aws-cdk/core'
+import CloudFront from '@aws-cdk/aws-cloudfront'
+import S3 from '@aws-cdk/aws-s3'
 
 /**
  * This sets up the web hosting for a web app

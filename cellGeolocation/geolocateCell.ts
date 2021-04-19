@@ -1,7 +1,7 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from './ErrorInfo'
+import TE from 'fp-ts/lib/TaskEither'
+import { ErrorInfo, ErrorType } from './ErrorInfo.js'
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
 import { Option, some, none } from 'fp-ts/lib/Option'
 

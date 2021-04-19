@@ -12,7 +12,7 @@ import {
 	UpdateCertificateCommand,
 } from '@aws-sdk/client-iot'
 import { CloudFormationCustomResourceEvent } from 'aws-lambda'
-import { paginate } from '../util/paginate'
+import { paginate } from '../util/paginate.js'
 import {
 	cfnResponse,
 	ResponseStatus,

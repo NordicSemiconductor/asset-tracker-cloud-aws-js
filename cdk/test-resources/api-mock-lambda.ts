@@ -5,7 +5,7 @@ import {
 	GetItemCommand,
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb'
-import * as querystring from 'querystring'
+import querystring from 'querystring'
 import { v4 } from 'uuid'
 
 const db = new DynamoDBClient({})

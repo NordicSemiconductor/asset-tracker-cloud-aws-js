@@ -5,11 +5,11 @@ import {
 	InterpolatedStep,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { randomWords } from '@nordicsemiconductor/random-words'
-import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
+import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate.js'
 import { device, thingShadow } from 'aws-iot-device-sdk'
-import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
+import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import { expect } from 'chai'
-import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
+import { isNotNullOrUndefined } from '../../util/isNullOrUndefined.js'
 import { readFileSync } from 'fs'
 
 const connect = ({

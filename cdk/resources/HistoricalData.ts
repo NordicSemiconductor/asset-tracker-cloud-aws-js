@@ -1,13 +1,13 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as IoT from '@aws-cdk/aws-iot'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as Timestream from '@aws-cdk/aws-timestream'
-import { logToCloudWatch } from './logToCloudWatch'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { NodeJS14Runtime } from './NodeJS14Runtime'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import CloudFormation from '@aws-cdk/core'
+import IAM from '@aws-cdk/aws-iam'
+import IoT from '@aws-cdk/aws-iot'
+import Lambda from '@aws-cdk/aws-lambda'
+import Timestream from '@aws-cdk/aws-timestream'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import { LambdasWithLayer } from './LambdasWithLayer.js'
+import { NodeJS14Runtime } from './NodeJS14Runtime.js'
+import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 
 /**
  * Provides resources for historical data

@@ -2,9 +2,9 @@ import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import {
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	CORE_STACK_NAME,
-} from '../../cdk/stacks/stackName'
+} from '../../cdk/stacks/stackName.js'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import { StackOutputs } from '../../cdk/stacks/ContinuousDeployment'
+import { StackOutputs } from '../../cdk/stacks/ContinuousDeployment.js'
 
 /**
  * Returns the active pipelines of the CD stack

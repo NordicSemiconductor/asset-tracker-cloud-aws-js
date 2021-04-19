@@ -1,4 +1,5 @@
-import { retry } from './retry'
+import { retry } from './retry.js'
+import { jest } from '@jest/globals'
 
 describe('retry()', () => {
 	it('should run a passed function and return the resolved promise', async () => {
@@ -19,7 +20,7 @@ describe('retry()', () => {
 		const f = jest.fn()
 		f.mockImplementationOnce(async () => Promise.reject(err))
 		f.mockImplementationOnce(async () => Promise.resolve(42))
-		expect(await retry(3, () => 1)(f)).toEqual(42)
+		expect(await retry(3, () => 1)(f as () => Promise<unknown>)).toEqual(42)
 		expect(f).toHaveBeenCalledTimes(2)
 	})
 })

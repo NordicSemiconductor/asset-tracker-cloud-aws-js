@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
-import * as T from 'fp-ts/lib/Task'
+import T from 'fp-ts/lib/Task'
 
 export const res = (statusCode: number, options?: { expires: number }) => (
 	body: unknown,

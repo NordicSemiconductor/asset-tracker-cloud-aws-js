@@ -1,9 +1,9 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
+import chalk from 'chalk'
+import { CommandDefinition } from './CommandDefinition.js'
 import { randomWords } from '@nordicsemiconductor/random-words'
-import * as path from 'path'
-import { createDeviceCertificate } from '../jitp/createDeviceCertificate'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import path from 'path'
+import { createDeviceCertificate } from '../jitp/createDeviceCertificate.js'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import { promises as fs } from 'fs'
 
 export const createDeviceCertCommand = ({

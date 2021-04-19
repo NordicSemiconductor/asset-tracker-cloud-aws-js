@@ -1,11 +1,11 @@
-import * as path from 'path'
+import path from 'path'
 import {
 	packBaseLayer,
 	packLayeredLambdas,
 	makeLayerFromPackageJSON,
 } from '@nordicsemiconductor/package-layered-lambdas'
 import { ConsoleProgressReporter } from '@nordicsemiconductor/package-layered-lambdas/dist/src/reporter'
-import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
+import { PackedLambdas } from '../../helper/lambdas/PackedLambdas.js'
 
 export type AssetTrackerLambdas = {
 	storeMessagesInTimestream: string

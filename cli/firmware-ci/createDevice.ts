@@ -6,9 +6,9 @@ import {
 	IoTClient,
 } from '@aws-sdk/client-iot'
 import { v4 } from 'uuid'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import { promises as fs } from 'fs'
-import * as path from 'path'
+import path from 'path'
 
 export const createDevice = async ({
 	iot,

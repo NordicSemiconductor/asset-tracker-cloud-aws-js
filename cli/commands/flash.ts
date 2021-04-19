@@ -1,19 +1,19 @@
-import { CommandDefinition } from './CommandDefinition'
-import * as path from 'path'
-import * as fs from 'fs'
-import * as os from 'os'
+import { CommandDefinition } from './CommandDefinition.js'
+import path from 'path'
+import fs from 'fs'
+import os from 'os'
 import {
 	flashCredentials,
 	connect,
 	atHostHexfile,
 	flash,
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import { Octokit } from '@octokit/rest'
-import * as chalk from 'chalk'
-import * as https from 'https'
+import chalk from 'chalk'
+import https from 'https'
 import { v4 } from 'uuid'
-import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
+import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner.js'
 
 const defaultPort = '/dev/ttyACM0'
 const defaultSecTag = 42

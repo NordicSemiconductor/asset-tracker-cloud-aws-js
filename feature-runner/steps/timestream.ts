@@ -3,7 +3,7 @@ import {
 	StepRunnerFunc,
 	InterpolatedStep,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
-import { AssetTrackerWorld } from '../run-features'
+import { AssetTrackerWorld } from '../run-features.js'
 import {
 	QueryCommand,
 	TimestreamQueryClient,

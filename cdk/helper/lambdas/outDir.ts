@@ -1,4 +1,4 @@
-import * as path from 'path'
+import path from 'path'
 import { promises as fs } from 'fs'
 
 // Prepares the storage director for packed lambdas

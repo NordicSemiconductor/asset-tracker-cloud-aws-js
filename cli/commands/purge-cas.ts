@@ -1,4 +1,4 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CommandDefinition } from './CommandDefinition.js'
 import {
 	DeleteCACertificateCommand,
 	DescribeCACertificateCommand,
@@ -7,10 +7,10 @@ import {
 	UpdateCACertificateCommand,
 } from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { paginate } from '../../util/paginate'
+import { paginate } from '../../util/paginate.js'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import * as chalk from 'chalk'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import chalk from 'chalk'
 
 const purgeCACertificate = ({
 	iot,
