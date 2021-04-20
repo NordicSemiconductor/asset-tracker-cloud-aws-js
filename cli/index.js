@@ -10,5 +10,4 @@ const die = (err, origin) => {
 process.on('uncaughtException', die)
 process.on('unhandledRejection', die)
 
-// eslint-disable-next-line
-require('../dist/cli/cli')
+import('../dist/cli/cli.js')
