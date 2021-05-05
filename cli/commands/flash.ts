@@ -18,7 +18,7 @@ import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
 const defaultPort = '/dev/ttyACM0'
 const defaultSecTag = 42
 const defaultFirmwareRepository =
-	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware'
+	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
 const netrclocation = path.resolve(os.homedir(), '.netrc')
 
 const getLatestFirmware = async ({
