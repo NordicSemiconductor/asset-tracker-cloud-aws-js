@@ -17,18 +17,20 @@ const defaults: StackContexts = {
 	'firmware-ci': '0',
 }
 
-export const getStackContexts = ({
-	ssm,
-	stackName,
-}: {
-	ssm: SSMClient
-	stackName: string
-}): (() => Promise<StackContexts>) => async () =>
-	getSettings<Partial<StackContexts>>({
+export const getStackContexts =
+	({
 		ssm,
-		system: 'stack',
-		scope: 'context',
 		stackName,
-	})()
-		.then((cfg) => ({ ...defaults, ...cfg }))
-		.catch(() => defaults)
+	}: {
+		ssm: SSMClient
+		stackName: string
+	}): (() => Promise<StackContexts>) =>
+	async () =>
+		getSettings<Partial<StackContexts>>({
+			ssm,
+			system: 'stack',
+			scope: 'context',
+			stackName,
+		})()
+			.then((cfg) => ({ ...defaults, ...cfg }))
+			.catch(() => defaults)

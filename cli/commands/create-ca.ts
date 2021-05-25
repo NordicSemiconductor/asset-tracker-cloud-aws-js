@@ -35,6 +35,5 @@ export const createCACommand = ({
 			chalk.greenBright('node cli create-device-cert'),
 		)
 	},
-	help:
-		'Creates a CA certificate and registers it for Just-in-time provisioning.',
+	help: 'Creates a CA certificate and registers it for Just-in-time provisioning.',
 })

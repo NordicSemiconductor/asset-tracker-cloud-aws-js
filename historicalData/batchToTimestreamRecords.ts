@@ -6,11 +6,13 @@ import { toRecord } from './toRecord'
 export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 	const Records: (_Record | undefined)[] = Object.entries(event.batch)
 		.map(([name, messages]) =>
-			(messages as (
-				| NumberValueSensor
-				| NumbersValueSensor
-				| NumbersAndStringsValueSensor
-			)[])
+			(
+				messages as (
+					| NumberValueSensor
+					| NumbersValueSensor
+					| NumbersAndStringsValueSensor
+				)[]
+			)
 				?.map((m) => {
 					const ts = m.ts
 					const measureGroup = v4()

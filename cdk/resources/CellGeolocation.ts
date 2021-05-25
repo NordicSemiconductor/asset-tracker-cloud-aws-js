@@ -229,8 +229,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 						runtime: NodeJS14Runtime,
 						timeout: CloudFormation.Duration.seconds(10),
 						memorySize: 1792,
-						code:
-							lambdas.lambdas.geolocateCellFromNrfConnectForCloudStepFunction,
+						code: lambdas.lambdas
+							.geolocateCellFromNrfConnectForCloudStepFunction,
 						description:
 							'Resolve cell geolocation using the nRF Connect for Cloud API',
 						initialPolicy: [

@@ -98,10 +98,8 @@ program
 				new GetCallerIdentityCommand({}),
 			)
 
-			const [
-				historicaldataDatabaseName,
-				historicaldataTableName,
-			] = stackConfig.historicaldataTableInfo.split('|')
+			const [historicaldataDatabaseName, historicaldataTableName] =
+				stackConfig.historicaldataTableInfo.split('|')
 
 			const world: AssetTrackerWorld = {
 				...stackConfig,

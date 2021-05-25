@@ -12,57 +12,61 @@ import { expect } from 'chai'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 import { readFileSync } from 'fs'
 
-const connect = ({
-	mqttEndpoint,
-	certsDir,
-	awsIotRootCA,
-}: {
-	mqttEndpoint: string
-	certsDir: string
-	awsIotRootCA: string
-}) => (clientId: string) => {
-	const deviceFiles = deviceFileLocations({
+const connect =
+	({
+		mqttEndpoint,
 		certsDir,
-		deviceId: clientId,
-	})
-	const { privateKey, clientCert } = JSON.parse(
-		readFileSync(deviceFiles.json, 'utf-8'),
-	)
-	return new device({
-		privateKey: Buffer.from(privateKey),
-		clientCert: Buffer.from(clientCert),
-		caCert: Buffer.from(awsIotRootCA),
-		clientId,
-		host: mqttEndpoint,
-		region: mqttEndpoint.split('.')[2],
-	})
-}
+		awsIotRootCA,
+	}: {
+		mqttEndpoint: string
+		certsDir: string
+		awsIotRootCA: string
+	}) =>
+	(clientId: string) => {
+		const deviceFiles = deviceFileLocations({
+			certsDir,
+			deviceId: clientId,
+		})
+		const { privateKey, clientCert } = JSON.parse(
+			readFileSync(deviceFiles.json, 'utf-8'),
+		)
+		return new device({
+			privateKey: Buffer.from(privateKey),
+			clientCert: Buffer.from(clientCert),
+			caCert: Buffer.from(awsIotRootCA),
+			clientId,
+			host: mqttEndpoint,
+			region: mqttEndpoint.split('.')[2],
+		})
+	}
 
-const shadow = ({
-	mqttEndpoint,
-	certsDir,
-	awsIotRootCA,
-}: {
-	mqttEndpoint: string
-	certsDir: string
-	awsIotRootCA: string
-}) => (clientId: string) => {
-	const deviceFiles = deviceFileLocations({
+const shadow =
+	({
+		mqttEndpoint,
 		certsDir,
-		deviceId: clientId,
-	})
-	const { privateKey, clientCert } = JSON.parse(
-		readFileSync(deviceFiles.json, 'utf-8'),
-	)
-	return new thingShadow({
-		privateKey: Buffer.from(privateKey),
-		clientCert: Buffer.from(clientCert),
-		caCert: Buffer.from(awsIotRootCA),
-		clientId,
-		host: mqttEndpoint,
-		region: mqttEndpoint.split('.')[2],
-	})
-}
+		awsIotRootCA,
+	}: {
+		mqttEndpoint: string
+		certsDir: string
+		awsIotRootCA: string
+	}) =>
+	(clientId: string) => {
+		const deviceFiles = deviceFileLocations({
+			certsDir,
+			deviceId: clientId,
+		})
+		const { privateKey, clientCert } = JSON.parse(
+			readFileSync(deviceFiles.json, 'utf-8'),
+		)
+		return new thingShadow({
+			privateKey: Buffer.from(privateKey),
+			clientCert: Buffer.from(clientCert),
+			caCert: Buffer.from(awsIotRootCA),
+			clientId,
+			host: mqttEndpoint,
+			region: mqttEndpoint.split('.')[2],
+		})
+	}
 
 type World = {
 	accountId: string

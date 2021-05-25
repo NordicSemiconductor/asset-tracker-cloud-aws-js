@@ -40,13 +40,15 @@ export const cdCommand = (): CommandDefinition => ({
 		)
 		statuses.forEach(({ pipelineName, summary }) => {
 			console.log(
-				({
-					Succeeded: chalk.green.inverse('  OK  '),
-					InProgress: chalk.yellow.inverse(' In Progress '),
-					Superseded: chalk.gray('[Superseded]'),
-					Failed: chalk.red.inverse('  ERR '),
-					Unknown: chalk.bgRedBright('  ?? '),
-				} as { [key: string]: any })[summary.status || 'Unknown'],
+				(
+					{
+						Succeeded: chalk.green.inverse('  OK  '),
+						InProgress: chalk.yellow.inverse(' In Progress '),
+						Superseded: chalk.gray('[Superseded]'),
+						Failed: chalk.red.inverse('  ERR '),
+						Unknown: chalk.bgRedBright('  ?? '),
+					} as { [key: string]: any }
+				)[summary.status || 'Unknown'],
 				chalk.cyan(pipelineName),
 				chalk.gray(
 					formatDistanceToNow(summary.lastUpdateTime, { addSuffix: true }),

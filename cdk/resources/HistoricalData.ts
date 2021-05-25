@@ -114,8 +114,7 @@ export class HistoricalData extends CloudFormation.Resource {
 				description:
 					'Store all updates to thing shadow documents in Timestream',
 				ruleDisabled: false,
-				sql:
-					"SELECT state.reported AS reported, clientid() as deviceId FROM '$aws/things/+/shadow/update'",
+				sql: "SELECT state.reported AS reported, clientid() as deviceId FROM '$aws/things/+/shadow/update'",
 				actions: [
 					{
 						lambda: {

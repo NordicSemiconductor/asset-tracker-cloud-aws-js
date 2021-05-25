@@ -12,45 +12,41 @@ import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import * as chalk from 'chalk'
 
-const purgeCACertificate = ({
-	iot,
-	thingGroupName,
-}: {
-	iot: IoTClient
-	thingGroupName: string
-}) => async (certificateId: string) => {
-	const cert = await iot.send(
-		new DescribeCACertificateCommand({
-			certificateId,
-		}),
-	)
-
-	const config = JSON.parse(cert.registrationConfig?.templateBody ?? '{}')
-	if (
-		(
-			(config?.Resources?.thing?.Properties?.ThingGroups as string[]) ?? []
-		).includes(thingGroupName)
-	) {
-		console.log(`Marking CA certificate ${certificateId} as INACTIVE ...`)
-		await iot.send(
-			new UpdateCACertificateCommand({
-				certificateId,
-				newStatus: 'INACTIVE',
-			}),
-		)
-
-		console.log(`Deleting CA certificate ${certificateId}...`)
-		await iot.send(
-			new DeleteCACertificateCommand({
+const purgeCACertificate =
+	({ iot, thingGroupName }: { iot: IoTClient; thingGroupName: string }) =>
+	async (certificateId: string) => {
+		const cert = await iot.send(
+			new DescribeCACertificateCommand({
 				certificateId,
 			}),
 		)
-	} else {
-		console.error(
-			chalk.yellow.dim(`Not a nRF Asset Tracker CA: ${certificateId}`),
-		)
+
+		const config = JSON.parse(cert.registrationConfig?.templateBody ?? '{}')
+		if (
+			(
+				(config?.Resources?.thing?.Properties?.ThingGroups as string[]) ?? []
+			).includes(thingGroupName)
+		) {
+			console.log(`Marking CA certificate ${certificateId} as INACTIVE ...`)
+			await iot.send(
+				new UpdateCACertificateCommand({
+					certificateId,
+					newStatus: 'INACTIVE',
+				}),
+			)
+
+			console.log(`Deleting CA certificate ${certificateId}...`)
+			await iot.send(
+				new DeleteCACertificateCommand({
+					certificateId,
+				}),
+			)
+		} else {
+			console.error(
+				chalk.yellow.dim(`Not a nRF Asset Tracker CA: ${certificateId}`),
+			)
+		}
 	}
-}
 
 export const purgeCAsCommand = (): CommandDefinition => ({
 	command: 'purge-cas',
