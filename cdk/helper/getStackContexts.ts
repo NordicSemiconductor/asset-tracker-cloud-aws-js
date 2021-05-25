@@ -13,7 +13,7 @@ const defaults: StackContexts = {
 	unwiredlabs: '0',
 	nrfconnectforcloud: '0',
 	cd: '0',
-	webapp: '0',
+	webapp: '1',
 	'firmware-ci': '0',
 }
 
