@@ -510,13 +510,13 @@ export class CellGeolocation extends CloudFormation.Resource {
 							`FROM '$aws/things/+/shadow/update/documents'`,
 							'WHERE',
 							// only if it actually has roaming information
-							'current.state.reported.roam.v.area <> NULL',
-							'AND current.state.reported.roam.v.mccmnc <> NULL',
-							'AND current.state.reported.roam.v.cell <> NULL',
-							`AND current.state.reported.${nwLocation}.v.nw <> NULL`,
+							'isUndefined(current.state.reported.roam.v.area) = false',
+							'AND isUndefined(current.state.reported.roam.v.mccmnc) = false',
+							'AND isUndefined(current.state.reported.roam.v.cell) = false',
+							`AND isUndefined(current.state.reported.${nwLocation}.v.nw) = false`,
 							// and if it has GPS location
-							'AND current.state.reported.gps.v.lat <> NULL AND current.state.reported.gps.v.lat <> 0',
-							'AND current.state.reported.gps.v.lng <> NULL AND current.state.reported.gps.v.lng <> 0',
+							'AND isUndefined(current.state.reported.gps.v.lat) = false AND current.state.reported.gps.v.lat <> 0',
+							'AND isUndefined(current.state.reported.gps.v.lng) = false AND current.state.reported.gps.v.lng <> 0',
 							// only if the location has changed
 							'AND (',
 							'isUndefined(previous.state.reported.gps.v.lat)',
