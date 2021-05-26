@@ -110,8 +110,8 @@ export const flashCommand = ({
 			description: `Use this secTag, defaults to ${defaultSecTag}`,
 		},
 		{
-			flags: '-a, --at-client <atClient>',
-			description: `Flash at_client from this file`,
+			flags: '-a, --at-host <atHost>',
+			description: `Flash at_host from this file`,
 		},
 		{
 			flags: '--debug',
@@ -137,7 +137,7 @@ export const flashCommand = ({
 			secTag,
 			debug,
 			ghToken,
-			atClient,
+			atHost,
 			firmwareRepository,
 		},
 	) => {
@@ -262,7 +262,7 @@ export const flashCommand = ({
 
 		const connection = await connect({
 			atHostHexfile:
-				atClient ??
+				atHost ??
 				(dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91']),
 			device: port ?? defaultPort,
 			warn: console.error,
