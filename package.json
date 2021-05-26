@@ -147,6 +147,6 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "testRegex": ".+.spec.ts$"
+    "testRegex": ".+\\.spec\\.ts$"
   }
 }
