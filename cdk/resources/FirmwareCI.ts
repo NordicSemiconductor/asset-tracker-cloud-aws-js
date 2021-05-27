@@ -7,7 +7,7 @@ import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../stacks/stackName'
 import * as IAM from '@aws-cdk/aws-iam'
 
 export class FirmwareCI extends CloudFormation.Resource {
-	public readonly thingGroupName
+	public readonly thingGroupName: string
 	public readonly bucket
 	public readonly userAccessKey
 	public constructor(
