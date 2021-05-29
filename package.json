@@ -90,7 +90,7 @@
     "date-fns": "2.22.1",
     "eslint": "7.27.0",
     "husky": "6.0.0",
-    "jest": "27.0.1",
+    "jest": "27.0.2",
     "lint-staged": "11.0.0",
     "nock": "13.0.11",
     "octokit-auth-netrc": "1.0.1",
