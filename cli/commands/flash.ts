@@ -142,14 +142,14 @@ export const flashCommand = ({
 		},
 	) => {
 		if (
-			(firmwareRepository === undefined && firmware === undefined) || // None provided
-			(firmwareRepository !== undefined && firmware !== undefined) // Both provided
+			firmwareRepository !== undefined &&
+			firmware !== undefined // Both provided
 		) {
 			throw new Error(
 				`Must provide either -f <firmware> or --repo <firmware repository URL>`,
 			)
 		}
-		if (firmwareRepository !== undefined) {
+		if (firmware === undefined) {
 			if (ghToken === undefined) {
 				try {
 					ghToken = fs
