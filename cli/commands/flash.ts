@@ -141,6 +141,26 @@ export const flashCommand = ({
 			firmwareRepository,
 		},
 	) => {
+		const certs = deviceFileLocations({
+			certsDir,
+			deviceId,
+		})
+
+		try {
+			fs.statSync(certs.certWithCA)
+			fs.statSync(certs.key)
+		} catch {
+			console.error(
+				chalk.red.inverse(' ERROR '),
+				chalk.red(`Could not find the certificate for device ${deviceId}!`),
+			)
+			console.error(
+				chalk.green('You can generate device certificates using'),
+				chalk.greenBright(`node cli create-device-cert -d ${deviceId}`),
+			)
+			process.exit(1)
+		}
+
 		if (
 			firmwareRepository !== undefined &&
 			firmware !== undefined // Both provided
@@ -274,11 +294,6 @@ export const flashCommand = ({
 			chalk.magenta(`Flashing credentials`),
 			chalk.blue(port ?? defaultPort),
 		)
-
-		const certs = deviceFileLocations({
-			certsDir,
-			deviceId,
-		})
 
 		await flashCredentials({
 			at: connection.connection.at,
