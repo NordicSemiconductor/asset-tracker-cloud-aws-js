@@ -95,7 +95,7 @@
     "nock": "13.1.0",
     "octokit-auth-netrc": "1.0.1",
     "pinst": "2.1.6",
-    "prettier": "2.3.0",
+    "prettier": "2.3.1",
     "ts-jest": "27.0.2",
     "typescript": "4.3.2"
   },
