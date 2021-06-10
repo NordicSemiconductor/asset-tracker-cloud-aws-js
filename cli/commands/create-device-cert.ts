@@ -4,7 +4,7 @@ import { randomWords } from '@nordicsemiconductor/random-words'
 import * as path from 'path'
 import {
 	createDeviceCertificate,
-	defaultValidityInDays,
+	defaultDeviceCertificateValidityInDays,
 } from '../jitp/createDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
@@ -24,7 +24,7 @@ export const createDeviceCertCommand = ({
 		},
 		{
 			flags: '-e, --expires <expires>',
-			description: `Validity of device certificate in days. Defaults to ${defaultValidityInDays} days.`,
+			description: `Validity of device certificate in days. Defaults to ${defaultDeviceCertificateValidityInDays} days.`,
 		},
 	],
 	action: async ({

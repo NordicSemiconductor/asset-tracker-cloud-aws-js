@@ -13,6 +13,8 @@ import { caFileLocations } from './caFileLocations'
 import { run } from '../process/run'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 
+export const defaultCAValidityInDays = 356
+
 /**
  * Creates a CA certificate and registers it for Just-in-time provisioning
  * @see https://docs.aws.amazon.com/iot/latest/developerguide/device-certs-your-own.html
@@ -26,6 +28,7 @@ export const createCA = async (args: {
 	attributes?: Record<string, string>
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
+	daysValid?: number
 }): Promise<{ certificateId: string }> => {
 	const { certsDir, log, debug, iot, cf } = args
 	const caFiles = caFileLocations(certsDir)
@@ -91,7 +94,7 @@ export const createCA = async (args: {
 			caFiles.key,
 			'-sha256',
 			'-days',
-			'365',
+			`${args.daysValid ?? defaultCAValidityInDays}`,
 			'-out',
 			caFiles.cert,
 			'-subj',
@@ -130,7 +133,7 @@ export const createCA = async (args: {
 			'-out',
 			caFiles.verificationCert,
 			'-days',
-			'365',
+			`${args.daysValid ?? defaultCAValidityInDays}`,
 			'-sha256',
 		],
 		log: debug,

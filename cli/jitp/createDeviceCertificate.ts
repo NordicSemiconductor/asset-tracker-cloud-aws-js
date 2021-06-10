@@ -4,7 +4,7 @@ import { caFileLocations } from './caFileLocations'
 import { deviceFileLocations } from './deviceFileLocations'
 import { run } from '../process/run'
 
-export const defaultValidityInDays = 10950
+export const defaultDeviceCertificateValidityInDays = 10950
 
 /**
  * Creates a certificate for a device, signed with the CA
@@ -83,7 +83,7 @@ export const createDeviceCertificate = async ({
 			'-out',
 			deviceFiles.cert,
 			'-days',
-			`${daysValid ?? defaultValidityInDays}`,
+			`${daysValid ?? defaultDeviceCertificateValidityInDays}`,
 			'-sha256',
 		],
 		log: debug,
