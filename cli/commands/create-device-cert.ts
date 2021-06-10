@@ -2,7 +2,10 @@ import * as chalk from 'chalk'
 import { CommandDefinition } from './CommandDefinition'
 import { randomWords } from '@nordicsemiconductor/random-words'
 import * as path from 'path'
-import { createDeviceCertificate } from '../jitp/createDeviceCertificate'
+import {
+	createDeviceCertificate,
+	defaultValidityInDays,
+} from '../jitp/createDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
 
@@ -19,9 +22,19 @@ export const createDeviceCertCommand = ({
 			flags: '-d, --deviceId <deviceId>',
 			description: 'Device ID, if left blank a random ID will be generated',
 		},
+		{
+			flags: '-e, --expires <expires>',
+			description: `Validity of device certificate in days. Defaults to ${defaultValidityInDays} days.`,
+		},
 	],
-	action: async ({ deviceId }: { deviceId: string }) => {
-		const id = deviceId || (await randomWords({ numWords: 3 })).join('-')
+	action: async ({
+		deviceId,
+		expires,
+	}: {
+		deviceId?: string
+		expires?: string
+	}) => {
+		const id = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
 		await createDeviceCertificate({
 			deviceId: id,
 			certsDir,
@@ -36,6 +49,7 @@ export const createDeviceCertCommand = ({
 			debug: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.cyan(m)))
 			},
+			daysValid: expires !== undefined ? parseInt(expires, 10) : undefined,
 		})
 		console.log(
 			chalk.green(`Certificate for device ${chalk.yellow(id)} generated.`),

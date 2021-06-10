@@ -111,6 +111,7 @@ export const assetTrackerStepRunners = ({
 						// eslint-disable-next-line @typescript-eslint/no-floating-promises
 						runner.progress('IoT (cert)', ...message)
 					},
+					daysValid: 1,
 				})
 				const deviceFiles = deviceFileLocations({
 					certsDir,

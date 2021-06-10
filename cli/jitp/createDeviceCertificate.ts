@@ -4,6 +4,8 @@ import { caFileLocations } from './caFileLocations'
 import { deviceFileLocations } from './deviceFileLocations'
 import { run } from '../process/run'
 
+export const defaultValidityInDays = 10950
+
 /**
  * Creates a certificate for a device, signed with the CA
  * @see https://docs.aws.amazon.com/iot/latest/developerguide/device-certs-your-own.html
@@ -15,6 +17,7 @@ export const createDeviceCertificate = async ({
 	deviceId,
 	awsIotRootCA,
 	mqttEndpoint,
+	daysValid,
 }: {
 	certsDir: string
 	deviceId: string
@@ -22,6 +25,7 @@ export const createDeviceCertificate = async ({
 	awsIotRootCA: string
 	log?: (...message: any[]) => void
 	debug?: (...message: any[]) => void
+	daysValid?: number
 }): Promise<{ deviceId: string }> => {
 	try {
 		await fs.stat(certsDir)
@@ -79,7 +83,7 @@ export const createDeviceCertificate = async ({
 			'-out',
 			deviceFiles.cert,
 			'-days',
-			'10950',
+			`${daysValid ?? defaultValidityInDays}`,
 			'-sha256',
 		],
 		log: debug,
