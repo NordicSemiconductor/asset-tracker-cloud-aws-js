@@ -35,7 +35,7 @@ export class AssetTrackerApp extends App {
 			key: 'firmware-ci',
 			component: 'Firmware CI',
 			onEnabled: () => {
-				new FirmwareCIStack(this, args)
+				new FirmwareCIStack(this)
 			},
 		})
 		// CD

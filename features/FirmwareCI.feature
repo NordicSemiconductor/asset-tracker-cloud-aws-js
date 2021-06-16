@@ -1,84 +1,58 @@
-Feature: Schedule CI runs of firmware builds
+Feature: Schedula FOTA jobs during Firmware CI runs
 
     As a developer
-    I can schedule runs of the firmware on real devices
+    I can schedule FOTA jobs for firmware that runs on real devices
     so I can continuously ensure that it works
-
-    Note: the resources provided in this project are
-    used to control the actual CI runner.
-    See https://github.com/NordicSemiconductor/cloud-aws-firmware-ci-runner-js
 
     Background:
 
         Given I am authenticated with AWS key "{firmwareCI:userAccessKeyId}" and secret "{firmwareCI:userSecretAccessKey}"
-
-    Scenario: Create a device for the CI runner
-
-        This is typically only needed once when setting up an instance
-        of the firmware CI runner
-
-        Given I create a firmware CI device as "firmwareCIDevice"
 
     Scenario: Create a CI job
 
         This happens for every firmware change
 
         # The job id needs to be unique, do not use the git commit hash
-        Given I have a random UUID in "ciJobId"
-
-        # Create a pre-signed URL which will be used by the firmware CI
-        # runner to store the log output.
-        When I execute "createPresignedPost" of the AWS S3 SDK with
-            """
-            {
-                "Bucket": "{firmwareCI:bucketName}",
-                "Fields": {
-                    "key": "{ciJobId}.json"
-                }
-            }
-            """
-        Then I store "awsSdk.res" into "ciJobReportTarget"
-        And I encode "ciJobReportTarget.fields" into "ciJobReportTargetQuery" using querystring
+        Given I have a random UUID in "jobId"
+        Given I have a random UUID in "ciDeviceId"
 
         # Create a blank new IoT thing (a regular tracker with certificates generated locally)
         # to be used for this specific test run.
         # The firmware is then build specifically for this device.
-        When I generate a certificate for the tracker "firmwaretest-{ciJobId}"
-        Then I encode "$lookup($, 'tracker:firmwaretest-{ciJobId}:clientCert')" into "firmwareTestDeviceCertificatePEM" using replaceNewLines
-        And I encode "$lookup($, 'tracker:firmwaretest-{ciJobId}:privateKey')" into "firmwareTestDeviceCertificatePrivateKey" using replaceNewLines
+        When I generate a certificate for the tracker "firmwaretest-{ciDeviceId}"
+        Then I encode "$lookup($, 'tracker:firmwaretest-{ciDeviceId}:clientCert')" into "firmwareTestDeviceCertificatePEM" using replaceNewLines
+        And I encode "$lookup($, 'tracker:firmwaretest-{ciDeviceId}:privateKey')" into "firmwareTestDeviceCertificatePrivateKey" using replaceNewLines
         And I encode "'{awsIotRootCA}'" into "awsIotRootCAEncoded" using replaceNewLines
 
         # Create a job for the AWS IoT thing used to manage the firmware CI runs
         When I encode this payload into "jobDocument" using JSON
             """
             {
-                "reportUrl": "{ciJobReportTarget.url}?{ciJobReportTargetQuery}",
-                "fw": "https://example.com/asset-tracker-Thingy91-ltem-debug-firmwaretest-{ciJobId}.hex",
-                "target": "thingy91_nrf9160ns:ltem",
-                "credentials": {
-                    "secTag": 42,
-                    "privateKey": "{firmwareTestDeviceCertificatePrivateKey}",
-                    "clientCert": "{firmwareTestDeviceCertificatePEM}",
-                    "caCert": "{awsIotRootCAEncoded}"
-                }
+                "operation": "app_fw_update",
+                "size": 1234,
+                "filename": "asset-tracker-Thingy91-ltem-debug-firmwaretest-{ciDeviceId}.hex",
+                "location": {
+                    "protocol": "https",
+                    "host": "example.com",
+                    "path": "asset-tracker-Thingy91-ltem-debug-firmwaretest-{ciDeviceId}.hex"
+                },
+                "fwversion": "1.2.3",
+                "target": "9160DK"
             }
             """
         And I execute "createJob" of the AWS Iot SDK with
             """
             {
-            "jobId": "{ciJobId}",
-            "targets": ["{firmwareCIDevice:arn}"],
+            "jobId": "{jobId}",
+            "targets": ["firmwaretest-{ciDeviceId}"],
             "document": {jobDocument},
-            "description": "Firmware CI job {ciJobId} for a Thingy:91 with LTE-m",
-            "targetSelection": "SNAPSHOT",
-            "timeoutConfig": {
-            "inProgressTimeoutInMinutes": 60
-            }
+            "description": "Upgrade firmwaretest-{ciDeviceId} to version 1.2.3.",
+            "targetSelection": "SNAPSHOT"
             }
             """
         Then "awsSdk.res.jobId" should equal this JSON
             """
-            "{ciJobId}"
+            "{jobId}"
             """
 
     Scenario: Cancel Job
@@ -86,11 +60,7 @@ Feature: Schedule CI runs of firmware builds
         When I execute "deleteJob" of the AWS Iot SDK with
             """
             {
-                "jobId": "{ciJobId}",
+                "jobId": "{jobId}",
                 "force": true
             }
             """
-
-    Scenario Outline: Delete the device for the CI runner
-
-        Given I delete the firmware CI device "firmwareCIDevice"

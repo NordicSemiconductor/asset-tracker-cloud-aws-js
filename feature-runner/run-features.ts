@@ -26,7 +26,6 @@ import {
 } from '../cdk/stacks/stackName'
 import { promises as fs } from 'fs'
 import * as path from 'path'
-import { firmwareCIStepRunners } from './steps/firmwareCI'
 import { certsDir } from '../cli/jitp/certsDir'
 import { timestreamStepRunners } from './steps/timestream'
 import { queryClient } from '@nordicsemiconductor/timestream-helpers'
@@ -43,7 +42,6 @@ export type AssetTrackerWorld = StackOutputs & {
 	historicaldataDatabaseName: string
 	'firmwareCI:userAccessKeyId': string
 	'firmwareCI:userSecretAccessKey': string
-	'firmwareCI:thingGroupName': string
 	'firmwareCI:bucketName': string
 	awsIotRootCA: string
 	certsDir: string
@@ -106,7 +104,6 @@ program
 				'firmwareCI:userAccessKeyId': firmwareCIStackConfig.userAccessKeyId,
 				'firmwareCI:userSecretAccessKey':
 					firmwareCIStackConfig.userSecretAccessKey,
-				'firmwareCI:thingGroupName': firmwareCIStackConfig.thingGroupName,
 				'firmwareCI:bucketName': firmwareCIStackConfig.bucketName,
 				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
 				historicaldataTableName,
@@ -163,12 +160,6 @@ program
 						}),
 					)
 					.addStepRunners(assetTrackerStepRunners(world))
-					.addStepRunners(
-						firmwareCIStepRunners({
-							...world,
-							iot: new IoTClient({}),
-						}),
-					)
 					.addStepRunners(storageStepRunners())
 					.addStepRunners(
 						randomStepRunners({

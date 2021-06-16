@@ -102,7 +102,6 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 			),
 			firmwareCICommand({
 				endpoint,
-				certsDir,
 			}),
 		)
 	}
