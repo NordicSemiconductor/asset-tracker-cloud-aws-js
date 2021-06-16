@@ -132,7 +132,7 @@ export const assetTrackerStepRunners = ({
 			}
 			return runner.store[`${prefix}:id`]
 		}),
-		regexMatcher<World>(/^I connect the tracker(?: ([^ ]+))?$/)(
+		regexMatcher<World>(/^I connect the tracker(?: "([^"]+)")?$/)(
 			async ([deviceId], __, runner) => {
 				const catId = deviceId ?? runner.store['tracker:id']
 				await runner.progress('IoT', catId)

@@ -18,6 +18,6 @@ export class TestApp extends App {
 		new AssetTrackerStack(this, {
 			...args,
 		})
-		new FirmwareCIStack(this, args)
+		new FirmwareCIStack(this)
 	}
 }
