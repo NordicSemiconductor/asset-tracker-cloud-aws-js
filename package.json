@@ -34,7 +34,7 @@
     "@aws-sdk/client-ssm": "3.18.0",
     "@aws-sdk/client-timestream-query": "3.18.0",
     "@aws-sdk/client-timestream-write": "3.18.0",
-    "@nordicsemiconductor/cell-geolocation-helpers": "3.0.7",
+    "@nordicsemiconductor/cell-geolocation-helpers": "3.0.8",
     "@nordicsemiconductor/random-words": "5.0.0",
     "@nordicsemiconductor/timestream-helpers": "3.1.13",
     "@sinclair/typebox": "0.16.7",
