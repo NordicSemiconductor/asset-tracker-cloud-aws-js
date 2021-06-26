@@ -37,7 +37,7 @@
     "@nordicsemiconductor/cell-geolocation-helpers": "3.0.8",
     "@nordicsemiconductor/random-words": "5.0.0",
     "@nordicsemiconductor/timestream-helpers": "3.1.14",
-    "@sinclair/typebox": "0.16.7",
+    "@sinclair/typebox": "0.17.1",
     "@typescript-eslint/eslint-plugin": "4.28.0",
     "@typescript-eslint/parser": "4.28.0",
     "ajv": "8.6.0",
