@@ -1,4 +1,4 @@
-import * as program from 'commander'
+import { program } from 'commander'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
 import { IoTClient } from '@aws-sdk/client-iot'
