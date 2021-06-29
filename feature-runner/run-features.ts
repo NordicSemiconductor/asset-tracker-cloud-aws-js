@@ -9,7 +9,7 @@ import {
 	RestClient,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import * as program from 'commander'
+import { program } from 'commander'
 import * as chalk from 'chalk'
 import { StackOutputs } from '../cdk/stacks/AssetTracker/stack'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
