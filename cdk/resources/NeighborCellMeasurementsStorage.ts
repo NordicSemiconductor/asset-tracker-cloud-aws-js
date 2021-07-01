@@ -28,7 +28,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 			},
 			sortKey: {
 				name: 'timestamp',
-				type: DynamoDB.AttributeType.STRING,
+				type: DynamoDB.AttributeType.NUMBER,
 			},
 			pointInTimeRecovery: true,
 			removalPolicy:
