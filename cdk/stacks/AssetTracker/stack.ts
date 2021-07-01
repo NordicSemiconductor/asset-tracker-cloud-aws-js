@@ -342,8 +342,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 						Action: ['iot:Publish'],
 						Resource: [
 							'arn:aws:iot:*:*:topic/$aws/things/${iot:ClientId}/*',
-							'arn:aws:iot:*:*:topic/${iot:ClientId}/batch',
-							'arn:aws:iot:*:*:topic/${iot:ClientId}/messages',
+							'arn:aws:iot:*:*:topic/${iot:ClientId}/*',
 						],
 					},
 				],
