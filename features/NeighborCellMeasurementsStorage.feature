@@ -97,11 +97,10 @@ Feature: Store neighboring cell measurement reports
                         "earfcn": { "N": "6446" },
                         "age": { "N": "16378" },
                         "cid": { "N": "21679716" },
-                        "ts": { "N": "1625176112102" }
+                        "ts": { "N": "{ts}" }
                     }
                 },
-                "deviceId": { "S": "{tracker:id}" },
-                "timestamp": { "N": "{ts}" }
+                "deviceId": { "S": "{tracker:id}" }
             }
         ]
         """
