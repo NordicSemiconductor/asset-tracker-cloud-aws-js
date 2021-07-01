@@ -7,7 +7,6 @@ import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import * as CloudWatchLogs from '@aws-cdk/aws-logs'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { NodeJS14Runtime } from './NodeJS14Runtime'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 
 /**
@@ -36,8 +35,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		const getCell = new Lambda.Function(this, 'getCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: NodeJS14Runtime,
+			runtime: Lambda.Runtime.NODEJS_14_X,
+
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellHttpApi,
@@ -67,8 +66,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		const addCell = new Lambda.Function(this, 'addCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: NodeJS14Runtime,
+			runtime: Lambda.Runtime.NODEJS_14_X,
+
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.addCellGeolocationHttpApi,

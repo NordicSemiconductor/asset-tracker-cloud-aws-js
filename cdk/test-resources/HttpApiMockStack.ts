@@ -8,7 +8,6 @@ import { HTTP_MOCK_HTTP_API_STACK_NAME } from '../stacks/stackName'
 import { HTTPAPIMockLambdas } from './prepare-test-resources'
 import * as S3 from '@aws-cdk/aws-s3'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
-import { NodeJS14Runtime } from '../resources/NodeJS14Runtime'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 
 /**
@@ -72,8 +71,7 @@ export class HttpApiMockStack extends CDK.Stack {
 					sourceCodeBucket,
 					packedHTTPAPIMockLambdas.layerZipFileName,
 				),
-				// compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X], // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-				compatibleRuntimes: [NodeJS14Runtime],
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X],
 			},
 		)
 
@@ -89,8 +87,8 @@ export class HttpApiMockStack extends CDK.Stack {
 			code: httpAPIMockLambdas.lambdas.httpApiMock,
 			layers: httpAPIMockLambdas.layers,
 			handler: 'index.handler',
-			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: NodeJS14Runtime,
+			runtime: Lambda.Runtime.NODEJS_14_X,
+
 			timeout: CDK.Duration.seconds(5),
 			initialPolicy: [
 				new IAM.PolicyStatement({

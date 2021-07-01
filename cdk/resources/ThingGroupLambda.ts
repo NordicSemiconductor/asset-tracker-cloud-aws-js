@@ -4,7 +4,6 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { NodeJS14Runtime } from './NodeJS14Runtime'
 import { CDKLambdas } from '../stacks/AssetTracker/lambdas'
 
 export class ThingGroupLambda extends CloudFormation.Resource {
@@ -26,8 +25,8 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 			description:
 				'Used in CloudFormation to create the thing group for the devices',
 			handler: 'index.handler',
-			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: NodeJS14Runtime,
+			runtime: Lambda.Runtime.NODEJS_14_X,
+
 			timeout: CloudFormation.Duration.minutes(1),
 			initialPolicy: [
 				new IAM.PolicyStatement({

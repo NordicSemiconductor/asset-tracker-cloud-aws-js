@@ -6,7 +6,6 @@ import * as Timestream from '@aws-cdk/aws-timestream'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
-import { NodeJS14Runtime } from './NodeJS14Runtime'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 
 /**
@@ -65,8 +64,8 @@ export class HistoricalData extends CloudFormation.Resource {
 		const storeMessagesInTimestream = new Lambda.Function(this, 'lambda', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			// runtime: Lambda.Runtime.NODEJS_14_X, // FIXME: use once CDK has support. See https://github.com/aws/aws-cdk/pull/12861
-			runtime: NodeJS14Runtime,
+			runtime: Lambda.Runtime.NODEJS_14_X,
+
 			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,
 			code: lambdas.lambdas.storeMessagesInTimestream,
