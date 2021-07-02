@@ -18,6 +18,7 @@ import { HistoricalData } from '../../resources/HistoricalData'
 import { warn } from '../../helper/note'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
+import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -461,6 +462,21 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			value: cellGeoApi.api.ref,
 			exportName: `${this.stackName}:geolocationApiId`,
 		})
+
+		// Neighbor Cell Measurements
+		const ncellmeasStorage = new NeighborCellMeasurementsStorage(
+			this,
+			'ncellmeasStorage',
+		)
+		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableName', {
+			value: ncellmeasStorage.reportsTable.tableName,
+			exportName: `${this.stackName}:ncellmeasStorageTableName`,
+		})
+		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableArn', {
+			value: ncellmeasStorage.reportsTable.tableArn,
+			exportName: `${this.stackName}:ncellmeasStorageTableArn`,
+		})
+		ncellmeasStorage.reportsTable.grantReadData(userRole)
 	}
 }
 
@@ -481,4 +497,6 @@ export type StackOutputs = {
 	historicaldataTableInfo: string
 	geolocationApiUrl: string
 	geolocationApiId: string
+	ncellmeasStorageTableName: string
+	ncellmeasStorageTableArn: string
 }
