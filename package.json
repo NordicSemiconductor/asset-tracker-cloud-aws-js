@@ -90,7 +90,7 @@
     "change-case": "4.1.2",
     "commander": "8.0.0",
     "date-fns": "2.22.1",
-    "eslint": "7.29.0",
+    "eslint": "7.30.0",
     "husky": "7.0.0",
     "jest": "27.0.6",
     "lint-staged": "11.0.0",
