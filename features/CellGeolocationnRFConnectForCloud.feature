@@ -5,9 +5,8 @@ Feature: nRF Connect for Cloud Cell Geolocation
 
     Contexts:
 
-    | nw    |
-    | ltem  |
-    | nbiot |
+    | nw    | apiNw |
+    | ltem  | lte   |
 
     Background:
 
@@ -21,13 +20,14 @@ Feature: nRF Connect for Cloud Cell Geolocation
         And I store "$floor($random() * 8000)" into "alt"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/single-cell?deviceIdentifier=nRFAssetTrackerForAWS&eci={cellId}&format=json&mcc=242&mnc=1&tac=30401
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
             """
             {
-                "lat": {lat},
-                "lon": {lng},
-                "alt": {alt},
-                "uncertainty": {accuracy}
+                "accuracy": {accuracy},
+                "location": {
+                    "lat": {lat},
+                    "lng": {lng}
+                }
             }
             """
             
@@ -49,4 +49,16 @@ Feature: nRF Connect for Cloud Cell Geolocation
 
     Scenario: The nRF Connect for Cloud API should have been called
 
-        Then the mock HTTP API should have been called with a GET request to api.nrfcloud.com/v1/location/single-cell?deviceIdentifier=nRFAssetTrackerForAWS&eci={cellId}&format=json&mcc=242&mnc=1&tac=30401
+        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
+            """
+            {
+                "<apiNw>": [
+                    {
+                        "mcc": 242,
+                        "mnc": 1,
+                        "tac": 30401,
+                        "cid": {cellId}
+                    }
+                ]
+            }
+            """
