@@ -81,7 +81,7 @@ Promise.all([
 				warn(
 					'Location Services',
 					`Use ${chalk.greenBright(
-						`node cli configure-api thirdParty unwiredlabs apiKey <API key>`,
+						`node cli configure thirdParty unwiredlabs apiKey <API key>`,
 					)} to set the API key`,
 				)
 				ctx.unwiredlabs = '0'
@@ -97,7 +97,7 @@ Promise.all([
 				warn(
 					'Location Services',
 					`Use ${chalk.greenBright(
-						`node cli configure-api thirdParty nrfconnectforcloud apiKey <API key>`,
+						`node cli configure thirdParty nrfconnectforcloud apiKey <API key>`,
 					)} to set the API key`,
 				)
 				ctx.nrfconnectforcloud = '0'
@@ -113,7 +113,7 @@ Promise.all([
 				warn(
 					'Cell Geolocation',
 					`Use ${chalk.greenBright(
-						`node cli configure-api codebuild github token <token>`,
+						`node cli configure codebuild github token <token>`,
 					)} to set the token`,
 				)
 				ctx.cd = '0'
