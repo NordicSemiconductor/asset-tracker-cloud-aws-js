@@ -2,6 +2,7 @@ import * as CloudFormation from '@aws-cdk/core'
 import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as Lambda from '@aws-cdk/aws-lambda'
+import * as SQS from '@aws-cdk/aws-sqs'
 import { logToCloudWatch } from './logToCloudWatch'
 import { CellGeolocation } from './CellGeolocation'
 import { LambdasWithLayer } from './LambdasWithLayer'
@@ -32,6 +33,53 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
+		const resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
+			fifo: true,
+			queueName: `${`${id}-${this.stack.stackName}`.substr(0, 75)}.fifo`,
+		})
+
+		const fromSQS = new Lambda.Function(this, 'fromSQS', {
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_14_X,
+
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: lambdas.lambdas.invokeStepFunctionFromSQS,
+			description:
+				'Invoke the cell geolocation resolution step function for SQS messages',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: [
+						'sqs:ReceiveMessage',
+						'sqs:DeleteMessage',
+						'sqs:GetQueueAttributes',
+					],
+					resources: [resolutionJobsQueue.queueArn],
+				}),
+			],
+			environment: {
+				STEP_FUNCTION_ARN: cellgeo.stateMachine.stateMachineArn,
+				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
+			},
+		})
+
+		new LambdaLogGroup(this, 'fromSQSLogs', fromSQS)
+
+		fromSQS.addPermission('invokeBySQS', {
+			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
+			sourceArn: resolutionJobsQueue.queueArn,
+		})
+
+		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
+			eventSourceArn: resolutionJobsQueue.queueArn,
+			target: fromSQS,
+			batchSize: 10,
+		})
+
+		cellgeo.stateMachine.grantStartExecution(fromSQS)
+
 		const getCell = new Lambda.Function(this, 'getCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
@@ -48,14 +96,13 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 					resources: [cellgeo.cacheTable.tableArn],
 				}),
 				new IAM.PolicyStatement({
-					resources: [cellgeo.resolutionJobsQueue.queueArn],
+					resources: [resolutionJobsQueue.queueArn],
 					actions: ['sqs:SendMessage'],
 				}),
 			],
 			environment: {
 				CACHE_TABLE: cellgeo.cacheTable.tableName,
-				CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE:
-					cellgeo.resolutionJobsQueue.queueUrl,
+				CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE: resolutionJobsQueue.queueUrl,
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
