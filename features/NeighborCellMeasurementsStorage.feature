@@ -14,11 +14,12 @@ Feature: Store neighboring cell measurement reports
         Then the tracker publishes this message to the topic {tracker:id}/ncellmeas
         """
         {
-            "mccmnc": 24201,
+            "mcc": 242,
+            "mnc": 1,
             "cell": 21679716,
             "area": 40401,
             "earfcn": 6446,
-            "timingAdvance": 80,
+            "adv": 80,
             "rsrp": 50,
             "rsrq": 28,
             "nmr": [
@@ -84,9 +85,10 @@ Feature: Store neighboring cell measurement reports
                         },
                         "rsrq": { "N": "28" },
                         "area": { "N": "40401" },
-                        "timingAdvance": { "N": "80" },
+                        "adv": { "N": "80" },
                         "rsrp": { "N": "50" },
-                        "mccmnc": { "N": "24201" },
+                        "mcc": { "N": "242" },
+                        "mnc": { "N": "1" },
                         "earfcn": { "N": "6446" },
                         "cell": { "N": "21679716" },
                         "ts": { "N": "{ts}" }
