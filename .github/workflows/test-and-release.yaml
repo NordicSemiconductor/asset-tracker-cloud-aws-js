@@ -82,11 +82,13 @@ jobs:
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
           npx cdk bootstrap
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-http-api-mock.js' deploy '*' --require-approval never
-          node cli configure-api cellGeoLocation unwiredlabs apiKey my-secret
-          node cli configure-api cellGeoLocation nrfconnectforcloud apiKey my-secret
+          node cli configure-api thirdParty unwiredlabs apiKey my-secret
+          node cli configure-api thirdParty nrfconnectforcloud apiKey my-secret
+          node cli configure-api ncellmeasGeoLocation nrfconnectforcloud apiKey my-secret
           MOCK_HTTP_API_ENDPOINT=`aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue' | sed -E 's/\/$//g'`
-          node cli configure-api cellGeoLocation unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
-          node cli configure-api cellGeoLocation nrfconnectforcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
+          node cli configure-api thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
+          node cli configure-api thirdParty nrfconnectforcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
+          node cli configure-api ncellmeasGeoLocation nrfconnectforcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' deploy '*' --require-approval never
           node cli create-ca
       - run: node --unhandled-rejections=strict dist/cdk/helper/addFakeRoute.js

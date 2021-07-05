@@ -8,6 +8,7 @@ import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../../resources/AvatarStorage'
 import { FOTAStorage } from '../../resources/FOTAStorage'
 import { CellGeolocation } from '../../resources/CellGeolocation'
+import { NcellmeasGeolocation } from '../../resources/NcellmeasGeolocation'
 import { CellGeolocationApi } from '../../resources/CellGeolocationApi'
 import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
 import { ThingGroup } from '../../resources/ThingGroup'
@@ -438,17 +439,6 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			lambdas,
 		})
 
-		cellgeo.stateMachine.grantStartExecution(userRole)
-
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				actions: ['states:describeExecution'],
-				resources: [
-					`arn:aws:states:${this.region}:${this.account}:execution:${cellgeo.stateMachineName}:*`,
-				],
-			}),
-		)
-
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			lambdas,
 			cellgeo,
@@ -478,6 +468,10 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:ncellmeasStorageTableArn`,
 		})
 		ncellmeasStorage.reportsTable.grantReadData(userRole)
+
+		new NcellmeasGeolocation(this, 'ncellmeasGeolocation', {
+			lambdas,
+		})
 	}
 }
 

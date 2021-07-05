@@ -1,7 +1,7 @@
 import { AssetTrackerApp } from './apps/AssetTracker'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getUnwiredLabsApiSettings } from '../cellGeolocation/settings/unwiredlabs'
-import { getNrfConnectForCloudApiSettings } from '../cellGeolocation/settings/nrfconnectforcloud'
+import { getUnwiredLabsApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
+import { getNrfConnectForCloudApiSettings } from '../third-party/nrfcloud.com/settings'
 import { warn } from './helper/note'
 import { CORE_STACK_NAME } from './stacks/stackName'
 import { getSettings } from '../util/settings'
@@ -75,13 +75,13 @@ Promise.all([
 			const enableUnwiredApi = 'apiKey' in unwiredLabsApiSettings
 			if (!enableUnwiredApi) {
 				warn(
-					'Cell Geolocation',
+					'Location Services',
 					'No UnwiredLabs API key configured. Feature will be disabled.',
 				)
 				warn(
-					'Cell Geolocation',
+					'Location Services',
 					`Use ${chalk.greenBright(
-						`node cli configure-api cellGeoLocation unwiredlabs apiKey <API key>`,
+						`node cli configure-api thirdParty unwiredlabs apiKey <API key>`,
 					)} to set the API key`,
 				)
 				ctx.unwiredlabs = '0'
@@ -91,13 +91,13 @@ Promise.all([
 				'apiKey' in nrfConnectForCloudApiSettings
 			if (!enableNrfConnectForCloudApi) {
 				warn(
-					'Cell Geolocation',
+					'Location Services',
 					'No nRF Connect for Cloud API key configured. Feature will be disabled.',
 				)
 				warn(
-					'Cell Geolocation',
+					'Location Services',
 					`Use ${chalk.greenBright(
-						`node cli configure-api cellGeoLocation nrfconnectforcloud apiKey <API key>`,
+						`node cli configure-api thirdParty nrfconnectforcloud apiKey <API key>`,
 					)} to set the API key`,
 				)
 				ctx.nrfconnectforcloud = '0'
