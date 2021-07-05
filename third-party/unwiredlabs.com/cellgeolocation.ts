@@ -65,9 +65,11 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 					}
 					if (res.statusCode >= 400) {
 						return reject(
-							`Error ${res.statusCode}: "${new Error(
-								Buffer.concat(body).toString(),
-							)}"`,
+							new Error(
+								`Error ${res.statusCode}: "${new Error(
+									Buffer.concat(body).toString(),
+								)}"`,
+							),
 						)
 					}
 					resolve(JSON.parse(Buffer.concat(body).toString()))

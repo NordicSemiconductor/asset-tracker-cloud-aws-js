@@ -5,7 +5,7 @@ import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { Cell } from '../../cellGeolocation/geolocateCell'
 import { fromEnv } from '../../util/fromEnv'
 import { getNrfConnectForCloudApiSettings } from './settings'
-import * as querystring from 'querystring'
+import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -22,31 +22,26 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 
 		// See https://api.nrfcloud.com/v1#operation/GetSingleCellLocation
 		const {
-			lat,
-			lon,
-			uncertainty,
+			location: { lat, lng },
+			accuracy,
 		}: {
-			lat: number
-			lon: number
-			uncertainty: number
+			location: {
+				lat: number
+				lng: number
+			}
+			accuracy: number
 		} = await new Promise((resolve, reject) => {
-			const mccmnc = cell.mccmnc.toFixed(0)
 			const options: RequestOptions = {
 				host: hostname,
+				port: 443,
 				path: `${
 					pathname?.replace(/\/*$/, '') ?? ''
-				}/v1/location/single-cell?${querystring.stringify({
-					deviceIdentifier: 'nRFAssetTrackerForAWS',
-					eci: cell.cell,
-					format: 'json',
-					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
-					mnc: parseInt(mccmnc.substr(-2), 10),
-					tac: cell.area,
-				})}`,
-				method: 'GET',
+				}/v1/location/locate/nRFAssetTrackerForAWS`,
+				method: 'POST',
 				agent: false,
 				headers: {
-					authorization: `Bearer ${apiKey}`,
+					Authorization: `Bearer ${apiKey}`,
+					'Content-Type': 'application/json',
 				},
 			}
 
@@ -73,9 +68,11 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 					}
 					if (res.statusCode >= 400) {
 						return reject(
-							`Error ${res.statusCode}: "${new Error(
-								Buffer.concat(body).toString(),
-							)}"`,
+							new Error(
+								`Error ${res.statusCode}: "${new Error(
+									Buffer.concat(body).toString(),
+								)}"`,
+							),
 						)
 					}
 					resolve(JSON.parse(Buffer.concat(body).toString()))
@@ -84,17 +81,29 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			req.on('error', (e) => {
 				reject(new Error(e.message))
 			})
-
+			const mccmnc = cell.mccmnc.toFixed(0)
+			req.write(
+				JSON.stringify({
+					[cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
+						{
+							cid: cell.cell,
+							mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
+							mnc: parseInt(mccmnc.substr(-2), 10),
+							tac: cell.area,
+						},
+					],
+				}),
+			)
 			req.end()
 		})
 
-		console.debug(JSON.stringify({ lat, lon, uncertainty }))
+		console.debug(JSON.stringify({ lat, lng, accuracy }))
 
-		if (lat !== undefined && lon !== undefined) {
+		if (lat !== undefined && lng !== undefined) {
 			return {
 				lat,
-				lng: lon,
-				accuracy: uncertainty,
+				lng,
+				accuracy,
 				located: true,
 			}
 		}
