@@ -17,13 +17,13 @@ import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import { DeviceCellGeolocations } from './DeviceCellGeolocations'
 
 /**
  * Provides the resources for geolocating LTE/NB-IoT network cells
  */
 export class CellGeolocation extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.Table
-	public readonly deviceCellGeolocationTable: DynamoDB.Table
 	public readonly stateMachine: StepFunctions.IStateMachine
 
 	public constructor(
@@ -31,8 +31,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 		id: string,
 		{
 			lambdas,
+			deviceCellGeo,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			deviceCellGeo: DeviceCellGeolocations
 		},
 	) {
 		super(parent, id)
@@ -76,44 +78,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'fromCacheLogs', fromCache)
 
-		this.deviceCellGeolocationTable = new DynamoDB.Table(
-			this,
-			'deviceCellGeoLocation',
-			{
-				billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
-				partitionKey: {
-					name: 'uuid',
-					type: DynamoDB.AttributeType.STRING,
-				},
-				sortKey: {
-					name: 'timestamp',
-					type: DynamoDB.AttributeType.STRING,
-				},
-				pointInTimeRecovery: true,
-				removalPolicy:
-					this.node.tryGetContext('isTest') === true
-						? CloudFormation.RemovalPolicy.DESTROY
-						: CloudFormation.RemovalPolicy.RETAIN,
-			},
-		)
-
-		const LOCATIONS_TABLE_CELLID_INDEX =
-			'cellIdIndex-720633fc-5dec-4b39-972a-b4347188d69b'
-
-		this.deviceCellGeolocationTable.addGlobalSecondaryIndex({
-			indexName: LOCATIONS_TABLE_CELLID_INDEX,
-			partitionKey: {
-				name: 'cellId',
-				type: DynamoDB.AttributeType.STRING,
-			},
-			sortKey: {
-				name: 'timestamp',
-				type: DynamoDB.AttributeType.STRING,
-			},
-			projectionType: DynamoDB.ProjectionType.INCLUDE,
-			nonKeyAttributes: ['lat', 'lng', 'accuracy'],
-		})
-
 		const fromDevices = new Lambda.Function(this, 'fromDevices', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
@@ -128,14 +92,15 @@ export class CellGeolocation extends CloudFormation.Resource {
 				new IAM.PolicyStatement({
 					actions: ['dynamodb:Query'],
 					resources: [
-						this.deviceCellGeolocationTable.tableArn,
-						`${this.deviceCellGeolocationTable.tableArn}/*`,
+						deviceCellGeo.deviceCellGeolocationTable.tableArn,
+						`${deviceCellGeo.deviceCellGeolocationTable.tableArn}/*`,
 					],
 				}),
 			],
 			environment: {
-				LOCATIONS_TABLE: this.deviceCellGeolocationTable.tableName,
-				LOCATIONS_TABLE_CELLID_INDEX,
+				LOCATIONS_TABLE: deviceCellGeo.deviceCellGeolocationTable.tableName,
+				LOCATIONS_TABLE_CELLID_INDEX:
+					deviceCellGeo.deviceCellGeolocationTableCellIdIndex,
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
@@ -399,13 +364,17 @@ export class CellGeolocation extends CloudFormation.Resource {
 										)
 											.branch(...branches)
 											.next(
-												new StepFunctions.Choice(
-													this,
-													'Resolved from any third party API?',
-												)
-													.when(...checkApiResult(0))
-													.when(...checkApiResult(1))
-													.otherwise(
+												(() => {
+													const choice = new StepFunctions.Choice(
+														this,
+														'Resolved from any third party API?',
+													)
+
+													for (let i = 0; i < branches.length; i++) {
+														choice.when(...checkApiResult(i))
+													}
+
+													choice.otherwise(
 														new StepFunctions.Pass(
 															this,
 															'no: mark cell as not located',
@@ -434,7 +403,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 																),
 															),
 														),
-													),
+													)
+
+													return choice
+												})(),
 											)
 									})(),
 								),
