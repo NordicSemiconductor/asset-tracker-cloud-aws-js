@@ -34,7 +34,7 @@ export const addCellToCacheIfNotExists =
 							})}`,
 						)
 					}
-					const cellGeoLocation = location.value
+					const cellGeolocation = location.value
 					const query = {
 						TableName,
 						Item: {
@@ -42,13 +42,13 @@ export const addCellToCacheIfNotExists =
 								S: cellId({ nw, area, mccmnc, cell }),
 							},
 							lat: {
-								N: `${cellGeoLocation.lat}`,
+								N: `${cellGeolocation.lat}`,
 							},
 							lng: {
-								N: `${cellGeoLocation.lng}`,
+								N: `${cellGeolocation.lng}`,
 							},
 							accuracy: {
-								N: `${cellGeoLocation.accuracy}`,
+								N: `${cellGeolocation.accuracy}`,
 							},
 							ttl: {
 								N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
