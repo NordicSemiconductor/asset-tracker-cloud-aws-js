@@ -14,27 +14,23 @@ Feature: Store neighboring cell measurement reports
         Then the tracker publishes this message to the topic {tracker:id}/ncellmeas
         """
         {
-            "mcc": 242,
-            "mnc": 1,
-            "cid": 21679716,
-            "tac": 40401,
+            "mccmnc": 24201,
+            "cell": 21679716,
+            "area": 40401,
             "earfcn": 6446,
             "timingAdvance": 80,
-            "age": 16378,
             "rsrp": 50,
             "rsrq": 28,
             "nmr": [
                 {
                 "earfcn": 262143,
-                "pci": 501,
-                "timeDiff": 55,
+                "cell": 501,
                 "rsrp": 44,
                 "rsrq": 25
                 },
                 {
                 "earfcn": 262265,
-                "pci": 503,
-                "timeDiff": 50,
+                "cell": 503,
                 "rsrp": 49,
                 "rsrq": 20
                 }
@@ -71,32 +67,28 @@ Feature: Store neighboring cell measurement reports
                                 {
                                     "M": {
                                         "rsrp": { "N": "44" },
-                                        "timeDiff": { "N": "55" },
                                         "rsrq": { "N": "25" },
                                         "earfcn": { "N": "262143" },
-                                        "pci": { "N": "501" }
+                                        "cell": { "N": "501" }
                                     }
                                 },
                                 {
                                     "M": {
                                         "rsrp": { "N": "49" },
-                                        "timeDiff": { "N": "50" },
                                         "rsrq": { "N": "20" },
                                         "earfcn": { "N": "262265" },
-                                        "pci": { "N": "503" }
+                                        "cell": { "N": "503" }
                                     }
                                 }
                             ]
                         },
-                        "mnc": { "N": "1" },
                         "rsrq": { "N": "28" },
-                        "tac": { "N": "40401" },
+                        "area": { "N": "40401" },
                         "timingAdvance": { "N": "80" },
                         "rsrp": { "N": "50" },
-                        "mcc": { "N": "242" },
+                        "mccmnc": { "N": "24201" },
                         "earfcn": { "N": "6446" },
-                        "age": { "N": "16378" },
-                        "cid": { "N": "21679716" },
+                        "cell": { "N": "21679716" },
                         "ts": { "N": "{ts}" }
                     }
                 },
