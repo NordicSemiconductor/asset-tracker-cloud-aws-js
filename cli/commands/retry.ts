@@ -15,7 +15,7 @@ export const retry =
 				if (triesLeft <= 0) throw err
 				lastError = err
 				await new Promise((resolve) => {
-					setTimeout(resolve, backoff(tries - triesLeft))
+					setTimeout(resolve, backoff(tries - triesLeft), [])
 				})
 			}
 		} while (triesLeft > 0)
