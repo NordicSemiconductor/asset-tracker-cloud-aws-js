@@ -20,6 +20,7 @@ import { warn } from '../../helper/note'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
+import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -435,13 +436,20 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		// Cell Geolocation
 
+		const deviceCellGeo = new DeviceCellGeolocations(
+			this,
+			'deviceCellGeolocation',
+		)
+
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			lambdas,
+			deviceCellGeo,
 		})
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			lambdas,
 			cellgeo,
+			deviceCellGeo,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {

@@ -9,6 +9,7 @@ import { LambdasWithLayer } from './LambdasWithLayer'
 import * as CloudWatchLogs from '@aws-cdk/aws-logs'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import { DeviceCellGeolocations } from './DeviceCellGeolocations'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -25,9 +26,11 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		id: string,
 		{
 			cellgeo,
+			deviceCellGeo,
 			lambdas,
 		}: {
 			cellgeo: CellGeolocation
+			deviceCellGeo: DeviceCellGeolocations
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 		},
 	) {
@@ -125,14 +128,14 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 					actions: ['dynamodb:PutItem'],
 					resources: [
 						cellgeo.cacheTable.tableArn,
-						cellgeo.deviceCellGeolocationTable.tableArn,
+						deviceCellGeo.deviceCellGeolocationTable.tableArn,
 					],
 				}),
 			],
 			environment: {
 				CACHE_TABLE: cellgeo.cacheTable.tableName,
 				DEVICE_CELL_GEOLOCATION_TABLE:
-					cellgeo.deviceCellGeolocationTable.tableName,
+					deviceCellGeo.deviceCellGeolocationTable.tableName,
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},

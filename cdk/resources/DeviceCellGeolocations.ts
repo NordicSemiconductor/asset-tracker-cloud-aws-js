@@ -13,6 +13,8 @@ import * as DynamoDB from '@aws-cdk/aws-dynamodb'
  */
 export class DeviceCellGeolocations extends CloudFormation.Resource {
 	public readonly deviceCellGeolocationTable: DynamoDB.Table
+	public readonly deviceCellGeolocationTableCellIdIndex: string =
+		'cellIdIndex-720633fc-5dec-4b39-972a-b4347188d69b'
 
 	public constructor(parent: CloudFormation.Stack, id: string) {
 		super(parent, id)
@@ -38,11 +40,8 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 			},
 		)
 
-		const LOCATIONS_TABLE_CELLID_INDEX =
-			'cellIdIndex-720633fc-5dec-4b39-972a-b4347188d69b'
-
 		this.deviceCellGeolocationTable.addGlobalSecondaryIndex({
-			indexName: LOCATIONS_TABLE_CELLID_INDEX,
+			indexName: this.deviceCellGeolocationTableCellIdIndex,
 			partitionKey: {
 				name: 'cellId',
 				type: DynamoDB.AttributeType.STRING,
