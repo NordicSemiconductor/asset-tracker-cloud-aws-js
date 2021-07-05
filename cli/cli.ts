@@ -20,7 +20,7 @@ import { purgeCAsCommand } from './commands/purge-cas'
 import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 import { flashCommand } from './commands/flash'
-import { configureAPICommand } from './commands/configure-api'
+import { configureCommand } from './commands/configure'
 import { showAPIConfigurationCommand } from './commands/show-api-configuration'
 
 const iot = new IoTClient({})
@@ -79,7 +79,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		cdCommand(),
 		purgeIotUserPolicyPrincipals(),
 		logsCommand(),
-		configureAPICommand(),
+		configureCommand(),
 		showAPIConfigurationCommand(),
 	]
 
