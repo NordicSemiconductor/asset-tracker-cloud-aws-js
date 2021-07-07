@@ -49,12 +49,17 @@ export const handler = async (
 
 	const report = await locator(valid.right.id)()
 	if (E.isLeft(report)) {
-		return res(toStatusCode[ErrorType.EntityNotFound], {
-			expires: 86400,
-		})({
-			type: ErrorType.EntityNotFound,
-			message: `neighbor cell geolocation not found!`,
-		})()
+		if (report.left.type === ErrorType.EntityNotFound) {
+			return res(toStatusCode[report.left.type], {
+				expires: 86400,
+			})({
+				type: ErrorType.EntityNotFound,
+				message: `neighbor cell geolocation not found!`,
+			})()
+		}
+		return res(toStatusCode[report.left.type], {
+			expires: 60,
+		})(report.left)()
 	}
 
 	if ('location' in report.right) {

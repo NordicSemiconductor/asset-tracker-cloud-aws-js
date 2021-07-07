@@ -49,8 +49,11 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			initialPolicy: [
 				logToCloudWatch,
 				new IAM.PolicyStatement({
-					actions: ['dynamodb:GetItem'],
-					resources: [storage.reportsTable.tableArn],
+					actions: ['dynamodb:GetItem', 'dynamodb:Query'],
+					resources: [
+						storage.reportsTable.tableArn,
+						`${storage.reportsTable.tableArn}/*`,
+					],
 				}),
 			],
 			environment: {
@@ -195,13 +198,17 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 							)
 								.branch(...branches)
 								.next(
-									new StepFunctions.Choice(
-										this,
-										'Resolved from any third party API?',
-									)
-										.when(...checkApiResult(0))
-										.when(...checkApiResult(1))
-										.otherwise(
+									(() => {
+										const choice = new StepFunctions.Choice(
+											this,
+											'Resolved from any third party API?',
+										)
+
+										for (let i = 0; i < branches.length; i++) {
+											choice.when(...checkApiResult(i))
+										}
+
+										choice.otherwise(
 											new StepFunctions.Pass(
 												this,
 												'no: mark cell as not located',
@@ -216,7 +223,9 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 														'The neighboring cell measurement report could not be resolved',
 												}),
 											),
-										),
+										)
+										return choice
+									})(),
 								)
 						})(),
 					),

@@ -93,8 +93,11 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 			initialPolicy: [
 				logToCloudWatch,
 				new IAM.PolicyStatement({
-					actions: ['dynamodb:GetItem'],
-					resources: [storage.reportsTable.tableArn],
+					actions: ['dynamodb:GetItem', 'dynamodb:Query'],
+					resources: [
+						storage.reportsTable.tableArn,
+						`${storage.reportsTable.tableArn}/*`,
+					],
 				}),
 				new IAM.PolicyStatement({
 					resources: [resolutionJobsQueue.queueArn],
@@ -188,7 +191,7 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 
 		getReportLocation.addPermission('invokeByHttpApi', {
 			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/cell`,
+			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/report/*/location`,
 		})
 
 		// Add $default route, this is a attempt to fix https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js/issues/455

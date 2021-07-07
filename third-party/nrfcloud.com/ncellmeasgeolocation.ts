@@ -3,7 +3,6 @@ import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
 import { getNrfConnectForCloudApiSettings } from './settings'
-import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
@@ -47,15 +46,12 @@ const ncellmeasSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const inputSchema = Type.Intersect([
-	Type.Object(
-		{
-			nw: Type.Enum(NetworkMode),
-		},
-		{ additionalProperties: false },
-	),
-	ncellmeasSchema,
-])
+const inputSchema = Type.Object({
+	roam: Type.Object({
+		nw: Type.String({ minLength: 1 }),
+	}),
+	report: ncellmeasSchema,
+})
 
 const locateRequestSchema = Type.Dict(ncellmeasSchema)
 
@@ -76,11 +72,14 @@ export const handler = async (
 	const { apiKey, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
 
-	const { nw, ...rest } = valid.right
+	const {
+		roam: { nw },
+		report,
+	} = valid.right
 	const maybeCeollGeolocation = await c.post({
 		resource: 'location/locate/nRFAssetTrackerForAWS',
 		payload: {
-			[nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [rest],
+			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [report],
 		},
 		requestSchema: locateRequestSchema,
 		responseSchema: locateResultSchema,

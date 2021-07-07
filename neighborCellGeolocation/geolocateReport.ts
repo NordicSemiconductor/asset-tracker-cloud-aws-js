@@ -1,4 +1,4 @@
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
 import { Location } from '../geolocation/Location'
@@ -17,24 +17,30 @@ export const geolocateReport =
 	(id: string): TE.TaskEither<ErrorInfo, Report & { location?: Location }> =>
 		TE.tryCatch(
 			async () => {
-				const { Item } = await dynamodb.send(
-					new GetItemCommand({
+				const { Items } = await dynamodb.send(
+					new QueryCommand({
 						TableName,
-						Key: {
-							reportId: {
+						IndexName: 'reportsById',
+						KeyConditionExpression: '#reportId = :reportId',
+						ExpressionAttributeNames: {
+							'#reportId': 'reportId',
+						},
+						ExpressionAttributeValues: {
+							':reportId': {
 								S: id,
 							},
 						},
-						ProjectionExpression: 'nw,lat,lng,accuracy,unresolved,report,roam',
+						Limit: 1,
+						ProjectionExpression: 'lat,lng,accuracy,unresolved,report,roam',
 					}),
 				)
 
-				if (Item) {
-					const entry = unmarshall(Item)
+				if (Items?.[0] !== undefined) {
+					const entry = unmarshall(Items?.[0])
 					const report: Report & { location?: Location } = {
 						unresolved: !('lat' in entry),
 						report: entry.report as Record<string, any>,
-						roam: { nw: entry.roam.nw as string },
+						roam: { nw: entry.roam.v.nw as string },
 					}
 					if ('lat' in entry) {
 						report.location = {
@@ -61,6 +67,7 @@ export const geolocateReport =
 					JSON.stringify({
 						geolocateReport: {
 							err,
+							errorMessage: (err as Error).message,
 							id,
 							TableName,
 						},

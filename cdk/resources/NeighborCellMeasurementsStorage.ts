@@ -38,7 +38,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 		})
 
 		this.reportsTable.addGlobalSecondaryIndex({
-			indexName: 'byReportId',
+			indexName: 'reportsById',
 			partitionKey: {
 				name: 'reportId',
 				type: DynamoDB.AttributeType.STRING,
@@ -48,7 +48,14 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				type: DynamoDB.AttributeType.NUMBER,
 			},
 			projectionType: DynamoDB.ProjectionType.INCLUDE,
-			nonKeyAttributes: ['report', 'roam'],
+			nonKeyAttributes: [
+				'report',
+				'roam',
+				'unresolved',
+				'lng',
+				'lat',
+				'accuracy',
+			],
 		})
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
