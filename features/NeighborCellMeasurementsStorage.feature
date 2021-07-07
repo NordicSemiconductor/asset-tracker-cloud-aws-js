@@ -1,3 +1,4 @@
+@Only
 Feature: Store neighboring cell measurement reports
 
     Neighboring cell measurement reports are too big to be stored in the AWS
@@ -7,6 +8,8 @@ Feature: Store neighboring cell measurement reports
 
         Given I am run after the "Device: Update Shadow" feature
         And I am authenticated with Cognito
+        And I store "$floor($random() * 100000000)" into "ncellmeasCellId"
+        And I store "$floor($random() * 100000000)" into "ncellmeasAreaId"
 
     Scenario: Device publishes %NCELLMEAS report
 
@@ -16,8 +19,8 @@ Feature: Store neighboring cell measurement reports
         {
             "mcc": 242,
             "mnc": 1,
-            "cell": 21679716,
-            "area": 40401,
+            "cell": {ncellmeasCellId},
+            "area": {ncellmeasAreaId},
             "earfcn": 6446,
             "adv": 80,
             "rsrp": 50,
@@ -54,7 +57,8 @@ Feature: Store neighboring cell measurement reports
                 ":deviceId": {
                 "S": "{tracker:id}"
                 }
-            }
+            },
+            "Limit": 1
         }
         """
         Then "awsSdk.res.Items" should match this JSON
@@ -62,36 +66,46 @@ Feature: Store neighboring cell measurement reports
         [
             {
                 "report": {
-                    "M": {
-                        "nmr": {
-                            "L": [
-                                {
-                                    "M": {
-                                        "rsrp": { "N": "44" },
-                                        "rsrq": { "N": "25" },
-                                        "earfcn": { "N": "262143" },
-                                        "cell": { "N": "501" }
-                                    }
-                                },
-                                {
-                                    "M": {
-                                        "rsrp": { "N": "49" },
-                                        "rsrq": { "N": "20" },
-                                        "earfcn": { "N": "262265" },
-                                        "cell": { "N": "503" }
-                                    }
-                                }
-                            ]
+                "M": {
+                    "nmr": {
+                    "L": [
+                        {
+                        "M": {
+                            "rsrp": { "N": "44" },
+                            "rsrq": { "N": "25" },
+                            "earfcn": { "N": "262143" },
+                            "cell": { "N": "501" }
+                        }
                         },
-                        "rsrq": { "N": "28" },
-                        "area": { "N": "40401" },
-                        "adv": { "N": "80" },
-                        "rsrp": { "N": "50" },
-                        "mcc": { "N": "242" },
-                        "mnc": { "N": "1" },
-                        "earfcn": { "N": "6446" },
-                        "cell": { "N": "21679716" },
-                        "ts": { "N": "{ts}" }
+                        {
+                        "M": {
+                            "rsrp": { "N": "49" },
+                            "rsrq": { "N": "20" },
+                            "earfcn": { "N": "262265" },
+                            "cell": { "N": "503" }
+                        }
+                        }
+                    ]
+                    },
+                    "rsrq": { "N": "28" },
+                    "area": { "N": "{ncellmeasAreaId}" },
+                    "adv": { "N": "80" },
+                    "rsrp": { "N": "50" },
+                    "mcc": { "N": "242" },
+                    "mnc": { "N": "1" },
+                    "earfcn": { "N": "6446" },
+                    "cell": { "N": "{ncellmeasCellId}" },
+                    "ts": { "N": "{ts}" }
+                }
+                },
+                "roam": {
+                    "M": {
+                        "v": {
+                            "M": {
+                                "band": { "N": "3" },
+                                "nw": { "S": "NB-IoT GPS" }
+                            }
+                        }
                     }
                 },
                 "deviceId": { "S": "{tracker:id}" }

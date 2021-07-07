@@ -1,13 +1,14 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
-import { Cell } from '../../cellGeolocation/geolocateCell'
 import { fromEnv } from '../../util/fromEnv'
 import { getNrfConnectForCloudApiSettings } from './settings'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
+import { locateResultSchema } from './locate'
+import { Cell } from '../../geolocation/Cell'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -16,21 +17,13 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 	stackName,
 })
 
-const locateResultSchema = Type.Object({
-	location: Type.Object({
-		lat: Type.Number({ minimum: -90, maximum: 90 }),
-		lng: Type.Number({ minimum: -180, maximum: 180 }),
-	}),
-	accuracy: Type.Number({ minimum: 0 }),
-})
-
 const locateRequestSchema = Type.Dict(
 	Type.Object(
 		{
-			cid: Type.Number({ minimum: 1 }),
-			mcc: Type.Number({ minimum: 100, maximum: 999 }),
-			mnc: Type.Number({ minimum: 1, maximum: 99 }),
-			tac: Type.Number({ minimum: 1 }),
+			cid: Type.Integer({ minimum: 1 }),
+			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
+			mnc: Type.Integer({ minimum: 1, maximum: 99 }),
+			tac: Type.Integer({ minimum: 1 }),
 		},
 		{ additionalProperties: false },
 	),

@@ -1,7 +1,7 @@
 import { chain, left, right, TaskEither, tryCatch } from 'fp-ts/lib/TaskEither'
 import { request as nodeRequest, RequestOptions } from 'https'
 import { URL } from 'url'
-import { ErrorInfo, ErrorType } from '../../cellGeolocation/ErrorInfo'
+import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
 import { Static, TSchema } from '@sinclair/typebox'
 import { pipe } from 'fp-ts/lib/function'
 import Ajv from 'ajv'

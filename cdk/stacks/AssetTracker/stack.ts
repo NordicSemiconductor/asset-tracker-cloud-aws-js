@@ -8,7 +8,6 @@ import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
 import { AvatarStorage } from '../../resources/AvatarStorage'
 import { FOTAStorage } from '../../resources/FOTAStorage'
 import { CellGeolocation } from '../../resources/CellGeolocation'
-import { NcellmeasGeolocation } from '../../resources/NcellmeasGeolocation'
 import { CellGeolocationApi } from '../../resources/CellGeolocationApi'
 import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
 import { ThingGroup } from '../../resources/ThingGroup'
@@ -21,6 +20,8 @@ import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
 import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
+import { NeighborCellGeolocationApi } from '../../resources/NeighborCellGeolocationApi'
+import { NeighborCellGeolocation } from '../../resources/NeighborCellGeolocation'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -463,6 +464,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 
 		// Neighbor Cell Measurements
+
 		const ncellmeasStorage = new NeighborCellMeasurementsStorage(
 			this,
 			'ncellmeasStorage',
@@ -477,8 +479,33 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 		ncellmeasStorage.reportsTable.grantReadData(userRole)
 
-		new NcellmeasGeolocation(this, 'ncellmeasGeolocation', {
-			lambdas,
+		const ncellmeasGeolocation = new NeighborCellGeolocation(
+			this,
+			'neighborCellGeolocation',
+			{
+				lambdas,
+				storage: ncellmeasStorage,
+			},
+		)
+
+		const neighborCellGeolocationApi = new NeighborCellGeolocationApi(
+			this,
+			'neighborCellGeolocationApi',
+			{
+				geolocation: ncellmeasGeolocation,
+				lambdas,
+				storage: ncellmeasStorage,
+			},
+		)
+
+		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiUrl', {
+			value: `https://${neighborCellGeolocationApi.api.ref}.execute-api.${this.region}.amazonaws.com/${neighborCellGeolocationApi.stage.stageName}/`,
+			exportName: `${this.stackName}:neighborCellGeolocationApiUrl`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiId', {
+			value: neighborCellGeolocationApi.api.ref,
+			exportName: `${this.stackName}:neighborCellGeolocationApiId`,
 		})
 	}
 }
@@ -500,6 +527,8 @@ export type StackOutputs = {
 	historicaldataTableInfo: string
 	geolocationApiUrl: string
 	geolocationApiId: string
+	neighborCellGeolocationApiUrl: string
+	neighborCellGeolocationApiId: string
 	ncellmeasStorageTableName: string
 	ncellmeasStorageTableArn: string
 }

@@ -88,7 +88,6 @@ export class HttpApiMockStack extends CDK.Stack {
 			layers: httpAPIMockLambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CDK.Duration.seconds(5),
 			initialPolicy: [
 				new IAM.PolicyStatement({

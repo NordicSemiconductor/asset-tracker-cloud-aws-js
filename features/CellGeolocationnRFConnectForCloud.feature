@@ -1,7 +1,7 @@
 Feature: nRF Connect for Cloud Cell Geolocation
 
     Optionally, cell locations can be resolved using the nRF Connect for Cloud API
-    Note: nRF Connect for Cloud's cell geolocation API does not distinguish between different network modes.
+    Note: nRF Connect for Cloud's geolocation API does not distinguish between different network modes.
 
     Contexts:
 
@@ -13,11 +13,9 @@ Feature: nRF Connect for Cloud Cell Geolocation
         This enques a mock response on the mock HTTP API the stack is configure
         to use for the nRF Connect for Cloud integration
 
-        # Given I am run after the "Cell Geolocation API" feature
-        And the endpoint is "{geolocationApiUrl}"
+        Given the endpoint is "{geolocationApiUrl}"
         Given I store "$floor($random() * 100000000)" into "cellId"
         And I store "$floor($random() * 20000)" into "accuracy"
-        And I store "$floor($random() * 8000)" into "alt"
         And I store "$random() * 90" into "lat"
         And I store "$random() * 180" into "lng"
         And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS

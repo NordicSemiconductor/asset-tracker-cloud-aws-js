@@ -35,7 +35,20 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				this.node.tryGetContext('isTest') === true
 					? CloudFormation.RemovalPolicy.DESTROY
 					: CloudFormation.RemovalPolicy.RETAIN,
-			timeToLiveAttribute: 'ttl',
+		})
+
+		this.reportsTable.addGlobalSecondaryIndex({
+			indexName: 'byReportId',
+			partitionKey: {
+				name: 'reportId',
+				type: DynamoDB.AttributeType.STRING,
+			},
+			sortKey: {
+				name: 'timestamp',
+				type: DynamoDB.AttributeType.NUMBER,
+			},
+			projectionType: DynamoDB.ProjectionType.INCLUDE,
+			nonKeyAttributes: ['report', 'roam'],
 		})
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
@@ -49,6 +62,10 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
 							],
 						}),
+						new IAM.PolicyStatement({
+							actions: ['iot:GetThingShadow'],
+							resources: ['*'],
+						}),
 					],
 				}),
 			},
@@ -61,7 +78,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				description:
 					'Store all neighboring cell measurement reports sent by devices in DynamoDB',
 				ruleDisabled: false,
-				sql: "SELECT * as report, clientid() as deviceId, timestamp() as timestamp FROM '+/ncellmeas'",
+				sql: `SELECT * as report, clientid() as deviceId, timestamp() as timestamp, newuuid() as reportId, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.roam as roam FROM '+/ncellmeas'`,
 				actions: [
 					{
 						dynamoDBv2: {

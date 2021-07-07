@@ -2,30 +2,31 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import {
-	geolocateCellFromCache,
-	queueCellGeolocationResolutionJob,
-} from '../geolocateCell'
-import { toStatusCode, ErrorType } from '../ErrorInfo'
-import { res } from './res'
+	cellId,
+	NetworkMode,
+} from '@nordicsemiconductor/cell-geolocation-helpers'
+import { geolocateFromCache } from '../geolocateFromCache'
+import { toStatusCode, ErrorType } from '../../api/ErrorInfo'
+import { res } from '../../api/res'
 import { SQSClient } from '@aws-sdk/client-sqs'
 import { getOrElse } from '../../util/fp-ts'
 import { fromEnv } from '../../util/fromEnv'
 import { Type } from '@sinclair/typebox'
-import { validateWithJSONSchema } from './validateWithJSONSchema'
+import { queueJob } from '../../geolocation/queueJob'
+import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 
 const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
 	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',
 	cacheTable: 'CACHE_TABLE',
 })(process.env)
 
-const locator = geolocateCellFromCache({
+const locator = geolocateFromCache({
 	dynamodb: new DynamoDBClient({}),
 	TableName: cacheTable,
 })
 
-const q = queueCellGeolocationResolutionJob({
+const q = queueJob({
 	QueueUrl: cellGeolocationResolutionJobsQueue,
 	sqs: new SQSClient({}),
 })
@@ -78,7 +79,7 @@ export const handler = async (
 				locator(cell),
 				getOrElse.TE(() =>
 					pipe(
-						q(cell),
+						q({ payload: cell, deduplicationId: cellId(cell) }),
 						TE.fold(
 							(err) => TE.left(err),
 							() =>

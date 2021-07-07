@@ -1,4 +1,4 @@
-import { Location } from '../geolocateCell'
+import { Location } from '../../geolocation/Location'
 
 export type MaybeCellGeoLocation = {
 	located: boolean

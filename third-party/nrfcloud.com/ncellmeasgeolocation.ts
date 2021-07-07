@@ -1,11 +1,14 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { request as nodeRequest, RequestOptions } from 'https'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
-import { Cell } from '../../cellGeolocation/geolocateCell'
 import { fromEnv } from '../../util/fromEnv'
 import { getNrfConnectForCloudApiSettings } from './settings'
-import * as querystring from 'querystring'
+import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
+import { Static, Type } from '@sinclair/typebox'
+import { apiClient } from './apiclient'
+import { isLeft } from 'fp-ts/lib/Either'
+import { locateResultSchema } from './locate'
+import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -14,94 +17,89 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 	stackName,
 })
 
-export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
-	console.log(JSON.stringify(cell))
-	try {
-		const { apiKey, endpoint } = await fetchSettings()
-		const { hostname, pathname } = new URL(endpoint)
+const PositiveInteger = Type.Integer({ minimum: 1 })
 
-		// See https://api.nrfcloud.com/v1#operation/GetSingleCellLocation
-		const {
-			lat,
-			lon,
-			uncertainty,
-		}: {
-			lat: number
-			lon: number
-			uncertainty: number
-		} = await new Promise((resolve, reject) => {
-			const mccmnc = cell.mccmnc.toFixed(0)
-			const options: RequestOptions = {
-				host: hostname,
-				path: `${
-					pathname?.replace(/\/*$/, '') ?? ''
-				}/v1/location/single-cell?${querystring.stringify({
-					deviceIdentifier: 'nRFAssetTrackerForAWS',
-					eci: cell.cell,
-					format: 'json',
-					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
-					mnc: parseInt(mccmnc.substr(-2), 10),
-					tac: cell.area,
-				})}`,
-				method: 'GET',
-				agent: false,
-				headers: {
-					authorization: `Bearer ${apiKey}`,
-				},
-			}
+const ncellmeasSchema = Type.Object(
+	{
+		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
+		mnc: Type.Integer({ minimum: 1, maximum: 99 }),
+		cell: PositiveInteger,
+		area: PositiveInteger,
+		earfcn: PositiveInteger,
+		adv: PositiveInteger,
+		rsrp: PositiveInteger,
+		rsrq: PositiveInteger,
+		nmr: Type.Optional(
+			Type.Array(
+				Type.Object(
+					{
+						cell: PositiveInteger,
+						earfcn: PositiveInteger,
+						rsrp: PositiveInteger,
+						rsrq: PositiveInteger,
+					},
+					{ additionalProperties: false },
+				),
+				{ minItems: 1 },
+			),
+		),
+	},
+	{ additionalProperties: false },
+)
 
-			console.debug(
-				JSON.stringify(options).replace(apiKey, `${apiKey.substr(0, 3)}***`),
-			)
+const inputSchema = Type.Intersect([
+	Type.Object(
+		{
+			nw: Type.Enum(NetworkMode),
+		},
+		{ additionalProperties: false },
+	),
+	ncellmeasSchema,
+])
 
-			const req = nodeRequest(options, (res) => {
-				console.debug(
-					JSON.stringify({
-						response: {
-							statusCode: res.statusCode,
-							headers: res.headers,
-						},
-					}),
-				)
-				const body: Uint8Array[] = []
-				res.on('data', (d) => {
-					body.push(d)
-				})
-				res.on('end', () => {
-					if (res.statusCode === undefined) {
-						return reject(new Error('No response received!'))
-					}
-					if (res.statusCode >= 400) {
-						return reject(
-							`Error ${res.statusCode}: "${new Error(
-								Buffer.concat(body).toString(),
-							)}"`,
-						)
-					}
-					resolve(JSON.parse(Buffer.concat(body).toString()))
-				})
-			})
-			req.on('error', (e) => {
-				reject(new Error(e.message))
-			})
+const locateRequestSchema = Type.Dict(ncellmeasSchema)
 
-			req.end()
-		})
+const validateInput = validateWithJSONSchema(inputSchema)
 
-		console.debug(JSON.stringify({ lat, lon, uncertainty }))
-
-		if (lat !== undefined && lon !== undefined) {
-			return {
-				lat,
-				lng: lon,
-				accuracy: uncertainty,
-				located: true,
-			}
+export const handler = async (
+	ncellmeas: Static<typeof inputSchema>,
+): Promise<MaybeCellGeoLocation> => {
+	console.log(JSON.stringify(ncellmeas))
+	const valid = validateInput(ncellmeas)
+	if (isLeft(valid)) {
+		console.error(JSON.stringify(valid.left))
+		return {
+			located: false,
 		}
-	} catch (err) {
-		console.error(JSON.stringify({ error: err.message }))
 	}
+
+	const { apiKey, endpoint } = await fetchSettings()
+	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
+
+	const { nw, ...rest } = valid.right
+	const maybeCeollGeolocation = await c.post({
+		resource: 'location/locate/nRFAssetTrackerForAWS',
+		payload: {
+			[nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [rest],
+		},
+		requestSchema: locateRequestSchema,
+		responseSchema: locateResultSchema,
+	})()
+	if (isLeft(maybeCeollGeolocation)) {
+		console.error(JSON.stringify(maybeCeollGeolocation.left))
+		return {
+			located: false,
+		}
+	}
+	const {
+		location: { lat, lng },
+		accuracy,
+	} = maybeCeollGeolocation.right
+	console.debug(JSON.stringify({ lat, lng, accuracy }))
 	return {
-		located: false,
+		lat,
+		lng,
+		accuracy,
+		located: true,
 	}
 }

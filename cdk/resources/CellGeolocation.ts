@@ -20,7 +20,7 @@ import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import { DeviceCellGeolocations } from './DeviceCellGeolocations'
 
 /**
- * Provides the resources for geolocating LTE/NB-IoT network cells
+ * Describes the step functions which resolves the geolocation of LTE/NB-IoT network cells using third-party location providers
  */
 export class CellGeolocation extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.Table
@@ -57,10 +57,9 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
+			code: lambdas.lambdas.geolocateFromCacheStepFunction,
 			description: 'Geolocate cells from cache',
 			initialPolicy: [
 				logToCloudWatch,
@@ -82,7 +81,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
@@ -112,7 +110,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
 			code: lambdas.lambdas.cacheCellGeolocationStepFunction,
@@ -146,7 +143,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 					layers: lambdas.layers,
 					handler: 'index.handler',
 					runtime: Lambda.Runtime.NODEJS_14_X,
-
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
 					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
@@ -184,7 +180,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 						layers: lambdas.layers,
 						handler: 'index.handler',
 						runtime: Lambda.Runtime.NODEJS_14_X,
-
 						timeout: CloudFormation.Duration.seconds(10),
 						memorySize: 1792,
 						code: lambdas.lambdas

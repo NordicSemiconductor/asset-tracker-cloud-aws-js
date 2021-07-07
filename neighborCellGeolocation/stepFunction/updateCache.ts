@@ -1,35 +1,30 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
-import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { MaybeCellGeoLocation } from './types'
+import { MaybeLocation } from '../../geolocation/types'
 import { fromEnv } from '../../util/fromEnv'
-import { Cell } from '../../geolocation/Cell'
 
 const { TableName } = fromEnv({
-	TableName: 'CACHE_TABLE',
+	TableName: 'REPORTS_TABLE',
 })(process.env)
 const dynamodb = new DynamoDBClient({})
 
 export const handler = async (
-	maybeLocatedCell: Cell & {
-		cellgeo: MaybeCellGeoLocation
+	maybeLocatedReport: { reportId: string } & {
+		ncellmeasgeo: MaybeLocation
 	},
 ): Promise<boolean> => {
 	console.log(
 		JSON.stringify({
-			geolocatedCell: maybeLocatedCell,
+			ncellmeasgeo: maybeLocatedReport,
 		}),
 	)
-	const { located } = maybeLocatedCell.cellgeo
+	const { located } = maybeLocatedReport.ncellmeasgeo
 	let Item = {
-		cellId: {
-			S: cellId(maybeLocatedCell),
-		},
-		ttl: {
-			N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,
+		reportId: {
+			S: maybeLocatedReport.reportId,
 		},
 	}
 	if (located) {
-		const { lat, lng, accuracy } = maybeLocatedCell.cellgeo
+		const { lat, lng, accuracy } = maybeLocatedReport.ncellmeasgeo
 		Item = {
 			...Item,
 			...{

@@ -11,13 +11,16 @@ export type AssetTrackerLambdas = {
 	storeMessagesInTimestream: string
 	geolocateCellHttpApi: string
 	invokeStepFunctionFromSQS: string
-	geolocateCellFromCacheStepFunction: string
+	geolocateFromCacheStepFunction: string
 	geolocateCellFromDeviceLocationsStepFunction: string
 	geolocateCellFromUnwiredLabsStepFunction: string
 	geolocateCellFromNrfConnectForCloudStepFunction: string
-	ncellmeasGeolocationFromNrfConnectForCloudStepFunction: string
+	neighborCellGeolocationFromNrfConnectForCloudStepFunction: string
 	cacheCellGeolocationStepFunction: string
 	addCellGeolocationHttpApi: string
+	neighborCellGeolocateReportHttpApi: string
+	geolocateNeighborCellFromCacheStepFunction: string
+	cacheNeighborCellGeolocationStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -60,7 +63,7 @@ export const prepareAssetTrackerLambdas = async ({
 					'lambda',
 					'invokeStepFunctionFromSQS.ts',
 				),
-				geolocateCellFromCacheStepFunction: path.resolve(
+				geolocateFromCacheStepFunction: path.resolve(
 					rootDir,
 					'cellGeolocation',
 					'stepFunction',
@@ -102,11 +105,29 @@ export const prepareAssetTrackerLambdas = async ({
 					'httpApi',
 					'addCellGeolocation.ts',
 				),
-				ncellmeasGeolocationFromNrfConnectForCloudStepFunction: path.resolve(
+				neighborCellGeolocationFromNrfConnectForCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
 					'nrfcloud.com',
 					'ncellmeasgeolocation.ts',
+				),
+				neighborCellGeolocateReportHttpApi: path.resolve(
+					rootDir,
+					'neighborCellGeolocation',
+					'httpApi',
+					'locateReport.ts',
+				),
+				cacheNeighborCellGeolocationStepFunction: path.resolve(
+					rootDir,
+					'neighborCellGeolocation',
+					'stepFunction',
+					'updateCache.ts',
+				),
+				geolocateNeighborCellFromCacheStepFunction: path.resolve(
+					rootDir,
+					'neighborCellGeolocation',
+					'stepFunction',
+					'fromCache.ts',
 				),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
