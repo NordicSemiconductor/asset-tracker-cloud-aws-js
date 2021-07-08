@@ -333,6 +333,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 						Action: ['iot:Subscribe'],
 						Resource: [
 							'arn:aws:iot:*:*:topicfilter/$aws/things/${iot:ClientId}/*',
+                                                        'arn:aws:iot:*:*:topicfilter/${iot:ClientId}/*',
 						],
 					},
 					{
