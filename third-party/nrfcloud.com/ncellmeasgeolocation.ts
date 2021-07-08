@@ -18,42 +18,44 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 
 const PositiveInteger = Type.Integer({ minimum: 1 })
 
-const ncellmeasSchema = Type.Object(
-	{
-		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-		mnc: Type.Integer({ minimum: 1, maximum: 99 }),
-		cell: PositiveInteger,
-		area: PositiveInteger,
-		earfcn: PositiveInteger,
-		adv: PositiveInteger,
-		rsrp: PositiveInteger,
-		rsrq: PositiveInteger,
-		nmr: Type.Optional(
-			Type.Array(
-				Type.Object(
-					{
-						cell: PositiveInteger,
-						earfcn: PositiveInteger,
-						rsrp: PositiveInteger,
-						rsrq: PositiveInteger,
-					},
-					{ additionalProperties: false },
-				),
-				{ minItems: 1 },
+const ncellmeasSchema = Type.Object({
+	mcc: Type.Integer({ minimum: 100, maximum: 999 }),
+	mnc: Type.Integer({ minimum: 1, maximum: 99 }),
+	cell: PositiveInteger,
+	area: PositiveInteger,
+	earfcn: PositiveInteger,
+	adv: PositiveInteger,
+	rsrp: PositiveInteger,
+	rsrq: PositiveInteger,
+	nmr: Type.Optional(
+		Type.Array(
+			Type.Object(
+				{
+					cell: PositiveInteger,
+					earfcn: PositiveInteger,
+					rsrp: PositiveInteger,
+					rsrq: PositiveInteger,
+				},
+				{ additionalProperties: false },
 			),
+			{ minItems: 1 },
 		),
-	},
-	{ additionalProperties: false },
-)
+	),
+})
 
 const inputSchema = Type.Object({
 	roam: Type.Object({
 		nw: Type.String({ minLength: 1 }),
 	}),
-	report: ncellmeasSchema,
+	report: Type.Intersect([
+		ncellmeasSchema,
+		Type.Object({ ts: PositiveInteger }),
+	]),
 })
 
-const locateRequestSchema = Type.Dict(ncellmeasSchema)
+const locateRequestSchema = Type.Dict(
+	Type.Array(ncellmeasSchema, { minItems: 1 }),
+)
 
 const validateInput = validateWithJSONSchema(inputSchema)
 
@@ -76,10 +78,11 @@ export const handler = async (
 		roam: { nw },
 		report,
 	} = valid.right
+	const { ts, ...reportWithoutTs } = report
 	const maybeCeollGeolocation = await c.post({
 		resource: 'location/locate/nRFAssetTrackerForAWS',
 		payload: {
-			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [report],
+			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [reportWithoutTs],
 		},
 		requestSchema: locateRequestSchema,
 		responseSchema: locateResultSchema,

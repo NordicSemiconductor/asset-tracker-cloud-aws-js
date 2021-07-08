@@ -1,4 +1,4 @@
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 import { MaybeLocation } from '../../geolocation/types'
 import { fromEnv } from '../../util/fromEnv'
 
@@ -8,7 +8,11 @@ const { TableName } = fromEnv({
 const dynamodb = new DynamoDBClient({})
 
 export const handler = async (
-	maybeLocatedReport: { reportId: string } & {
+	maybeLocatedReport: {
+		reportId: string
+		deviceId: string
+		timestamp: number
+	} & {
 		ncellmeasgeo: MaybeLocation
 	},
 ): Promise<boolean> => {
@@ -18,44 +22,61 @@ export const handler = async (
 		}),
 	)
 	const { located } = maybeLocatedReport.ncellmeasgeo
-	let Item = {
-		reportId: {
-			S: maybeLocatedReport.reportId,
+	const Key = {
+		deviceId: {
+			S: maybeLocatedReport.deviceId,
+		},
+		timestamp: {
+			N: `${maybeLocatedReport.timestamp}`,
 		},
 	}
 	if (located) {
 		const { lat, lng, accuracy } = maybeLocatedReport.ncellmeasgeo
-		Item = {
-			...Item,
-			...{
-				lat: {
-					N: `${lat}`,
+		await dynamodb.send(
+			new UpdateItemCommand({
+				TableName,
+				Key,
+				UpdateExpression:
+					'SET #unresolved = :unresolved, #lat = :lat, #lng = :lng, #accuracy = :accuracy',
+				ExpressionAttributeNames: {
+					'#unresolved': 'unresolved',
+					'#lat': 'lat',
+					'#lng': 'lng',
+					'#accuracy': 'accuracy',
 				},
-				lng: {
-					N: `${lng}`,
+				ExpressionAttributeValues: {
+					':unresolved': {
+						BOOL: false,
+					},
+					':lat': {
+						N: `${lat}`,
+					},
+					':lng': {
+						N: `${lng}`,
+					},
+					':accuracy': {
+						N: `${accuracy}`,
+					},
 				},
-				accuracy: {
-					N: `${accuracy}`,
-				},
-			},
-		}
+			}),
+		)
 	} else {
-		Item = {
-			...Item,
-			...{
-				unresolved: {
-					BOOL: true,
+		await dynamodb.send(
+			new UpdateItemCommand({
+				TableName,
+				Key,
+				UpdateExpression: 'SET #unresolved = :unresolved',
+				ExpressionAttributeNames: {
+					'#unresolved': 'unresolved',
 				},
-			},
-		}
+				ExpressionAttributeValues: {
+					':unresolved': {
+						BOOL: true,
+					},
+				},
+			}),
+		)
 	}
-
-	await dynamodb.send(
-		new PutItemCommand({
-			TableName,
-			Item,
-		}),
-	)
 
 	return true
 }

@@ -80,7 +80,10 @@ export const apiClient = ({
 							const options: RequestOptions = {
 								host: endpoint.hostname,
 								port: 443,
-								path: `/v1/${resource}`,
+								path: `${endpoint.pathname.replace(
+									/\/+$/g,
+									'',
+								)}/v1/${resource}`,
 								method: 'POST',
 								agent: false,
 								headers: {

@@ -1,4 +1,3 @@
-@Only
 Feature: Store neighboring cell measurement reports
 
     Neighboring cell measurement reports are too big to be stored in the AWS
@@ -103,7 +102,7 @@ Feature: Store neighboring cell measurement reports
                         "v": {
                             "M": {
                                 "band": { "N": "3" },
-                                "nw": { "S": "NB-IoT GPS" }
+                                "nw": { "S": "LTE-M GPS" }
                             }
                         }
                     }

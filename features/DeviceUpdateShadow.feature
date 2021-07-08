@@ -1,4 +1,3 @@
-@Only
 Feature: Device: Update Shadow
   Devices can update their shadow
 
@@ -24,7 +23,7 @@ Feature: Device: Update Shadow
         "roam": {
           "v": {
             "band": 3,
-            "nw": "NB-IoT GPS"
+            "nw": "LTE-M GPS"
           },
           "ts": {updateShadowTs}
         },

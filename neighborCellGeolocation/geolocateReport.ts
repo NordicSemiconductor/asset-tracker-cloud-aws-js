@@ -5,6 +5,9 @@ import { Location } from '../geolocation/Location'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 
 type Report = {
+	deviceId: string
+	timestamp: number
+	reportId: string
 	roam: {
 		nw: string
 	}
@@ -24,6 +27,7 @@ export const geolocateReport =
 						KeyConditionExpression: '#reportId = :reportId',
 						ExpressionAttributeNames: {
 							'#reportId': 'reportId',
+							'#timestamp': 'timestamp',
 						},
 						ExpressionAttributeValues: {
 							':reportId': {
@@ -31,13 +35,23 @@ export const geolocateReport =
 							},
 						},
 						Limit: 1,
-						ProjectionExpression: 'lat,lng,accuracy,unresolved,report,roam',
+						ProjectionExpression:
+							'reportId,deviceId,#timestamp,lat,lng,accuracy,unresolved,report,roam',
+					}),
+				)
+
+				console.debug(
+					JSON.stringify({
+						geolocateReport: Items,
 					}),
 				)
 
 				if (Items?.[0] !== undefined) {
 					const entry = unmarshall(Items?.[0])
 					const report: Report & { location?: Location } = {
+						reportId: entry.reportId,
+						deviceId: entry.deviceId,
+						timestamp: entry.timestamp,
 						unresolved: !('lat' in entry),
 						report: entry.report as Record<string, any>,
 						roam: { nw: entry.roam.v.nw as string },

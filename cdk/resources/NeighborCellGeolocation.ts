@@ -109,6 +109,30 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
+		const updateCache = new Lambda.Function(this, 'updateCache', {
+			layers: lambdas.layers,
+			handler: 'index.handler',
+			runtime: Lambda.Runtime.NODEJS_14_X,
+			timeout: CloudFormation.Duration.minutes(1),
+			memorySize: 1792,
+			code: lambdas.lambdas.cacheNeighborCellGeolocationStepFunction,
+			description: 'Caches neighboring cell measurement report geolocations',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['dynamodb:UpdateItem'],
+					resources: [storage.reportsTable.tableArn],
+				}),
+			],
+			environment: {
+				REPORTS_TABLE: storage.reportsTable.tableName,
+				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
+			},
+		})
+
+		new LambdaLogGroup(this, 'updateCacheLogs', updateCache)
+
 		const stateMachineRole = new Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
 		})
@@ -169,11 +193,20 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 								)
 							}
 
-							const success = new StepFunctions.Succeed(
+							const cacheResult = new StepFunctionTasks.LambdaInvoke(
 								this,
-								'Done (resolved using third party API)',
+								'Cache result from third party API',
+								{
+									lambdaFunction: updateCache,
+									resultPath: '$.storedInCache',
+									payloadResponseOnly: true,
+								},
+							).next(
+								new StepFunctions.Succeed(
+									this,
+									'Done (resolved using third party API)',
+								),
 							)
-
 							const checkApiResult = (n: number): [Condition, IChainable] => [
 								StepFunctions.Condition.booleanEquals(
 									`$.ncellmeasgeo[${n}].located`,
@@ -186,7 +219,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 										resultPath: '$.ncellmeasgeo',
 										inputPath: `$.ncellmeasgeo[${n}]`,
 									},
-								).next(success),
+								).next(cacheResult),
 							]
 
 							return new StepFunctions.Parallel(

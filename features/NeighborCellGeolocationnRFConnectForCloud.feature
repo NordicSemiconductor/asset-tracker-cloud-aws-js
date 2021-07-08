@@ -1,4 +1,3 @@
-@Only
 Feature: nRF Connect for Cloud Neighbor Cell Geolocation
 
     Optionally, device locations can be resolved by the nRF Connect for Cloud API using the neighboring cell measurement reports
