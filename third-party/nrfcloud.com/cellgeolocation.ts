@@ -18,14 +18,17 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 })
 
 const locateRequestSchema = Type.Dict(
-	Type.Object(
-		{
-			cid: Type.Integer({ minimum: 1 }),
-			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-			mnc: Type.Integer({ minimum: 1, maximum: 99 }),
-			tac: Type.Integer({ minimum: 1 }),
-		},
-		{ additionalProperties: false },
+	Type.Array(
+		Type.Object(
+			{
+				cid: Type.Integer({ minimum: 1 }),
+				mcc: Type.Integer({ minimum: 100, maximum: 999 }),
+				mnc: Type.Integer({ minimum: 1, maximum: 99 }),
+				tac: Type.Integer({ minimum: 1 }),
+			},
+			{ additionalProperties: false },
+		),
+		{ minItems: 1 },
 	),
 )
 
