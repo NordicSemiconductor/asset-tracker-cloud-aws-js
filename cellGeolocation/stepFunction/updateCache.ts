@@ -1,8 +1,8 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { Cell } from '../geolocateCell'
 import { MaybeCellGeoLocation } from './types'
 import { fromEnv } from '../../util/fromEnv'
+import { Cell } from '../../geolocation/Cell'
 
 const { TableName } = fromEnv({
 	TableName: 'CACHE_TABLE',

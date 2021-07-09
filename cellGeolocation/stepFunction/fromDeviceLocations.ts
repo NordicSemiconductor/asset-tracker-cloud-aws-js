@@ -3,8 +3,8 @@ import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { MaybeCellGeoLocation } from './types'
 import { isSome } from 'fp-ts/lib/Option'
 import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
-import { Cell } from '../geolocateCell'
 import { fromEnv } from '../../util/fromEnv'
+import { Cell } from '../../geolocation/Cell'
 
 const { TableName, IndexName } = fromEnv({
 	TableName: 'LOCATIONS_TABLE',

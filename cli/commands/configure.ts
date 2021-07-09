@@ -4,8 +4,8 @@ import * as chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { putSettings } from '../../util/settings'
 
-export const configureAPICommand = (): CommandDefinition => ({
-	command: 'configure-api <scope> <api> <property> <value>',
+export const configureCommand = (): CommandDefinition => ({
+	command: 'configure <scope> <system> <property> <value>',
 	options: [
 		{
 			flags: '-d, --deleteBeforeUpdate',
@@ -14,7 +14,7 @@ export const configureAPICommand = (): CommandDefinition => ({
 	],
 	action: async (
 		scope: any,
-		api: any,
+		system: any,
 		property: string,
 		value: string,
 		{ deleteBeforeUpdate },
@@ -25,7 +25,7 @@ export const configureAPICommand = (): CommandDefinition => ({
 			ssm,
 			stackName: CORE_STACK_NAME,
 			scope,
-			system: api,
+			system,
 		})({
 			property,
 			value,
@@ -40,5 +40,5 @@ export const configureAPICommand = (): CommandDefinition => ({
 			chalk.yellow(value),
 		)
 	},
-	help: 'Configure an API',
+	help: 'Configure the system',
 })

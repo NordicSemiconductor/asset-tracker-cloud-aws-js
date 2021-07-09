@@ -1,11 +1,12 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from './ErrorInfo'
-import { Location, Cell } from './geolocateCell'
-import { pipe } from 'fp-ts/lib/pipeable'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
+import { pipe } from 'fp-ts/lib/function'
 import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations'
 import { isSome } from 'fp-ts/lib/Option'
+import { Cell } from '../geolocation/Cell'
+import { Location } from '../geolocation/Location'
 
 export const addCellToCacheIfNotExists =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
@@ -34,7 +35,7 @@ export const addCellToCacheIfNotExists =
 							})}`,
 						)
 					}
-					const cellGeoLocation = location.value
+					const cellGeolocation = location.value
 					const query = {
 						TableName,
 						Item: {
@@ -42,13 +43,13 @@ export const addCellToCacheIfNotExists =
 								S: cellId({ nw, area, mccmnc, cell }),
 							},
 							lat: {
-								N: `${cellGeoLocation.lat}`,
+								N: `${cellGeolocation.lat}`,
 							},
 							lng: {
-								N: `${cellGeoLocation.lng}`,
+								N: `${cellGeolocation.lng}`,
 							},
 							accuracy: {
-								N: `${cellGeoLocation.accuracy}`,
+								N: `${cellGeolocation.accuracy}`,
 							},
 							ttl: {
 								N: `${Math.round(Date.now() / 1000) + 24 * 60 * 60}`,

@@ -19,6 +19,9 @@ import { warn } from '../../helper/note'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
+import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
+import { NeighborCellGeolocationApi } from '../../resources/NeighborCellGeolocationApi'
+import { NeighborCellGeolocation } from '../../resources/NeighborCellGeolocation'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -434,24 +437,20 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		// Cell Geolocation
 
+		const deviceCellGeo = new DeviceCellGeolocations(
+			this,
+			'deviceCellGeolocation',
+		)
+
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			lambdas,
+			deviceCellGeo,
 		})
-
-		cellgeo.stateMachine.grantStartExecution(userRole)
-
-		userRole.addToPolicy(
-			new IAM.PolicyStatement({
-				actions: ['states:describeExecution'],
-				resources: [
-					`arn:aws:states:${this.region}:${this.account}:execution:${cellgeo.stateMachineName}:*`,
-				],
-			}),
-		)
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			lambdas,
 			cellgeo,
+			deviceCellGeo,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {
@@ -465,6 +464,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 
 		// Neighbor Cell Measurements
+
 		const ncellmeasStorage = new NeighborCellMeasurementsStorage(
 			this,
 			'ncellmeasStorage',
@@ -478,6 +478,35 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:ncellmeasStorageTableArn`,
 		})
 		ncellmeasStorage.reportsTable.grantReadData(userRole)
+
+		const ncellmeasGeolocation = new NeighborCellGeolocation(
+			this,
+			'neighborCellGeolocation',
+			{
+				lambdas,
+				storage: ncellmeasStorage,
+			},
+		)
+
+		const neighborCellGeolocationApi = new NeighborCellGeolocationApi(
+			this,
+			'neighborCellGeolocationApi',
+			{
+				geolocation: ncellmeasGeolocation,
+				lambdas,
+				storage: ncellmeasStorage,
+			},
+		)
+
+		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiUrl', {
+			value: `https://${neighborCellGeolocationApi.api.ref}.execute-api.${this.region}.amazonaws.com/${neighborCellGeolocationApi.stage.stageName}/`,
+			exportName: `${this.stackName}:neighborCellGeolocationApiUrl`,
+		})
+
+		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiId', {
+			value: neighborCellGeolocationApi.api.ref,
+			exportName: `${this.stackName}:neighborCellGeolocationApiId`,
+		})
 	}
 }
 
@@ -498,6 +527,8 @@ export type StackOutputs = {
 	historicaldataTableInfo: string
 	geolocationApiUrl: string
 	geolocationApiId: string
+	neighborCellGeolocationApiUrl: string
+	neighborCellGeolocationApiId: string
 	ncellmeasStorageTableName: string
 	ncellmeasStorageTableArn: string
 }

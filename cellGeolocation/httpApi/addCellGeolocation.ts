@@ -1,18 +1,20 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { pipe } from 'fp-ts/lib/pipeable'
+import { pipe } from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as E from 'fp-ts/lib/Either'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { Cell, Location } from '../geolocateCell'
-import { toStatusCode, ErrorInfo, ErrorType } from '../ErrorInfo'
-import { res } from './res'
+import { toStatusCode, ErrorInfo, ErrorType } from '../../api/ErrorInfo'
+import { res } from '../../api/res'
 import { addDeviceCellGeolocation } from '../addDeviceCellGeolocation'
 import { addCellToCacheIfNotExists } from '../addCellToCacheIfNotExists'
 import { sequenceT } from 'fp-ts/lib/Apply'
 import { fromEnv } from '../../util/fromEnv'
 import { Type } from '@sinclair/typebox'
-import { validateWithJSONSchema } from './validateWithJSONSchema'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
+import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { Cell } from '../../geolocation/Cell'
+import { Location } from '../../geolocation/Location'
+import * as JSON from 'fp-ts/lib/Json'
 
 const { deviceCellGeolocationTable, cacheTable } = fromEnv({
 	deviceCellGeolocationTable: 'DEVICE_CELL_GEOLOCATION_TABLE',
@@ -69,7 +71,8 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
 	console.log(JSON.stringify(event))
 	return pipe(
-		E.parseJSON<ErrorInfo>(event?.body ?? '', () => ({
+		JSON.parse(event?.body ?? ''),
+		E.mapLeft(() => ({
 			message: `Failed to parse body "${event.body}"!`,
 			type: ErrorType.BadRequest,
 		})),
@@ -109,6 +112,9 @@ export const handler = async (
 		),
 		TE.flatten,
 		TE.map(([id]) => id),
-		TE.fold((error) => res(toStatusCode[error.type])(error), res(202)),
+		TE.fold(
+			(error) => res(toStatusCode[(error as ErrorInfo).type])(error),
+			res(202),
+		),
 	)()
 }

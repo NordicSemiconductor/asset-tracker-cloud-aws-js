@@ -1,6 +1,5 @@
 import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
-import * as IoT from '@aws-cdk/aws-iot'
 import * as DynamoDB from '@aws-cdk/aws-dynamodb'
 import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
 import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
@@ -14,34 +13,31 @@ import {
 	StateMachineType,
 } from '@aws-cdk/aws-stepfunctions'
 import { Role } from '@aws-cdk/aws-iam'
-import * as SQS from '@aws-cdk/aws-sqs'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import { DeviceCellGeolocations } from './DeviceCellGeolocations'
 
 /**
- * Provides the resources for geolocating LTE/NB-IoT network cells
+ * Describes the step functions which resolves the geolocation of LTE/NB-IoT network cells using third-party location providers
  */
 export class CellGeolocation extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.Table
-	public readonly deviceCellGeolocationTable: DynamoDB.Table
 	public readonly stateMachine: StepFunctions.IStateMachine
-	public readonly stateMachineName: string
-	public readonly resolutionJobsQueue: SQS.IQueue
 
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
 		{
 			lambdas,
+			deviceCellGeo,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			deviceCellGeo: DeviceCellGeolocations
 		},
 	) {
 		super(parent, id)
-
-		this.stateMachineName = `${this.stack.stackName}-cellGeo`
 
 		this.cacheTable = new DynamoDB.Table(this, 'cellGeolocationCache', {
 			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
@@ -61,10 +57,9 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateCellFromCacheStepFunction,
+			code: lambdas.lambdas.geolocateFromCacheStepFunction,
 			description: 'Geolocate cells from cache',
 			initialPolicy: [
 				logToCloudWatch,
@@ -82,49 +77,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'fromCacheLogs', fromCache)
 
-		this.deviceCellGeolocationTable = new DynamoDB.Table(
-			this,
-			'deviceCellGeoLocation',
-			{
-				billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
-				partitionKey: {
-					name: 'uuid',
-					type: DynamoDB.AttributeType.STRING,
-				},
-				sortKey: {
-					name: 'timestamp',
-					type: DynamoDB.AttributeType.STRING,
-				},
-				pointInTimeRecovery: true,
-				removalPolicy:
-					this.node.tryGetContext('isTest') === true
-						? CloudFormation.RemovalPolicy.DESTROY
-						: CloudFormation.RemovalPolicy.RETAIN,
-			},
-		)
-
-		const LOCATIONS_TABLE_CELLID_INDEX =
-			'cellIdIndex-720633fc-5dec-4b39-972a-b4347188d69b'
-
-		this.deviceCellGeolocationTable.addGlobalSecondaryIndex({
-			indexName: LOCATIONS_TABLE_CELLID_INDEX,
-			partitionKey: {
-				name: 'cellId',
-				type: DynamoDB.AttributeType.STRING,
-			},
-			sortKey: {
-				name: 'timestamp',
-				type: DynamoDB.AttributeType.STRING,
-			},
-			projectionType: DynamoDB.ProjectionType.INCLUDE,
-			nonKeyAttributes: ['lat', 'lng', 'accuracy'],
-		})
-
 		const fromDevices = new Lambda.Function(this, 'fromDevices', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
@@ -134,14 +90,15 @@ export class CellGeolocation extends CloudFormation.Resource {
 				new IAM.PolicyStatement({
 					actions: ['dynamodb:Query'],
 					resources: [
-						this.deviceCellGeolocationTable.tableArn,
-						`${this.deviceCellGeolocationTable.tableArn}/*`,
+						deviceCellGeo.deviceCellGeolocationTable.tableArn,
+						`${deviceCellGeo.deviceCellGeolocationTable.tableArn}/*`,
 					],
 				}),
 			],
 			environment: {
-				LOCATIONS_TABLE: this.deviceCellGeolocationTable.tableName,
-				LOCATIONS_TABLE_CELLID_INDEX,
+				LOCATIONS_TABLE: deviceCellGeo.deviceCellGeolocationTable.tableName,
+				LOCATIONS_TABLE_CELLID_INDEX:
+					deviceCellGeo.deviceCellGeolocationTableCellIdIndex,
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
@@ -153,7 +110,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
-
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
 			code: lambdas.lambdas.cacheCellGeolocationStepFunction,
@@ -187,7 +143,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 					layers: lambdas.layers,
 					handler: 'index.handler',
 					runtime: Lambda.Runtime.NODEJS_14_X,
-
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
 					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
@@ -197,7 +152,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 						new IAM.PolicyStatement({
 							actions: ['ssm:GetParametersByPath'],
 							resources: [
-								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/cellGeoLocation/unwiredlabs`,
+								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/unwiredlabs`,
 							],
 						}),
 					],
@@ -225,7 +180,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 						layers: lambdas.layers,
 						handler: 'index.handler',
 						runtime: Lambda.Runtime.NODEJS_14_X,
-
 						timeout: CloudFormation.Duration.seconds(10),
 						memorySize: 1792,
 						code: lambdas.lambdas
@@ -237,7 +191,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 							new IAM.PolicyStatement({
 								actions: ['ssm:GetParametersByPath'],
 								resources: [
-									`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/cellGeoLocation/nrfconnectforcloud`,
+									`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfconnectforcloud`,
 								],
 							}),
 						],
@@ -270,7 +224,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		 * This is not possible with EXPRESS StepFunctions.
 		 */
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
-			stateMachineName: this.stateMachineName,
+			stateMachineName: `${this.stack.stackName}-cellGeo`,
 			stateMachineType: StateMachineType.STANDARD,
 			definition: new StepFunctionTasks.LambdaInvoke(
 				this,
@@ -405,13 +359,17 @@ export class CellGeolocation extends CloudFormation.Resource {
 										)
 											.branch(...branches)
 											.next(
-												new StepFunctions.Choice(
-													this,
-													'Resolved from any third party API?',
-												)
-													.when(...checkApiResult(0))
-													.when(...checkApiResult(1))
-													.otherwise(
+												(() => {
+													const choice = new StepFunctions.Choice(
+														this,
+														'Resolved from any third party API?',
+													)
+
+													for (let i = 0; i < branches.length; i++) {
+														choice.when(...checkApiResult(i))
+													}
+
+													choice.otherwise(
 														new StepFunctions.Pass(
 															this,
 															'no: mark cell as not located',
@@ -440,7 +398,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 																),
 															),
 														),
-													),
+													)
+
+													return choice
+												})(),
 											)
 									})(),
 								),
@@ -450,152 +411,5 @@ export class CellGeolocation extends CloudFormation.Resource {
 			timeout: CloudFormation.Duration.minutes(5),
 			role: stateMachineRole,
 		})
-
-		const topicRuleRole = new IAM.Role(this, 'Role', {
-			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),
-			inlinePolicies: {
-				iot: new IAM.PolicyDocument({
-					statements: [
-						new IAM.PolicyStatement({
-							actions: ['iot:Publish'],
-							resources: [
-								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
-							],
-						}),
-					],
-				}),
-				dynamodb: new IAM.PolicyDocument({
-					statements: [
-						new IAM.PolicyStatement({
-							actions: ['dynamodb:PutItem'],
-							resources: [this.deviceCellGeolocationTable.tableArn],
-						}),
-					],
-				}),
-			},
-		})
-
-		const storeCellGeolocationsFromDevicesSQL = (nwLocation: 'dev' | 'roam') =>
-			new IoT.CfnTopicRule(
-				this,
-				`storeCellGeolocationsFromDevices${nwLocation}`,
-				{
-					topicRulePayload: {
-						awsIotSqlVersion: '2016-03-23',
-						description: `Stores the geolocations for cells from devices (with nw in ${nwLocation})`,
-						ruleDisabled: false,
-						sql: [
-							'SELECT',
-							'newuuid() as uuid,',
-							'current.state.reported.roam.v.cell as cell,',
-							`current.state.reported.${nwLocation}.v.nw as nw,`,
-							'current.state.reported.roam.v.mccmnc as mccmnc,',
-							'current.state.reported.roam.v.area as area,',
-							// see cellId in @nordicsemiconductor/cell-geolocation-helpers for format of cellId
-							'concat(',
-							`CASE startswith(current.state.reported.${nwLocation}.v.nw, "NB-IoT") WHEN true THEN "nbiot" ELSE "ltem" END,`,
-							'"-",',
-							'current.state.reported.roam.v.cell,',
-							'"-",',
-							'current.state.reported.roam.v.mccmnc,',
-							'"-",',
-							'current.state.reported.roam.v.area',
-							') AS cellId,',
-							'current.state.reported.gps.v.lat AS lat,',
-							'current.state.reported.gps.v.lng AS lng,',
-							'current.state.reported.gps.v.acc AS accuracy,',
-							'concat("device:", topic(3)) as source,',
-							"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
-							`FROM '$aws/things/+/shadow/update/documents'`,
-							'WHERE',
-							// only if it actually has roaming information
-							'isUndefined(current.state.reported.roam.v.area) = false',
-							'AND isUndefined(current.state.reported.roam.v.mccmnc) = false',
-							'AND isUndefined(current.state.reported.roam.v.cell) = false',
-							`AND isUndefined(current.state.reported.${nwLocation}.v.nw) = false`,
-							// and if it has GPS location
-							'AND isUndefined(current.state.reported.gps.v.lat) = false AND current.state.reported.gps.v.lat <> 0',
-							'AND isUndefined(current.state.reported.gps.v.lng) = false AND current.state.reported.gps.v.lng <> 0',
-							// only if the location has changed
-							'AND (',
-							'isUndefined(previous.state.reported.gps.v.lat)',
-							'OR',
-							'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
-							'OR',
-							'isUndefined(previous.state.reported.gps.v.lng)',
-							'OR',
-							'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
-							')',
-						].join(' '),
-						actions: [
-							{
-								dynamoDBv2: {
-									putItem: {
-										tableName: this.deviceCellGeolocationTable.tableName,
-									},
-									roleArn: topicRuleRole.roleArn,
-								},
-							},
-						],
-						errorAction: {
-							republish: {
-								roleArn: topicRuleRole.roleArn,
-								topic: 'errors',
-							},
-						},
-					},
-				},
-			)
-
-		storeCellGeolocationsFromDevicesSQL('roam')
-		// FIXME: remove fallback for current firmware revision, which has nw in dev, not in roam
-		storeCellGeolocationsFromDevicesSQL('dev')
-
-		this.resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
-			fifo: true,
-			queueName: `${`${id}-${this.stack.stackName}`.substr(0, 75)}.fifo`,
-		})
-
-		const fromSQS = new Lambda.Function(this, 'fromSQS', {
-			handler: 'index.handler',
-			runtime: Lambda.Runtime.NODEJS_14_X,
-
-			timeout: CloudFormation.Duration.seconds(10),
-			memorySize: 1792,
-			code: lambdas.lambdas.invokeStepFunctionFromSQS,
-			description:
-				'Invoke the cell geolocation resolution step function for SQS messages',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: [
-						'sqs:ReceiveMessage',
-						'sqs:DeleteMessage',
-						'sqs:GetQueueAttributes',
-					],
-					resources: [this.resolutionJobsQueue.queueArn],
-				}),
-			],
-			environment: {
-				STEP_FUNCTION_ARN: this.stateMachine.stateMachineArn,
-				VERSION: this.node.tryGetContext('version'),
-				STACK_NAME: this.stack.stackName,
-			},
-		})
-
-		new LambdaLogGroup(this, 'fromSQSLogs', fromSQS)
-
-		fromSQS.addPermission('invokeBySQS', {
-			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
-			sourceArn: this.resolutionJobsQueue.queueArn,
-		})
-
-		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
-			eventSourceArn: this.resolutionJobsQueue.queueArn,
-			target: fromSQS,
-			batchSize: 10,
-		})
-
-		this.stateMachine.grantStartExecution(fromSQS)
 	}
 }

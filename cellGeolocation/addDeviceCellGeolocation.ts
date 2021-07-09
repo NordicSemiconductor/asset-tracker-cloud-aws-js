@@ -1,9 +1,10 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from './ErrorInfo'
-import { Location, Cell } from './geolocateCell'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
 import { v4 } from 'uuid'
+import { Cell } from '../geolocation/Cell'
+import { Location } from '../geolocation/Location'
 
 export const addDeviceCellGeolocation =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>

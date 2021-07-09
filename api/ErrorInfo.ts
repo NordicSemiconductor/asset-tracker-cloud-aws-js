@@ -4,6 +4,7 @@ export enum ErrorType {
 	AccessDenied = 'AccessDenied',
 	InternalError = 'InternalError',
 	Conflict = 'Conflict',
+	BadGateway = 'BadGateway',
 }
 
 export type ErrorInfo = {
@@ -18,4 +19,5 @@ export const toStatusCode = {
 	[ErrorType.EntityNotFound]: 404,
 	[ErrorType.InternalError]: 500,
 	[ErrorType.Conflict]: 409,
+	[ErrorType.BadGateway]: 502,
 }

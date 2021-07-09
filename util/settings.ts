@@ -5,7 +5,7 @@ import {
 	DeleteParameterCommand,
 } from '@aws-sdk/client-ssm'
 
-type Scopes = 'context' | 'cellGeoLocation' | 'codebuild'
+type Scopes = 'context' | 'thirdParty' | 'codebuild'
 type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfconnectforcloud'
 
 export const getSettings =
