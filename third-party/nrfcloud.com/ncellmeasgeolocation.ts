@@ -20,7 +20,7 @@ const PositiveInteger = Type.Integer({ minimum: 1 })
 
 const ncellmeasSchema = Type.Object({
 	mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-	mnc: Type.Integer({ minimum: 1, maximum: 99 }),
+	mnc: Type.Integer({ minimum: 0, maximum: 99 }),
 	cell: PositiveInteger,
 	area: PositiveInteger,
 	earfcn: PositiveInteger,
