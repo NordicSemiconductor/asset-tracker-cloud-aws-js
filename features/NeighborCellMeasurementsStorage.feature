@@ -97,11 +97,10 @@ Feature: Store neighboring cell measurement reports
                     "ts": { "N": "{ts}" }
                 }
                 },
-                "roam": {
+                "dev": {
                     "M": {
                         "v": {
                             "M": {
-                                "band": { "N": "3" },
                                 "nw": { "S": "LTE-M GPS" }
                             }
                         }

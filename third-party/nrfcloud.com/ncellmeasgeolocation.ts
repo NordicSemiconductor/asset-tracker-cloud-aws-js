@@ -19,7 +19,7 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 const PositiveInteger = Type.Integer({ minimum: 1 })
 
 const inputSchema = Type.Object({
-	roam: Type.Object({
+	dev: Type.Object({
 		nw: Type.String({ minLength: 1 }),
 	}),
 	report: Type.Object({
@@ -100,7 +100,7 @@ export const handler = async (
 	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
 
 	const {
-		roam: { nw },
+		dev: { nw },
 		report,
 	} = valid.right
 	const maybeCeollGeolocation = await c.post({

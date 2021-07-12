@@ -78,21 +78,21 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 			},
 		})
 
-		new IoT.CfnTopicRule(this, `storeCellGeolocationsFromDevicesroam`, {
+		new IoT.CfnTopicRule(this, `storeCellGeolocationsFromDevices`, {
 			topicRulePayload: {
 				awsIotSqlVersion: '2016-03-23',
-				description: `Stores the geolocations for cells from devices (with nw in roam)`,
+				description: `Stores the geolocations for cells from devices`,
 				ruleDisabled: false,
 				sql: [
 					'SELECT',
 					'newuuid() as uuid,',
 					'current.state.reported.roam.v.cell as cell,',
-					`current.state.reported.roam.v.nw as nw,`,
+					`current.state.reported.dev.v.nw as nw,`,
 					'current.state.reported.roam.v.mccmnc as mccmnc,',
 					'current.state.reported.roam.v.area as area,',
 					// see cellId in @nordicsemiconductor/cell-geolocation-helpers for format of cellId
 					'concat(',
-					`CASE startswith(current.state.reported.roam.v.nw, "NB-IoT") WHEN true THEN "nbiot" ELSE "ltem" END,`,
+					`CASE startswith(current.state.reported.dev.v.nw, "NB-IoT") WHEN true THEN "nbiot" ELSE "ltem" END,`,
 					'"-",',
 					'current.state.reported.roam.v.cell,',
 					'"-",',
@@ -111,7 +111,7 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 					'isUndefined(current.state.reported.roam.v.area) = false',
 					'AND isUndefined(current.state.reported.roam.v.mccmnc) = false',
 					'AND isUndefined(current.state.reported.roam.v.cell) = false',
-					`AND isUndefined(current.state.reported.roam.v.nw) = false`,
+					`AND isUndefined(current.state.reported.dev.v.nw) = false`,
 					// and if it has GPS location
 					'AND isUndefined(current.state.reported.gps.v.lat) = false AND current.state.reported.gps.v.lat <> 0',
 					'AND isUndefined(current.state.reported.gps.v.lng) = false AND current.state.reported.gps.v.lng <> 0',
