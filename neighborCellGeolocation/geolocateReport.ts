@@ -8,7 +8,7 @@ type Report = {
 	deviceId: string
 	timestamp: number
 	reportId: string
-	roam: {
+	dev: {
 		nw: string
 	}
 	report: Record<string, any>
@@ -23,7 +23,7 @@ export const geolocateReport =
 				const { Items } = await dynamodb.send(
 					new QueryCommand({
 						TableName,
-						IndexName: 'reportsById',
+						IndexName: 'reportById',
 						KeyConditionExpression: '#reportId = :reportId',
 						ExpressionAttributeNames: {
 							'#reportId': 'reportId',
@@ -36,7 +36,7 @@ export const geolocateReport =
 						},
 						Limit: 1,
 						ProjectionExpression:
-							'reportId,deviceId,#timestamp,lat,lng,accuracy,unresolved,report,roam',
+							'reportId,deviceId,#timestamp,lat,lng,accuracy,unresolved,report,dev',
 					}),
 				)
 
@@ -54,7 +54,7 @@ export const geolocateReport =
 						timestamp: entry.timestamp,
 						unresolved: entry.unresolved,
 						report: entry.report as Record<string, any>,
-						roam: { nw: entry.roam.v.nw as string },
+						dev: { nw: entry.dev.v.nw as string },
 					}
 					if ('lat' in entry) {
 						report.location = {

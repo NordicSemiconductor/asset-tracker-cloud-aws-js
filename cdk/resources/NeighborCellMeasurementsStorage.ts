@@ -38,7 +38,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 		})
 
 		this.reportsTable.addGlobalSecondaryIndex({
-			indexName: 'reportsById',
+			indexName: 'reportById',
 			partitionKey: {
 				name: 'reportId',
 				type: DynamoDB.AttributeType.STRING,
@@ -50,7 +50,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 			projectionType: DynamoDB.ProjectionType.INCLUDE,
 			nonKeyAttributes: [
 				'report',
-				'roam',
+				'dev',
 				'unresolved',
 				'lng',
 				'lat',
@@ -85,7 +85,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				description:
 					'Store all neighboring cell measurement reports sent by devices in DynamoDB',
 				ruleDisabled: false,
-				sql: `SELECT * as report, clientid() as deviceId, timestamp() as timestamp, newuuid() as reportId, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.roam as roam FROM '+/ncellmeas'`,
+				sql: `SELECT * as report, clientid() as deviceId, timestamp() as timestamp, newuuid() as reportId, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.dev as dev FROM '+/ncellmeas'`,
 				actions: [
 					{
 						dynamoDBv2: {
