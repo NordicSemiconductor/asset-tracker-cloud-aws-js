@@ -69,6 +69,15 @@ export const handler = async (
 		})(l)()
 	}
 
+	if (report.right?.unresolved === true) {
+		return res(toStatusCode[ErrorType.EntityNotFound], {
+			expires: 86400,
+		})({
+			type: ErrorType.EntityNotFound,
+			message: 'Neighbor cell geolocation could not be resolved',
+		})()
+	}
+
 	await q({
 		deduplicationId: valid.right.id,
 		payload: report.right,
