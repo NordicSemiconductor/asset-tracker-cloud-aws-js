@@ -16,14 +16,14 @@ Feature: Device: Update Shadow
             "iccid": "89882806660004909182",
             "modV": "mfw_nrf9160_1.0.0",
             "brdV": "thingy91_nrf9160",
-            "appV": "0.14.6"
+            "appV": "0.14.6",
+            "nw": "LTE-M GPS"
           },
           "ts": {updateShadowTs}
         },
         "roam": {
           "v": {
-            "band": 3,
-            "nw": "LTE-M GPS"
+            "band": 3
           },
           "ts": {updateShadowTs}
         },
