@@ -52,7 +52,7 @@ export const geolocateReport =
 						reportId: entry.reportId,
 						deviceId: entry.deviceId,
 						timestamp: entry.timestamp,
-						unresolved: !('lat' in entry),
+						unresolved: entry.unresolved,
 						report: entry.report as Record<string, any>,
 						roam: { nw: entry.roam.v.nw as string },
 					}

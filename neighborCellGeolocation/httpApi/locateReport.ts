@@ -34,8 +34,6 @@ const inputSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-console.log(JSON.stringify(inputSchema, null, 2))
-
 const validateInput = validateWithJSONSchema(inputSchema)
 
 export const handler = async (
@@ -61,6 +59,8 @@ export const handler = async (
 			expires: 60,
 		})(report.left)()
 	}
+
+	console.log(JSON.stringify({ report: report.right }))
 
 	if ('location' in report.right) {
 		const l = report.right.location as Location
