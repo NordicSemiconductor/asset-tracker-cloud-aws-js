@@ -76,8 +76,8 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
                     {
                         "mcc": 242,
                         "mnc": 1,
-                        "cell": {ncellmeasCellId},
-                        "area": {ncellmeasAreaId},
+                        "cid": {ncellmeasCellId},
+                        "tac": {ncellmeasAreaId},
                         "earfcn": 6446,
                         "adv": 80,
                         "rsrp": 50,
@@ -85,13 +85,13 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
                         "nmr": [
                             {
                             "earfcn": 262143,
-                            "cell": 501,
+                            "pci": 501,
                             "rsrp": 44,
                             "rsrq": 25
                             },
                             {
                             "earfcn": 262265,
-                            "cell": 503,
+                            "pci": 503,
                             "rsrp": 49,
                             "rsrq": 20
                             }
