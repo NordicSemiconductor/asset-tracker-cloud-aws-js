@@ -18,43 +18,68 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 
 const PositiveInteger = Type.Integer({ minimum: 1 })
 
-const ncellmeasSchema = Type.Object({
-	mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-	mnc: Type.Integer({ minimum: 0, maximum: 99 }),
-	cell: PositiveInteger,
-	area: PositiveInteger,
-	earfcn: PositiveInteger,
-	adv: PositiveInteger,
-	rsrp: PositiveInteger,
-	rsrq: PositiveInteger,
-	nmr: Type.Optional(
-		Type.Array(
-			Type.Object(
-				{
-					cell: PositiveInteger,
-					earfcn: PositiveInteger,
-					rsrp: PositiveInteger,
-					rsrq: PositiveInteger,
-				},
-				{ additionalProperties: false },
-			),
-			{ minItems: 1 },
-		),
-	),
-})
-
 const inputSchema = Type.Object({
 	roam: Type.Object({
 		nw: Type.String({ minLength: 1 }),
 	}),
-	report: Type.Intersect([
-		ncellmeasSchema,
-		Type.Object({ ts: PositiveInteger }),
-	]),
+	report: Type.Object({
+		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
+		mnc: Type.Integer({ minimum: 0, maximum: 99 }),
+		cell: PositiveInteger,
+		area: PositiveInteger,
+		earfcn: PositiveInteger,
+		adv: PositiveInteger,
+		rsrp: PositiveInteger,
+		rsrq: PositiveInteger,
+		nmr: Type.Optional(
+			Type.Array(
+				Type.Object(
+					{
+						cell: PositiveInteger,
+						earfcn: PositiveInteger,
+						rsrp: PositiveInteger,
+						rsrq: PositiveInteger,
+					},
+					{ additionalProperties: false },
+				),
+				{ minItems: 1 },
+			),
+		),
+		ts: PositiveInteger,
+	}),
 })
 
 const locateRequestSchema = Type.Dict(
-	Type.Array(ncellmeasSchema, { minItems: 1 }),
+	Type.Array(
+		Type.Object(
+			{
+				mcc: Type.Integer({ minimum: 100, maximum: 999 }),
+				mnc: Type.Integer({ minimum: 0, maximum: 99 }),
+				cid: PositiveInteger,
+				tac: PositiveInteger,
+				earfcn: PositiveInteger,
+				adv: PositiveInteger,
+				rsrp: PositiveInteger,
+				rsrq: PositiveInteger,
+				nmr: Type.Optional(
+					Type.Array(
+						Type.Object(
+							{
+								pci: PositiveInteger,
+								earfcn: PositiveInteger,
+								rsrp: PositiveInteger,
+								rsrq: PositiveInteger,
+							},
+							{ additionalProperties: false },
+						),
+						{ minItems: 1 },
+					),
+				),
+			},
+			{ additionalProperties: false },
+		),
+		{ minItems: 1 },
+	),
 )
 
 const validateInput = validateWithJSONSchema(inputSchema)
@@ -78,11 +103,25 @@ export const handler = async (
 		roam: { nw },
 		report,
 	} = valid.right
-	const { ts, ...reportWithoutTs } = report
 	const maybeCeollGeolocation = await c.post({
 		resource: 'location/locate/nRFAssetTrackerForAWS',
 		payload: {
-			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [reportWithoutTs],
+			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [
+				{
+					mcc: report.mcc,
+					mnc: report.mnc,
+					cid: report.cell,
+					tac: report.area,
+					earfcn: report.earfcn,
+					adv: report.adv,
+					rsrp: report.rsrp,
+					rsrq: report.rsrq,
+					nmr: report.nmr?.map(({ cell, ...rest }) => ({
+						pci: cell,
+						...rest,
+					})),
+				},
+			],
 		},
 		requestSchema: locateRequestSchema,
 		responseSchema: locateResultSchema,
