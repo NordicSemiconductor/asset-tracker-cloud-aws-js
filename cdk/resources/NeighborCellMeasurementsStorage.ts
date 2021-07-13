@@ -20,15 +20,11 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 	public constructor(parent: CloudFormation.Stack, id: string) {
 		super(parent, id)
 
-		this.reportsTable = new DynamoDB.Table(this, 'reports', {
+		this.reportsTable = new DynamoDB.Table(this, 'reportsTable', {
 			billingMode: DynamoDB.BillingMode.PAY_PER_REQUEST,
 			partitionKey: {
-				name: 'deviceId',
+				name: 'reportId',
 				type: DynamoDB.AttributeType.STRING,
-			},
-			sortKey: {
-				name: 'timestamp',
-				type: DynamoDB.AttributeType.NUMBER,
 			},
 			pointInTimeRecovery: true,
 			removalPolicy:
@@ -38,24 +34,16 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 		})
 
 		this.reportsTable.addGlobalSecondaryIndex({
-			indexName: 'reportById',
+			indexName: 'reportByDevice',
 			partitionKey: {
-				name: 'reportId',
+				name: 'deviceId',
 				type: DynamoDB.AttributeType.STRING,
 			},
 			sortKey: {
 				name: 'timestamp',
 				type: DynamoDB.AttributeType.NUMBER,
 			},
-			projectionType: DynamoDB.ProjectionType.INCLUDE,
-			nonKeyAttributes: [
-				'report',
-				'dev',
-				'unresolved',
-				'lng',
-				'lat',
-				'accuracy',
-			],
+			projectionType: DynamoDB.ProjectionType.KEYS_ONLY,
 		})
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
@@ -85,7 +73,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				description:
 					'Store all neighboring cell measurement reports sent by devices in DynamoDB',
 				ruleDisabled: false,
-				sql: `SELECT * as report, clientid() as deviceId, timestamp() as timestamp, newuuid() as reportId, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.dev as dev FROM '+/ncellmeas'`,
+				sql: `SELECT newuuid() as reportId, clientid() as deviceId, timestamp() as timestamp, * as report, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.dev.v.nw as nw FROM '+/ncellmeas'`,
 				actions: [
 					{
 						dynamoDBv2: {

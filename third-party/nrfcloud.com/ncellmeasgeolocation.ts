@@ -19,9 +19,7 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 const PositiveInteger = Type.Integer({ minimum: 1 })
 
 const inputSchema = Type.Object({
-	dev: Type.Object({
-		nw: Type.String({ minLength: 1 }),
-	}),
+	nw: Type.String({ minLength: 1 }),
 	report: Type.Object({
 		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
 		mnc: Type.Integer({ minimum: 0, maximum: 99 }),
@@ -99,10 +97,7 @@ export const handler = async (
 	const { apiKey, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
 
-	const {
-		dev: { nw },
-		report,
-	} = valid.right
+	const { nw, report } = valid.right
 	const maybeCeollGeolocation = await c.post({
 		resource: 'location/locate/nRFAssetTrackerForAWS',
 		payload: {
