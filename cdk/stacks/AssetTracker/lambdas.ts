@@ -19,8 +19,8 @@ export type AssetTrackerLambdas = {
 	cacheCellGeolocationStepFunction: string
 	addCellGeolocationHttpApi: string
 	neighborCellGeolocateReportHttpApi: string
-	geolocateNeighborCellFromCacheStepFunction: string
-	cacheNeighborCellGeolocationStepFunction: string
+	geolocateNeighborCellFromResolvedStepFunction: string
+	persistNeighborCellGeolocationStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -117,17 +117,17 @@ export const prepareAssetTrackerLambdas = async ({
 					'httpApi',
 					'locateReport.ts',
 				),
-				cacheNeighborCellGeolocationStepFunction: path.resolve(
+				persistNeighborCellGeolocationStepFunction: path.resolve(
 					rootDir,
 					'neighborCellGeolocation',
 					'stepFunction',
-					'updateCache.ts',
+					'persist.ts',
 				),
-				geolocateNeighborCellFromCacheStepFunction: path.resolve(
+				geolocateNeighborCellFromResolvedStepFunction: path.resolve(
 					rootDir,
 					'neighborCellGeolocation',
 					'stepFunction',
-					'fromCache.ts',
+					'fromResolved.ts',
 				),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),

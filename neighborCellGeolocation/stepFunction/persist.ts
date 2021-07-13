@@ -10,8 +10,6 @@ const dynamodb = new DynamoDBClient({})
 export const handler = async (
 	maybeLocatedReport: {
 		reportId: string
-		deviceId: string
-		timestamp: number
 	} & {
 		ncellmeasgeo: MaybeLocation
 	},
@@ -23,11 +21,8 @@ export const handler = async (
 	)
 	const { located } = maybeLocatedReport.ncellmeasgeo
 	const Key = {
-		deviceId: {
-			S: maybeLocatedReport.deviceId,
-		},
-		timestamp: {
-			N: `${maybeLocatedReport.timestamp}`,
+		reportId: {
+			S: maybeLocatedReport.reportId,
 		},
 	}
 	if (located) {

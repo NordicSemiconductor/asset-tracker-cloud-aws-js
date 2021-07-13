@@ -38,14 +38,14 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 
 		const checkFlag = enabledInContext(this.node)
 
-		const fromCache = new Lambda.Function(this, 'fromCache', {
+		const fromResolved = new Lambda.Function(this, 'fromResolved', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateNeighborCellFromCacheStepFunction,
-			description: 'Geolocate neighbor cell reports from cache',
+			code: lambdas.lambdas.geolocateNeighborCellFromResolvedStepFunction,
+			description: 'Checks if neighboring cell report is already geolocated',
 			initialPolicy: [
 				logToCloudWatch,
 				new IAM.PolicyStatement({
@@ -63,7 +63,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		new LambdaLogGroup(this, 'fromCacheLogs', fromCache)
+		new LambdaLogGroup(this, 'fromResolvedLogs', fromResolved)
 
 		// Optional step: resolve using nRF Connect for Cloud API
 		let fromNrfConnectForCloud: Lambda.IFunction | undefined = undefined
@@ -109,14 +109,14 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		const updateCache = new Lambda.Function(this, 'updateCache', {
+		const persis = new Lambda.Function(this, 'persist', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
-			code: lambdas.lambdas.cacheNeighborCellGeolocationStepFunction,
-			description: 'Caches neighboring cell measurement report geolocations',
+			code: lambdas.lambdas.persistNeighborCellGeolocationStepFunction,
+			description: 'Persists neighboring cell measurement report geolocations',
 			initialPolicy: [
 				logToCloudWatch,
 				new IAM.PolicyStatement({
@@ -131,7 +131,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		new LambdaLogGroup(this, 'updateCacheLogs', updateCache)
+		new LambdaLogGroup(this, 'persistLogs', persis)
 
 		const stateMachineRole = new Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
@@ -146,20 +146,20 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			stateMachineType: StateMachineType.STANDARD,
 			definition: new StepFunctionTasks.LambdaInvoke(
 				this,
-				'Resolve from cache',
+				'Check if already resolved',
 				{
-					lambdaFunction: fromCache,
+					lambdaFunction: fromResolved,
 					resultPath: '$.ncellmeasgeo',
 					payloadResponseOnly: true,
 				},
 			).next(
-				new StepFunctions.Choice(this, 'Cache found?')
+				new StepFunctions.Choice(this, 'Already resolved?')
 					.when(
 						StepFunctions.Condition.booleanEquals(
 							'$.ncellmeasgeo.located',
 							true,
 						),
-						new StepFunctions.Succeed(this, 'Done (already cached)'),
+						new StepFunctions.Succeed(this, 'Done (already resolved)'),
 					)
 					.otherwise(
 						(() => {
@@ -193,11 +193,11 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 								)
 							}
 
-							const cacheResult = new StepFunctionTasks.LambdaInvoke(
+							const persistResult = new StepFunctionTasks.LambdaInvoke(
 								this,
-								'Cache result from third party API',
+								'Persist result from third party API',
 								{
-									lambdaFunction: updateCache,
+									lambdaFunction: persis,
 									resultPath: '$.storedInCache',
 									payloadResponseOnly: true,
 								},
@@ -219,7 +219,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 										resultPath: '$.ncellmeasgeo',
 										inputPath: `$.ncellmeasgeo[${n}]`,
 									},
-								).next(cacheResult),
+								).next(persistResult),
 							]
 
 							return new StepFunctions.Parallel(

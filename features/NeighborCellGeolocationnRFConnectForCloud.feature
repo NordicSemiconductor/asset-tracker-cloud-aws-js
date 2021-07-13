@@ -30,12 +30,13 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
             }
             """
             
-    Scenario: Fetch the latest cell measurement report for the device
+    Scenario: Find the latest report
 
         When I execute "query" of the AWS DynamoDB SDK with
         """
         {
             "TableName": "{ncellmeasStorageTableName}",
+            "IndexName": "reportByDevice",
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
                 "#deviceId": "deviceId"
@@ -45,16 +46,15 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
                 "S": "{tracker:id}"
                 }
             },
-            "Limit": 1,
-            "ProjectionExpression": "reportId"
+            "Limit": 1
         }
         """
-        Then I store "awsSdk.res.Items[0].reportId.S" into "ncellmeasReportId"
+        Then I store "awsSdk.res.Items[0].reportId.S" into "<nw>-ncellmeasReportId"
     
     Scenario: Retrieve the location for the report
 
         Given I store "$millis()" into "ts"
-        When I GET /report/{ncellmeasReportId}/location?ts={ts}
+        When I GET /report/{<nw>-ncellmeasReportId}/location?ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"

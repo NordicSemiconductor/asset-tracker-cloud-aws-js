@@ -1,10 +1,10 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import * as TE from 'fp-ts/lib/TaskEither'
 import * as T from 'fp-ts/lib/Task'
-import { pipe } from 'fp-ts/lib/pipeable'
 import { geolocateReport } from '../geolocateReport'
 import { MaybeLocation } from '../../geolocation/types'
 import { fromEnv } from '../../util/fromEnv'
+import { pipe } from 'fp-ts/lib/function'
 
 const { reportsTable } = fromEnv({
 	reportsTable: 'REPORTS_TABLE',
