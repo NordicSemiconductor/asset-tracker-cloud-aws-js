@@ -16,7 +16,9 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 	stackName,
 })
 
-const PositiveInteger = Type.Integer({ minimum: 1 })
+const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
+const RSRP = Type.Integer({ minimum: -255, maximum: 255, title: 'RSRP' })
+const RSRQ = Type.Integer({ minimum: -30, maximum: 255, title: 'RSRQ' })
 
 const inputSchema = Type.Object({
 	nw: Type.String({ minLength: 1 }),
@@ -27,16 +29,16 @@ const inputSchema = Type.Object({
 		area: PositiveInteger,
 		earfcn: PositiveInteger,
 		adv: PositiveInteger,
-		rsrp: PositiveInteger,
-		rsrq: PositiveInteger,
+		rsrp: RSRP,
+		rsrq: RSRQ,
 		nmr: Type.Optional(
 			Type.Array(
 				Type.Object(
 					{
 						cell: PositiveInteger,
 						earfcn: PositiveInteger,
-						rsrp: PositiveInteger,
-						rsrq: PositiveInteger,
+						rsrp: RSRP,
+						rsrq: RSRQ,
 					},
 					{ additionalProperties: false },
 				),
@@ -57,16 +59,16 @@ const locateRequestSchema = Type.Dict(
 				tac: PositiveInteger,
 				earfcn: PositiveInteger,
 				adv: PositiveInteger,
-				rsrp: PositiveInteger,
-				rsrq: PositiveInteger,
+				rsrp: RSRP,
+				rsrq: RSRQ,
 				nmr: Type.Optional(
 					Type.Array(
 						Type.Object(
 							{
 								pci: PositiveInteger,
 								earfcn: PositiveInteger,
-								rsrp: PositiveInteger,
-								rsrq: PositiveInteger,
+								rsrp: RSRP,
+								rsrq: RSRQ,
 							},
 							{ additionalProperties: false },
 						),
