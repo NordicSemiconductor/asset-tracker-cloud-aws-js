@@ -6,7 +6,7 @@ import { unmarshall } from '@aws-sdk/util-dynamodb'
 
 type Report = {
 	deviceId: string
-	timestamp: number
+	timestamp: Date
 	reportId: string
 	nw: string
 	report: Record<string, any>
@@ -40,7 +40,7 @@ export const geolocateReport =
 					const report: Report & { location?: Location } = {
 						reportId: entry.reportId,
 						deviceId: entry.deviceId,
-						timestamp: entry.timestamp,
+						timestamp: new Date(entry.timestamp),
 						unresolved: entry.unresolved,
 						report: entry.report as Record<string, any>,
 						nw: entry.nw,
