@@ -109,7 +109,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		const persis = new Lambda.Function(this, 'persist', {
+		const persist = new Lambda.Function(this, 'persist', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
@@ -131,7 +131,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		new LambdaLogGroup(this, 'persistLogs', persis)
+		new LambdaLogGroup(this, 'persistLogs', persist)
 
 		const stateMachineRole = new Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
@@ -197,8 +197,8 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 								this,
 								'Persist result from third party API',
 								{
-									lambdaFunction: persis,
-									resultPath: '$.storedInCache',
+									lambdaFunction: persist,
+									resultPath: '$.persisted',
 									payloadResponseOnly: true,
 								},
 							).next(
@@ -249,13 +249,29 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 													resultPath: '$.ncellmeasgeo',
 													result: Result.fromObject({ located: false }),
 												},
-											).next(
-												new StepFunctions.Fail(this, 'Failed (no resolution)', {
-													error: 'FAILED',
-													cause:
-														'The neighboring cell measurement report could not be resolved',
-												}),
-											),
+											)
+												.next(
+													new StepFunctionTasks.LambdaInvoke(
+														this,
+														'Persist resolution failure',
+														{
+															lambdaFunction: persist,
+															resultPath: '$.persisted',
+															payloadResponseOnly: true,
+														},
+													),
+												)
+												.next(
+													new StepFunctions.Fail(
+														this,
+														'Failed (no resolution)',
+														{
+															error: 'FAILED',
+															cause:
+																'The neighboring cell measurement report could not be resolved',
+														},
+													),
+												),
 										)
 										return choice
 									})(),
