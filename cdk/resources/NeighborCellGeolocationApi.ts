@@ -49,17 +49,7 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 			code: lambdas.lambdas.invokeStepFunctionFromSQS,
 			description:
 				'Invoke the neighboring cell geolocation resolution step function for SQS messages',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: [
-						'sqs:ReceiveMessage',
-						'sqs:DeleteMessage',
-						'sqs:GetQueueAttributes',
-					],
-					resources: [resolutionJobsQueue.queueArn],
-				}),
-			],
+			initialPolicy: [logToCloudWatch],
 			environment: {
 				STEP_FUNCTION_ARN: geolocation.stateMachine.stateMachineArn,
 				VERSION: this.node.tryGetContext('version'),
@@ -79,6 +69,8 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 			target: fromSQS,
 			batchSize: 10,
 		})
+
+		resolutionJobsQueue.grantConsumeMessages(fromSQS)
 
 		geolocation.stateMachine.grantStartExecution(fromSQS)
 

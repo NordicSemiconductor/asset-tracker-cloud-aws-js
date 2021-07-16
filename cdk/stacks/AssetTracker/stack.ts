@@ -22,6 +22,9 @@ import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMea
 import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
 import { NeighborCellGeolocationApi } from '../../resources/NeighborCellGeolocationApi'
 import { NeighborCellGeolocation } from '../../resources/NeighborCellGeolocation'
+import { AGPSStorage } from '../../resources/AGPSStorage'
+import { AGPSResolver } from '../../resources/AGPSResolver'
+import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -336,7 +339,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 						Action: ['iot:Subscribe'],
 						Resource: [
 							'arn:aws:iot:*:*:topicfilter/$aws/things/${iot:ClientId}/*',
-                                                        'arn:aws:iot:*:*:topicfilter/${iot:ClientId}/*',
+							'arn:aws:iot:*:*:topicfilter/${iot:ClientId}/*',
 						],
 					},
 					{
@@ -506,6 +509,18 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiId', {
 			value: neighborCellGeolocationApi.api.ref,
 			exportName: `${this.stackName}:neighborCellGeolocationApiId`,
+		})
+
+		// A-GPS support
+		const agpsStorage = new AGPSStorage(this, 'agpsStorage')
+		const agpsResolver = new AGPSResolver(this, 'agpsResolver', {
+			storage: agpsStorage,
+			lambdas,
+		})
+		new AGPSDeviceRequestHandler(this, 'agpsDeviceRequestHandler', {
+			lambdas,
+			storage: agpsStorage,
+			resolver: agpsResolver,
 		})
 	}
 }
