@@ -137,8 +137,8 @@ export class AGPSResolver extends CloudFormation.Resource {
 						},
 						expressionAttributeValues: {
 							':unresolved': DynamoAttributeValue.fromBoolean(false),
-							':data': DynamoAttributeValue.fromString(
-								JsonPath.stringAt('$.agps.data'),
+							':data': DynamoAttributeValue.fromStringSet(
+								JsonPath.listAt('$.agps.data'),
 							),
 						},
 					},

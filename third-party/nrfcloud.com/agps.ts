@@ -6,7 +6,7 @@ import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
-import { AGPSType } from '../../agps/types'
+import { agpsRequestSchema, AGPSType } from '../../agps/types'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -17,17 +17,7 @@ const fetchSettings = getNrfConnectForCloudApiSettings({
 
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
-const inputSchema = Type.Object({
-	nw: Type.String({ minLength: 1 }),
-	mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-	mnc: Type.Integer({ minimum: 0, maximum: 99 }),
-	cell: PositiveInteger,
-	area: PositiveInteger,
-	phycell: Type.Optional(PositiveInteger),
-	types: Type.Array(Type.Enum(AGPSType), { minItems: 1 }),
-})
-
-const agpsRequestSchema = Type.Object(
+const apiRequestSchema = Type.Object(
 	{
 		deviceIdentifier: Type.String({ minLength: 1 }),
 		eci: PositiveInteger,
@@ -40,10 +30,10 @@ const agpsRequestSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithJSONSchema(inputSchema)
+const validateInput = validateWithJSONSchema(agpsRequestSchema)
 
 export const handler = async (
-	agps: Static<typeof inputSchema>,
+	agps: Static<typeof agpsRequestSchema>,
 ): Promise<{ resolved: boolean; data?: string[] }> => {
 	console.log(JSON.stringify(agps))
 	const valid = validateInput(agps)
@@ -75,7 +65,7 @@ export const handler = async (
 			// FIXME: use dynamic value from HEAD request. Currently broken on nRF Connect for Cloud side
 			Range: `bytes=0-2000`,
 		},
-		requestSchema: agpsRequestSchema,
+		requestSchema: apiRequestSchema,
 		responseSchema: Type.String({ minLength: 1, maxLength: 2000 }),
 	})()
 	if (isLeft(maybeAGPS)) {
@@ -84,7 +74,11 @@ export const handler = async (
 			resolved: false,
 		}
 	}
-	console.debug(JSON.stringify(maybeAGPS.right))
+	console.debug(
+		`Received ${
+			maybeAGPS.right.length
+		} bytes for requested types ${JSON.stringify(types)}`,
+	)
 	return {
 		resolved: true,
 		data: [maybeAGPS.right],

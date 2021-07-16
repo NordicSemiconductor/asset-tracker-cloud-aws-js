@@ -11,6 +11,18 @@ const ajv = new Ajv()
 ajv.addKeyword('kind')
 ajv.addKeyword('modifier')
 
+/**
+ * Provides custom encoding of arrays
+ */
+export const toQueryString = (query: Record<string, any>): string => {
+	if (Object.entries(query).length === 0) return ''
+	const parts = Object.entries(query).map(([k, v]) => {
+		if (Array.isArray(v)) return `${encodeURIComponent(k)}=${v.join(',')}`
+		return `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
+	})
+	return `?${parts.join('&')}`
+}
+
 const validate =
 	<Schema extends TSchema>({
 		schema,
@@ -75,7 +87,9 @@ const req =
 								path: `${endpoint.pathname.replace(
 									/\/+$/g,
 									'',
-								)}/v1/${resource}`,
+								)}/v1/${resource}${
+									method === 'GET' ? `${toQueryString(payload)}` : ''
+								}`,
 								method,
 								agent: false,
 								headers: {
@@ -136,7 +150,7 @@ const req =
 							req.on('error', (e) => {
 								reject(new Error(e.message))
 							})
-							req.write(JSON.stringify(input))
+							if (method === 'POST') req.write(JSON.stringify(input))
 							req.end()
 						}),
 					(err) => {
