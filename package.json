@@ -30,6 +30,7 @@
     "@aws-sdk/client-dynamodb": "3.22.0",
     "@aws-sdk/client-iot": "3.22.0",
     "@aws-sdk/client-s3": "3.22.0",
+    "@aws-sdk/client-sfn": "3.22.0",
     "@aws-sdk/client-sqs": "3.22.0",
     "@aws-sdk/client-ssm": "3.22.0",
     "@aws-sdk/client-timestream-query": "3.22.0",
