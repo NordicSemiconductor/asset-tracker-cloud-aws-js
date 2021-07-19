@@ -87,6 +87,112 @@ export class AGPSResolver extends CloudFormation.Resource {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
 		})
 
+		const persistResult = new StepFunctionTasks.DynamoUpdateItem(
+			this,
+			'Persist result from third party API',
+			{
+				table: storage.cacheTable,
+				key: {
+					cacheKey: DynamoAttributeValue.fromString(
+						JsonPath.stringAt('$.cacheKey'),
+					),
+				},
+				updateExpression:
+					'SET #unresolved = :unresolved, #data = :data, #source = :source, #ttl = :ttl, #timestamp = :timestamp',
+				expressionAttributeNames: {
+					'#unresolved': 'unresolved',
+					'#data': 'data',
+					'#source': 'source',
+					'#timestamp': 'timestamp',
+					'#ttl': 'ttl',
+				},
+				expressionAttributeValues: {
+					':unresolved': DynamoAttributeValue.fromBoolean(false),
+					':data': DynamoAttributeValue.fromStringSet(
+						JsonPath.listAt('$.agps.data'),
+					),
+					':source': DynamoAttributeValue.fromString(
+						JsonPath.stringAt('$.agps.source'),
+					),
+					':timestamp': DynamoAttributeValue.fromString(
+						JsonPath.stringAt('$$.State.EnteredTime'),
+					),
+					':ttl': DynamoAttributeValue.fromString(JsonPath.stringAt('$.ttl')),
+				},
+			},
+		).next(
+			new StepFunctions.Succeed(this, 'Done (resolved using third party API)'),
+		)
+
+		const checkApiResult = (n: number): [Condition, IChainable] => [
+			StepFunctions.Condition.booleanEquals(`$.agps[${n}].resolved`, true),
+			new StepFunctions.Pass(
+				this,
+				`yes: write location data from result ${n} to input`,
+				{
+					resultPath: '$.agps',
+					inputPath: `$.agps[${n}]`,
+				},
+			).next(persistResult),
+		]
+
+		const persistFailure = new StepFunctionTasks.DynamoUpdateItem(
+			this,
+			'Persist resolution failure',
+			{
+				table: storage.cacheTable,
+				key: {
+					cacheKey: DynamoAttributeValue.fromString(
+						JsonPath.stringAt('$.cacheKey'),
+					),
+				},
+				updateExpression:
+					'SET #unresolved = :unresolved, #ttl = :ttl, #timestamp = :timestamp',
+				expressionAttributeNames: {
+					'#unresolved': 'unresolved',
+					'#ttl': 'ttl',
+					'#timestamp': 'timestamp',
+				},
+				expressionAttributeValues: {
+					':unresolved': DynamoAttributeValue.fromBoolean(true),
+					':ttl': DynamoAttributeValue.fromNumber(JsonPath.numberAt('$.ttl')),
+					':timestamp': DynamoAttributeValue.fromString(
+						JsonPath.stringAt('$$.State.EnteredTime'),
+					),
+				},
+			},
+		)
+
+		const noApiResult = new StepFunctions.Pass(
+			this,
+			'no: mark request as not resolved',
+			{
+				resultPath: '$.agps',
+				result: Result.fromObject({ located: false }),
+			},
+		)
+			.next(persistFailure)
+			.next(
+				new StepFunctions.Fail(this, 'Failed (no resolution)', {
+					error: 'FAILED',
+					cause: 'The A-GPS request could not be resolved',
+				}),
+			)
+
+		const fetchCache = new StepFunctionTasks.DynamoGetItem(
+			this,
+			'fetch cached data',
+			{
+				table: storage.cacheTable,
+				key: {
+					cacheKey: DynamoAttributeValue.fromString(
+						JsonPath.stringAt('$.cacheKey'),
+					),
+				},
+				resultPath: '$.cached',
+			},
+		)
+
 		/**
 		 * This is a STANDARD StepFunction because we want the user to be able to execute it and query it for the result.
 		 * This is not possible with EXPRESS StepFunctions.
@@ -94,132 +200,78 @@ export class AGPSResolver extends CloudFormation.Resource {
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-agps`,
 			stateMachineType: StateMachineType.STANDARD,
-			definition: (() => {
-				if (fromNrfConnectForCloud === undefined) {
-					return new StepFunctions.Fail(this, 'Failed (No API)', {
-						error: 'NO_API',
-						cause: 'No third party API is configured to resolve the A-GPS data',
-					})
-				}
-				const markSource = (source: string) =>
-					new StepFunctions.Pass(this, `mark source in result as ${source}`, {
-						resultPath: '$.source',
-						result: Result.fromString(source),
-					})
-				const branches: IChainable[] = []
-				if (fromNrfConnectForCloud !== undefined) {
-					branches.push(
-						new StepFunctionTasks.LambdaInvoke(
-							this,
-							'Resolve using nRF Connect for Cloud API',
-							{
-								lambdaFunction: fromNrfConnectForCloud,
-								payloadResponseOnly: true,
-							},
-						).next(markSource('nrfconnectforcloud')),
+			definition: fetchCache.next(
+				new StepFunctions.Choice(this, 'Already resolved?')
+					.when(
+						StepFunctions.Condition.and(
+							StepFunctions.Condition.isPresent(
+								`$.cached.Item.unresolved.BOOL`,
+							),
+							StepFunctions.Condition.booleanEquals(
+								`$.cached.Item.unresolved.BOOL`,
+								false,
+							),
+						),
+						new StepFunctions.Succeed(this, 'Done (already resolved)'),
 					)
-				}
-
-				const persistResult = new StepFunctionTasks.DynamoUpdateItem(
-					this,
-					'Persist result from third party API',
-					{
-						table: storage.cacheTable,
-						key: {
-							cacheKey: DynamoAttributeValue.fromString(
-								JsonPath.stringAt('$.cacheKey'),
-							),
-						},
-						updateExpression: 'SET #unresolved = :unresolved, #data = :data',
-						expressionAttributeNames: {
-							'#unresolved': 'unresolved',
-							'#data': 'data',
-						},
-						expressionAttributeValues: {
-							':unresolved': DynamoAttributeValue.fromBoolean(false),
-							':data': DynamoAttributeValue.fromStringSet(
-								JsonPath.listAt('$.agps.data'),
-							),
-						},
-					},
-				).next(
-					new StepFunctions.Succeed(
-						this,
-						'Done (resolved using third party API)',
-					),
-				)
-				const checkApiResult = (n: number): [Condition, IChainable] => [
-					StepFunctions.Condition.booleanEquals(`$.agps[${n}].resolved`, true),
-					new StepFunctions.Pass(
-						this,
-						`yes: write location data from result ${n} to input`,
-						{
-							resultPath: '$.agps',
-							inputPath: `$.agps[${n}]`,
-						},
-					).next(persistResult),
-				]
-
-				return new StepFunctions.Parallel(
-					this,
-					'Resolve using third party API',
-					{
-						resultPath: '$.agps',
-					},
-				)
-					.branch(...branches)
-					.next(
+					.otherwise(
 						(() => {
-							const choice = new StepFunctions.Choice(
-								this,
-								'Resolved from any third party API?',
-							)
-
-							for (let i = 0; i < branches.length; i++) {
-								choice.when(...checkApiResult(i))
+							if (fromNrfConnectForCloud === undefined) {
+								return new StepFunctions.Fail(this, 'Failed (No API)', {
+									error: 'NO_API',
+									cause:
+										'No third party API is configured to resolve the A-GPS data',
+								})
 							}
-
-							choice.otherwise(
+							const markSource = (source: string) =>
 								new StepFunctions.Pass(
 									this,
-									'no: mark request as not resolved',
+									`mark source in result as ${source}`,
 									{
-										resultPath: '$.agps',
-										result: Result.fromObject({ located: false }),
+										resultPath: '$.source',
+										result: Result.fromString(source),
 									},
 								)
-									.next(
-										new StepFunctionTasks.DynamoUpdateItem(
-											this,
-											'Persist resulotion failure',
-											{
-												table: storage.cacheTable,
-												key: {
-													cacheKey: DynamoAttributeValue.fromString(
-														JsonPath.stringAt('$.cacheKey'),
-													),
-												},
-												updateExpression: 'SET #unresolved = :unresolved',
-												expressionAttributeNames: {
-													'#unresolved': 'unresolved',
-												},
-												expressionAttributeValues: {
-													':unresolved': DynamoAttributeValue.fromBoolean(true),
-												},
-											},
-										),
-									)
-									.next(
-										new StepFunctions.Fail(this, 'Failed (no resolution)', {
-											error: 'FAILED',
-											cause: 'The A-GPS request could not be resolved',
-										}),
-									),
+							const branches: IChainable[] = []
+							if (fromNrfConnectForCloud !== undefined) {
+								branches.push(
+									new StepFunctionTasks.LambdaInvoke(
+										this,
+										'Resolve using nRF Connect for Cloud API',
+										{
+											lambdaFunction: fromNrfConnectForCloud,
+											payloadResponseOnly: true,
+										},
+									).next(markSource('nrfconnectforcloud')),
+								)
+							}
+
+							return new StepFunctions.Parallel(
+								this,
+								'Resolve using third party API',
+								{
+									resultPath: '$.agps',
+								},
 							)
-							return choice
+								.branch(...branches)
+								.next(
+									(() => {
+										const choice = new StepFunctions.Choice(
+											this,
+											'Resolved from any third party API?',
+										)
+
+										for (let i = 0; i < branches.length; i++) {
+											choice.when(...checkApiResult(i))
+										}
+
+										choice.otherwise(noApiResult)
+										return choice
+									})(),
+								)
 						})(),
-					)
-			})(),
+					),
+			),
 			timeout: CloudFormation.Duration.minutes(5),
 			role: stateMachineRole,
 		})

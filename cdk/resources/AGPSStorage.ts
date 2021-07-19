@@ -20,6 +20,7 @@ export class AGPSStorage extends CloudFormation.Resource {
 				this.node.tryGetContext('isTest') === true
 					? CloudFormation.RemovalPolicy.DESTROY
 					: CloudFormation.RemovalPolicy.RETAIN,
+			timeToLiveAttribute: 'ttl',
 		})
 	}
 }
