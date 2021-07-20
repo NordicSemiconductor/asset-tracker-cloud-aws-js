@@ -28,3 +28,7 @@ Feature: A-GPS
         ]
       }
       """
+
+  Scenario: Receive A-GPS data
+
+    Given the tracker receives a raw message on the topic {tracker:id}/agps

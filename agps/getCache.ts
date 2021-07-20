@@ -27,26 +27,25 @@ export const getCache =
 				}),
 			)
 
-			console.debug(
-				JSON.stringify({
-					getCache: { Item },
-				}),
-			)
-
 			if (Item === undefined) throw new Error('NOT_FOUND')
 
 			const entry = unmarshall(Item)
+			const i = {
+				...entry,
+				updatedAt: new Date(entry.updatedAt as string),
+				types: [...(entry.types as Set<number>)],
+				data:
+					entry.data !== undefined
+						? [...(entry.data as Set<string>)]
+						: undefined,
+			} as AGPSDataCache
 
 			console.debug(
 				JSON.stringify({
-					getCache: { entry },
+					getCache: { entry: i },
 				}),
 			)
-			return right({
-				...entry,
-				updatedAt: new Date(entry.updatedAt as string),
-				data: [...(entry.data as Set<string>)],
-			} as AGPSDataCache)
+			return right(i)
 		} catch (err) {
 			if (
 				(err as Error).message === 'NOT_FOUND' ||

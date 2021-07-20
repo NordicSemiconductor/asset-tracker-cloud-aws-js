@@ -164,7 +164,7 @@ export const assetTrackerStepRunners = ({
 					})
 					connection.on('error', () => {
 						clearTimeout(timeout)
-						reject()
+						reject(new Error('disconnected'))
 						connection.end()
 					})
 				})
@@ -226,6 +226,7 @@ export const assetTrackerStepRunners = ({
 				connection.on('error', (err: any) => {
 					clearTimeout(timeout)
 					reject(err)
+					connection.end()
 				})
 				connection.publish(topic, JSON.stringify(message), undefined, (err) => {
 					if (isNotNullOrUndefined(err)) {
@@ -233,9 +234,49 @@ export const assetTrackerStepRunners = ({
 					}
 					clearTimeout(timeout)
 					resolve()
+					connection.end()
 				})
 			})
 			return publishPromise
+		}),
+		regexGroupMatcher(
+			/^the tracker(?: (?<deviceId>[^ ]+))? receives a (?<raw>raw )?message on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
+		)(async ({ deviceId, raw, topic, storeName }, _, runner) => {
+			const catId = deviceId ?? runner.store['tracker:id']
+
+			return new Promise((resolve, reject) => {
+				const timeout = setTimeout(reject, 60 * 1000)
+				const connection = connectToBroker(catId)
+
+				connection.on('connect', () => {
+					connection.subscribe(topic, undefined, (err) => {
+						if (isNotNullOrUndefined(err)) {
+							connection.end()
+							reject(err)
+						}
+					})
+
+					connection.on('message', async (t, message) => {
+						connection.end()
+						clearTimeout(timeout)
+						await runner.progress(`Iot`, t)
+						await runner.progress(`Iot`, message)
+						if (t === topic) {
+							// eslint-disable-next-line require-atomic-updates
+							const m = raw !== undefined ? message : JSON.parse(message)
+							if (storeName !== undefined) runner.store[storeName] = m
+							resolve(m)
+						} else {
+							reject(new Error(`Did not receive a message!`))
+						}
+					})
+				})
+				connection.on('error', (error) => {
+					clearTimeout(timeout)
+					reject(error)
+					connection.end()
+				})
+			})
 		}),
 		regexGroupMatcher(
 			/^the tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,

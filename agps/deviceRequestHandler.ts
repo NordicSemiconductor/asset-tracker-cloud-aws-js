@@ -3,11 +3,7 @@ import {
 	IoTDataPlaneClient,
 	PublishCommand,
 } from '@aws-sdk/client-iot-data-plane'
-import {
-	SQSClient,
-	SendMessageBatchCommand,
-	SendMessageBatchCommandInput,
-} from '@aws-sdk/client-sqs'
+import { SQSClient, SendMessageBatchCommand } from '@aws-sdk/client-sqs'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
@@ -40,13 +36,14 @@ type AGPSRequestFromIoTRule = Static<typeof agpsRequestSchema> & {
 	updatedAt: string
 }
 
-const resolvedRequests: Record<string, AGPSDataCache> = {}
-
 const iotData = new IoTDataPlaneClient({})
 
 const sqs = new SQSClient({})
 
 const sf = new SFNClient({})
+
+// Keep a local cache in case many devices requests the same location
+const resolvedRequests: Record<string, AGPSDataCache> = {}
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	console.log(JSON.stringify({ event }))
@@ -83,26 +80,26 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	await Promise.all(
 		Object.entries(byCacheKey).map(
 			async ([cacheKey, deviceRequests]): Promise<void> => {
-				// Load from DB, if not already known
 				if (resolvedRequests[cacheKey] === undefined) {
+					console.debug(cacheKey, 'Load from DB')
 					const d = await c(cacheKey)
 					if (isRight(d)) {
 						if (d.right?.unresolved !== undefined) {
-							// Processing of the request is finished
+							console.debug(cacheKey, 'Processing of the request is finished')
 							resolvedRequests[cacheKey] = d.right
 							if (d.right.unresolved === true) {
-								// Previously tried to resolve it, but not data available
-								console.error(`A-GPS request for ${cacheKey} is unresolved.`)
+								console.error(cacheKey, `A-GPS request is unresolved.`)
 								return
 							}
 						}
 					} else {
+						console.debug(cacheKey, 'cache does not exist')
 						console.warn({ getCache: d.left })
-						try {
-							const r = deviceRequests[0].request
-							await Promise.all([
-								// Create DB entry
-								await dynamodb.send(
+						const r = deviceRequests[0].request
+						await Promise.all([
+							// Create DB entry
+							await dynamodb
+								.send(
 									new PutItemCommand({
 										TableName,
 										Item: {
@@ -143,9 +140,12 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 											},
 										},
 									}),
-								),
-								// Kick off resolution
-								await sf.send(
+								)
+								.then(() => {
+									console.debug(cacheKey, 'Cache entry created')
+								}),
+							await sf
+								.send(
 									new StartExecutionCommand({
 										stateMachineArn,
 										input: JSON.stringify({
@@ -154,83 +154,111 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 										}),
 										name: cacheKey, // This will ensure only one is executed per invocation
 									}),
-								),
-							])
-						} catch (err) {
-							// FIXME: handle expected errors
-							console.error({
-								startExecutionError: err.message,
-							})
-						}
+								)
+								.then((res) => {
+									console.debug(
+										cacheKey,
+										'Resolution started',
+										res.executionArn,
+									)
+								})
+								.catch((err) => {
+									// FIXME: handle (supress) expected errors (duplicate execution)
+									console.error(
+										JSON.stringify({
+											startExecutionError: err.message,
+										}),
+									)
+								}),
+						])
 					}
 				}
 
-				// The data for these devices is available
+				// The data for these requests is available
 				if (
 					resolvedRequests[cacheKey]?.unresolved !== undefined &&
 					resolvedRequests[cacheKey].unresolved === false
 				) {
+					console.debug(cacheKey, 'data for these requests is available')
 					console.debug(
 						JSON.stringify({
 							deviceRequests,
 							resolvedRequests,
 						}),
 					)
-					try {
-						await Promise.all(
-							deviceRequests.map(async (deviceRequest) =>
-								Promise.all(
-									(resolvedRequests[cacheKey]?.data ?? []).map(
-										async (agpsdata) =>
-											iotData.send(
-												new PublishCommand({
-													topic: `${deviceRequest.request.deviceId}/agps`,
-													payload: new TextEncoder().encode(agpsdata),
-												}),
-											),
+					await Promise.all(
+						deviceRequests.map(async (deviceRequest) =>
+							Promise.all(
+								(resolvedRequests[cacheKey]?.data ?? []).map(async (agpsdata) =>
+									iotData.send(
+										new PublishCommand({
+											topic: `${deviceRequest.request.deviceId}/agps`,
+											payload: new TextEncoder().encode(agpsdata),
+											qos: 1,
+										}),
 									),
 								),
 							),
-						)
-					} catch (err) {
-						console.error({
-							resolveRequestsViaIot: err.message,
+						),
+					)
+						.then(() => {
+							deviceRequests.forEach(({ request: { deviceId } }) =>
+								console.debug(cacheKey, `resolved request for`, deviceId),
+							)
 						})
-					}
+						.catch((err) => {
+							console.error(
+								JSON.stringify({
+									resolveRequestsViaIot: err.message,
+								}),
+							)
+						})
 					return
 				}
 
-				// Resolution is in progress ... put in queue again, with increasing delay
-				const req: SendMessageBatchCommandInput = {
-					QueueUrl,
-					Entries: deviceRequests.map((deviceRequest) => {
-						const DelaySeconds =
-							parseInt(
-								deviceRequest.messageAttributes.DelaySeconds?.stringValue ??
-									'10',
-								10,
-							) * 1.5
-						return {
-							Id: v4(),
-							MessageBody: JSON.stringify(deviceRequest.request),
-							DelaySeconds,
-							MessageAttributes: {
-								DelaySeconds: {
-									DataType: 'Number',
-									StringValue: `${DelaySeconds}`,
-								},
-							},
-						}
-					}),
-				}
-				try {
-					await sqs.send(new SendMessageBatchCommand(req))
-				} catch (err) {
-					console.error({
-						batchSchedule: err.message,
-						req,
+				// Resolution is in progress ... put request in queue again, with increasing delay
+				// Eventually, messages will be discarded from the queue
+				await sqs
+					.send(
+						new SendMessageBatchCommand({
+							QueueUrl,
+							Entries: deviceRequests.map((deviceRequest) => {
+								const DelaySeconds = Math.floor(
+									Math.min(
+										900,
+										parseInt(
+											deviceRequest.messageAttributes.DelaySeconds
+												?.stringValue ?? '10',
+											10,
+										) * 1.5,
+									),
+								)
+								return {
+									Id: v4(),
+									MessageBody: JSON.stringify(deviceRequest.request),
+									DelaySeconds,
+									MessageAttributes: {
+										DelaySeconds: {
+											DataType: 'Number',
+											StringValue: `${DelaySeconds}`,
+										},
+									},
+								}
+							}),
+						}),
+					)
+					.then(() => {
+						deviceRequests.forEach(({ request: { deviceId } }) =>
+							console.debug(cacheKey, `re-scheduled request for`, deviceId),
+						)
 					})
-				}
+					.catch((err) => {
+						console.error(
+							JSON.stringify({
+								batchSchedule: err.message,
+							}),
+						)
+					})
 			},
 		),
 	)
