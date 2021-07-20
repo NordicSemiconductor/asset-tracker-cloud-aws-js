@@ -31,4 +31,8 @@ Feature: A-GPS
 
   Scenario: Receive A-GPS data
 
-    Given the tracker receives a raw message on the topic {tracker:id}/agps
+    The response should be split into two messages,
+    because A-GPS Ephemerides data is so large it cannot
+    be combined with other types
+
+    Given the tracker receives 2 raw messages on the topic {tracker:id}/agps

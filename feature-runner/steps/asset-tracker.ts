@@ -12,33 +12,37 @@ import { expect } from 'chai'
 import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 import { readFileSync } from 'fs'
 
-const connect =
-	({
-		mqttEndpoint,
-		certsDir,
-		awsIotRootCA,
-	}: {
-		mqttEndpoint: string
-		certsDir: string
-		awsIotRootCA: string
-	}) =>
-	(clientId: string) => {
-		const deviceFiles = deviceFileLocations({
-			certsDir,
-			deviceId: clientId,
-		})
-		const { privateKey, clientCert } = JSON.parse(
-			readFileSync(deviceFiles.json, 'utf-8'),
-		)
-		return new device({
-			privateKey: Buffer.from(privateKey),
-			clientCert: Buffer.from(clientCert),
-			caCert: Buffer.from(awsIotRootCA),
-			clientId,
-			host: mqttEndpoint,
-			region: mqttEndpoint.split('.')[2],
-		})
+const connect = ({
+	mqttEndpoint,
+	certsDir,
+	awsIotRootCA,
+}: {
+	mqttEndpoint: string
+	certsDir: string
+	awsIotRootCA: string
+}) => {
+	const connections: Record<string, device> = {}
+	return (clientId: string) => {
+		if (connections[clientId] === undefined) {
+			const deviceFiles = deviceFileLocations({
+				certsDir,
+				deviceId: clientId,
+			})
+			const { privateKey, clientCert } = JSON.parse(
+				readFileSync(deviceFiles.json, 'utf-8'),
+			)
+			connections[clientId] = new device({
+				privateKey: Buffer.from(privateKey),
+				clientCert: Buffer.from(clientCert),
+				caCert: Buffer.from(awsIotRootCA),
+				clientId,
+				host: mqttEndpoint,
+				region: mqttEndpoint.split('.')[2],
+			})
+		}
+		return connections[clientId]
 	}
+}
 
 const shadow =
 	({
@@ -240,12 +244,24 @@ export const assetTrackerStepRunners = ({
 			return publishPromise
 		}),
 		regexGroupMatcher(
-			/^the tracker(?: (?<deviceId>[^ ]+))? receives a (?<raw>raw )?message on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
-		)(async ({ deviceId, raw, topic, storeName }, _, runner) => {
+			/^the tracker(?: (?<deviceId>[^ ]+))? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
+		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
 
+			const expectedMessageCount =
+				messageCount === 'a' ? 1 : parseInt(messageCount, 10)
+			const messages: (Record<string, any> | string)[] = []
+
 			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(reject, 60 * 1000)
+				const timeout = setTimeout(() => {
+					reject(
+						new Error(
+							`timed out with ${
+								expectedMessageCount - messages.length
+							} message${expectedMessageCount > 1 ? 's' : ''} yet to receive.`,
+						),
+					)
+				}, 60 * 1000)
 				const connection = connectToBroker(catId)
 
 				connection.on('connect', () => {
@@ -257,17 +273,21 @@ export const assetTrackerStepRunners = ({
 					})
 
 					connection.on('message', async (t, message) => {
-						connection.end()
-						clearTimeout(timeout)
 						await runner.progress(`Iot`, t)
 						await runner.progress(`Iot`, message)
 						if (t === topic) {
-							// eslint-disable-next-line require-atomic-updates
 							const m = raw !== undefined ? message : JSON.parse(message)
-							if (storeName !== undefined) runner.store[storeName] = m
-							resolve(m)
-						} else {
-							reject(new Error(`Did not receive a message!`))
+							messages.push(m)
+							if (messages.length === expectedMessageCount) {
+								connection.unsubscribe(topic)
+								connection.end()
+								clearTimeout(timeout)
+								// eslint-disable-next-line require-atomic-updates
+								if (storeName !== undefined)
+									runner.store[storeName] =
+										messages.length > 1 ? messages : messages[0]
+								resolve(messages.length > 1 ? messages : messages[0])
+							}
 						}
 					})
 				})
@@ -310,6 +330,7 @@ export const assetTrackerStepRunners = ({
 					})
 
 					connection.on('message', async (topic, message) => {
+						connection.unsubscribe(successTopic)
 						connection.end()
 						await runner.progress('Iot (job)', topic)
 						await runner.progress('Iot (job)', message)
@@ -367,6 +388,9 @@ export const assetTrackerStepRunners = ({
 				connection.on('message', async (topic, payload) => {
 					await runner.progress('Iot (job)', topic)
 					await runner.progress('Iot (job)', payload)
+					connection.unsubscribe(
+						`$aws/things/${catId}/jobs/${job.jobId}/update/accepted`,
+					)
 					connection.end()
 					resolve()
 				})
