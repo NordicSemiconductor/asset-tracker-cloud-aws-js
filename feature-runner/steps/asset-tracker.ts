@@ -6,14 +6,78 @@ import {
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { randomWords } from '@nordicsemiconductor/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
+import { mqtt, io, iot, iotshadow, iotjobs } from 'aws-iot-device-sdk-v2'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
-import { promises as fs } from 'fs'
-import {
-	awsIotDeviceConnection,
-	ListenerWithPayload,
-} from './awsIotDeviceConnection'
+import { readFileSync } from 'fs'
+import { TextDecoder } from 'util'
 import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR'
+import { promises as fs } from 'fs'
+
+const decoder = new TextDecoder('utf8')
+
+io.enable_logging(
+	process.env.IOT_LOG_LEVEL === undefined
+		? io.LogLevel.ERROR
+		: parseInt(process.env.IOT_LOG_LEVEL, 10),
+)
+const clientBootstrap = new io.ClientBootstrap()
+
+const awsIotThingMQTTConnection = ({
+	mqttEndpoint,
+	certsDir,
+}: {
+	mqttEndpoint: string
+	certsDir: string
+}) => {
+	const connections: Record<
+		string,
+		{
+			connection: mqtt.MqttClientConnection
+			shadow: iotshadow.IotShadowClient
+		}
+	> = {}
+	return async (
+		clientId: string,
+	): Promise<{
+		connection: mqtt.MqttClientConnection
+		shadow: iotshadow.IotShadowClient
+	}> => {
+		if (connections[clientId] === undefined) {
+			console.debug(`Creating new connection for ${clientId}...`)
+			const deviceFiles = deviceFileLocations({
+				certsDir,
+				deviceId: clientId,
+			})
+			const { privateKey, clientCert } = JSON.parse(
+				readFileSync(deviceFiles.simulatorJSON, 'utf-8'),
+			)
+			const cfg = iot.AwsIotMqttConnectionConfigBuilder.new_mtls_builder(
+				clientCert,
+				privateKey,
+			)
+			cfg.with_clean_session(true)
+			cfg.with_client_id(clientId)
+			cfg.with_endpoint(mqttEndpoint)
+			const client = new mqtt.MqttClient(clientBootstrap)
+			const connection = client.new_connection(cfg.build())
+			connection.on('error', (err) => {
+				console.error(err)
+			})
+			try {
+				await connection.connect()
+				connections[clientId] = {
+					connection,
+					shadow: new iotshadow.IotShadowClient(connection),
+				}
+			} catch (err) {
+				console.error(err)
+			}
+		}
+
+		return connections[clientId]
+	}
+}
 
 type World = {
 	accountId: string
@@ -22,16 +86,13 @@ type World = {
 export const assetTrackerStepRunners = ({
 	mqttEndpoint,
 	certsDir,
-	awsIotRootCA,
 }: {
 	mqttEndpoint: string
 	certsDir: string
-	awsIotRootCA: string
 }): ((step: InterpolatedStep) => StepRunnerFunc<World> | false)[] => {
-	const connectToBroker = awsIotDeviceConnection({
+	const iotConnect = awsIotThingMQTTConnection({
 		mqttEndpoint,
 		certsDir,
-		awsIotRootCA,
 	})
 	return [
 		regexMatcher<World>(
@@ -77,25 +138,28 @@ export const assetTrackerStepRunners = ({
 					mqttEndpoint.split('.')[2]
 				}:${runner.world.accountId}:thing/${catId}`
 			}
-			return runner.store[`${prefix}:id`]
 		}),
 		regexMatcher<World>(/^I connect the tracker(?: "([^"]+)")?$/)(
 			async ([deviceId], __, runner) => {
 				const catId = deviceId ?? runner.store['tracker:id']
-				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
-				const connection = await connectToBroker(catId)
-
-				return new Promise((resolve, reject) => {
-					const timeout = setTimeout(async () => {
-						await runner.progress('IoT', `Connection timeout`)
-						reject(new Error(`Connection timeout`))
-					}, 60 * 1000)
-
-					connection.onConnect(() => {
-						clearTimeout(timeout)
-						resolve([catId, mqttEndpoint])
-					})
-				})
+				await runner.progress(
+					'IoT > connect',
+					`Connecting ${catId} to ${mqttEndpoint} ...`,
+				)
+				await iotConnect(catId)
+				await runner.progress(
+					'IoT < connect',
+					`Connected ${catId} to ${mqttEndpoint} ...`,
+				)
+			},
+		),
+		regexMatcher<World>(/^I disconnect the tracker(?: "([^"]+)")?$/)(
+			async ([deviceId], __, runner) => {
+				const catId = deviceId ?? runner.store['tracker:id']
+				const { connection } = await iotConnect(catId)
+				await runner.progress('IoT > disconnect')
+				await connection.disconnect()
+				await new Promise((resolve) => setTimeout(resolve, 5000, []))
 			},
 		),
 		regexMatcher<World>(
@@ -106,38 +170,47 @@ export const assetTrackerStepRunners = ({
 			}
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = await connectToBroker(catId)
-			const shadowBase = `$aws/things/${catId}/shadow`
-			const updateStatus = `${shadowBase}/update`
-			const updateStatusAccepted = `${updateStatus}/accepted`
-			const updateStatusRejected = `${updateStatus}/rejected`
+			const { connection, shadow } = await iotConnect(catId)
 
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
-				Promise.all([
-					connection.onMessageOnce(updateStatusAccepted, (message) => {
-						void runner.progress('IoT < status', message.toString())
-						clearTimeout(timeout)
-						resolve(JSON.parse(message.toString()))
-					}),
-					connection.onMessageOnce(updateStatusRejected, (message) => {
-						void runner.progress('IoT < status', message.toString())
-						clearTimeout(timeout)
-						reject(new Error(`Update rejected!`))
-					}),
-				])
-					.then(async () => {
-						void runner.progress('IoT > reported', catId)
-						void runner.progress('IoT > reported', JSON.stringify(reported))
-						return connection.publish(
-							updateStatus,
-							JSON.stringify({ state: { reported } }),
-						)
-					})
-					.catch((err) => {
-						clearTimeout(timeout)
-						reject(err)
-					})
+				const onError = (err: any) => {
+					console.error(err)
+					clearTimeout(timeout)
+					reject(err)
+				}
+				connection.on('error', onError)
+				shadow
+					.subscribeToUpdateShadowAccepted(
+						{
+							thingName: catId,
+						},
+						mqtt.QoS.AtLeastOnce,
+						async (error, response) => {
+							if (error !== undefined) {
+								return onError(error)
+							}
+							await runner.progress(
+								'IoT < status',
+								JSON.stringify(response?.state),
+							)
+							clearTimeout(timeout)
+							resolve(response?.state)
+						},
+					)
+					.then(async () =>
+						runner.progress('IoT > reported', JSON.stringify(reported)),
+					)
+					.then(async () =>
+						shadow.publishUpdateShadow(
+							{
+								thingName: catId,
+								state: { reported },
+							},
+							mqtt.QoS.AtLeastOnce,
+						),
+					)
+					.catch(reject)
 			})
 			return await updatePromise
 		}),
@@ -149,12 +222,16 @@ export const assetTrackerStepRunners = ({
 				throw new Error('Must provide argument!')
 			}
 			const message = JSON.parse(step.interpolatedArgument)
-			const connection = await connectToBroker(catId)
+			const { connection } = await iotConnect(catId)
 			const publishPromise = new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
+				connection.on('error', (err: any) => {
+					clearTimeout(timeout)
+					reject(err)
+				})
 				connection
-					.publish(topic, JSON.stringify(message))
-					.then(resolve)
+					.publish(topic, message, mqtt.QoS.AtLeastOnce)
+					.then(async () => resolve())
 					.catch(reject)
 					.finally(() => {
 						clearTimeout(timeout)
@@ -166,8 +243,8 @@ export const assetTrackerStepRunners = ({
 			/^the tracker(?: "(?<deviceId>[^"]+)")? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
 		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = await connectToBroker(catId)
 			const isRaw = raw !== undefined
+			const { connection } = await iotConnect(catId)
 
 			const expectedMessageCount =
 				messageCount === 'a' ? 1 : parseInt(messageCount, 10)
@@ -184,117 +261,137 @@ export const assetTrackerStepRunners = ({
 					)
 				}, 60 * 1000)
 
-				const catchError = (error: Error) => {
-					clearTimeout(timeout)
-					reject(error)
-				}
+				connection.subscribe(
+					topic,
+					mqtt.QoS.AtLeastOnce,
+					async (topic: string, payload: ArrayBuffer) => {
+						const message = decoder.decode(payload)
+						const m = isRaw
+							? Buffer.from(payload).toString('hex')
+							: JSON.parse(message)
+						messages.push(m)
+						await runner.progress(`Iot`, message)
+						if (messages.length === expectedMessageCount) {
+							clearTimeout(timeout)
+							connection.unsubscribe(topic)
+							const result = messages.length > 1 ? messages : messages[0]
 
-				const listener: ListenerWithPayload = async (message) => {
-					await runner.progress(`Iot`, JSON.stringify(message))
-					const m = isRaw
-						? message.toString('hex')
-						: JSON.parse(message.toString('utf-8'))
-					messages.push(m)
-					if (messages.length === expectedMessageCount) {
-						clearTimeout(timeout)
-
-						const result = messages.length > 1 ? messages : messages[0]
-
-						if (storeName !== undefined) runner.store[storeName] = result
-
-						if (isRaw) {
-							if (messages.length > 1)
+							if (storeName !== undefined) runner.store[storeName] = result
+							if (isRaw) {
+								if (messages.length > 1)
+									return resolve(
+										messages.map(
+											(m) =>
+												`(${
+													Buffer.from(m as string, 'hex').length
+												} bytes of data)`,
+										),
+									)
 								return resolve(
-									messages.map(
-										(m) =>
-											`(${
-												Buffer.from(m as string, 'hex').length
-											} bytes of data)`,
-									),
+									`(${
+										Buffer.from(messages[0] as string, 'hex').length
+									} bytes of data)`,
 								)
-							return resolve(
-								`(${
-									Buffer.from(messages[0] as string, 'hex').length
-								} bytes of data)`,
-							)
-						}
+							}
 
-						return resolve(result)
-					}
-					connection.onMessageOnce(topic, listener).catch(catchError)
-				}
-				connection.onMessageOnce(topic, listener).catch(catchError)
+							return resolve(result)
+						}
+					},
+				)
 			})
 		}),
 		regexGroupMatcher(
 			/^the tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = await connectToBroker(catId)
-
-			const getNextJobTopic = `$aws/things/${catId}/jobs/$next/get`
-			const successTopic = `${getNextJobTopic}/accepted`
+			const { connection } = await iotConnect(catId)
+			const jobsClient = new iotjobs.IotJobsClient(connection)
 
 			return new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Did not receive a next job!`))
 				}, 60 * 1000)
 
-				const catchError = (error: Error) => {
+				connection.on('error', (error) => {
 					clearTimeout(timeout)
 					reject(error)
-				}
+				})
 
-				connection
-					.onMessageOnce(successTopic, (message) => {
-						clearTimeout(timeout)
-						runner.store[storeName] = JSON.parse(message.toString()).execution
-						resolve(runner.store[storeName])
-					})
-					.catch(catchError)
-
-				connection.publish(getNextJobTopic, '').catch(catchError)
+				jobsClient
+					.subscribeToGetPendingJobExecutionsAccepted(
+						{
+							thingName: catId,
+						},
+						mqtt.QoS.AtLeastOnce,
+						(error, job) => {
+							if (error !== undefined) {
+								clearTimeout(timeout)
+								return reject(error)
+							}
+							clearTimeout(timeout)
+							runner.store[storeName] = job
+							resolve(job)
+						},
+					)
+					.then(async () =>
+						jobsClient.publishGetPendingJobExecutions(
+							{
+								thingName: catId,
+							},
+							mqtt.QoS.AtLeastOnce,
+						),
+					)
+					.catch(reject)
 			})
 		}),
 		regexGroupMatcher(
 			/^the tracker(?: (?<deviceId>[^ ]+))? marks the job in "(?<storeName>[^"]+)" as in progress$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = await connectToBroker(catId)
-
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
-
-			const updateJobTopic = `$aws/things/${catId}/jobs/${job.jobId}/update`
-			const successTopic = `${updateJobTopic}/accepted`
+			const { connection } = await iotConnect(catId)
+			const jobsClient = new iotjobs.IotJobsClient(connection)
 
 			return new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
-					reject(new Error(`Job not marked as in progress!`))
+					reject(new Error('Timeout'))
 				}, 60 * 1000)
 
-				const catchError = (error: Error) => {
+				connection.on('error', (error) => {
 					clearTimeout(timeout)
 					reject(error)
-				}
+				})
 
-				connection
-					.onMessageOnce(successTopic, (message) => {
-						clearTimeout(timeout)
-						runner.store[storeName] = JSON.parse(message.toString())
-						resolve(JSON.parse(message.toString()))
-					})
+				jobsClient
+					.subscribeToUpdateJobExecutionAccepted(
+						{
+							jobId: job.jobId,
+							thingName: catId,
+						},
+						mqtt.QoS.AtLeastOnce,
+						async (error, update) => {
+							if (error !== undefined) {
+								clearTimeout(timeout)
+								return reject(error)
+							}
+							await runner.progress('Iot (job)', JSON.stringify(update))
+							resolve()
+						},
+					)
 					.then(async () =>
-						connection.publish(
-							updateJobTopic,
-							JSON.stringify({
-								status: 'IN_PROGRESS',
+						jobsClient.publishUpdateJobExecution(
+							{
+								jobId: job.jobId,
+								thingName: catId,
+								status: iotjobs.model.JobStatus.IN_PROGRESS,
 								expectedVersion: job.versionNumber,
 								executionNumber: job.executionNumber,
-							}),
+							},
+							mqtt.QoS.AtLeastOnce,
 						),
 					)
-					.catch(catchError)
+					.catch(reject)
 			})
 		}),
 	]

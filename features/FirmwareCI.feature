@@ -22,7 +22,6 @@ Feature: Schedula FOTA jobs during Firmware CI runs
         When I generate a certificate for the tracker "firmwaretest-{ciDeviceId}"
         Then I encode "$lookup($, 'tracker:firmwaretest-{ciDeviceId}:clientCert')" into "firmwareTestDeviceCertificatePEM" using replaceNewLines
         And I encode "$lookup($, 'tracker:firmwaretest-{ciDeviceId}:privateKey')" into "firmwareTestDeviceCertificatePrivateKey" using replaceNewLines
-        And I encode "'{awsIotRootCA}'" into "awsIotRootCAEncoded" using replaceNewLines
 
         # Tracker needs to be connected so a job can be created
         Then I connect the tracker "firmwaretest-{ciDeviceId}"
