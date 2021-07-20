@@ -10,6 +10,7 @@ import * as Lambda from '@aws-cdk/aws-lambda'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { AGPSResolver } from './AGPSResolver'
 import { AGPSStorage } from './AGPSStorage'
+import { PolicyStatement } from '@aws-cdk/aws-iam'
 
 /**
  * Provides assisted GPS data to devices via MQTT.
@@ -79,14 +80,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 				sql: `SELECT mcc, mnc, cell, area, phycell, types, get_thing_shadow(clientid(), "${
 					topicRuleRole.roleArn
 				}").state.reported.dev.v.nw as nw, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/agps/get' WHERE ${iotRuleSqlCheckUndefined(
-					[
-						`get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.dev.v.nw`,
-						'mcc',
-						'mnc',
-						'cell',
-						'area',
-						'types',
-					], // phycell is optional
+					['mcc', 'mnc', 'cell', 'area', 'types'], // phycell is optional
 				)}`,
 				actions: [
 					{
@@ -122,7 +116,18 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 					CACHE_TABLE: storage.cacheTable.tableName,
 					VERSION: this.node.tryGetContext('version'),
 					STACK_NAME: this.stack.stackName,
+					BIN_HOURS: '1',
+					STATE_MACHINE_ARN: resolver.stateMachine.stateMachineArn,
+					QUEUE_URL: queue.queueUrl,
 				},
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['iot:Publish'],
+						resources: [
+							`arn:aws:iot:${parent.region}:${parent.account}:topic/*/agps`,
+						],
+					}),
+				],
 			},
 		)
 
@@ -146,5 +151,8 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 		// Allow lambda to read from the cache table to fullfill already resolved requests
 		// ... and write execution ID to cache table
 		storage.cacheTable.grantReadWriteData(deviceRequestHandler)
+
+		// Allow lambda to republish unfullfilled requests
+		queue.grantSendMessages(deviceRequestHandler)
 	}
 }

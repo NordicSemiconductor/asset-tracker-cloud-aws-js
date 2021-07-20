@@ -12,7 +12,10 @@ export const cacheKey = ({
 	const { nw, mcc, mnc, cell, area, types } = request
 	return `${
 		nw.toLocaleLowerCase().includes('nb-iot') ? 'nbiot' : 'ltem'
-	}-${mcc}-${mnc}-${cell}-${area}-${types.join(',')}-${new Date(
+	}-${mcc}-${mnc}-${cell}-${area}-${types.join('_')}-${new Date(
 		Math.floor(Date.now() / binMs) * binMs,
-	).toISOString()}`
+	)
+		.toISOString()
+		.substr(0, 19)
+		.replace(/[:-]/g, '')}`
 }

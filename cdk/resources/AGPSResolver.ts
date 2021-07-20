@@ -98,13 +98,12 @@ export class AGPSResolver extends CloudFormation.Resource {
 					),
 				},
 				updateExpression:
-					'SET #unresolved = :unresolved, #data = :data, #source = :source, #ttl = :ttl, #timestamp = :timestamp',
+					'SET #unresolved = :unresolved, #data = :data, #source = :source, #updatedAt = :updatedAt',
 				expressionAttributeNames: {
 					'#unresolved': 'unresolved',
 					'#data': 'data',
 					'#source': 'source',
-					'#timestamp': 'timestamp',
-					'#ttl': 'ttl',
+					'#updatedAt': 'updatedAt',
 				},
 				expressionAttributeValues: {
 					':unresolved': DynamoAttributeValue.fromBoolean(false),
@@ -114,10 +113,9 @@ export class AGPSResolver extends CloudFormation.Resource {
 					':source': DynamoAttributeValue.fromString(
 						JsonPath.stringAt('$.agps.source'),
 					),
-					':timestamp': DynamoAttributeValue.fromString(
+					':updatedAt': DynamoAttributeValue.fromString(
 						JsonPath.stringAt('$$.State.EnteredTime'),
 					),
-					':ttl': DynamoAttributeValue.fromString(JsonPath.stringAt('$.ttl')),
 				},
 			},
 		).next(
@@ -147,16 +145,14 @@ export class AGPSResolver extends CloudFormation.Resource {
 					),
 				},
 				updateExpression:
-					'SET #unresolved = :unresolved, #ttl = :ttl, #timestamp = :timestamp',
+					'SET #unresolved = :unresolved,  #updatedAt = :updatedAt',
 				expressionAttributeNames: {
 					'#unresolved': 'unresolved',
-					'#ttl': 'ttl',
-					'#timestamp': 'timestamp',
+					'#updatedAt': 'updatedAt',
 				},
 				expressionAttributeValues: {
 					':unresolved': DynamoAttributeValue.fromBoolean(true),
-					':ttl': DynamoAttributeValue.fromNumber(JsonPath.numberAt('$.ttl')),
-					':timestamp': DynamoAttributeValue.fromString(
+					':updatedAt': DynamoAttributeValue.fromString(
 						JsonPath.stringAt('$$.State.EnteredTime'),
 					),
 				},

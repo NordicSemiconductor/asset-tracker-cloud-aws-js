@@ -15,8 +15,9 @@ describe('cacheKey', () => {
 				},
 			}),
 		).toEqual(
-			`ltem-242-1-21626624-30401-1,2,3,4,6,7,8,9-${new Date()
+			`ltem-242-1-21626624-30401-1_2_3_4_6_7_8_9-${new Date()
 				.toISOString()
-				.substr(0, 13)}:00:00.000Z`,
+				.substr(0, 13)
+				.replace(/[:-]/g, '')}0000`,
 		))
 })
