@@ -1,4 +1,5 @@
 @Last
+@Only
 Feature: Delete trackers
   As a user
   I can delete trackers
