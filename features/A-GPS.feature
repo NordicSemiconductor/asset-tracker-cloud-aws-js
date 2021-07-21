@@ -35,4 +35,5 @@ Feature: A-GPS
     because A-GPS Ephemerides data is so large it cannot
     be combined with other types
 
-    Given the tracker receives 2 raw messages on the topic {tracker:id}/agps
+    # Given the tracker receives 2 raw messages on the topic {tracker:id}/agps
+    Given the tracker receives 1 raw messages on the topic {tracker:id}/agps

@@ -6,71 +6,13 @@ import {
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { randomWords } from '@nordicsemiconductor/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
-import { device, thingShadow } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
-import { isNotNullOrUndefined } from '../../util/isNullOrUndefined'
 import { readFileSync } from 'fs'
-
-const connect = ({
-	mqttEndpoint,
-	certsDir,
-	awsIotRootCA,
-}: {
-	mqttEndpoint: string
-	certsDir: string
-	awsIotRootCA: string
-}) => {
-	const connections: Record<string, device> = {}
-	return (clientId: string) => {
-		if (connections[clientId] === undefined) {
-			const deviceFiles = deviceFileLocations({
-				certsDir,
-				deviceId: clientId,
-			})
-			const { privateKey, clientCert } = JSON.parse(
-				readFileSync(deviceFiles.json, 'utf-8'),
-			)
-			connections[clientId] = new device({
-				privateKey: Buffer.from(privateKey),
-				clientCert: Buffer.from(clientCert),
-				caCert: Buffer.from(awsIotRootCA),
-				clientId,
-				host: mqttEndpoint,
-				region: mqttEndpoint.split('.')[2],
-			})
-		}
-		return connections[clientId]
-	}
-}
-
-const shadow =
-	({
-		mqttEndpoint,
-		certsDir,
-		awsIotRootCA,
-	}: {
-		mqttEndpoint: string
-		certsDir: string
-		awsIotRootCA: string
-	}) =>
-	(clientId: string) => {
-		const deviceFiles = deviceFileLocations({
-			certsDir,
-			deviceId: clientId,
-		})
-		const { privateKey, clientCert } = JSON.parse(
-			readFileSync(deviceFiles.json, 'utf-8'),
-		)
-		return new thingShadow({
-			privateKey: Buffer.from(privateKey),
-			clientCert: Buffer.from(clientCert),
-			caCert: Buffer.from(awsIotRootCA),
-			clientId,
-			host: mqttEndpoint,
-			region: mqttEndpoint.split('.')[2],
-		})
-	}
+import {
+	awsIotDeviceConnection,
+	ListenerWithPayload,
+} from './awsIotDeviceConnection'
 
 type World = {
 	accountId: string
@@ -85,12 +27,7 @@ export const assetTrackerStepRunners = ({
 	certsDir: string
 	awsIotRootCA: string
 }): ((step: InterpolatedStep) => StepRunnerFunc<World> | false)[] => {
-	const connectToBroker = connect({
-		mqttEndpoint,
-		certsDir,
-		awsIotRootCA,
-	})
-	const shadowOnBroker = shadow({
+	const connectToBroker = awsIotDeviceConnection({
 		mqttEndpoint,
 		certsDir,
 		awsIotRootCA,
@@ -108,12 +45,10 @@ export const assetTrackerStepRunners = ({
 					mqttEndpoint,
 					awsIotRootCA,
 					log: (...message: any[]) => {
-						// eslint-disable-next-line @typescript-eslint/no-floating-promises
-						runner.progress('IoT (cert)', ...message)
+						void runner.progress('IoT (cert)', ...message)
 					},
 					debug: (...message: any[]) => {
-						// eslint-disable-next-line @typescript-eslint/no-floating-promises
-						runner.progress('IoT (cert)', ...message)
+						void runner.progress('IoT (cert)', ...message)
 					},
 					daysValid: 1,
 				})
@@ -127,9 +62,7 @@ export const assetTrackerStepRunners = ({
 				runner.store[`${prefix}:privateKey`] = privateKey
 				runner.store[`${prefix}:clientCert`] = clientCert
 
-				// eslint-disable-next-line require-atomic-updates
 				runner.store[`${prefix}:id`] = catId
-				// eslint-disable-next-line require-atomic-updates
 				runner.store[`${prefix}:arn`] = `arn:aws:iot:${
 					mqttEndpoint.split('.')[2]
 				}:${runner.world.accountId}:thing/${catId}`
@@ -139,37 +72,18 @@ export const assetTrackerStepRunners = ({
 		regexMatcher<World>(/^I connect the tracker(?: "([^"]+)")?$/)(
 			async ([deviceId], __, runner) => {
 				const catId = deviceId ?? runner.store['tracker:id']
-				await runner.progress('IoT', catId)
-				const deviceFiles = deviceFileLocations({
-					certsDir,
-					deviceId: catId,
-				})
 				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
+				const connection = connectToBroker(catId)
 
 				return new Promise((resolve, reject) => {
-					const timeout = setTimeout(reject, 60 * 1000)
-					const { privateKey, clientCert } = JSON.parse(
-						readFileSync(deviceFiles.json, 'utf-8'),
-					)
-					const connection = new thingShadow({
-						privateKey: Buffer.from(privateKey),
-						clientCert: Buffer.from(clientCert),
-						caCert: Buffer.from(awsIotRootCA),
-						clientId: catId,
-						host: mqttEndpoint,
-						region: mqttEndpoint.split('.')[2],
-					})
+					const timeout = setTimeout(async () => {
+						await runner.progress('IoT', `Connection timeout`)
+						reject(new Error(`Connection timeout`))
+					}, 60 * 1000)
 
-					connection.on('connect', () => {
-						// eslint-disable-next-line require-atomic-updates
+					connection.onConnect(() => {
 						clearTimeout(timeout)
 						resolve([catId, mqttEndpoint])
-						connection.end()
-					})
-					connection.on('error', () => {
-						clearTimeout(timeout)
-						reject(new Error('disconnected'))
-						connection.end()
 					})
 				})
 			},
@@ -182,37 +96,38 @@ export const assetTrackerStepRunners = ({
 			}
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = shadowOnBroker(catId)
+			const connection = connectToBroker(catId)
+			const shadowBase = `$aws/things/${catId}/shadow`
+			const updateStatus = `${shadowBase}/update`
+			const updateStatusAccepted = `${updateStatus}/accepted`
+			const updateStatusRejected = `${updateStatus}/rejected`
+
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
-				connection.on(
-					'status',
-					async (
-						_thingName: string,
-						stat: string,
-						_clientToken: string,
-						stateObject: Record<string, any>,
-					) => {
-						await runner.progress('IoT < status', stat)
-						await runner.progress('IoT < status', JSON.stringify(stateObject))
-						if (stat === 'accepted') {
-							clearTimeout(timeout)
-							resolve(stateObject)
-							connection.end()
-						}
-					},
-				)
-				connection.on('error', (err: any) => {
-					console.error(err)
-					clearTimeout(timeout)
-					reject(err)
-					connection.end()
-				})
-				connection.register(catId, {}, async () => {
-					await runner.progress('IoT > reported', catId)
-					await runner.progress('IoT > reported', JSON.stringify(reported))
-					connection.update(catId, { state: { reported } })
-				})
+				Promise.all([
+					connection.onMessageOnce(updateStatusAccepted, (message) => {
+						void runner.progress('IoT < status', message.toString())
+						clearTimeout(timeout)
+						resolve(JSON.parse(message.toString()))
+					}),
+					connection.onMessageOnce(updateStatusRejected, (message) => {
+						void runner.progress('IoT < status', message.toString())
+						clearTimeout(timeout)
+						reject(new Error(`Update rejected!`))
+					}),
+				])
+					.then(async () => {
+						void runner.progress('IoT > reported', catId)
+						void runner.progress('IoT > reported', JSON.stringify(reported))
+						return connection.publish(
+							updateStatus,
+							JSON.stringify({ state: { reported } }),
+						)
+					})
+					.catch((err) => {
+						clearTimeout(timeout)
+						reject(err)
+					})
 			})
 			return await updatePromise
 		}),
@@ -227,19 +142,13 @@ export const assetTrackerStepRunners = ({
 			const connection = connectToBroker(catId)
 			const publishPromise = new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
-				connection.on('error', (err: any) => {
-					clearTimeout(timeout)
-					reject(err)
-					connection.end()
-				})
-				connection.publish(topic, JSON.stringify(message), undefined, (err) => {
-					if (isNotNullOrUndefined(err)) {
-						return reject(err)
-					}
-					clearTimeout(timeout)
-					resolve()
-					connection.end()
-				})
+				connection
+					.publish(topic, JSON.stringify(message))
+					.then(resolve)
+					.catch(reject)
+					.finally(() => {
+						clearTimeout(timeout)
+					})
 			})
 			return publishPromise
 		}),
@@ -247,6 +156,7 @@ export const assetTrackerStepRunners = ({
 			/^the tracker(?: (?<deviceId>[^ ]+))? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
 		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
+			const connection = connectToBroker(catId)
 
 			const expectedMessageCount =
 				messageCount === 'a' ? 1 : parseInt(messageCount, 10)
@@ -262,143 +172,97 @@ export const assetTrackerStepRunners = ({
 						),
 					)
 				}, 60 * 1000)
-				const connection = connectToBroker(catId)
 
-				connection.on('connect', () => {
-					connection.subscribe(topic, undefined, (err) => {
-						if (isNotNullOrUndefined(err)) {
-							connection.end()
-							reject(err)
-						}
-					})
-
-					connection.on('message', async (t, message) => {
-						await runner.progress(`Iot`, t)
-						await runner.progress(`Iot`, message)
-						if (t === topic) {
-							const m = raw !== undefined ? message : JSON.parse(message)
-							messages.push(m)
-							if (messages.length === expectedMessageCount) {
-								connection.unsubscribe(topic)
-								connection.end()
-								clearTimeout(timeout)
-								// eslint-disable-next-line require-atomic-updates
-								if (storeName !== undefined)
-									runner.store[storeName] =
-										messages.length > 1 ? messages : messages[0]
-								resolve(messages.length > 1 ? messages : messages[0])
-							}
-						}
-					})
-				})
-				connection.on('error', (error) => {
+				const catchError = (error: Error) => {
 					clearTimeout(timeout)
 					reject(error)
-					connection.end()
-				})
+				}
+
+				const listener: ListenerWithPayload = async (message) => {
+					await runner.progress(`Iot`, JSON.stringify(message))
+					const m = raw !== undefined ? message : JSON.parse(message.toString())
+					messages.push(m)
+					if (messages.length === expectedMessageCount) {
+						clearTimeout(timeout)
+						if (storeName !== undefined)
+							runner.store[storeName] =
+								messages.length > 1 ? messages : messages[0]
+						return resolve(messages.length > 1 ? messages : messages[0])
+					}
+					connection.onMessageOnce(topic, listener).catch(catchError)
+				}
+				connection.onMessageOnce(topic, listener).catch(catchError)
 			})
 		}),
 		regexGroupMatcher(
 			/^the tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
+			const connection = connectToBroker(catId)
+
+			const getNextJobTopic = `$aws/things/${catId}/jobs/$next/get`
+			const successTopic = `${getNextJobTopic}/accepted`
 
 			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(reject, 60 * 1000)
-				const connection = connectToBroker(catId)
+				const timeout = setTimeout(() => {
+					reject(new Error(`Did not receive a next job!`))
+				}, 60 * 1000)
 
-				const successTopic = `$aws/things/${catId}/jobs/$next/get/accepted`
-
-				connection.on('connect', () => {
-					clearTimeout(timeout)
-					connection.subscribe(successTopic, undefined, (err) => {
-						if (isNotNullOrUndefined(err)) {
-							connection.end()
-							reject(err)
-						}
-						connection.publish(
-							`$aws/things/${catId}/jobs/$next/get`,
-							'',
-							undefined,
-							(err) => {
-								if (isNotNullOrUndefined(err)) {
-									connection.end()
-									reject(err)
-								}
-							},
-						)
-					})
-
-					connection.on('message', async (topic, message) => {
-						connection.unsubscribe(successTopic)
-						connection.end()
-						await runner.progress('Iot (job)', topic)
-						await runner.progress('Iot (job)', message)
-						const { execution } = JSON.parse(message)
-						if (topic === successTopic && isNotNullOrUndefined(execution)) {
-							// eslint-disable-next-line require-atomic-updates
-							runner.store[storeName] = execution
-							resolve(execution)
-							connection.end()
-						} else {
-							reject(new Error(`Did not receive a next job!`))
-							connection.end()
-						}
-					})
-				})
-				connection.on('error', (error) => {
+				const catchError = (error: Error) => {
 					clearTimeout(timeout)
 					reject(error)
-					connection.end()
-				})
+				}
+
+				connection
+					.onMessageOnce(successTopic, (message) => {
+						clearTimeout(timeout)
+						runner.store[storeName] = JSON.parse(message.toString()).execution
+						resolve(runner.store[storeName])
+					})
+					.catch(catchError)
+
+				connection.publish(getNextJobTopic, '').catch(catchError)
 			})
 		}),
 		regexGroupMatcher(
 			/^the tracker(?: (?<deviceId>[^ ]+))? marks the job in "(?<storeName>[^"]+)" as in progress$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
+			const connection = connectToBroker(catId)
+
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
 
-			return new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(reject, 60 * 1000)
-				const connection = connectToBroker(catId)
+			const updateJobTopic = `$aws/things/${catId}/jobs/${job.jobId}/update`
+			const successTopic = `${updateJobTopic}/accepted`
 
-				connection.on('connect', () => {
-					clearTimeout(timeout)
-					connection.subscribe(
-						`$aws/things/${catId}/jobs/${job.jobId}/update/accepted`,
-					)
-					connection.publish(
-						`$aws/things/${catId}/jobs/${job.jobId}/update`,
-						JSON.stringify({
-							status: 'IN_PROGRESS',
-							expectedVersion: job.versionNumber,
-							executionNumber: job.executionNumber,
-						}),
-						undefined,
-						(err) => {
-							if (err) {
-								connection.end()
-								reject(err)
-							}
-						},
-					)
-				})
-				connection.on('message', async (topic, payload) => {
-					await runner.progress('Iot (job)', topic)
-					await runner.progress('Iot (job)', payload)
-					connection.unsubscribe(
-						`$aws/things/${catId}/jobs/${job.jobId}/update/accepted`,
-					)
-					connection.end()
-					resolve()
-				})
-				connection.on('error', (error) => {
+			return new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error(`Job not marked as in progress!`))
+				}, 60 * 1000)
+
+				const catchError = (error: Error) => {
 					clearTimeout(timeout)
 					reject(error)
-					connection.end()
-				})
+				}
+
+				connection
+					.onMessageOnce(successTopic, (message) => {
+						clearTimeout(timeout)
+						runner.store[storeName] = JSON.parse(message.toString())
+						resolve(JSON.parse(message.toString()))
+					})
+					.then(async () =>
+						connection.publish(
+							updateJobTopic,
+							JSON.stringify({
+								status: 'IN_PROGRESS',
+								expectedVersion: job.versionNumber,
+								executionNumber: job.executionNumber,
+							}),
+						),
+					)
+					.catch(catchError)
 			})
 		}),
 	]
