@@ -184,14 +184,16 @@ export const assetTrackerStepRunners = ({
 					messages.push(m)
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
-						if (storeName !== undefined)
-							runner.store[storeName] =
-								messages.length > 1 ? messages : messages[0]
+
+						const result =
+							messages.length > 1
+								? messages.map((m) => m.toString())
+								: messages[0].toString()
+
+						if (storeName !== undefined) runner.store[storeName] = result
 						return resolve(
 							raw === undefined
-								? messages.length > 1
-									? messages.map((m) => m.toString())
-									: messages[0].toString()
+								? result
 								: messages.length > 1
 								? messages.map((m) => `(${m.length} bytes of data)`)
 								: `(${messages[0].length} bytes of data)`,
