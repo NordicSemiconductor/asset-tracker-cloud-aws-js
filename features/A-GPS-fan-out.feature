@@ -1,15 +1,21 @@
-Feature: A-GPS Data Fan Out
+Feature: A-GPS Data Fan Out (The cargo container scenario)
 
-  Scenario: The cargo container scenario
+  In this scenario hundreds, or thousands of devices are unloaded from a steel
+  walled cargo container (intermodal container). All of them connect to the 
+  cellular network, and the same cell tower, and request A-GPS data, because
+  they have been offline for weeks while being shipped over the ocean.
+  
+  While all devices should receive A-GPS data as per their request, we do not
+  want to hammer to third-party API with thousands of requests for the same
+  A-GPS data.
 
-    In this scenario hundreds, or thousands of devices are unloaded from a steel
-    walled cargo container (intermodal container). All of them connect to the 
-    cellular network, and the same cell tower, and request A-GPS data, because
-    they have been offline for weeks while being shipped over the ocean.
+  Contexts:
 
-    While all devices should receive A-GPS data as per their request, we do not
-    want to hammer to third-party API with thousands of requests for the same
-    A-GPS data.
+    | device                   |
+    | cargo container device 1 |
+    | cargo container device 2 |
+
+  Scenario: Register and connect device
 
     Given I am run after the "A-GPS" feature
     And I have a random UUID in "agpsDevice"
@@ -31,6 +37,9 @@ Feature: A-GPS Data Fan Out
         }
       }
       """
+
+  Scenario: Request A-GPS data
+
     When the tracker "{agpsDevice}" publishes this message to the topic {agpsDevice}/agps/get
       """
       {
@@ -53,7 +62,9 @@ Feature: A-GPS Data Fan Out
     Then the tracker "{agpsDevice}" receives 2 raw messages on the topic {agpsDevice}/agps into "agpsData"
     And  "agpsData[0]" should equal "(binary A-GPS data) ephemerides"
     And  "agpsData[1]" should equal "(binary A-GPS data) other types"
-    # Delete tracker
+    
+  Scenario: Delete tracker
+  
     Given I am authenticated with Cognito
     When I execute "listThingPrincipals" of the AWS Iot SDK with
       """
@@ -90,9 +101,3 @@ Feature: A-GPS Data Fan Out
         "thingName": "{agpsDevice}"
       }
       """
-
-    Examples:
-
-    | device                   |
-    | cargo container device 1 |
-    | cargo container device 2 |
