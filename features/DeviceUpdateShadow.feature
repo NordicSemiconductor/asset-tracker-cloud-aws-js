@@ -1,4 +1,3 @@
-@Only
 Feature: Device: Update Shadow
   Devices can update their shadow
 
