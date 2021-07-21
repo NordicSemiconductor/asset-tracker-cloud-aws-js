@@ -10,17 +10,17 @@ Feature: A-GPS
     implemented properly on nRF Connect for Cloud side.
 
     Given I am run after the "Device: Update Shadow" feature
-    And I store "$floor($random() * 1000)" into "mcc"
-    And I store "$floor($random() * 100)" into "mnc"
-    And I store "$floor($random() * 100000000)" into "cellId"
-    And I store "$floor($random() * 100) + 100" into "area"
-    And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=1%2C3%2C4%2C6%2C7%2C8%2C9&deviceIdentifier=nRFAssetTrackerForAWS&eci={cellId}&mcc={mcc}&mnc={mnc}&requestType=custom&tac={area}
+    And I store "$floor($random() * 1000)" into "agpsMcc"
+    And I store "$floor($random() * 100)" into "agpsMnc"
+    And I store "$floor($random() * 100000000)" into "agpsCellId"
+    And I store "$floor($random() * 100) + 100" into "agpsArea"
+    And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=1%2C3%2C4%2C6%2C7%2C8%2C9&deviceIdentifier=nRFAssetTrackerForAWS&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
       """
       Content-Type: application/octet-stream
 
       (binary A-GPS data) other types
       """
-    And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=2&deviceIdentifier=nRFAssetTrackerForAWS&eci={cellId}&mcc={mcc}&mnc={mnc}&requestType=custom&tac={area}
+    And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=2&deviceIdentifier=nRFAssetTrackerForAWS&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
       """
       Content-Type: application/octet-stream
 
@@ -36,10 +36,10 @@ Feature: A-GPS
     When the tracker publishes this message to the topic {tracker:id}/agps/get
       """
       {
-        "mcc": {mcc},
-        "mnc": {mnc},
-        "cell": {cellId},
-        "area": {area},
+        "mcc": {agpsMcc},
+        "mnc": {agpsMnc},
+        "cell": {agpsCellId},
+        "area": {agpsArea},
         "types": [
           1,
           2,

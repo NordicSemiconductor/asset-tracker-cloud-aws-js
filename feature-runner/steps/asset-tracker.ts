@@ -89,7 +89,7 @@ export const assetTrackerStepRunners = ({
 			},
 		),
 		regexMatcher<World>(
-			/^the tracker(?: ([^ ]+))? updates its reported state with$/,
+			/^the tracker(?: "([^"]+)")? updates its reported state with$/,
 		)(async ([deviceId], step, runner) => {
 			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
@@ -132,7 +132,7 @@ export const assetTrackerStepRunners = ({
 			return await updatePromise
 		}),
 		regexMatcher<World>(
-			/^the tracker(?: ([^ ]+))? publishes this message to the topic ([^ ]+)$/,
+			/^the tracker(?: "([^"]+)")? publishes this message to the topic ([^ ]+)$/,
 		)(async ([deviceId, topic], step, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
 			if (step.interpolatedArgument === undefined) {
@@ -153,7 +153,7 @@ export const assetTrackerStepRunners = ({
 			return publishPromise
 		}),
 		regexGroupMatcher(
-			/^the tracker(?: (?<deviceId>[^ ]+))? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
+			/^the tracker(?: "(?<deviceId>[^"]+)")? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
 		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
 			const connection = connectToBroker(catId)
