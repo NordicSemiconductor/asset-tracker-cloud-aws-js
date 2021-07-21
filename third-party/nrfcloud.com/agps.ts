@@ -4,7 +4,7 @@ import { fromEnv } from '../../util/fromEnv'
 import { getNrfConnectForCloudApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
-import { isLeft } from 'fp-ts/lib/Either'
+import { isLeft, isRight, Right } from 'fp-ts/lib/Either'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { agpsRequestSchema, AGPSType } from '../../agps/types'
 
@@ -46,41 +46,55 @@ export const handler = async (
 
 	const { apiKey, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
+	const fetchTypes = async (types: AGPSType[]) =>
+		c.get({
+			resource: 'location/agps',
+			payload: {
+				deviceIdentifier: 'nRFAssetTrackerForAWS',
+				eci: cell,
+				tac: area,
+				requestType: 'custom',
+				mcc,
+				mnc,
+				customTypes: types,
+			},
+			headers: {
+				'Content-Type': 'application/octet-stream',
+				// FIXME: use dynamic value from HEAD request. Currently broken on nRF Connect for Cloud side
+				Range: `bytes=0-2000`,
+			},
+			requestSchema: apiRequestSchema,
+			responseSchema: Type.String({ minLength: 1, maxLength: 2000 }),
+		})()
 
 	const { mcc, mnc, cell, area, types } = valid.right
-	// FIXME: if type 2 is requested, resolve it seperately to keep chunk size < 2000 byte
-	const maybeAGPS = await c.get({
-		resource: 'location/agps',
-		payload: {
-			deviceIdentifier: 'nRFAssetTrackerForAWS',
-			eci: cell,
-			tac: area,
-			requestType: 'custom',
-			mcc,
-			mnc,
-			customTypes: types,
-		},
-		headers: {
-			'Content-Type': 'application/octet-stream',
-			// FIXME: use dynamic value from HEAD request. Currently broken on nRF Connect for Cloud side
-			Range: `bytes=0-2000`,
-		},
-		requestSchema: apiRequestSchema,
-		responseSchema: Type.String({ minLength: 1, maxLength: 2000 }),
-	})()
-	if (isLeft(maybeAGPS)) {
-		console.error(JSON.stringify(maybeAGPS.left))
+
+	// Split requests, so that request for Ephemerides is a separate one
+	const requests = []
+
+	if (types.includes(AGPSType.Ephemerides))
+		requests.push(fetchTypes([AGPSType.Ephemerides]))
+
+	const otherTypesInRequest = types.filter((t) => t !== AGPSType.Ephemerides)
+	if (otherTypesInRequest.length > 0)
+		requests.push(fetchTypes(otherTypesInRequest))
+
+	const results = await Promise.all(requests)
+
+	// If any request fails, mark operation as failed
+	const resolved = results.filter((maybeAGPS) => {
+		if (isLeft(maybeAGPS)) {
+			console.error(JSON.stringify(maybeAGPS.left))
+		}
+		return isRight(maybeAGPS)
+	})
+	if (resolved.length !== requests.length)
 		return {
 			resolved: false,
 		}
-	}
-	console.debug(
-		`Received ${
-			maybeAGPS.right.length
-		} bytes for requested types ${JSON.stringify(types)}`,
-	)
+
 	return {
 		resolved: true,
-		data: [maybeAGPS.right],
+		data: resolved.map((r) => (r as Right<string>).right),
 	}
 }
