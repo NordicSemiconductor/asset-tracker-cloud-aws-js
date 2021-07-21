@@ -26,6 +26,18 @@ Feature: A-GPS
 
       (binary A-GPS data) ephemerides
       """
+    And I store "$millis()" into "ts"
+    And the tracker updates its reported state with
+            """
+            {
+            "dev": {
+                "v": {
+                    "nw": "LTE-M GPS"
+                },
+                "ts": {ts}
+            }
+            }
+            """
 
   Scenario: Request A-GPS data
 

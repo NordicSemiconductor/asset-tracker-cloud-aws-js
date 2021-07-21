@@ -6,7 +6,7 @@ describe('cacheKey', () => {
 			cacheKey({
 				binHours: 1,
 				request: {
-					nw: 'LTE-m GPS',
+					nw: 'LTE-M GPS',
 					mcc: 242,
 					mnc: 1,
 					cell: 21626624,
