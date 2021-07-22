@@ -37,7 +37,7 @@ export const httpApiMockStepRunners = ({
 							N: statusCode,
 						},
 						body: {
-							S: JSON.stringify(JSON.parse(step.interpolatedArgument)),
+							S: step.interpolatedArgument,
 						},
 						ttl: {
 							N: `${Math.round(Date.now() / 1000) + 5 * 60}`,

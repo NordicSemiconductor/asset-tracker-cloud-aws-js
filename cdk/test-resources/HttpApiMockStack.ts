@@ -9,6 +9,7 @@ import { HTTPAPIMockLambdas } from './prepare-test-resources'
 import * as S3 from '@aws-cdk/aws-s3'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import { logToCloudWatch } from '../resources/logToCloudWatch'
 
 /**
  * This is CloudFormation stack sets up a dummy HTTP API which stores all requests in SQS for inspection
@@ -89,16 +90,7 @@ export class HttpApiMockStack extends CDK.Stack {
 			handler: 'index.handler',
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CDK.Duration.seconds(5),
-			initialPolicy: [
-				new IAM.PolicyStatement({
-					resources: ['arn:aws:logs:*:*:*'],
-					actions: [
-						'logs:CreateLogGroup',
-						'logs:CreateLogStream',
-						'logs:PutLogEvents',
-					],
-				}),
-			],
+			initialPolicy: [logToCloudWatch],
 			environment: {
 				REQUESTS_TABLE_NAME: requestsTable.tableName,
 				RESPONSES_TABLE_NAME: responsesTable.tableName,

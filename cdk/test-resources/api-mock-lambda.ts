@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/client-dynamodb'
 import * as querystring from 'querystring'
 import { v4 } from 'uuid'
+import { splitMockResponse } from './splitMockResponse'
 
 const db = new DynamoDBClient({})
 
@@ -77,9 +78,10 @@ export const handler = async (
 				},
 			}),
 		)
+
 		return {
 			statusCode: parseInt(Item.statusCode.N ?? '200', 10),
-			body: Item.body.S ?? '',
+			...splitMockResponse(Item.body.S ?? ''),
 		}
 	} else {
 		console.log('no responses found')

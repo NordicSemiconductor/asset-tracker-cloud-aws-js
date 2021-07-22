@@ -21,6 +21,8 @@ export type AssetTrackerLambdas = {
 	neighborCellGeolocateReportHttpApi: string
 	geolocateNeighborCellFromResolvedStepFunction: string
 	persistNeighborCellGeolocationStepFunction: string
+	agpsDeviceRequestHandler: string
+	agpsNrfConnectForCloudStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -128,6 +130,17 @@ export const prepareAssetTrackerLambdas = async ({
 					'neighborCellGeolocation',
 					'stepFunction',
 					'fromResolved.ts',
+				),
+				agpsDeviceRequestHandler: path.resolve(
+					rootDir,
+					'agps',
+					'deviceRequestHandler.ts',
+				),
+				agpsNrfConnectForCloudStepFunction: path.resolve(
+					rootDir,
+					'third-party',
+					'nrfcloud.com',
+					'agps.ts',
 				),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),

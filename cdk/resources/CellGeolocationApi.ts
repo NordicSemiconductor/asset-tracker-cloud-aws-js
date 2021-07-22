@@ -49,17 +49,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			code: lambdas.lambdas.invokeStepFunctionFromSQS,
 			description:
 				'Invoke the cell geolocation resolution step function for SQS messages',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: [
-						'sqs:ReceiveMessage',
-						'sqs:DeleteMessage',
-						'sqs:GetQueueAttributes',
-					],
-					resources: [resolutionJobsQueue.queueArn],
-				}),
-			],
+			initialPolicy: [logToCloudWatch],
 			environment: {
 				STEP_FUNCTION_ARN: cellgeo.stateMachine.stateMachineArn,
 				VERSION: this.node.tryGetContext('version'),
@@ -79,6 +69,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			target: fromSQS,
 			batchSize: 10,
 		})
+
+		resolutionJobsQueue.grantConsumeMessages(fromSQS)
 
 		cellgeo.stateMachine.grantStartExecution(fromSQS)
 

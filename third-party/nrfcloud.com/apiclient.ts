@@ -11,6 +11,18 @@ const ajv = new Ajv()
 ajv.addKeyword('kind')
 ajv.addKeyword('modifier')
 
+/**
+ * Provides custom encoding of arrays
+ */
+export const toQueryString = (query: Record<string, any>): string => {
+	if (Object.entries(query).length === 0) return ''
+	const parts = Object.entries(query).map(([k, v]) => {
+		if (Array.isArray(v)) return `${encodeURIComponent(k)}=${v.join(',')}`
+		return `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
+	})
+	return `?${parts.join('&')}`
+}
+
 const validate =
 	<Schema extends TSchema>({
 		schema,
@@ -36,45 +48,37 @@ const validate =
 		return right(payload as Static<typeof schema>)
 	}
 
-export const apiClient = ({
-	endpoint,
-	apiKey,
-}: {
-	endpoint: URL
-	apiKey: string
-}): {
-	post: <Request extends TSchema, Response extends TSchema>({
+const req =
+	({
+		endpoint,
+		apiKey,
+		method,
+	}: {
+		endpoint: URL
+		apiKey: string
+		method: 'GET' | 'POST'
+	}) =>
+	<Request extends TSchema, Response extends TSchema>({
 		resource,
 		payload,
+		headers,
 		requestSchema,
 		responseSchema,
 	}: {
 		resource: string
 		payload: Record<string, any>
-		requestSchema: Request
-		responseSchema: Response
-	}) => TaskEither<ErrorInfo, Static<typeof responseSchema>>
-} => ({
-	post: <Request extends TSchema, Response extends TSchema>({
-		resource,
-		payload,
-		requestSchema,
-		responseSchema,
-	}: {
-		resource: string
-		payload: Record<string, any>
+		headers?: Record<string, string>
 		requestSchema: Request
 		responseSchema: Response
 	}): TaskEither<ErrorInfo, Static<typeof responseSchema>> =>
 		pipe(
 			validate({
 				schema: requestSchema,
-
 				errorMessage: 'Input validation failed!',
 				errorType: ErrorType.BadRequest,
 			})(payload),
 			chain((input) =>
-				tryCatch<ErrorInfo, Record<string, any>>(
+				tryCatch<ErrorInfo, Static<typeof responseSchema>>(
 					async () =>
 						new Promise((resolve, reject) => {
 							const options: RequestOptions = {
@@ -83,12 +87,15 @@ export const apiClient = ({
 								path: `${endpoint.pathname.replace(
 									/\/+$/g,
 									'',
-								)}/v1/${resource}`,
-								method: 'POST',
+								)}/v1/${resource}${
+									method === 'GET' ? `${toQueryString(payload)}` : ''
+								}`,
+								method,
 								agent: false,
 								headers: {
 									Authorization: `Bearer ${apiKey}`,
 									'Content-Type': 'application/json',
+									...headers,
 								},
 							}
 
@@ -126,21 +133,24 @@ export const apiClient = ({
 										)
 									}
 									const bodyAsString = Buffer.concat(body).toString()
-									let response: Record<string, any>
-									try {
-										response = JSON.parse(bodyAsString)
-									} catch {
-										throw new Error(
-											`Failed to parse response as JSON: ${bodyAsString}`,
-										)
+									if (res.headers['content-type']?.includes('json') ?? false) {
+										let response: Record<string, any>
+										try {
+											response = JSON.parse(bodyAsString)
+										} catch {
+											throw new Error(
+												`Failed to parse response as JSON: ${bodyAsString}`,
+											)
+										}
+										resolve(response as Static<typeof responseSchema>)
 									}
-									resolve(response)
+									resolve(bodyAsString as Static<typeof responseSchema>)
 								})
 							})
 							req.on('error', (e) => {
 								reject(new Error(e.message))
 							})
-							req.write(JSON.stringify(input))
+							if (method === 'POST') req.write(JSON.stringify(input))
 							req.end()
 						}),
 					(err) => {
@@ -158,5 +168,50 @@ export const apiClient = ({
 					errorMessage: 'Response validation failed!',
 				}),
 			),
-		),
+		)
+
+export const apiClient = ({
+	endpoint,
+	apiKey,
+}: {
+	endpoint: URL
+	apiKey: string
+}): {
+	post: <Request extends TSchema, Response extends TSchema>({
+		resource,
+		payload,
+		headers,
+		requestSchema,
+		responseSchema,
+	}: {
+		resource: string
+		payload: Record<string, any>
+		headers?: Record<string, string>
+		requestSchema: Request
+		responseSchema: Response
+	}) => TaskEither<ErrorInfo, Static<typeof responseSchema>>
+	get: <Request extends TSchema, Response extends TSchema>({
+		resource,
+		payload,
+		headers,
+		requestSchema,
+		responseSchema,
+	}: {
+		resource: string
+		payload: Record<string, any>
+		headers?: Record<string, string>
+		requestSchema: Request
+		responseSchema: Response
+	}) => TaskEither<ErrorInfo, Static<typeof responseSchema>>
+} => ({
+	post: req({
+		endpoint,
+		apiKey,
+		method: 'POST',
+	}),
+	get: req({
+		endpoint,
+		apiKey,
+		method: 'GET',
+	}),
 })
