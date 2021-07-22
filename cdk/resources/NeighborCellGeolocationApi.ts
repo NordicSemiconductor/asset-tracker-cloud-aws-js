@@ -47,6 +47,7 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: lambdas.lambdas.invokeStepFunctionFromSQS,
+			layers: lambdas.layers,
 			description:
 				'Invoke the neighboring cell geolocation resolution step function for SQS messages',
 			initialPolicy: [logToCloudWatch],
