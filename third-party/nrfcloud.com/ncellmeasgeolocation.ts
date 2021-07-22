@@ -49,7 +49,8 @@ const inputSchema = Type.Object({
 	}),
 })
 
-const locateRequestSchema = Type.Dict(
+const locateRequestSchema = Type.Record(
+	Type.Union([Type.Literal('nbiot'), Type.Literal('lte')]),
 	Type.Array(
 		Type.Object(
 			{
