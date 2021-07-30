@@ -86,7 +86,7 @@
     "@types/jest": "26.0.24",
     "@types/node": "16.4.0",
     "@types/uuid": "8.3.1",
-    "aws-iot-device-sdk": "2.2.10",
+    "aws-iot-device-sdk": "2.2.11",
     "backoff": "2.5.0",
     "cdk": "1.115.0",
     "chalk": "4.1.1",
