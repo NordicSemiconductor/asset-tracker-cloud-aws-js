@@ -89,7 +89,7 @@
     "aws-iot-device-sdk": "2.2.10",
     "backoff": "2.5.0",
     "cdk": "1.115.0",
-    "chalk": "4.1.1",
+    "chalk": "4.1.2",
     "change-case": "4.1.2",
     "commander": "8.0.0",
     "date-fns": "2.23.0",
