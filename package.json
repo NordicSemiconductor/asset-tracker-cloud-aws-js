@@ -39,7 +39,7 @@
     "@aws-sdk/util-dynamodb": "3.22.0",
     "@nordicsemiconductor/cell-geolocation-helpers": "3.0.9",
     "@nordicsemiconductor/random-words": "5.0.0",
-    "@nordicsemiconductor/timestream-helpers": "3.1.17",
+    "@nordicsemiconductor/timestream-helpers": "3.1.19",
     "@sinclair/typebox": "0.18.0",
     "@typescript-eslint/eslint-plugin": "4.28.4",
     "@typescript-eslint/parser": "4.28.4",
