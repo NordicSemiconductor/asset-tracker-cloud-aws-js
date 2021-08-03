@@ -7,7 +7,7 @@ Feature: Cell Geolocation Publish API
 
         Given I am run after the "Cell Geolocation API" feature
         And the endpoint is "{geolocationApiUrl}"
-        And I store a random number between 0 and 100000000 into "cellId"
+        And I store a random number between 1 and 100000000 into "cellId"
         And I store a random number between 10000 and 99999 into "mccmnc"
         And I store a random number between 100 and 199 into "area"
         And I store a random number between 0 and 50000 into "accuracy"
