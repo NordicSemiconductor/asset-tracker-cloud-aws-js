@@ -1,7 +1,7 @@
-Feature: nRF Connect for Cloud Cell Geolocation
+Feature: nRF Cloud Cell Geolocation
 
-    Optionally, cell locations can be resolved using the nRF Connect for Cloud API
-    Note: nRF Connect for Cloud's geolocation API does not distinguish between different network modes.
+    Optionally, cell locations can be resolved using the nRF Cloud API
+    Note: nRF Cloud's geolocation API does not distinguish between different network modes.
 
     Contexts:
 
@@ -11,7 +11,7 @@ Feature: nRF Connect for Cloud Cell Geolocation
     Background:
 
         This enques a mock response on the mock HTTP API the stack is configure
-        to use for the nRF Connect for Cloud integration
+        to use for the nRF Cloud integration
 
         Given the endpoint is "{geolocationApiUrl}"
         And I store a random number between 1 and 100000000 into "cellId"
@@ -45,7 +45,7 @@ Feature: nRF Connect for Cloud Cell Geolocation
             }
             """
 
-    Scenario: The nRF Connect for Cloud API should have been called
+    Scenario: The nRF Cloud API should have been called
 
         Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
             """

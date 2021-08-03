@@ -1,7 +1,7 @@
-Feature: nRF Connect for Cloud Neighbor Cell Geolocation
+Feature: nRF Cloud Neighbor Cell Geolocation
 
-    Optionally, device locations can be resolved by the nRF Connect for Cloud API using the neighboring cell measurement reports
-    Note: nRF Connect for Cloud's geolocation API does not distinguish between different network modes.
+    Optionally, device locations can be resolved by the nRF Cloud API using the neighboring cell measurement reports
+    Note: nRF Cloud's geolocation API does not distinguish between different network modes.
 
     Contexts:
 
@@ -11,7 +11,7 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
     Background:
 
         This enques a mock response on the mock HTTP API the stack is configure
-        to use for the nRF Connect for Cloud integration
+        to use for the nRF Cloud integration
 
         Given I am run after the "Store neighboring cell measurement reports" feature
         And I am authenticated with Cognito
@@ -67,7 +67,7 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
             }
             """
 
-    Scenario: The nRF Connect for Cloud API should have been called
+    Scenario: The nRF Cloud API should have been called
 
         Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
             """

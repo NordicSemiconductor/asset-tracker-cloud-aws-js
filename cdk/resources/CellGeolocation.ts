@@ -166,47 +166,37 @@ export class CellGeolocation extends CloudFormation.Resource {
 			},
 		})
 
-		// Optional step: resolve using nRF Connect for Cloud API
-		let fromNrfConnectForCloud: Lambda.IFunction | undefined = undefined
+		// Optional step: resolve using nRF Cloud API
+		let fromNrfCloud: Lambda.IFunction | undefined = undefined
 		checkFlag({
-			key: 'nrfconnectforcloud',
-			component: 'nRF Connect for Cloud API (single cell geolocation)',
+			key: 'nrfcloud',
+			component: 'nRF Cloud API (single cell geolocation)',
 			onUndefined: 'disabled',
 			onEnabled: () => {
-				fromNrfConnectForCloud = new Lambda.Function(
-					this,
-					'fromNrfConnectForCloud',
-					{
-						layers: lambdas.layers,
-						handler: 'index.handler',
-						runtime: Lambda.Runtime.NODEJS_14_X,
-						timeout: CloudFormation.Duration.seconds(10),
-						memorySize: 1792,
-						code: lambdas.lambdas
-							.geolocateCellFromNrfConnectForCloudStepFunction,
-						description:
-							'Resolve cell geolocation using the nRF Connect for Cloud API',
-						initialPolicy: [
-							logToCloudWatch,
-							new IAM.PolicyStatement({
-								actions: ['ssm:GetParametersByPath'],
-								resources: [
-									`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfconnectforcloud`,
-								],
-							}),
-						],
-						environment: {
-							VERSION: this.node.tryGetContext('version'),
-							STACK_NAME: this.stack.stackName,
-						},
+				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
+					layers: lambdas.layers,
+					handler: 'index.handler',
+					runtime: Lambda.Runtime.NODEJS_14_X,
+					timeout: CloudFormation.Duration.seconds(10),
+					memorySize: 1792,
+					code: lambdas.lambdas.geolocateCellFromNrfCloudStepFunction,
+					description: 'Resolve cell geolocation using the nRF Cloud API',
+					initialPolicy: [
+						logToCloudWatch,
+						new IAM.PolicyStatement({
+							actions: ['ssm:GetParametersByPath'],
+							resources: [
+								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfcloud`,
+							],
+						}),
+					],
+					environment: {
+						VERSION: this.node.tryGetContext('version'),
+						STACK_NAME: this.stack.stackName,
 					},
-				)
+				})
 
-				new LambdaLogGroup(
-					this,
-					'fromNrfConnectForCloudLogs',
-					fromNrfConnectForCloud,
-				)
+				new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 			},
 		})
 
@@ -275,7 +265,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 									(() => {
 										if (
 											fromUnwiredLabs === undefined &&
-											fromNrfConnectForCloud === undefined
+											fromNrfCloud === undefined
 										) {
 											return new StepFunctions.Fail(this, 'Failed (No API)', {
 												error: 'NO_API',
@@ -305,16 +295,16 @@ export class CellGeolocation extends CloudFormation.Resource {
 												).next(markSource('unwiredlabs')),
 											)
 										}
-										if (fromNrfConnectForCloud !== undefined) {
+										if (fromNrfCloud !== undefined) {
 											branches.push(
 												new StepFunctionTasks.LambdaInvoke(
 													this,
-													'Resolve using nRF Connect for Cloud API',
+													'Resolve using nRF Cloud API',
 													{
-														lambdaFunction: fromNrfConnectForCloud,
+														lambdaFunction: fromNrfCloud,
 														payloadResponseOnly: true,
 													},
-												).next(markSource('nrfconnectforcloud')),
+												).next(markSource('nrfcloud')),
 											)
 										}
 

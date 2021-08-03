@@ -1,6 +1,6 @@
 import { toQueryString } from './apiclient'
 
-describe('nRF Connect for Cloud API client', () => {
+describe('nRF Cloud API client', () => {
 	it('should encode query strings', () =>
 		expect(
 			toQueryString({
