@@ -19,8 +19,8 @@ Feature: Cell Geolocation API
     Scenario: Device enters a cell
 
         Given I store a random number between 1 and 100000000 into "cellId"
-        And I store a random number between -90 and 90 into "lat"
-        And I store a random number between -180 and 180 into "lng"
+        And I store a random float between -90 and 90 into "lat"
+        And I store a random float between -180 and 180 into "lng"
         And I store "$millis()" into "ts"
         Then the tracker updates its reported state with
             """

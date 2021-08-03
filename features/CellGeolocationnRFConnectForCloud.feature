@@ -16,8 +16,8 @@ Feature: nRF Connect for Cloud Cell Geolocation
         Given the endpoint is "{geolocationApiUrl}"
         And I store a random number between 1 and 100000000 into "cellId"
         And I store a random number between 0 and 20000 into "accuracy"
-        And I store a random number between -90 and 90 into "lat"
-        And I store a random number between -180 and 180 into "lng"
+        And I store a random float between -90 and 90 into "lat"
+        And I store a random float between -180 and 180 into "lng"
         And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
             """
             {
