@@ -5,8 +5,8 @@ Feature: Device: Messages
   Background:
 
     Given I am run after the "Device: Update Shadow" feature
-    And I store "$floor($random() * 1024)" into "button1"
-    And I store "$floor($random() * 1024)" into "button2"
+    And I store a random number between 0 and 1024 into "button1"
+    And I store a random number between 0 and 1024 into "button2"
 
   Scenario: Devices publishes that a button was pressed
 

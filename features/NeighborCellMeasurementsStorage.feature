@@ -7,8 +7,8 @@ Feature: Store neighboring cell measurement reports
 
         Given I am run after the "Device: Update Shadow" feature
         And I am authenticated with Cognito
-        And I store "$floor($random() * 100000000)" into "ncellmeasCellId"
-        And I store "$floor($random() * 100000000)" into "ncellmeasAreaId"
+        And I store a random number between 0 and 100000000 into "ncellmeasCellId"
+        And I store a random number between 0 and 100000000 into "ncellmeasAreaId"
 
     Scenario: Device publishes %NCELLMEAS report
 

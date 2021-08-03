@@ -6,8 +6,8 @@ Feature: Device: Batch Data
     Given I am run after the "Device: Update Shadow" feature
       Given I store "$millis()" into "ts1"
     And I store "$millis()+(120*1000)" into "ts2"
-    And I store "$random() * 180" into "lng1"
-    And I store "$random() * 180" into "lng2"
+    And I store a random number between -180 and 180 into "lng1"
+    And I store a random number between -180 and 180 into "lng2"
 
   Scenario: Devices can publish batch data
 
