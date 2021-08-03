@@ -7,12 +7,12 @@ Feature: Cell Geolocation Publish API
 
         Given I am run after the "Cell Geolocation API" feature
         And the endpoint is "{geolocationApiUrl}"
-        And I store "$floor($random() * 100000000)" into "cellId"
-        And I store "$floor($random() * 10000) + 10000" into "mccmnc"
-        And I store "$floor($random() * 100) + 100" into "area"
-        And I store "$random() * 50000" into "accuracy"
-        And I store "$random() * 90" into "lat"
-        And I store "$random() * 180" into "lng"
+        And I store a random number between 0 and 100000000 into "cellId"
+        And I store a random number between 10000 and 99999 into "mccmnc"
+        And I store a random number between 100 and 199 into "area"
+        And I store a random number between 0 and 50000 into "accuracy"
+        And I store a random number between -90 and 90 into "lat"
+        And I store a random number between -180 and 180 into "lng"
 
     Scenario: Provide cell geolocation
 

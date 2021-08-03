@@ -16,9 +16,9 @@ Feature: nRF Connect for Cloud Neighbor Cell Geolocation
         Given I am run after the "Store neighboring cell measurement reports" feature
         And I am authenticated with Cognito
         And the endpoint is "{neighborCellGeolocationApiUrl}"
-        And I store "$floor($random() * 20000)" into "accuracy"
-        And I store "$random() * 90" into "lat"
-        And I store "$random() * 180" into "lng"
+        And I store a random number between 0 and 20000 into "accuracy"
+        And I store a random number between -90 and 90 into "lat"
+        And I store a random number between -180 and 180 into "lng"
         And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
             """
             {
