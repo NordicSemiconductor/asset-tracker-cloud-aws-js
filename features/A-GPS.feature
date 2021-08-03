@@ -12,7 +12,7 @@ Feature: A-GPS
     Given I am run after the "Device: Update Shadow" feature
     And I store a random number between 100 and 999 into "agpsMcc"
     And I store a random number between 0 and 99 into "agpsMnc"
-    And I store a random number between 0 and 100000000 into "agpsCellId"
+    And I store a random number between 1 and 100000000 into "agpsCellId"
     And I store a random number between 100 and 199 into "agpsArea"
     And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=1%2C3%2C4%2C6%2C7%2C8%2C9&deviceIdentifier=nRFAssetTrackerForAWS&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
       """
