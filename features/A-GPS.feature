@@ -65,5 +65,5 @@ Feature: A-GPS
       }
       """
     Then the tracker receives 2 raw messages on the topic {tracker:id}/agps into "agpsData"
-    And  "agpsData[0]" should equal "(binary A-GPS data) ephemerides"
-    And  "agpsData[1]" should equal "(binary A-GPS data) other types"
+    And  "'(binary A-GPS data) ephemerides' in agpsData" should be true
+    And  "'(binary A-GPS data) other types' in agpsData" should be true

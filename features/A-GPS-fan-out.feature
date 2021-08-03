@@ -60,8 +60,8 @@ Feature: A-GPS Data Fan Out (The cargo container scenario)
       }
       """
     Then the tracker "{agpsDevice}" receives 2 raw messages on the topic {agpsDevice}/agps into "agpsData"
-    And  "agpsData[0]" should equal "(binary A-GPS data) ephemerides"
-    And  "agpsData[1]" should equal "(binary A-GPS data) other types"
+    And  "'(binary A-GPS data) ephemerides' in agpsData" should be true
+    And  "'(binary A-GPS data) other types' in agpsData" should be true
     
   Scenario: Delete tracker
   
