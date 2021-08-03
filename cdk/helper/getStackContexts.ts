@@ -3,7 +3,7 @@ import { getSettings } from '../../util/settings'
 
 type StackContexts = {
 	unwiredlabs: '0' | '1'
-	nrfconnectforcloud: '0' | '1'
+	nrfcloud: '0' | '1'
 	cd: '0' | '1'
 	webapp: '0' | '1'
 	'firmware-ci': '0' | '1'
@@ -11,7 +11,7 @@ type StackContexts = {
 
 const defaults: StackContexts = {
 	unwiredlabs: '0',
-	nrfconnectforcloud: '0',
+	nrfcloud: '0',
 	cd: '0',
 	webapp: '1',
 	'firmware-ci': '0',

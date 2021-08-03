@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
-import { getNrfConnectForCloudApiSettings } from './settings'
+import { getNrfCloudApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
@@ -11,7 +11,7 @@ import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getNrfConnectForCloudApiSettings({
+const fetchSettings = getNrfCloudApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })

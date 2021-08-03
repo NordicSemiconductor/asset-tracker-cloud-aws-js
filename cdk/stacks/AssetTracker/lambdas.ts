@@ -14,15 +14,15 @@ export type AssetTrackerLambdas = {
 	geolocateFromCacheStepFunction: string
 	geolocateCellFromDeviceLocationsStepFunction: string
 	geolocateCellFromUnwiredLabsStepFunction: string
-	geolocateCellFromNrfConnectForCloudStepFunction: string
-	neighborCellGeolocationFromNrfConnectForCloudStepFunction: string
+	geolocateCellFromNrfCloudStepFunction: string
+	neighborCellGeolocationFromNrfCloudStepFunction: string
 	cacheCellGeolocationStepFunction: string
 	addCellGeolocationHttpApi: string
 	neighborCellGeolocateReportHttpApi: string
 	geolocateNeighborCellFromResolvedStepFunction: string
 	persistNeighborCellGeolocationStepFunction: string
 	agpsDeviceRequestHandler: string
-	agpsNrfConnectForCloudStepFunction: string
+	agpsNrfCloudStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -83,7 +83,7 @@ export const prepareAssetTrackerLambdas = async ({
 					'unwiredlabs.com',
 					'cellgeolocation.ts',
 				),
-				geolocateCellFromNrfConnectForCloudStepFunction: path.resolve(
+				geolocateCellFromNrfCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
 					'nrfcloud.com',
@@ -107,7 +107,7 @@ export const prepareAssetTrackerLambdas = async ({
 					'httpApi',
 					'addCellGeolocation.ts',
 				),
-				neighborCellGeolocationFromNrfConnectForCloudStepFunction: path.resolve(
+				neighborCellGeolocationFromNrfCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
 					'nrfcloud.com',
@@ -136,7 +136,7 @@ export const prepareAssetTrackerLambdas = async ({
 					'agps',
 					'deviceRequestHandler.ts',
 				),
-				agpsNrfConnectForCloudStepFunction: path.resolve(
+				agpsNrfCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
 					'nrfcloud.com',

@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
-import { getNrfConnectForCloudApiSettings } from './settings'
+import { getNrfCloudApiSettings } from './settings'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
@@ -12,7 +12,7 @@ import { Cell } from '../../geolocation/Cell'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getNrfConnectForCloudApiSettings({
+const fetchSettings = getNrfCloudApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })

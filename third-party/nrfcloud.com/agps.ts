@@ -1,7 +1,7 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { fromEnv } from '../../util/fromEnv'
-import { getNrfConnectForCloudApiSettings } from './settings'
+import { getNrfCloudApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft, isRight, Right } from 'fp-ts/lib/Either'
@@ -10,7 +10,7 @@ import { agpsRequestSchema, AGPSType } from '../../agps/types'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getNrfConnectForCloudApiSettings({
+const fetchSettings = getNrfCloudApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
@@ -60,7 +60,7 @@ export const handler = async (
 			},
 			headers: {
 				'Content-Type': 'application/octet-stream',
-				// FIXME: use dynamic value from HEAD request. Currently broken on nRF Connect for Cloud side
+				// FIXME: use dynamic value from HEAD request. Currently broken on nRF Cloud side
 				Range: `bytes=0-2000`,
 			},
 			requestSchema: apiRequestSchema,

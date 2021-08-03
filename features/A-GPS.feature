@@ -7,7 +7,7 @@ Feature: A-GPS
     Prepare the mock API responses. The A-GPS data request will be split into
     two requests, one for type 2 (ephemerides) and one for the rest.
     FIXME: Actually using a HEAD request to determine chunk size, once it is
-    implemented properly on nRF Connect for Cloud side.
+    implemented properly on nRF Cloud side.
 
     Given I am run after the "Device: Update Shadow" feature
     And I store a random number between 100 and 999 into "agpsMcc"

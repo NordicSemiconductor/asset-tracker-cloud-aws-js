@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-ssm'
 
 type Scopes = 'context' | 'thirdParty' | 'codebuild'
-type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfconnectforcloud'
+type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfcloud'
 
 export const getSettings =
 	<Settings extends Record<string, string>>({

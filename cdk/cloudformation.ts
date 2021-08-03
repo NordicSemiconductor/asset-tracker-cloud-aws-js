@@ -1,7 +1,7 @@
 import { AssetTrackerApp } from './apps/AssetTracker'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getUnwiredLabsApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
-import { getNrfConnectForCloudApiSettings } from '../third-party/nrfcloud.com/settings'
+import { getNrfCloudApiSettings } from '../third-party/nrfcloud.com/settings'
 import { warn } from './helper/note'
 import { CORE_STACK_NAME } from './stacks/stackName'
 import { getSettings } from '../util/settings'
@@ -19,7 +19,7 @@ const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
-const fetchNrfConnectForCloudApiSettings = getNrfConnectForCloudApiSettings({
+const fetchNrfCloudApiSettings = getNrfCloudApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
@@ -50,7 +50,7 @@ Promise.all([
 		}),
 	})),
 	fetchUnwiredLabsApiSettings().catch(() => ({})),
-	fetchNrfConnectForCloudApiSettings().catch(() => ({})),
+	fetchNrfCloudApiSettings().catch(() => ({})),
 	getSettings<{ token: string }>({
 		ssm,
 		stackName: CORE_STACK_NAME,
@@ -63,7 +63,7 @@ Promise.all([
 		([
 			lambdaResources,
 			unwiredLabsApiSettings,
-			nrfConnectForCloudApiSettings,
+			nrfCloudApiSettings,
 			codebuildSettings,
 			context,
 		]) => {
@@ -87,20 +87,19 @@ Promise.all([
 				ctx.unwiredlabs = '0'
 			}
 
-			const enableNrfConnectForCloudApi =
-				'apiKey' in nrfConnectForCloudApiSettings
-			if (!enableNrfConnectForCloudApi) {
+			const enableNrfCloudApi = 'apiKey' in nrfCloudApiSettings
+			if (!enableNrfCloudApi) {
 				warn(
 					'Location Services',
-					'No nRF Connect for Cloud API key configured. Feature will be disabled.',
+					'No nRF Cloud API key configured. Feature will be disabled.',
 				)
 				warn(
 					'Location Services',
 					`Use ${chalk.greenBright(
-						`node cli configure thirdParty nrfconnectforcloud apiKey <API key>`,
+						`node cli configure thirdParty nrfcloud apiKey <API key>`,
 					)} to set the API key`,
 				)
-				ctx.nrfconnectforcloud = '0'
+				ctx.nrfcloud = '0'
 			}
 
 			const enableCD = 'token' in codebuildSettings
