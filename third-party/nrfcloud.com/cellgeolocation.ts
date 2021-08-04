@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
-import { getNrfCloudApiSettings } from './settings'
+import { getCellLocationApiSettings } from './settings'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
@@ -12,7 +12,7 @@ import { Cell } from '../../geolocation/Cell'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getNrfCloudApiSettings({
+const fetchSettings = getCellLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
@@ -36,12 +36,12 @@ const locateRequestSchema = Type.Record(
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 
-	const { apiKey, endpoint } = await fetchSettings()
-	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
+	const { serviceKey, teamId, endpoint } = await fetchSettings()
+	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const mccmnc = cell.mccmnc.toFixed(0)
 	const maybeCeollGeolocation = await c.post({
-		resource: 'location/locate/nRFAssetTrackerForAWS',
+		resource: 'location/locate',
 		payload: {
 			[cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
 				{

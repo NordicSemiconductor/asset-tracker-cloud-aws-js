@@ -5,6 +5,7 @@ import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
 import { Static, TSchema } from '@sinclair/typebox'
 import { pipe } from 'fp-ts/lib/function'
 import Ajv from 'ajv'
+import * as jwt from 'jsonwebtoken'
 
 const ajv = new Ajv()
 // see @https://github.com/sinclairzx81/typebox/issues/51
@@ -51,11 +52,13 @@ const validate =
 const req =
 	({
 		endpoint,
-		apiKey,
+		serviceKey,
+		teamId,
 		method,
 	}: {
 		endpoint: URL
-		apiKey: string
+		serviceKey: string
+		teamId: string
 		method: 'GET' | 'POST'
 	}) =>
 	<Request extends TSchema, Response extends TSchema>({
@@ -93,18 +96,17 @@ const req =
 								method,
 								agent: false,
 								headers: {
-									Authorization: `Bearer ${apiKey}`,
+									Authorization: `Bearer ${jwt.sign(
+										{ aud: teamId },
+										serviceKey,
+										{ algorithm: 'ES256' },
+									)}`,
 									'Content-Type': 'application/json',
 									...headers,
 								},
 							}
 
-							console.debug(
-								JSON.stringify(options).replace(
-									apiKey,
-									`${apiKey.substr(0, 3)}***`,
-								),
-							)
+							console.debug(JSON.stringify(options))
 
 							const req = nodeRequest(options, (res) => {
 								console.debug(
@@ -172,10 +174,12 @@ const req =
 
 export const apiClient = ({
 	endpoint,
-	apiKey,
+	serviceKey,
+	teamId,
 }: {
 	endpoint: URL
-	apiKey: string
+	serviceKey: string
+	teamId: string
 }): {
 	post: <Request extends TSchema, Response extends TSchema>({
 		resource,
@@ -206,12 +210,14 @@ export const apiClient = ({
 } => ({
 	post: req({
 		endpoint,
-		apiKey,
+		serviceKey,
+		teamId,
 		method: 'POST',
 	}),
 	get: req({
 		endpoint,
-		apiKey,
+		serviceKey,
+		teamId,
 		method: 'GET',
 	}),
 })

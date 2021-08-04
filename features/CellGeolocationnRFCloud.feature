@@ -18,7 +18,7 @@ Feature: nRF Cloud Cell Geolocation
         And I store a random number between 0 and 20000 into "accuracy"
         And I store a random float between -90 and 90 into "lat"
         And I store a random float between -180 and 180 into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate
             """
             {
                 "accuracy": {accuracy},
@@ -47,7 +47,7 @@ Feature: nRF Cloud Cell Geolocation
 
     Scenario: The nRF Cloud API should have been called
 
-        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/locate/nRFAssetTrackerForAWS
+        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/locate
             """
             {
                 "<apiNw>": [

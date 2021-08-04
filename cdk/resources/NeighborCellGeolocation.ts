@@ -68,7 +68,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 		// Optional step: resolve using nRF Cloud API
 		let fromNrfCloud: Lambda.IFunction | undefined = undefined
 		checkFlag({
-			key: 'nrfcloud',
+			key: 'nrfcloudCellLocation',
 			component: 'nRF Cloud API (neighboring cell geolocation)',
 			onUndefined: 'disabled',
 			onEnabled: () => {

@@ -43,7 +43,7 @@ export class AGPSResolver extends CloudFormation.Resource {
 		// Optional step: resolve using nRF Cloud API
 		let fromNrfCloud: Lambda.IFunction | undefined = undefined
 		checkFlag({
-			key: 'nrfcloud',
+			key: 'nrfcloudAGPS',
 			component: 'nRF Cloud API (A-GPS)',
 			onUndefined: 'disabled',
 			onEnabled: () => {

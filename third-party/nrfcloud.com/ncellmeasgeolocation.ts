@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
-import { getNrfCloudApiSettings } from './settings'
+import { getCellLocationApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
@@ -11,7 +11,7 @@ import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getNrfCloudApiSettings({
+const fetchSettings = getCellLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
@@ -97,12 +97,12 @@ export const handler = async (
 		}
 	}
 
-	const { apiKey, endpoint } = await fetchSettings()
-	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
+	const { serviceKey, teamId, endpoint } = await fetchSettings()
+	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const { nw, report } = valid.right
 	const maybeCeollGeolocation = await c.post({
-		resource: 'location/locate/nRFAssetTrackerForAWS',
+		resource: 'location/locate',
 		payload: {
 			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [
 				{
