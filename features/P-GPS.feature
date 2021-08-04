@@ -17,6 +17,7 @@ Feature: P-GPS
       }
       """
 
+  @Retry=failAfter:5,maxDelay:60000
   Scenario: Request P-GPS data
 
     When the tracker publishes this message to the topic {tracker:id}/pgps/get
