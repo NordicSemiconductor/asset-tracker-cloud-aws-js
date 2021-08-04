@@ -9,7 +9,7 @@ Feature: A-GPS
     FIXME: Actually using a HEAD request to determine chunk size, once it is
     implemented properly on nRF Cloud side.
 
-    Given I am run after the "Device: Update Shadow" feature
+    Given I am run after the "Connect a tracker" feature
     And I store a random number between 100 and 999 into "agpsMcc"
     And I store a random number between 0 and 99 into "agpsMnc"
     And I store a random number between 1 and 100000000 into "agpsCellId"

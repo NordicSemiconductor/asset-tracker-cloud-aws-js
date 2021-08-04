@@ -180,15 +180,15 @@ export const assetTrackerStepRunners = ({
 
 				const listener: ListenerWithPayload = async (message) => {
 					await runner.progress(`Iot`, JSON.stringify(message))
-					const m = raw !== undefined ? message : JSON.parse(message.toString())
+					const m =
+						raw !== undefined
+							? message.toString()
+							: JSON.parse(message.toString())
 					messages.push(m)
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
 
-						const result =
-							messages.length > 1
-								? messages.map((m) => m.toString())
-								: messages[0].toString()
+						const result = messages.length > 1 ? messages : messages[0]
 
 						if (storeName !== undefined) runner.store[storeName] = result
 						return resolve(

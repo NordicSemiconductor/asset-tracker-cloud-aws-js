@@ -23,6 +23,8 @@ export type AssetTrackerLambdas = {
 	persistNeighborCellGeolocationStepFunction: string
 	agpsDeviceRequestHandler: string
 	agpsNrfCloudStepFunction: string
+	pgpsDeviceRequestHandler: string
+	pgpsNrfCloudStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -141,6 +143,17 @@ export const prepareAssetTrackerLambdas = async ({
 					'third-party',
 					'nrfcloud.com',
 					'agps.ts',
+				),
+				pgpsDeviceRequestHandler: path.resolve(
+					rootDir,
+					'pgps',
+					'deviceRequestHandler.ts',
+				),
+				pgpsNrfCloudStepFunction: path.resolve(
+					rootDir,
+					'third-party',
+					'nrfcloud.com',
+					'pgps.ts',
 				),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),

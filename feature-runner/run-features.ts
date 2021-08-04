@@ -32,6 +32,7 @@ import { queryClient } from '@nordicsemiconductor/timestream-helpers'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { httpApiMockStepRunners } from './steps/httpApiMock'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { gpsDay } from '../pgps/gpsTime'
 
 let ran = false
 
@@ -50,6 +51,7 @@ export type AssetTrackerWorld = StackOutputs & {
 	'httpApiMock:responsesTableName': string
 	'httpApiMock:apiURL': string
 	region: string
+	currentGpsDay: number
 }
 
 program
@@ -125,6 +127,7 @@ program
 					httpApiMockStackConfig.responsesTableName,
 				'httpApiMock:apiURL': httpApiMockStackConfig.apiURL,
 				region: mqttEndpoint.split('.')[2],
+				currentGpsDay: gpsDay(),
 			}
 
 			console.log(chalk.yellow.bold(' World:'))
