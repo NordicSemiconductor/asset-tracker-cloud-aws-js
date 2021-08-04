@@ -19,7 +19,6 @@ const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
 const apiRequestSchema = Type.Object(
 	{
-		deviceIdentifier: Type.String({ minLength: 1 }),
 		eci: PositiveInteger,
 		tac: PositiveInteger,
 		requestType: Type.RegEx(/^custom$/),
