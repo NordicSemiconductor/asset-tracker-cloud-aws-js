@@ -185,10 +185,7 @@ export const assetTrackerStepRunners = ({
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
 
-						const result =
-							messages.length > 1
-								? messages.map((m) => m.toString())
-								: messages[0].toString()
+						const result = messages.length > 1 ? messages : messages[0]
 
 						if (storeName !== undefined) runner.store[storeName] = result
 						return resolve(

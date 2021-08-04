@@ -139,6 +139,13 @@ const req =
 										let response: Record<string, any>
 										try {
 											response = JSON.parse(bodyAsString)
+											console.debug(
+												JSON.stringify({
+													response: {
+														body: response,
+													},
+												}),
+											)
 										} catch {
 											throw new Error(
 												`Failed to parse response as JSON: ${bodyAsString}`,

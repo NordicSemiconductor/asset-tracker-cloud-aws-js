@@ -25,6 +25,9 @@ import { NeighborCellGeolocation } from '../../resources/NeighborCellGeolocation
 import { AGPSStorage } from '../../resources/AGPSStorage'
 import { AGPSResolver } from '../../resources/AGPSResolver'
 import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
+import { PGPSStorage } from '../../resources/PGPSStorage'
+import { PGPSResolver } from '../../resources/PGPSResolver'
+import { PGPSDeviceRequestHandler } from '../../resources/PGPSDeviceRequestHandler'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -521,6 +524,18 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			lambdas,
 			storage: agpsStorage,
 			resolver: agpsResolver,
+		})
+
+		// P-GPS support
+		const pgpsStorage = new PGPSStorage(this, 'pgpsStorage')
+		const pgpsResolver = new PGPSResolver(this, 'pgpsResolver', {
+			storage: pgpsStorage,
+			lambdas,
+		})
+		new PGPSDeviceRequestHandler(this, 'pgpsDeviceRequestHandler', {
+			lambdas,
+			storage: pgpsStorage,
+			resolver: pgpsResolver,
 		})
 	}
 }

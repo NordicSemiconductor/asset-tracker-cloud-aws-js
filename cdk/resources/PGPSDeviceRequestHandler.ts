@@ -1,19 +1,19 @@
 import * as CloudFormation from '@aws-cdk/core'
 import * as IAM from '@aws-cdk/aws-iam'
 import * as IoT from '@aws-cdk/aws-iot'
-import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined'
 import * as SQS from '@aws-cdk/aws-sqs'
 import { Duration } from '@aws-cdk/core'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import * as Lambda from '@aws-cdk/aws-lambda'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import { AGPSResolver } from './AGPSResolver'
-import { AGPSStorage } from './AGPSStorage'
+import { PGPSResolver } from './PGPSResolver'
+import { PGPSStorage } from './PGPSStorage'
 import { PolicyStatement } from '@aws-cdk/aws-iam'
+import { iotRuleSqlCheckIfDefinedAndNotZero } from '../helper/iotRuleSqlCheckIfDefinedAndNotZero'
 
 /**
- * Provides assisted GPS data to devices via MQTT.
+ * Provides predicted GPS data to devices via MQTT.
  *
  * This implementation prevents hammering the third-party API by queuing all
  * device requests and using the execution ID of StepFunctions ensure that the
@@ -29,7 +29,7 @@ import { PolicyStatement } from '@aws-cdk/aws-iam'
  *     • persist a temporary entry in the cache table so other items won't try to start execution as well
  *     • return item to queue (which will later call the lambda again with the item)
  */
-export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
+export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
@@ -39,8 +39,8 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			resolver,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
-			storage: AGPSStorage
-			resolver: AGPSResolver
+			storage: PGPSStorage
+			resolver: PGPSResolver
 		},
 	) {
 		super(parent, id)
@@ -56,10 +56,6 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
 							],
 						}),
-						new IAM.PolicyStatement({
-							actions: ['iot:GetThingShadow'],
-							resources: ['*'],
-						}),
 					],
 				}),
 			},
@@ -71,16 +67,14 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 		})
 		queue.grantSendMessages(topicRuleRole)
 
-		new IoT.CfnTopicRule(this, 'deviceAGPSRequestRule', {
+		new IoT.CfnTopicRule(this, 'devicePGPSRequestRule', {
 			topicRulePayload: {
 				description:
-					'Devices request A-GPS data by publishing the the AWS IoT topic <deviceId>/agps/get. This puts all requests in a queue so we can resolved the requested data, but also ensure that we do not hit the third part APIs if many devices request the same assistance data at once (cargo container scenario).',
+					'Devices request P-GPS data by publishing the the AWS IoT topic <deviceId>/pgps/get. This puts all requests in a queue so we can resolved the requested data, but also ensure that we do not hit the third part APIs if many devices request the same prediction data at once (cargo container scenario).',
 				ruleDisabled: false,
 				awsIotSqlVersion: '2016-03-23',
-				sql: `SELECT mcc, mnc, cell, area, phycell, types, get_thing_shadow(clientid(), "${
-					topicRuleRole.roleArn
-				}").state.reported.dev.v.nw as nw, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/agps/get' WHERE ${iotRuleSqlCheckUndefined(
-					['mcc', 'mnc', 'cell', 'area', 'types'], // phycell is optional
+				sql: `SELECT n, int, day, time, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/pgps/get' WHERE ${iotRuleSqlCheckIfDefinedAndNotZero(
+					['n', 'int', 'day', 'time'], // all message properties are optional positive integers
 				)}`,
 				actions: [
 					{
@@ -109,9 +103,9 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 				runtime: Lambda.Runtime.NODEJS_14_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
-				code: lambdas.lambdas.agpsDeviceRequestHandler,
+				code: lambdas.lambdas.pgpsDeviceRequestHandler,
 				description:
-					'Handles A-GPS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
+					'Handles P-GPS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
 				environment: {
 					CACHE_TABLE: storage.cacheTable.tableName,
 					VERSION: this.node.tryGetContext('version'),
@@ -124,7 +118,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 					new PolicyStatement({
 						actions: ['iot:Publish'],
 						resources: [
-							`arn:aws:iot:${parent.region}:${parent.account}:topic/*/agps`,
+							`arn:aws:iot:${parent.region}:${parent.account}:topic/*/pgps`,
 						],
 					}),
 				],
@@ -133,7 +127,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'deviceRequestHandlerLogs', deviceRequestHandler)
 
-		// Invoke lambda for all A-GPS requests from devices
+		// Invoke lambda for all P-GPS requests from devices
 		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
 			eventSourceArn: queue.queueArn,
 			target: deviceRequestHandler,
