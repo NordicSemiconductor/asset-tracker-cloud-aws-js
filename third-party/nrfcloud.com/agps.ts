@@ -1,7 +1,7 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { URL } from 'url'
 import { fromEnv } from '../../util/fromEnv'
-import { getNrfCloudApiSettings } from './settings'
+import { getAGPSLocationApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
 import { isLeft, isRight, Right } from 'fp-ts/lib/Either'
@@ -10,7 +10,7 @@ import { agpsRequestSchema, AGPSType } from '../../agps/types'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getNrfCloudApiSettings({
+const fetchSettings = getAGPSLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
@@ -19,7 +19,6 @@ const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
 const apiRequestSchema = Type.Object(
 	{
-		deviceIdentifier: Type.String({ minLength: 1 }),
 		eci: PositiveInteger,
 		tac: PositiveInteger,
 		requestType: Type.RegEx(/^custom$/),
@@ -44,13 +43,12 @@ export const handler = async (
 		}
 	}
 
-	const { apiKey, endpoint } = await fetchSettings()
-	const c = apiClient({ endpoint: new URL(endpoint), apiKey })
+	const { serviceKey, teamId, endpoint } = await fetchSettings()
+	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 	const fetchTypes = async (types: AGPSType[]) =>
 		c.get({
 			resource: 'location/agps',
 			payload: {
-				deviceIdentifier: 'nRFAssetTrackerForAWS',
 				eci: cell,
 				tac: area,
 				requestType: 'custom',

@@ -1,7 +1,12 @@
 import { AssetTrackerApp } from './apps/AssetTracker'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getUnwiredLabsApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
-import { getNrfCloudApiSettings } from '../third-party/nrfcloud.com/settings'
+import { getApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
+import {
+	getAGPSLocationApiSettings,
+	getCellLocationApiSettings,
+	getPGPSLocationApiSettings,
+	serviceKeyProperty,
+} from '../third-party/nrfcloud.com/settings'
 import { warn } from './helper/note'
 import { CORE_STACK_NAME } from './stacks/stackName'
 import { getSettings } from '../util/settings'
@@ -15,11 +20,19 @@ import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucke
 import { getStackContexts } from './helper/getStackContexts'
 
 const ssm = new SSMClient({})
-const fetchUnwiredLabsApiSettings = getUnwiredLabsApiSettings({
+const fetchUnwiredLabsApiSettings = getApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
-const fetchNrfCloudApiSettings = getNrfCloudApiSettings({
+const fetchNrfCloudAGPSLocationApiSettings = getAGPSLocationApiSettings({
+	ssm,
+	stackName: CORE_STACK_NAME,
+})
+const fetchNrfCloudPGPSLocationApiSettings = getPGPSLocationApiSettings({
+	ssm,
+	stackName: CORE_STACK_NAME,
+})
+const fetchNrfCloudCellLocationApiSettings = getCellLocationApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
@@ -50,7 +63,9 @@ Promise.all([
 		}),
 	})),
 	fetchUnwiredLabsApiSettings().catch(() => ({})),
-	fetchNrfCloudApiSettings().catch(() => ({})),
+	fetchNrfCloudAGPSLocationApiSettings().catch(() => ({})),
+	fetchNrfCloudPGPSLocationApiSettings().catch(() => ({})),
+	fetchNrfCloudCellLocationApiSettings().catch(() => ({})),
 	getSettings<{ token: string }>({
 		ssm,
 		stackName: CORE_STACK_NAME,
@@ -63,7 +78,9 @@ Promise.all([
 		([
 			lambdaResources,
 			unwiredLabsApiSettings,
-			nrfCloudApiSettings,
+			nrfCloudAGPSLocationApiSettings,
+			nrfCloudPGPSLocationApiSettings,
+			nrfCloudCellLocationApiSettings,
 			codebuildSettings,
 			context,
 		]) => {
@@ -87,19 +104,39 @@ Promise.all([
 				ctx.unwiredlabs = '0'
 			}
 
-			const enableNrfCloudApi = 'apiKey' in nrfCloudApiSettings
-			if (!enableNrfCloudApi) {
-				warn(
-					'Location Services',
-					'No nRF Cloud API key configured. Feature will be disabled.',
-				)
-				warn(
-					'Location Services',
-					`Use ${chalk.greenBright(
-						`node cli configure thirdParty nrfcloud apiKey <API key>`,
-					)} to set the API key`,
-				)
-				ctx.nrfcloud = '0'
+			for (const { name, context, configProperty, settings } of [
+				{
+					name: 'Assisted GPS',
+					context: 'nrfcloudAGPS',
+					configProperty: serviceKeyProperty('agpsLocation'),
+					settings: nrfCloudAGPSLocationApiSettings,
+				},
+				{
+					name: 'Predicted GPS',
+					context: 'nrfcloudPGPS',
+					configProperty: serviceKeyProperty('pgpsLocation'),
+					settings: nrfCloudPGPSLocationApiSettings,
+				},
+				{
+					name: 'Cell Location',
+					context: 'nrfcloudCellLocation',
+					configProperty: serviceKeyProperty('cellLocation'),
+					settings: nrfCloudCellLocationApiSettings,
+				},
+			]) {
+				if (!('serviceKey' in settings)) {
+					warn(
+						'Location Services',
+						`No nRF Cloud ${name} Location Service service key configured. Feature will be disabled.`,
+					)
+					warn(
+						'Location Services',
+						`Use ${chalk.greenBright(
+							`node cli configure thirdParty nrfcloud ${configProperty} <service key>`,
+						)} to set the service key`,
+					)
+					ctx[context] = '0'
+				}
 			}
 
 			const enableCD = 'token' in codebuildSettings

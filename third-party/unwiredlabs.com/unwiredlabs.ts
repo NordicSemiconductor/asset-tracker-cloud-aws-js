@@ -1,7 +1,7 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getSettings } from '../../util/settings'
 
-export const getUnwiredLabsApiSettings =
+export const getApiSettings =
 	({ ssm, stackName }: { ssm: SSMClient; stackName: string }) =>
 	async (): Promise<{ apiKey: string; endpoint: string }> => {
 		const p = await getSettings({

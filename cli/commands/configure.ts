@@ -3,9 +3,10 @@ import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { putSettings } from '../../util/settings'
+import * as fs from 'fs'
 
 export const configureCommand = (): CommandDefinition => ({
-	command: 'configure <scope> <system> <property> <value>',
+	command: 'configure <scope> <system> <property> [value]',
 	options: [
 		{
 			flags: '-d, --deleteBeforeUpdate',
@@ -16,11 +17,14 @@ export const configureCommand = (): CommandDefinition => ({
 		scope: any,
 		system: any,
 		property: string,
-		value: string,
+		value: string | undefined,
 		{ deleteBeforeUpdate },
 	) => {
+		const v = value ?? fs.readFileSync(0, 'utf-8')
+		if (v === undefined || v.length === 0) {
+			throw new Error(`Must provide value either as argument or via stdin!`)
+		}
 		const ssm = new SSMClient({})
-
 		const { name } = await putSettings({
 			ssm,
 			stackName: CORE_STACK_NAME,
@@ -28,7 +32,7 @@ export const configureCommand = (): CommandDefinition => ({
 			system,
 		})({
 			property,
-			value,
+			value: v,
 			deleteBeforeUpdate,
 		})
 
@@ -37,8 +41,8 @@ export const configureCommand = (): CommandDefinition => ({
 			chalk.green('Updated the configuration'),
 			chalk.blueBright(name),
 			chalk.green('to'),
-			chalk.yellow(value),
+			chalk.yellow(v),
 		)
 	},
-	help: 'Configure the system',
+	help: 'Configure the system. If value is not provided, it is read from stdin',
 })

@@ -34,7 +34,9 @@ Promise.all([
 				version: process.env.VERSION ?? '0.0.0-development',
 				isTest: true,
 				unwiredlabs: '1',
-				nrfcloud: '1',
+				nrfcloudAGPS: '1',
+				nrfcloudPGPS: '1',
+				nrfcloudCellLocation: '1',
 			},
 		}).synth(),
 	)
