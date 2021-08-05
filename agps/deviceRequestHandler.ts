@@ -189,14 +189,20 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					await Promise.all(
 						deviceRequests.map(async (deviceRequest) =>
 							Promise.all(
-								(resolvedRequests[cacheKey]?.data ?? []).map(async (agpsdata) =>
-									iotData.send(
-										new PublishCommand({
-											topic: `${deviceRequest.request.deviceId}/agps`,
-											payload: new TextEncoder().encode(agpsdata),
-											qos: 1,
-										}),
-									),
+								(resolvedRequests[cacheKey]?.data ?? []).map(
+									async (agpsdata) => {
+										const payload = new TextEncoder().encode(agpsdata)
+										console.log(
+											`Sending ${payload.length} bytes to ${deviceRequest.request.deviceId}`,
+										)
+										return iotData.send(
+											new PublishCommand({
+												topic: `${deviceRequest.request.deviceId}/agps`,
+												payload,
+												qos: 1,
+											}),
+										)
+									},
 								),
 							),
 						),

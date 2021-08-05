@@ -40,11 +40,6 @@ export const getCache =
 						: undefined,
 			} as AGPSDataCache
 
-			console.debug(
-				JSON.stringify({
-					getCache: { entry: i },
-				}),
-			)
 			return right(i)
 		} catch (err) {
 			if (
