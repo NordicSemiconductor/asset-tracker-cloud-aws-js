@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { CommandDefinition } from './CommandDefinition'
 import * as chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { putSettings } from '../../util/settings'
+import { deleteSettings, putSettings } from '../../util/settings'
 import * as fs from 'fs'
 
 export const configureCommand = (): CommandDefinition => ({
@@ -12,19 +12,43 @@ export const configureCommand = (): CommandDefinition => ({
 			flags: '-d, --deleteBeforeUpdate',
 			description: `Useful when depending on the parameter having version 1, e.g. for use in CloudFormation`,
 		},
+		{
+			flags: '-X, --deleteParameters',
+			description: 'Deletes the parameters.',
+		},
 	],
 	action: async (
 		scope: any,
 		system: any,
 		property: string,
 		value: string | undefined,
-		{ deleteBeforeUpdate },
+		{ deleteBeforeUpdate, deleteParameters },
 	) => {
+		const ssm = new SSMClient({})
+
+		if (deleteParameters !== undefined) {
+			// Delete
+			const { name } = await deleteSettings({
+				ssm,
+				stackName: CORE_STACK_NAME,
+				scope,
+				system,
+			})({
+				property,
+			})
+			console.log()
+			console.log(
+				chalk.green('Deleted the parameters from'),
+				chalk.blueBright(name),
+			)
+			return
+		}
+
 		const v = value ?? fs.readFileSync(0, 'utf-8')
 		if (v === undefined || v.length === 0) {
 			throw new Error(`Must provide value either as argument or via stdin!`)
 		}
-		const ssm = new SSMClient({})
+
 		const { name } = await putSettings({
 			ssm,
 			stackName: CORE_STACK_NAME,

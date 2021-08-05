@@ -90,3 +90,25 @@ export const putSettings =
 		)
 		return { name: Name }
 	}
+
+export const deleteSettings =
+	({
+		ssm,
+		stackName,
+		scope,
+		system,
+	}: {
+		ssm: SSMClient
+		stackName: string
+		scope: Scopes
+		system: Systems
+	}) =>
+	async ({ property }: { property: string }): Promise<{ name: string }> => {
+		const Name = `/${stackName}/${scope}/${system}/${property}`
+		await ssm.send(
+			new DeleteParameterCommand({
+				Name,
+			}),
+		)
+		return { name: Name }
+	}
