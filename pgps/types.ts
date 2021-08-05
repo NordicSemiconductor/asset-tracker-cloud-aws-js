@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox'
-import { gpsDay } from './gpsTime'
+import { minimumGpsDay } from './gpsTime'
 
 export const pgpsRequestSchema = Type.Object({
 	n: Type.Optional(
@@ -10,7 +10,7 @@ export const pgpsRequestSchema = Type.Object({
 	),
 	day: Type.Optional(
 		Type.Integer({
-			minimum: gpsDay(), // Devices should not request data from the past
+			minimum: minimumGpsDay(),
 			title: 'start day of the prediction set as GPS Day',
 		}),
 	),

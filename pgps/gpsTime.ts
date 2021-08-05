@@ -19,3 +19,10 @@ export const gpsTime = (now?: Date): number =>
  */
 export const gpsDay = (now?: Date): number =>
 	Math.floor(gpsTime(now) / 1000 / 60 / 60 / 24)
+
+/**
+ * Devices should not request data from the past.
+ *
+ * Grants some leeway for different implementations.
+ */
+export const minimumGpsDay = (): number => gpsDay() - 5

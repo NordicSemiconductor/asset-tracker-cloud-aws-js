@@ -37,7 +37,7 @@ const apiRequestSchema = Type.Object(
 		),
 		startGpsDay: Type.Optional(
 			Type.Integer({
-				minimum: gpsDay(), // Devices should not request data from the past
+				minimum: 0,
 				title: 'start day of the prediction set as GPS Day',
 			}),
 		),

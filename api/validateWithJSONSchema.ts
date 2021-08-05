@@ -19,7 +19,10 @@ export const validateWithJSONSchema = <T extends TObject<TProperties>>(
 			return E.left({
 				type: ErrorType.BadRequest,
 				message: 'Validation failed!',
-				detail: v.errors,
+				detail: {
+					errors: v.errors,
+					input: value,
+				},
 			})
 		}
 		return E.right(value as Static<typeof schema>)
