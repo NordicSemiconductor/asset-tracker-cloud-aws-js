@@ -11,9 +11,11 @@ const offSetToUnixTime = 315874800000
 /**
  * Return the microseconds since the GPS epoch
  */
-export const gpsTime = (): number => Date.now() - offSetToUnixTime
+export const gpsTime = (now?: Date): number =>
+	(now?.getTime() ?? Date.now()) - offSetToUnixTime
 
 /**
  * Return the days since the GPS epoch
  */
-export const gpsDay = (): number => Math.floor(gpsTime() / 1000 / 60 / 24)
+export const gpsDay = (now?: Date): number =>
+	Math.floor(gpsTime(now) / 1000 / 60 / 60 / 24)
