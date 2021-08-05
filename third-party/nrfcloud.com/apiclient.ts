@@ -43,7 +43,10 @@ const validate =
 			return left({
 				type: errorType,
 				message: errorMessage,
-				detail: v.errors,
+				detail: {
+					errors: v.errors,
+					input: payload,
+				},
 			})
 		}
 		return right(payload as Static<typeof schema>)

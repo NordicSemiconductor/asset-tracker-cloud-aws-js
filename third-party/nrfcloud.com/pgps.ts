@@ -21,14 +21,33 @@ const fetchSettings = getPGPSLocationApiSettings({
 	stackName,
 })
 
-const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
-
+enum Interval {
+	twoHours = 120,
+	fourHours = 240,
+	sixHours = 360,
+	eightHours = 480,
+}
 const apiRequestSchema = Type.Object(
 	{
-		predictionCount: Type.Optional(PositiveInteger),
-		predictionIntervalMinutes: Type.Optional(PositiveInteger),
-		startGpsDay: Type.Optional(PositiveInteger),
-		startGpsTimeOfDaySeconds: Type.Optional(PositiveInteger),
+		predictionCount: Type.Optional(
+			Type.Integer({ minimum: 1, title: 'number of predictions' }),
+		),
+		predictionIntervalMinutes: Type.Optional(
+			Type.Enum(Interval, { title: 'prediction interval in minutes' }),
+		),
+		startGpsDay: Type.Optional(
+			Type.Integer({
+				minimum: gpsDay(), // Devices should not request data from the past
+				title: 'start day of the prediction set as GPS Day',
+			}),
+		),
+		startGpsTimeOfDaySeconds: Type.Optional(
+			Type.Integer({
+				minimum: 0,
+				maximum: 86399,
+				title: 'start time of the prediction set as seconds in day',
+			}),
+		),
 	},
 	{ additionalProperties: false },
 )
