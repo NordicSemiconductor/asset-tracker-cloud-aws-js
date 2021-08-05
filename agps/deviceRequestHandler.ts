@@ -7,7 +7,6 @@ import { SQSClient, SendMessageBatchCommand } from '@aws-sdk/client-sqs'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
-import { TextEncoder } from 'util'
 import { v4 } from 'uuid'
 import { fromEnv } from '../util/fromEnv'
 import { cacheKey } from './cacheKey'
@@ -191,14 +190,13 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 							Promise.all(
 								(resolvedRequests[cacheKey]?.data ?? []).map(
 									async (agpsdata) => {
-										const payload = new TextEncoder().encode(agpsdata)
 										console.log(
-											`Sending ${payload.length} bytes to ${deviceRequest.request.deviceId}`,
+											`Sending ${agpsdata.length} bytes to ${deviceRequest.request.deviceId}`,
 										)
 										return iotData.send(
 											new PublishCommand({
 												topic: `${deviceRequest.request.deviceId}/agps`,
-												payload,
+												payload: Buffer.from(agpsdata, 'binary'),
 												qos: 1,
 											}),
 										)
