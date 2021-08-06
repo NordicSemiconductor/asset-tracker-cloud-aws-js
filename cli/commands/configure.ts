@@ -22,11 +22,11 @@ export const configureCommand = (): CommandDefinition => ({
 		system: any,
 		property: string,
 		value: string | undefined,
-		{ deleteBeforeUpdate, deleteParameters },
+		{ deleteBeforeUpdate, deleteParameter },
 	) => {
 		const ssm = new SSMClient({})
 
-		if (deleteParameters !== undefined) {
+		if (deleteParameter !== undefined) {
 			// Delete
 			const { name } = await deleteSettings({
 				ssm,
