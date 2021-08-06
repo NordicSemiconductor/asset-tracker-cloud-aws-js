@@ -104,11 +104,11 @@ jobs:
           '[skip-cleanup]') && github.event.inputs.skipCleanup != 'yes'
         run: |
           node cli configure thirdParty unwiredlabs apiKey -X
+          node cli configure thirdParty unwiredlabs endpoint -X
           node cli configure thirdParty nrfcloud teamId -X
           node cli configure thirdParty nrfcloud cellLocationServiceKey -X
           node cli configure thirdParty nrfcloud agpsLocationServiceKey -X
           node cli configure thirdParty nrfcloud pgpsLocationServiceKey -X
-          node cli configure thirdParty unwiredlabs endpoint -X
           node cli configure thirdParty nrfcloud endpoint -X
           node cli purge-iot-user-policy-principals
           node cli purge-cas -i `cat certificates/**/rootCA.id`
