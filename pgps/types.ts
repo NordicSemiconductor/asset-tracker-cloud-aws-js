@@ -11,6 +11,7 @@ export const pgpsRequestSchema = Type.Object({
 	day: Type.Optional(
 		Type.Integer({
 			minimum: minimumGpsDay(),
+			maximum: 99999, // The actual minimum depends on the provider in use, do some sanity clamping here.
 			title: 'start day of the prediction set as GPS Day',
 		}),
 	),

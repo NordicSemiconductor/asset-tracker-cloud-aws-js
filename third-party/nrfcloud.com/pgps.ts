@@ -12,7 +12,7 @@ import {
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
 } from '../../pgps/cacheKey'
-import { gpsDay } from '../../pgps/gpsTime'
+import { gpsDay, minimumGpsDay } from '../../pgps/gpsTime'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -37,7 +37,8 @@ const apiRequestSchema = Type.Object(
 		),
 		startGpsDay: Type.Optional(
 			Type.Integer({
-				minimum: 0,
+				minimum: minimumGpsDay(),
+				maximum: gpsDay() + 14, // Current GPS day + 2 weeks is the upper bound for nRF Cloud
 				title: 'start day of the prediction set as GPS Day',
 			}),
 		),
