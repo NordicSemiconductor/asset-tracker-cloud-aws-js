@@ -22,7 +22,7 @@ const locateRequestSchema = Type.Record(
 	Type.Array(
 		Type.Object(
 			{
-				cid: Type.Integer({ minimum: 1 }),
+				eci: Type.Integer({ minimum: 1 }),
 				mcc: Type.Integer({ minimum: 100, maximum: 999 }),
 				mnc: Type.Integer({ minimum: 1, maximum: 99 }),
 				tac: Type.Integer({ minimum: 1 }),
@@ -41,11 +41,11 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 
 	const mccmnc = cell.mccmnc.toFixed(0)
 	const maybeCeollGeolocation = await c.post({
-		resource: 'location/locate',
+		resource: 'location/cell',
 		payload: {
 			[cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
 				{
-					cid: cell.cell,
+					eci: cell.cell,
 					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
 					mnc: parseInt(mccmnc.substr(-2), 10),
 					tac: cell.area,
@@ -61,15 +61,14 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			located: false,
 		}
 	}
-	const {
-		location: { lat, lng },
-		accuracy,
-	} = maybeCeollGeolocation.right
-	console.debug(JSON.stringify({ lat, lng, accuracy }))
+	const { lat, lon, uncertainty } = maybeCeollGeolocation.right
+	console.debug(
+		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
+	)
 	return {
 		lat,
-		lng,
-		accuracy,
+		lng: lon,
+		accuracy: uncertainty,
 		located: true,
 	}
 }

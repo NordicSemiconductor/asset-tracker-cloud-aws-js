@@ -18,14 +18,13 @@ Feature: nRF Cloud Cell Geolocation
         And I store a random number between 0 and 20000 into "accuracy"
         And I store a random float between -90 and 90 into "lat"
         And I store a random float between -180 and 180 into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/locate
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/cell
             """
             {
-                "accuracy": {accuracy},
-                "location": {
-                    "lat": {lat},
-                    "lng": {lng}
-                }
+                "uncertainty": {accuracy},
+                "lat": {lat},
+                "lon": {lng},
+                "fulfilledWith": "SCELL"
             }
             """
             
@@ -47,7 +46,7 @@ Feature: nRF Cloud Cell Geolocation
 
     Scenario: The nRF Cloud API should have been called
 
-        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/locate
+        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/cell
             """
             {
                 "<apiNw>": [
@@ -55,7 +54,7 @@ Feature: nRF Cloud Cell Geolocation
                         "mcc": 242,
                         "mnc": 1,
                         "tac": 30401,
-                        "cid": {cellId}
+                        "eci": {cellId}
                     }
                 ]
             }

@@ -56,7 +56,7 @@ const locateRequestSchema = Type.Record(
 			{
 				mcc: Type.Integer({ minimum: 100, maximum: 999 }),
 				mnc: Type.Integer({ minimum: 0, maximum: 99 }),
-				cid: PositiveInteger,
+				eci: PositiveInteger,
 				tac: PositiveInteger,
 				earfcn: PositiveInteger,
 				adv: PositiveInteger,
@@ -102,13 +102,13 @@ export const handler = async (
 
 	const { nw, report } = valid.right
 	const maybeCeollGeolocation = await c.post({
-		resource: 'location/locate',
+		resource: 'location/cell',
 		payload: {
 			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [
 				{
 					mcc: report.mcc,
 					mnc: report.mnc,
-					cid: report.cell,
+					eci: report.cell,
 					tac: report.area,
 					earfcn: report.earfcn,
 					adv: report.adv,
@@ -130,15 +130,14 @@ export const handler = async (
 			located: false,
 		}
 	}
-	const {
-		location: { lat, lng },
-		accuracy,
-	} = maybeCeollGeolocation.right
-	console.debug(JSON.stringify({ lat, lng, accuracy }))
+	const { lat, lon, uncertainty } = maybeCeollGeolocation.right
+	console.debug(
+		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
+	)
 	return {
 		lat,
-		lng,
-		accuracy,
+		lng: lon,
+		accuracy: uncertainty,
 		located: true,
 	}
 }
