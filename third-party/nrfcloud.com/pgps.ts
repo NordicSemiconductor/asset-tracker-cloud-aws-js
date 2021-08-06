@@ -30,7 +30,7 @@ enum Interval {
 const apiRequestSchema = Type.Object(
 	{
 		predictionCount: Type.Optional(
-			Type.Integer({ minimum: 1, title: 'number of predictions' }),
+			Type.Integer({ minimum: 1, maximum: 84, title: 'number of predictions' }),
 		),
 		predictionIntervalMinutes: Type.Optional(
 			Type.Enum(Interval, { title: 'prediction interval in minutes' }),
