@@ -8,6 +8,28 @@ import {
 type Scopes = 'context' | 'thirdParty' | 'codebuild'
 type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfcloud'
 
+const settingsPath = ({
+	stackName,
+	scope,
+	system,
+}: {
+	stackName: string
+	scope: Scopes
+	system: Systems
+}): string => `/${stackName}/${scope}/${system}`
+
+const settingsName = ({
+	stackName,
+	scope,
+	system,
+	property,
+}: {
+	stackName: string
+	scope: Scopes
+	system: Systems
+	property: string
+}): string => `${settingsPath({ stackName, scope, system })}/${property}`
+
 export const getSettings =
 	<Settings extends Record<string, string>>({
 		ssm,
@@ -21,7 +43,7 @@ export const getSettings =
 		system: Systems
 	}) =>
 	async (): Promise<Settings> => {
-		const Path = `/${stackName}/${scope}/${system}`
+		const Path = settingsPath({ stackName, scope, system })
 		const { Parameters } = await ssm.send(
 			new GetParametersByPathCommand({
 				Path,
@@ -68,7 +90,7 @@ export const putSettings =
 		 */
 		deleteBeforeUpdate?: boolean
 	}): Promise<{ name: string }> => {
-		const Name = `/${stackName}/${scope}/${system}/${property}`
+		const Name = settingsName({ stackName, scope, system, property })
 		if (deleteBeforeUpdate ?? false) {
 			try {
 				await ssm.send(
@@ -86,6 +108,28 @@ export const putSettings =
 				Value: value,
 				Type: 'String',
 				Overwrite: !(deleteBeforeUpdate ?? false),
+			}),
+		)
+		return { name: Name }
+	}
+
+export const deleteSettings =
+	({
+		ssm,
+		stackName,
+		scope,
+		system,
+	}: {
+		ssm: SSMClient
+		stackName: string
+		scope: Scopes
+		system: Systems
+	}) =>
+	async ({ property }: { property: string }): Promise<{ name: string }> => {
+		const Name = settingsName({ stackName, scope, system, property })
+		await ssm.send(
+			new DeleteParameterCommand({
+				Name,
 			}),
 		)
 		return { name: Name }
