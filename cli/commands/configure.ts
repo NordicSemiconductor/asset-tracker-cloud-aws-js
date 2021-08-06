@@ -13,8 +13,8 @@ export const configureCommand = (): CommandDefinition => ({
 			description: `Useful when depending on the parameter having version 1, e.g. for use in CloudFormation`,
 		},
 		{
-			flags: '-X, --deleteParameters',
-			description: 'Deletes the parameters.',
+			flags: '-X, --deleteParameter',
+			description: 'Deletes the parameter.',
 		},
 	],
 	action: async (
