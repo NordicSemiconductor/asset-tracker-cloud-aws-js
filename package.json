@@ -37,7 +37,7 @@
     "@aws-sdk/client-timestream-query": "3.25.0",
     "@aws-sdk/client-timestream-write": "3.25.0",
     "@aws-sdk/util-dynamodb": "3.25.0",
-    "@nordicsemiconductor/cell-geolocation-helpers": "3.0.11",
+    "@nordicsemiconductor/cell-geolocation-helpers": "3.0.12",
     "@nordicsemiconductor/random-words": "5.0.0",
     "@nordicsemiconductor/timestream-helpers": "3.1.20",
     "@sinclair/typebox": "0.20.4",
