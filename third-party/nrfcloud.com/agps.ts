@@ -46,7 +46,7 @@ export const handler = async (
 	const { serviceKey, teamId, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 	const fetchTypes = async (types: AGPSType[]) =>
-		c.get({
+		c.getBinary({
 			resource: 'location/agps',
 			payload: {
 				eci: cell,
@@ -62,7 +62,6 @@ export const handler = async (
 				Range: `bytes=0-2000`,
 			},
 			requestSchema: apiRequestSchema,
-			responseSchema: Type.String({ minLength: 1, maxLength: 2000 }),
 		})()
 
 	const { mcc, mnc, cell, area, types } = valid.right
@@ -93,6 +92,6 @@ export const handler = async (
 
 	return {
 		resolved: true,
-		data: resolved.map((r) => (r as Right<string>).right),
+		data: resolved.map((r) => (r as Right<Buffer>).right.toString()),
 	}
 }
