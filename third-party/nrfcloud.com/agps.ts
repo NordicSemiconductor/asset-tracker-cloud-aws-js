@@ -9,37 +9,17 @@ import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { agpsRequestSchema, AGPSType } from '../../agps/types'
 import { pipe } from 'fp-ts/function'
 import * as TE from 'fp-ts/lib/TaskEither'
-import * as E from 'fp-ts/lib/Either'
-import {
-	AGPSMessage,
-	verify,
-} from '@nordicsemiconductor/nrfcloud-location-services-tests'
+import { verify } from '@nordicsemiconductor/nrfcloud-location-services-tests'
 import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
 
-const { stackName, validateAGPSPayload } = fromEnv({
+const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',
-	validateAGPSPayload: 'VALIDATE_AGPS_PAYLOAD',
 })(process.env)
 
 const settingsPromise = getAGPSLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
-
-// A-GPS payload verification can be disabled
-const verifyAgpsPayload: typeof verify =
-	validateAGPSPayload === '1'
-		? () =>
-				E.right({
-					schemaVersion: 1,
-					entries: [
-						{
-							type: 99,
-							items: 0,
-						},
-					],
-				}) as E.Either<Error, AGPSMessage>
-		: verify
 
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
@@ -119,7 +99,7 @@ export const handler = async (
 						TE.chain((agpsData) =>
 							pipe(
 								agpsData,
-								verifyAgpsPayload,
+								verify,
 								TE.fromEither,
 								TE.mapLeft(
 									(error) =>

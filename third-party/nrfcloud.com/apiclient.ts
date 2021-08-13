@@ -97,7 +97,7 @@ const doRequest =
 			console.debug(JSON.stringify({ doRequest: doRequest }))
 
 			const req = nodeRequest(options, (res) => {
-				const body: Uint8Array[] = []
+				const body: Buffer[] = []
 				res.on('data', (d) => {
 					body.push(d)
 				})
@@ -308,7 +308,11 @@ const reqBinary =
 			})(payload),
 			chain((payload) =>
 				tryCatch<ErrorInfo, Buffer>(
-					doRequest(cfg)({ resource, payload, headers }),
+					doRequest(cfg)({
+						resource,
+						payload,
+						headers: { ...headers, Accept: 'application/octet-stream' },
+					}),
 					(err) => {
 						return {
 							type: ErrorType.BadGateway,

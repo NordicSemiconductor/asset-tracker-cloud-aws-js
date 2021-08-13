@@ -157,6 +157,7 @@ export const assetTrackerStepRunners = ({
 		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
 			const connection = connectToBroker(catId)
+			const isRaw = raw !== undefined
 
 			const expectedMessageCount =
 				messageCount === 'a' ? 1 : parseInt(messageCount, 10)
@@ -180,10 +181,9 @@ export const assetTrackerStepRunners = ({
 
 				const listener: ListenerWithPayload = async (message) => {
 					await runner.progress(`Iot`, JSON.stringify(message))
-					const m =
-						raw !== undefined
-							? message.toString()
-							: JSON.parse(message.toString())
+					const m = isRaw
+						? message.toString('hex')
+						: JSON.parse(message.toString('utf-8'))
 					messages.push(m)
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
@@ -191,13 +191,25 @@ export const assetTrackerStepRunners = ({
 						const result = messages.length > 1 ? messages : messages[0]
 
 						if (storeName !== undefined) runner.store[storeName] = result
-						return resolve(
-							raw === undefined
-								? result
-								: messages.length > 1
-								? messages.map((m) => `(${m.length} bytes of data)`)
-								: `(${messages[0].length} bytes of data)`,
-						)
+
+						if (isRaw) {
+							if (messages.length > 1)
+								return resolve(
+									messages.map(
+										(m) =>
+											`(${
+												Buffer.from(m as string, 'hex').length
+											} bytes of data)`,
+									),
+								)
+							return resolve(
+								`(${
+									Buffer.from(messages[0] as string, 'hex').length
+								} bytes of data)`,
+							)
+						}
+
+						return resolve(result)
 					}
 					connection.onMessageOnce(topic, listener).catch(catchError)
 				}

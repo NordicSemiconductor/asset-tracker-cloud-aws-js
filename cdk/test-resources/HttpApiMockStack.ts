@@ -106,6 +106,7 @@ export class HttpApiMockStack extends CDK.Stack {
 		const api = new ApiGateway.RestApi(this, 'api', {
 			restApiName: `HTTP Mock API for testing ${this.stackName}`,
 			description: 'API Gateway to test outgoing requests',
+			binaryMediaTypes: ['application/octet-stream'],
 		})
 		const proxyResource = api.root.addResource('{proxy+}')
 		proxyResource.addMethod('ANY', new ApiGateway.LambdaIntegration(lambda))
