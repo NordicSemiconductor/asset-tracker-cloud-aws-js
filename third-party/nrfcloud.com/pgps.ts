@@ -16,10 +16,10 @@ import { gpsDay, minimumGpsDay } from '../../pgps/gpsTime'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getPGPSLocationApiSettings({
+const settingsPromise = getPGPSLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
-})
+})()
 
 enum Interval {
 	twoHours = 120,
@@ -75,7 +75,7 @@ export const handler = async (
 		}
 	}
 
-	const { serviceKey, teamId, endpoint } = await fetchSettings()
+	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const { n, int, day, time } = valid.right

@@ -6,19 +6,29 @@ Feature: A-GPS
 
     Prepare the mock API responses. The A-GPS data request will be split into
     two requests, one for type 2 (ephemerides) and one for the rest.
-    FIXME: Actually using a HEAD request to determine chunk size, once it is
-    implemented properly on nRF Cloud side.
 
     Given I am run after the "Connect a tracker" feature
     And I store a random number between 100 and 999 into "agpsMcc"
     And I store a random number between 0 and 99 into "agpsMnc"
     And I store a random number between 1 and 100000000 into "agpsCellId"
     And I store a random number between 100 and 199 into "agpsArea"
+    And I enqueue this mock HTTP API response with status code 200 for a HEAD request to api.nrfcloud.com/v1/location/agps?customTypes=1%2C3%2C4%2C6%2C7%2C8%2C9&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
+      """
+      Content-Type: application/octet-stream
+      Content-Length: 32
+      
+      """
     And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=1%2C3%2C4%2C6%2C7%2C8%2C9&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
       """
       Content-Type: application/octet-stream
 
       (binary A-GPS data) other types
+      """
+    And I enqueue this mock HTTP API response with status code 200 for a HEAD request to api.nrfcloud.com/v1/location/agps?customTypes=2&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
+      """
+      Content-Type: application/octet-stream
+      Content-Length: 32
+
       """
     And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/agps?customTypes=2&eci={agpsCellId}&mcc={agpsMcc}&mnc={agpsMnc}&requestType=custom&tac={agpsArea}
       """

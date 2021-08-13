@@ -188,7 +188,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					await Promise.all(
 						deviceRequests.map(async (deviceRequest) =>
 							Promise.all(
-								(resolvedRequests[cacheKey]?.data ?? []).map(
+								(resolvedRequests[cacheKey]?.dataHex ?? []).map(
 									async (agpsdata) => {
 										console.log(
 											`Sending ${agpsdata.length} bytes to ${deviceRequest.request.deviceId}`,
@@ -196,7 +196,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 										return iotData.send(
 											new PublishCommand({
 												topic: `${deviceRequest.request.deviceId}/agps`,
-												payload: Buffer.from(agpsdata, 'binary'),
+												payload: Buffer.from(agpsdata, 'hex'),
 												qos: 1,
 											}),
 										)
