@@ -68,6 +68,8 @@ export class AGPSResolver extends CloudFormation.Resource {
 					environment: {
 						VERSION: this.node.tryGetContext('version'),
 						STACK_NAME: this.stack.stackName,
+						VALIDATE_AGPS_PAYLOAD:
+							this.node.tryGetContext('isTest') === true ? '0' : '1',
 					},
 				})
 
