@@ -4,16 +4,18 @@ import { fromEnv } from '../../util/fromEnv'
 import { getAGPSLocationApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
-import { isLeft, isRight, Right } from 'fp-ts/lib/Either'
+import { isLeft } from 'fp-ts/lib/Either'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { agpsRequestSchema, AGPSType } from '../../agps/types'
+import { pipe } from 'fp-ts/function'
+import * as TE from 'fp-ts/lib/TaskEither'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getAGPSLocationApiSettings({
+const settingsPromise = getAGPSLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
-})
+})()
 
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
@@ -33,8 +35,8 @@ const validateInput = validateWithJSONSchema(agpsRequestSchema)
 
 export const handler = async (
 	agps: Static<typeof agpsRequestSchema>,
-): Promise<{ resolved: boolean; data?: string[] }> => {
-	console.log(JSON.stringify(agps))
+): Promise<{ resolved: boolean; dataHex?: readonly string[] }> => {
+	console.log(JSON.stringify({ event: agps }))
 	const valid = validateInput(agps)
 	if (isLeft(valid)) {
 		console.error(JSON.stringify(valid.left))
@@ -43,55 +45,79 @@ export const handler = async (
 		}
 	}
 
-	const { serviceKey, teamId, endpoint } = await fetchSettings()
+	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
-	const fetchTypes = async (types: AGPSType[]) =>
-		c.getBinary({
-			resource: 'location/agps',
-			payload: {
-				eci: cell,
-				tac: area,
-				requestType: 'custom',
-				mcc,
-				mnc,
-				customTypes: types,
-			},
-			headers: {
-				'Content-Type': 'application/octet-stream',
-				// FIXME: use dynamic value from HEAD request. Currently broken on nRF Cloud side
-				Range: `bytes=0-2000`,
-			},
-			requestSchema: apiRequestSchema,
-		})()
 
 	const { mcc, mnc, cell, area, types } = valid.right
 
 	// Split requests, so that request for Ephemerides is a separate one
-	const requests = []
-
-	if (types.includes(AGPSType.Ephemerides))
-		requests.push(fetchTypes([AGPSType.Ephemerides]))
-
 	const otherTypesInRequest = types.filter((t) => t !== AGPSType.Ephemerides)
-	if (otherTypesInRequest.length > 0)
-		requests.push(fetchTypes(otherTypesInRequest))
+	const requestTypes = []
+	if (types.includes(AGPSType.Ephemerides))
+		requestTypes.push([AGPSType.Ephemerides])
+	if (otherTypesInRequest.length > 0) requestTypes.push(otherTypesInRequest)
 
-	const results = await Promise.all(requests)
+	const res = await pipe(
+		requestTypes,
+		TE.traverseArray((types) =>
+			pipe(
+				TE.right({
+					resource: 'location/agps',
+					payload: {
+						eci: cell,
+						tac: area,
+						requestType: 'custom',
+						mcc,
+						mnc,
+						customTypes: types,
+					},
+					headers: {
+						'Content-Type': 'application/octet-stream',
+					},
+				}),
+				TE.chain((request) =>
+					pipe(
+						c.head({
+							...request,
+							method: 'GET',
+							requestSchema: apiRequestSchema,
+						}),
+						TE.chain((headers) =>
+							c.getBinary({
+								...request,
+								headers: {
+									...request.headers,
+									Range: `bytes=0-${headers['content-length']}`,
+								},
+								requestSchema: apiRequestSchema,
+							}),
+						),
+						TE.map((res) => res.toString('hex')),
+					),
+				),
+			),
+		),
+	)()
 
-	// If any request fails, mark operation as failed
-	const resolved = results.filter((maybeAGPS) => {
-		if (isLeft(maybeAGPS)) {
-			console.error(JSON.stringify(maybeAGPS.left))
-		}
-		return isRight(maybeAGPS)
-	})
-	if (resolved.length !== requests.length)
+	if (isLeft(res)) {
+		console.error(JSON.stringify(res.left))
 		return {
 			resolved: false,
 		}
+	}
+
+	// If any request fails, mark operation as failed
+	if (res.right.length !== requestTypes.length) {
+		console.error(
+			`Resolved ${res.right.length}, expected ${requestTypes.length}!`,
+		)
+		return {
+			resolved: false,
+		}
+	}
 
 	return {
 		resolved: true,
-		data: resolved.map((r) => (r as Right<Buffer>).right.toString()),
+		dataHex: res.right,
 	}
 }

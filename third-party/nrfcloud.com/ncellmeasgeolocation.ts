@@ -11,10 +11,10 @@ import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getCellLocationApiSettings({
+const settingsPromise = getCellLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
-})
+})()
 
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 const RSRP = Type.Integer({ minimum: -255, maximum: 255, title: 'RSRP' })
@@ -97,7 +97,7 @@ export const handler = async (
 		}
 	}
 
-	const { serviceKey, teamId, endpoint } = await fetchSettings()
+	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const { nw, report } = valid.right

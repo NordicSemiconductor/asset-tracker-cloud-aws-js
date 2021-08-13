@@ -4,8 +4,10 @@ import {
 	right,
 	TaskEither,
 	tryCatch,
+	fromEither,
 	map,
 } from 'fp-ts/lib/TaskEither'
+import * as E from 'fp-ts/lib/Either'
 import { request as nodeRequest, RequestOptions } from 'https'
 import { URL } from 'url'
 import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
@@ -13,7 +15,7 @@ import { Static, TSchema } from '@sinclair/typebox'
 import { pipe } from 'fp-ts/lib/function'
 import Ajv from 'ajv'
 import * as jwt from 'jsonwebtoken'
-import { OutgoingHttpHeaders } from 'http'
+import { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
 import * as J from 'fp-ts/Json'
 
 const ajv = new Ajv()
@@ -43,9 +45,7 @@ const validate =
 		errorType: ErrorType
 		errorMessage: string
 	}) =>
-	(
-		payload: Record<string, any>,
-	): TaskEither<ErrorInfo, Static<typeof schema>> => {
+	(payload: J.Json): TaskEither<ErrorInfo, Static<typeof schema>> => {
 		const v = ajv.compile(schema)
 		const valid = v(payload)
 		if (valid !== true) {
@@ -84,39 +84,36 @@ const doRequest =
 	}) =>
 	async () =>
 		new Promise<Buffer>((resolve, reject) => {
-			const options: RequestOptions = {
-				host: endpoint.hostname,
-				port: 443,
-				path: `${endpoint.pathname.replace(/\/+$/g, '')}/v1/${resource}${
-					method === 'GET' ? `${toQueryString(payload)}` : ''
-				}`,
+			const options: RequestOptions = jsonRequestOptions({
+				endpoint,
+				resource,
 				method,
-				agent: false,
-				headers: {
-					Authorization: `Bearer ${jwt.sign({ aud: teamId }, serviceKey, {
-						algorithm: 'ES256',
-					})}`,
-					'Content-Type': 'application/json',
-					...headers,
-				},
-			}
+				payload,
+				teamId,
+				serviceKey,
+				headers,
+			})
 
-			console.debug(JSON.stringify(options))
+			console.debug(JSON.stringify({ doRequest: doRequest }))
 
 			const req = nodeRequest(options, (res) => {
-				console.debug(
-					JSON.stringify({
-						response: {
-							statusCode: res.statusCode,
-							headers: res.headers,
-						},
-					}),
-				)
 				const body: Uint8Array[] = []
 				res.on('data', (d) => {
 					body.push(d)
 				})
 				res.on('end', () => {
+					console.debug(
+						JSON.stringify({
+							doRequest: {
+								response: {
+									statusCode: res.statusCode,
+									headers: res.headers,
+									body: Buffer.concat(body).toString(),
+								},
+							},
+						}),
+					)
+
 					if (res.statusCode === undefined) {
 						return reject(new Error('No response received!'))
 					}
@@ -177,13 +174,111 @@ const reqJSON =
 					},
 				),
 			),
-			map((b) => J.parse(b.toString('utf-8'))),
+			chain((buffer) =>
+				pipe(
+					buffer.toString('utf-8'),
+					J.parse,
+					E.mapLeft(
+						() =>
+							({
+								type: ErrorType.BadGateway,
+								message: `Failed to parse payload as JSON "${buffer.toString(
+									'utf-8',
+								)}"`,
+							} as ErrorInfo),
+					),
+					fromEither,
+				),
+			),
+			map((j) => j),
 			chain(
 				validate({
 					schema: responseSchema,
 					errorType: ErrorType.BadGateway,
 					errorMessage: 'Response validation failed!',
 				}),
+			),
+		)
+
+const head =
+	({
+		endpoint,
+		serviceKey,
+		teamId,
+	}: {
+		endpoint: URL
+		serviceKey: string
+		teamId: string
+	}) =>
+	<Request extends TSchema>({
+		resource,
+		payload,
+		headers,
+		method,
+		requestSchema,
+	}: {
+		resource: string
+		method: 'GET' | 'POST'
+		payload: Record<string, any>
+		headers?: OutgoingHttpHeaders
+		requestSchema: Request
+	}): TaskEither<ErrorInfo, IncomingHttpHeaders> =>
+		pipe(
+			validate({
+				schema: requestSchema,
+				errorMessage: 'Input validation failed!',
+				errorType: ErrorType.BadRequest,
+			})(payload),
+			chain((payload) =>
+				tryCatch<ErrorInfo, IncomingHttpHeaders>(
+					async () =>
+						new Promise<IncomingHttpHeaders>((resolve, reject) => {
+							const options: RequestOptions = {
+								...jsonRequestOptions({
+									endpoint,
+									resource,
+									method,
+									payload,
+									teamId,
+									serviceKey,
+									headers,
+								}),
+								method: 'HEAD',
+							}
+
+							console.debug(JSON.stringify({ head: { options } }))
+
+							const req = nodeRequest(options, (res) => {
+								console.debug(
+									JSON.stringify({
+										head: {
+											response: {
+												statusCode: res.statusCode,
+												headers: res.headers,
+											},
+										},
+									}),
+								)
+								if (res.statusCode === undefined) {
+									return reject(new Error('No response received!'))
+								}
+								if (res.statusCode >= 400) {
+									return reject(new Error(`Error ${res.statusCode}`))
+								}
+								resolve(res.headers)
+							})
+							req.on('error', (e) => {
+								reject(new Error(e.message))
+							})
+							req.end()
+						}),
+					(err) => {
+						return {
+							type: ErrorType.BadGateway,
+							message: (err as Error).message,
+						}
+					},
+				),
 			),
 		)
 
@@ -259,6 +354,18 @@ export const apiClient = ({
 		requestSchema: Request
 		responseSchema: Response
 	}) => TaskEither<ErrorInfo, Static<typeof responseSchema>>
+	head: <Request extends TSchema>({
+		resource,
+		payload,
+		headers,
+		requestSchema,
+	}: {
+		resource: string
+		method: 'GET' | 'POST'
+		payload: Record<string, any>
+		headers?: Record<string, string>
+		requestSchema: Request
+	}) => TaskEither<ErrorInfo, OutgoingHttpHeaders>
 	getBinary: <Request extends TSchema>({
 		resource,
 		payload,
@@ -283,10 +390,46 @@ export const apiClient = ({
 		teamId,
 		method: 'GET',
 	}),
+	head: head({
+		endpoint,
+		serviceKey,
+		teamId,
+	}),
 	getBinary: reqBinary({
 		endpoint,
 		serviceKey,
 		teamId,
 		method: 'GET',
 	}),
+})
+const jsonRequestOptions = ({
+	endpoint,
+	resource,
+	method,
+	payload,
+	teamId,
+	serviceKey,
+	headers,
+}: {
+	endpoint: URL
+	resource: string
+	method: string
+	payload: Record<string, any>
+	teamId: string
+	serviceKey: string
+	headers: OutgoingHttpHeaders | undefined
+}): RequestOptions => ({
+	host: endpoint.hostname,
+	port: 443,
+	path: `${endpoint.pathname.replace(/\/+$/g, '')}/v1/${resource}${
+		method === 'GET' ? `${toQueryString(payload)}` : ''
+	}`,
+	method,
+	agent: false,
+	headers: {
+		Authorization: `Bearer ${jwt.sign({ aud: teamId }, serviceKey, {
+			algorithm: 'ES256',
+		})}`,
+		...headers,
+	},
 })

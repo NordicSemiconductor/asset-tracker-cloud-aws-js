@@ -79,10 +79,13 @@ export const handler = async (
 			}),
 		)
 
-		return {
+		const res = {
 			statusCode: parseInt(Item.statusCode.N ?? '200', 10),
 			...splitMockResponse(Item.body.S ?? ''),
 		}
+		console.log(JSON.stringify(res))
+
+		return res
 	} else {
 		console.log('no responses found')
 	}
