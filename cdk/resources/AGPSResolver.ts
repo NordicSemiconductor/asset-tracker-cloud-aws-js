@@ -90,17 +90,17 @@ export class AGPSResolver extends CloudFormation.Resource {
 					),
 				},
 				updateExpression:
-					'SET #unresolved = :unresolved, #data = :data, #source = :source, #updatedAt = :updatedAt',
+					'SET #unresolved = :unresolved, #dataHex = :dataHex, #source = :source, #updatedAt = :updatedAt',
 				expressionAttributeNames: {
 					'#unresolved': 'unresolved',
-					'#data': 'data',
+					'#dataHex': 'dataHex',
 					'#source': 'source',
 					'#updatedAt': 'updatedAt',
 				},
 				expressionAttributeValues: {
 					':unresolved': DynamoAttributeValue.fromBoolean(false),
-					':data': DynamoAttributeValue.fromStringSet(
-						JsonPath.listAt('$.agps.data'),
+					':dataHex': DynamoAttributeValue.fromStringSet(
+						JsonPath.listAt('$.agps.dataHex'),
 					),
 					':source': DynamoAttributeValue.fromString(
 						JsonPath.stringAt('$.agps.source'),

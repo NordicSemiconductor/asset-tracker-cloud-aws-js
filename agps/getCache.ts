@@ -7,7 +7,7 @@ import { agpsRequestSchema } from './types'
 
 export type AGPSDataCache = Static<typeof agpsRequestSchema> & {
 	source: string
-	data?: string[]
+	dataHex?: string[]
 	unresolved?: boolean
 	updatedAt: Date
 }
@@ -34,9 +34,9 @@ export const getCache =
 				...entry,
 				updatedAt: new Date(entry.updatedAt as string),
 				types: [...(entry.types as Set<number>)],
-				data:
-					entry.data !== undefined
-						? [...(entry.data as Set<string>)]
+				dataHex:
+					entry.dataHex !== undefined
+						? [...(entry.dataHex as Set<string>)]
 						: undefined,
 			} as AGPSDataCache
 

@@ -9,15 +9,15 @@ import { Cell } from '../../geolocation/Cell'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getApiSettings({
+const settingsPromise = getApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
-})
+})()
 
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 	try {
-		const { apiKey, endpoint } = await fetchSettings()
+		const { apiKey, endpoint } = await settingsPromise
 		const { hostname, pathname } = new URL(endpoint)
 
 		// See https://eu1.unwiredlabs.com/docs-html/index.html#response

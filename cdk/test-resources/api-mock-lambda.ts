@@ -79,10 +79,26 @@ export const handler = async (
 			}),
 		)
 
-		return {
+		const { body, headers } = splitMockResponse(Item.body.S ?? '')
+
+		// Send as binary, if mock response is HEX encoded. See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-payload-encodings.html
+		const isBinary = /^[0-9a-f]+$/.test(body)
+		const res = {
 			statusCode: parseInt(Item.statusCode.N ?? '200', 10),
-			...splitMockResponse(Item.body.S ?? ''),
+			headers: isBinary
+				? {
+						...headers,
+						'Content-Type': 'application/octet-stream',
+				  }
+				: headers,
+			body: isBinary
+				? /* body is HEX encoded */ Buffer.from(body, 'hex').toString('base64')
+				: body,
+			isBase64Encoded: isBinary,
 		}
+		console.log(JSON.stringify(res))
+
+		return res
 	} else {
 		console.log('no responses found')
 	}
