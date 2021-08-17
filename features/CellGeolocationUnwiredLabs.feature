@@ -51,6 +51,8 @@ Feature: Unwired Labs Cell Geolocation
 
         Then the mock HTTP API should have been called with a POST request to eu1.unwiredlabs.com/v2/process.php
             """
+            Content-Type: application/json
+            
             {
                 "token": "my-secret",
                 "radio": "<radio>",

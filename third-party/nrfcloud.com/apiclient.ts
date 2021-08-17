@@ -94,7 +94,9 @@ const doRequest =
 				headers,
 			})
 
-			console.debug(JSON.stringify({ doRequest: doRequest }))
+			console.debug(
+				JSON.stringify({ doRequest: { options, payload } }, null, 2),
+			)
 
 			const req = nodeRequest(options, (res) => {
 				const body: Buffer[] = []
@@ -133,7 +135,9 @@ const doRequest =
 			req.on('error', (e) => {
 				reject(new Error(e.message))
 			})
-			if (method === 'POST') req.write(JSON.stringify(payload))
+			if (method === 'POST') {
+				req.write(JSON.stringify(payload))
+			}
 			req.end()
 		})
 
@@ -165,7 +169,14 @@ const reqJSON =
 			})(payload),
 			chain((payload) =>
 				tryCatch<ErrorInfo, Buffer>(
-					doRequest(cfg)({ resource, payload, headers }),
+					doRequest(cfg)({
+						resource,
+						payload,
+						headers: {
+							...headers,
+							'Content-Type': 'application/json',
+						},
+					}),
 					(err) => {
 						return {
 							type: ErrorType.BadGateway,

@@ -70,6 +70,8 @@ Feature: nRF Cloud Neighbor Cell Geolocation
 
         Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/cell
             """
+            Content-Type: application/json
+            
             {
                 "<apiNw>": [
                     {

@@ -10,7 +10,11 @@ import {
 	PutItemCommand,
 	QueryCommand,
 } from '@aws-sdk/client-dynamodb'
+import * as chai from 'chai'
 import { expect } from 'chai'
+import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse'
+import * as chaiSubset from 'chai-subset'
+chai.use(chaiSubset)
 
 export const httpApiMockStepRunners = ({
 	db,
@@ -50,8 +54,11 @@ export const httpApiMockStepRunners = ({
 			/^the mock HTTP API should have been called with a (?<method>[A-Z]+) request to (?<path>.+)$/,
 		)(async ({ method, path }, step, runner) => {
 			let expectedBody: Record<string, any> | undefined = undefined
+			let expectedHeaders: Record<string, string> | undefined = undefined
 			if (step.interpolatedArgument !== undefined) {
-				expectedBody = JSON.parse(step.interpolatedArgument)
+				const { body, headers } = splitMockResponse(step.interpolatedArgument)
+				expectedBody = JSON.parse(body)
+				expectedHeaders = headers
 			}
 
 			const res = await db.send(
@@ -63,7 +70,7 @@ export const httpApiMockStepRunners = ({
 							S: `${method} ${path}`,
 						},
 					},
-					ProjectionExpression: 'methodPathQuery,requestId,body',
+					ProjectionExpression: 'methodPathQuery,requestId,body,headers',
 					Limit: 1000,
 				}),
 			)
@@ -74,6 +81,11 @@ export const httpApiMockStepRunners = ({
 					if (expectedBody !== undefined) {
 						const actual = JSON.parse(request.body?.S ?? '{}')
 						expect(actual).to.deep.equal(expectedBody)
+					}
+					if (expectedHeaders !== undefined) {
+						const actual = JSON.parse(request.headers?.S ?? '{}')
+						console.log({ request, expectedHeaders })
+						expect(actual).to.containSubset(expectedHeaders)
 					}
 					await db.send(
 						new DeleteItemCommand({
