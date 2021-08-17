@@ -34,7 +34,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				},
 				roam: {
 					v: {
-						rsrp: 70,
+						rsrp: -97,
 						area: 30401,
 						mccmnc: 24201,
 						cell: 16964098,
@@ -91,7 +91,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 			{
 				Dimensions,
 				MeasureName: 'roam.rsrp',
-				MeasureValue: '70',
+				MeasureValue: '-97',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606395292763',
 			},

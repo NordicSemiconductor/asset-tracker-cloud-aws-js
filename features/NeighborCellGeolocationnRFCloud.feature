@@ -81,20 +81,20 @@ Feature: nRF Cloud Neighbor Cell Geolocation
                         "tac": {ncellmeasAreaId},
                         "earfcn": 6446,
                         "adv": 80,
-                        "rsrp": 50,
-                        "rsrq": 28,
+                        "rsrp": -97,
+                        "rsrq": -9,
                         "nmr": [
                             {
                             "earfcn": 262143,
                             "pci": 501,
-                            "rsrp": 44,
-                            "rsrq": 25
+                            "rsrp": -104,
+                            "rsrq": -18
                             },
                             {
                             "earfcn": 262265,
                             "pci": 503,
-                            "rsrp": 49,
-                            "rsrq": 20
+                            "rsrp": -116,
+                            "rsrq": -11
                             }
                         ]
                     }

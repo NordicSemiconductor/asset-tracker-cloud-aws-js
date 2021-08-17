@@ -13,7 +13,6 @@ Feature: Cell Geolocation API
     Background:
 
         Given I am run after the "Connect a tracker" feature
-        And I am run after the "Device: Update Shadow" feature
         And the endpoint is "{geolocationApiUrl}"
 
     Scenario: Device enters a cell
@@ -33,7 +32,7 @@ Feature: Cell Geolocation API
             },
             "roam": {
             "v": {
-            "rsrp": 0,
+            "rsrp": -97,
             "area": 211,
             "mccmnc": 26201,
             "cell": {cellId},

@@ -5,10 +5,34 @@ Feature: Store neighboring cell measurement reports
 
     Background:
 
-        Given I am run after the "Device: Update Shadow" feature
-        And I am authenticated with Cognito
+        Given I am authenticated with Cognito
         And I store a random number between 1 and 100000000 into "ncellmeasCellId"
         And I store a random number between 1 and 100000000 into "ncellmeasAreaId"
+    
+    Scenario: Device connects
+
+        Given I store "$millis()" into "ts"
+        Then the tracker updates its reported state with
+            """
+            {
+            "dev": {
+                "v": {
+                    "nw": "LTE-M GPS"
+                },
+                "ts": {ts}
+            },
+            "roam": {
+            "v": {
+            "rsrp": -97,
+            "area": {ncellmeasAreaId},
+            "mccmnc": 24201,
+            "cell": {ncellmeasCellId},
+            "ip": "10.202.80.9"
+            },
+            "ts": {ts}
+            }
+            }
+            """
 
     Scenario: Device publishes %NCELLMEAS report
 
@@ -22,20 +46,20 @@ Feature: Store neighboring cell measurement reports
             "area": {ncellmeasAreaId},
             "earfcn": 6446,
             "adv": 80,
-            "rsrp": 50,
-            "rsrq": 28,
+            "rsrp": -97,
+            "rsrq": -9,
             "nmr": [
                 {
                 "earfcn": 262143,
                 "cell": 501,
-                "rsrp": 44,
-                "rsrq": 25
+                "rsrp": -104,
+                "rsrq": -18
                 },
                 {
                 "earfcn": 262265,
                 "cell": 503,
-                "rsrp": 49,
-                "rsrq": 20
+                "rsrp": -116,
+                "rsrq": -11
                 }
             ],
             "ts": {ts}
@@ -85,26 +109,26 @@ Feature: Store neighboring cell measurement reports
                 "L": [
                     {
                     "M": {
-                        "rsrp": { "N": "44" },
-                        "rsrq": { "N": "25" },
+                        "rsrp": { "N": "-104" },
+                        "rsrq": { "N": "-18" },
                         "earfcn": { "N": "262143" },
                         "cell": { "N": "501" }
                     }
                     },
                     {
                     "M": {
-                        "rsrp": { "N": "49" },
-                        "rsrq": { "N": "20" },
+                        "rsrp": { "N": "-116" },
+                        "rsrq": { "N": "-11" },
                         "earfcn": { "N": "262265" },
                         "cell": { "N": "503" }
                     }
                     }
                 ]
                 },
-                "rsrq": { "N": "28" },
+                "rsrq": { "N": "-9" },
                 "area": { "N": "{ncellmeasAreaId}" },
                 "adv": { "N": "80" },
-                "rsrp": { "N": "50" },
+                "rsrp": { "N": "-97" },
                 "mcc": { "N": "242" },
                 "mnc": { "N": "1" },
                 "earfcn": { "N": "6446" },
