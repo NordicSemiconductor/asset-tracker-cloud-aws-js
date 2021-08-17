@@ -84,7 +84,6 @@ export const httpApiMockStepRunners = ({
 					}
 					if (expectedHeaders !== undefined) {
 						const actual = JSON.parse(request.headers?.S ?? '{}')
-						console.log({ request, expectedHeaders })
 						expect(actual).to.containSubset(expectedHeaders)
 					}
 					await db.send(
