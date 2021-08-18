@@ -3,7 +3,11 @@ import {
 	IoTDataPlaneClient,
 	PublishCommand,
 } from '@aws-sdk/client-iot-data-plane'
-import { SQSClient, SendMessageBatchCommand } from '@aws-sdk/client-sqs'
+import {
+	SQSClient,
+	SendMessageBatchCommand,
+	SendMessageBatchRequestEntry,
+} from '@aws-sdk/client-sqs'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
@@ -22,14 +26,32 @@ import { pgpsRequestSchema } from './types'
 import { gpsDay } from './gpsTime'
 import { URL } from 'url'
 
-const { binHoursString, TableName, QueueUrl, stateMachineArn } = fromEnv({
+const {
+	binHoursString,
+	TableName,
+	QueueUrl,
+	stateMachineArn,
+	initialDelayString,
+	delayFactorString,
+	maxResolutionTimeInMinutes,
+} = fromEnv({
 	binHoursString: 'BIN_HOURS',
 	TableName: 'CACHE_TABLE',
 	QueueUrl: 'QUEUE_URL',
 	stateMachineArn: 'STATE_MACHINE_ARN',
-})(process.env)
+	initialDelayString: 'INITIAL_DELAY',
+	delayFactorString: 'DELAY_FACTOR',
+	maxResolutionTimeInMinutes: 'MAX_RESOLUTION_TIME_IN_MINUTES',
+})({
+	INITIAL_DELAY: '5',
+	DELAY_FACTOR: '1.5',
+	...process.env,
+})
 
 const binHours = parseInt(binHoursString, 10)
+const delayFactor = parseFloat(delayFactorString)
+const initialDelay = parseInt(initialDelayString, 10)
+const maxResolutionTimeInSeconds = parseInt(maxResolutionTimeInMinutes, 10) * 60
 
 const dynamodb = new DynamoDBClient({})
 
@@ -40,7 +62,7 @@ const c = getCache({
 
 type PGPSRequestFromIoTRule = Static<typeof pgpsRequestSchema> & {
 	deviceId: string
-	updatedAt: string
+	timestamp: string
 }
 
 const iotData = new IoTDataPlaneClient({})
@@ -218,47 +240,75 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 				// Resolution is in progress ... put request in queue again, with increasing delay
 				// Eventually, messages will be discarded from the queue
-				await sqs
-					.send(
-						new SendMessageBatchCommand({
-							QueueUrl,
-							Entries: deviceRequests.map((deviceRequest) => {
-								const DelaySeconds = Math.floor(
-									Math.min(
-										900,
-										parseInt(
-											deviceRequest.messageAttributes.DelaySeconds
-												?.stringValue ?? '10',
-											10,
-										) * 1.5,
-									),
-								)
-								return {
-									Id: v4(),
-									MessageBody: JSON.stringify(deviceRequest.request),
-									DelaySeconds,
-									MessageAttributes: {
-										DelaySeconds: {
-											DataType: 'Number',
-											StringValue: `${DelaySeconds}`,
-										},
+				const Entries: SendMessageBatchRequestEntry[] = deviceRequests
+					.filter((deviceRequest) => {
+						const requestStarted = new Date(deviceRequest.request.timestamp)
+						const ageInSeconds = Math.floor(
+							(Date.now() - requestStarted.getTime()) / 1000,
+						)
+						const cancelRequest = ageInSeconds > maxResolutionTimeInSeconds
+						if (cancelRequest) {
+							console.error(
+								`Cancelling request because of resolution timeout after ${ageInSeconds} seconds.`,
+							)
+							console.error(
+								JSON.stringify(
+									{
+										cancelled: deviceRequest.request,
+										maxResolutionTimeInSeconds,
 									},
-								}
-							}),
-						}),
-					)
-					.then(() => {
-						deviceRequests.forEach(({ request: { deviceId } }) =>
-							console.debug(cacheKey, `re-scheduled request for`, deviceId),
-						)
+									null,
+									2,
+								),
+							)
+						}
+						return !cancelRequest
 					})
-					.catch((err) => {
-						console.error(
-							JSON.stringify({
-								batchSchedule: err.message,
+					.map((deviceRequest) => {
+						const DelaySeconds = Math.floor(
+							Math.min(
+								maxResolutionTimeInSeconds,
+								(deviceRequest.messageAttributes.DelaySeconds?.stringValue ===
+								undefined
+									? initialDelay
+									: parseInt(
+											deviceRequest.messageAttributes.DelaySeconds.stringValue,
+											10,
+									  )) * delayFactor,
+							),
+						)
+						return {
+							Id: v4(),
+							MessageBody: JSON.stringify(deviceRequest.request),
+							DelaySeconds,
+							MessageAttributes: {
+								DelaySeconds: {
+									DataType: 'Number',
+									StringValue: `${DelaySeconds}`,
+								},
+							},
+						}
+					})
+				if (Entries.length > 0)
+					await sqs
+						.send(
+							new SendMessageBatchCommand({
+								QueueUrl,
+								Entries,
 							}),
 						)
-					})
+						.then(() => {
+							deviceRequests.forEach(({ request: { deviceId } }) =>
+								console.debug(cacheKey, `re-scheduled request for`, deviceId),
+							)
+						})
+						.catch((err) => {
+							console.error(
+								JSON.stringify({
+									batchSchedule: err.message,
+								}),
+							)
+						})
 			},
 		),
 	)

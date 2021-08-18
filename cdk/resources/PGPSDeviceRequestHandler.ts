@@ -12,6 +12,8 @@ import { PGPSStorage } from './PGPSStorage'
 import { PolicyStatement } from '@aws-cdk/aws-iam'
 import { iotRuleSqlCheckIfDefinedAndNotZero } from '../helper/iotRuleSqlCheckIfDefinedAndNotZero'
 
+export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
+
 /**
  * Provides predicted GPS data to devices via MQTT.
  *
@@ -62,7 +64,7 @@ export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 		})
 
 		const queue = new SQS.Queue(this, 'queue', {
-			retentionPeriod: Duration.minutes(10),
+			retentionPeriod: Duration.minutes(MAX_RESOLUTION_TIME_IN_MINUTES),
 			visibilityTimeout: Duration.minutes(1),
 		})
 		queue.grantSendMessages(topicRuleRole)
@@ -113,6 +115,7 @@ export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 					BIN_HOURS: '1',
 					STATE_MACHINE_ARN: resolver.stateMachine.stateMachineArn,
 					QUEUE_URL: queue.queueUrl,
+					MAX_RESOLUTION_TIME_IN_MINUTES: `${MAX_RESOLUTION_TIME_IN_MINUTES}`,
 				},
 				initialPolicy: [
 					new PolicyStatement({
