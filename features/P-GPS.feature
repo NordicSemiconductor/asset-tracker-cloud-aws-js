@@ -7,7 +7,7 @@ Feature: P-GPS
     Prepare the mock API responses. 
 
     Given I am run after the "Connect a tracker" feature
-    And I store a random number between 1 and 90 into "predictionCount"
+    And I store a random number between 1 and 168 into "predictionCount"
     And I store a random number between 0 and 86399 into "startGpsTimeOfDaySeconds"
     And I enqueue this mock HTTP API response with status code 200 for a GET request to api.nrfcloud.com/v1/location/pgps?predictionCount={predictionCount}&predictionIntervalMinutes=240&startGpsDay={currentGpsDay}&startGpsTimeOfDaySeconds={startGpsTimeOfDaySeconds}
       """
