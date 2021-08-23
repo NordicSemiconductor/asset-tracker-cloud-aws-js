@@ -76,7 +76,7 @@
     "@nordicsemiconductor/cloudformation-helpers": "6.0.41",
     "@nordicsemiconductor/e2e-bdd-test-runner": "14.3.18",
     "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "8.0.7",
-    "@nordicsemiconductor/firmware-ci-device-helpers": "9.0.69",
+    "@nordicsemiconductor/firmware-ci-device-helpers": "10.2.1",
     "@nordicsemiconductor/object-to-env": "2.0.1",
     "@nordicsemiconductor/package-layered-lambdas": "7.4.66",
     "@octokit/rest": "18.9.1",

@@ -8,11 +8,12 @@ import { randomWords } from '@nordicsemiconductor/random-words'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
-import { readFileSync } from 'fs'
+import { promises as fs } from 'fs'
 import {
 	awsIotDeviceConnection,
 	ListenerWithPayload,
 } from './awsIotDeviceConnection'
+import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR'
 
 type World = {
 	accountId: string
@@ -39,11 +40,19 @@ export const assetTrackerStepRunners = ({
 			const catId = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
 			const prefix = deviceId === undefined ? 'tracker' : `tracker:${catId}`
 			if (runner.store[`${prefix}:id`] === undefined) {
+				await createSimulatorKeyAndCSR({
+					deviceId: catId,
+					certsDir,
+					log: (...message: any[]) => {
+						void runner.progress('IoT (cert)', ...message)
+					},
+					debug: (...message: any[]) => {
+						void runner.progress('IoT (cert)', ...message)
+					},
+				})
 				await createDeviceCertificate({
 					deviceId: catId,
 					certsDir,
-					mqttEndpoint,
-					awsIotRootCA,
 					log: (...message: any[]) => {
 						void runner.progress('IoT (cert)', ...message)
 					},
@@ -56,9 +65,10 @@ export const assetTrackerStepRunners = ({
 					certsDir,
 					deviceId: catId,
 				})
-				const { privateKey, clientCert } = JSON.parse(
-					readFileSync(deviceFiles.json, 'utf-8'),
-				)
+				const [privateKey, clientCert] = await Promise.all([
+					fs.readFile(deviceFiles.key, 'utf-8'),
+					fs.readFile(deviceFiles.certWithCA, 'utf-8'),
+				])
 				runner.store[`${prefix}:privateKey`] = privateKey
 				runner.store[`${prefix}:clientCert`] = clientCert
 
@@ -73,7 +83,7 @@ export const assetTrackerStepRunners = ({
 			async ([deviceId], __, runner) => {
 				const catId = deviceId ?? runner.store['tracker:id']
 				await runner.progress('IoT', `Connecting ${catId} to ${mqttEndpoint}`)
-				const connection = connectToBroker(catId)
+				const connection = await connectToBroker(catId)
 
 				return new Promise((resolve, reject) => {
 					const timeout = setTimeout(async () => {
@@ -96,7 +106,7 @@ export const assetTrackerStepRunners = ({
 			}
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = connectToBroker(catId)
+			const connection = await connectToBroker(catId)
 			const shadowBase = `$aws/things/${catId}/shadow`
 			const updateStatus = `${shadowBase}/update`
 			const updateStatusAccepted = `${updateStatus}/accepted`
@@ -139,7 +149,7 @@ export const assetTrackerStepRunners = ({
 				throw new Error('Must provide argument!')
 			}
 			const message = JSON.parse(step.interpolatedArgument)
-			const connection = connectToBroker(catId)
+			const connection = await connectToBroker(catId)
 			const publishPromise = new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
 				connection
@@ -156,7 +166,7 @@ export const assetTrackerStepRunners = ({
 			/^the tracker(?: "(?<deviceId>[^"]+)")? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
 		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = connectToBroker(catId)
+			const connection = await connectToBroker(catId)
 			const isRaw = raw !== undefined
 
 			const expectedMessageCount =
@@ -220,7 +230,7 @@ export const assetTrackerStepRunners = ({
 			/^the tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = connectToBroker(catId)
+			const connection = await connectToBroker(catId)
 
 			const getNextJobTopic = `$aws/things/${catId}/jobs/$next/get`
 			const successTopic = `${getNextJobTopic}/accepted`
@@ -250,7 +260,7 @@ export const assetTrackerStepRunners = ({
 			/^the tracker(?: (?<deviceId>[^ ]+))? marks the job in "(?<storeName>[^"]+)" as in progress$/,
 		)(async ({ deviceId, storeName }, _, runner) => {
 			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = connectToBroker(catId)
+			const connection = await connectToBroker(catId)
 
 			const job = runner.store[storeName]
 			expect(job).to.not.be.an('undefined')
