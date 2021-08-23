@@ -5,7 +5,7 @@ import { IoTClient } from '@aws-sdk/client-iot'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import * as path from 'path'
 import { cdCommand } from './commands/cd'
-import { createDeviceCertCommand } from './commands/create-device-cert'
+import { createAndProvisionDeviceCertCommand } from './commands/create-and-provision-device-cert'
 import { reactConfigCommand } from './commands/react-config'
 import { infoCommand } from './commands/info'
 import { createCACommand } from './commands/create-ca'
@@ -19,9 +19,11 @@ import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-p
 import { purgeCAsCommand } from './commands/purge-cas'
 import { firmwareCICommand } from './commands/firmware-ci'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
-import { flashCommand } from './commands/flash'
+import { flashFirmwareCommand } from './commands/flash-firmware'
 import { configureCommand } from './commands/configure'
 import { showAPIConfigurationCommand } from './commands/show-api-configuration'
+import { imeiCommand } from './commands/imei'
+import { createSimulatorCertCommand } from './commands/create-simulator-cert'
 
 const iot = new IoTClient({})
 const version = JSON.parse(
@@ -73,7 +75,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 
 	const commands = [
 		createCACommand({ certsDir }),
-		createDeviceCertCommand({ endpoint, certsDir }),
+		createSimulatorCertCommand({ certsDir, endpoint }),
 		reactConfigCommand(),
 		infoCommand(),
 		cdCommand(),
@@ -88,9 +90,8 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		commands.push(purgeBucketsCommand(), purgeCAsCommand())
 	} else {
 		commands.push(
-			flashCommand({
-				certsDir,
-			}),
+			createAndProvisionDeviceCertCommand({ certsDir }),
+			flashFirmwareCommand(),
 			cdUpdateTokenCommand(),
 			confirm(
 				'Do you really purge all nRF Asset Tracker buckets?',
@@ -103,6 +104,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 			firmwareCICommand({
 				endpoint,
 			}),
+			imeiCommand(),
 		)
 	}
 

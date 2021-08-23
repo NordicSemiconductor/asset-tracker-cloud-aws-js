@@ -13,6 +13,7 @@ import {
 	awsIotDeviceConnection,
 	ListenerWithPayload,
 } from './awsIotDeviceConnection'
+import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR'
 
 type World = {
 	accountId: string
@@ -39,11 +40,19 @@ export const assetTrackerStepRunners = ({
 			const catId = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
 			const prefix = deviceId === undefined ? 'tracker' : `tracker:${catId}`
 			if (runner.store[`${prefix}:id`] === undefined) {
+				await createSimulatorKeyAndCSR({
+					deviceId: catId,
+					certsDir,
+					log: (...message: any[]) => {
+						void runner.progress('IoT (cert)', ...message)
+					},
+					debug: (...message: any[]) => {
+						void runner.progress('IoT (cert)', ...message)
+					},
+				})
 				await createDeviceCertificate({
 					deviceId: catId,
 					certsDir,
-					mqttEndpoint,
-					awsIotRootCA,
 					log: (...message: any[]) => {
 						void runner.progress('IoT (cert)', ...message)
 					},

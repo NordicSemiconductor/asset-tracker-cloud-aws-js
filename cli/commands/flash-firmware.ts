@@ -2,21 +2,15 @@ import { CommandDefinition } from './CommandDefinition'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
-import {
-	flashCredentials,
-	connect,
-	atHostHexfile,
-	flash,
-} from '@nordicsemiconductor/firmware-ci-device-helpers'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { flash } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import { Octokit } from '@octokit/rest'
 import * as chalk from 'chalk'
 import * as https from 'https'
 import { v4 } from 'uuid'
 import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
 
-const defaultPort = '/dev/ttyACM0'
-const defaultSecTag = 42
+export const defaultPort = '/dev/ttyACM0'
+export const defaultSecTag = 42
 const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
 const netrclocation = path.resolve(os.homedir(), '.netrc')
@@ -78,12 +72,8 @@ const getLatestFirmware = async ({
 	return downloadTarget
 }
 
-export const flashCommand = ({
-	certsDir,
-}: {
-	certsDir: string
-}): CommandDefinition => ({
-	command: 'flash <deviceId>',
+export const flashFirmwareCommand = (): CommandDefinition => ({
+	command: 'flash-firmware',
 	options: [
 		{
 			flags: '--dk',
@@ -98,24 +88,8 @@ export const flashCommand = ({
 			description: `Flash no-debug firmware`,
 		},
 		{
-			flags: '-p, --port <port>',
-			description: `The port the device is connected to, defaults to ${defaultPort}`,
-		},
-		{
 			flags: '-f, --firmware <firmware>',
 			description: `Flash application from this file`,
-		},
-		{
-			flags: '-s, --sec-tag <secTag>',
-			description: `Use this secTag, defaults to ${defaultSecTag}`,
-		},
-		{
-			flags: '-a, --at-host <atHost>',
-			description: `Flash at_host from this file`,
-		},
-		{
-			flags: '--debug',
-			description: `Log debug messages`,
 		},
 		{
 			flags: '--gh-token <ghToken>',
@@ -125,42 +99,20 @@ export const flashCommand = ({
 			flags: '-r, --firmware-repository <firmwareRepository>',
 			description: `Firmware repository to pull the release from.`,
 		},
-	],
-	action: async (
-		deviceId: string,
 		{
-			dk,
-			nbiot,
-			nodebugfw,
-			port,
-			firmware,
-			secTag,
-			debug,
-			ghToken,
-			atHost,
-			firmwareRepository,
+			flags: '--debug',
+			description: `Log debug messages`,
 		},
-	) => {
-		const certs = deviceFileLocations({
-			certsDir,
-			deviceId,
-		})
-
-		try {
-			fs.statSync(certs.certWithCA)
-			fs.statSync(certs.key)
-		} catch {
-			console.error(
-				chalk.red.inverse(' ERROR '),
-				chalk.red(`Could not find the certificate for device ${deviceId}!`),
-			)
-			console.error(
-				chalk.green('You can generate device certificates using'),
-				chalk.greenBright(`node cli create-device-cert -d ${deviceId}`),
-			)
-			process.exit(1)
-		}
-
+	],
+	action: async ({
+		dk,
+		nbiot,
+		nodebugfw,
+		firmware,
+		ghToken,
+		firmwareRepository,
+		debug,
+	}) => {
 		if (
 			firmwareRepository !== undefined &&
 			firmware !== undefined // Both provided
@@ -275,46 +227,13 @@ export const flashCommand = ({
 				firmwareRepository: firmwareRepository ?? defaultFirmwareRepository,
 			}))
 
-		console.log(
-			chalk.magenta(`Connecting to device`),
-			chalk.blue(port ?? defaultPort),
-		)
-
-		const connection = await connect({
-			atHostHexfile:
-				atHost ??
-				(dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91']),
-			device: port ?? defaultPort,
-			warn: console.error,
-			debug: debug === true ? console.debug : undefined,
-			progress: debug === true ? console.log : undefined,
-		})
-
-		console.log(
-			chalk.magenta(`Flashing credentials`),
-			chalk.blue(port ?? defaultPort),
-		)
-
-		await flashCredentials({
-			at: connection.connection.at,
-			caCert: fs.readFileSync(
-				path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-				'utf-8',
-			),
-			secTag: secTag ?? defaultSecTag,
-			clientCert: fs.readFileSync(certs.certWithCA, 'utf-8'),
-			privateKey: fs.readFileSync(certs.key, 'utf-8'),
-		})
-
-		console.log(chalk.magenta(`Flashing firmware`), chalk.blue(hexfile))
-
 		await flash({
 			hexfile,
+			warn: console.error,
+			debug: debug === true ? console.debug : undefined,
 		})
-
-		await connection.connection.end()
 
 		console.log(chalk.green(`Done`))
 	},
-	help: 'Flash credentials and latest firmware release to a device using JLink',
+	help: 'Flash (latest) firmware release to a device using JLink',
 })
