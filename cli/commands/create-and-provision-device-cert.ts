@@ -16,7 +16,9 @@ import * as os from 'os'
 import * as path from 'path'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { run } from '../process/run'
-import { defaultPort, defaultSecTag } from './flash-firmware'
+
+export const defaultPort = '/dev/ttyACM0'
+export const defaultSecTag = 42
 
 export const createAndProvisionDeviceCertCommand = ({
 	certsDir,

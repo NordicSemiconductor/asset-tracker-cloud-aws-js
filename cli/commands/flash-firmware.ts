@@ -9,8 +9,6 @@ import * as https from 'https'
 import { v4 } from 'uuid'
 import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
 
-export const defaultPort = '/dev/ttyACM0'
-export const defaultSecTag = 42
 const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
 const netrclocation = path.resolve(os.homedir(), '.netrc')

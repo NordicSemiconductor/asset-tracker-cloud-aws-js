@@ -5,7 +5,7 @@ import {
 	connect,
 	getIMEI,
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
-import { defaultPort } from './flash-firmware'
+import { defaultPort } from './create-and-provision-device-cert'
 
 export const imeiCommand = (): CommandDefinition => ({
 	command: 'imei',
