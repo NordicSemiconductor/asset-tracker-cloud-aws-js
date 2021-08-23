@@ -8,15 +8,16 @@ import {
 } from '../jitp/createDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { promises as fs } from 'fs'
+import { createSimulatorKeyAndCSR } from '../jitp/createSimulatorKeyAndCSR'
 
-export const createDeviceCertCommand = ({
+export const createSimulatorCertCommand = ({
 	endpoint,
 	certsDir,
 }: {
 	endpoint: string
 	certsDir: string
 }): CommandDefinition => ({
-	command: 'create-device-cert',
+	command: 'create-simulator-cert',
 	options: [
 		{
 			flags: '-d, --deviceId <deviceId>',
@@ -35,14 +36,26 @@ export const createDeviceCertCommand = ({
 		expires?: string
 	}) => {
 		const id = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
+
+		await createSimulatorKeyAndCSR({
+			deviceId: id,
+			certsDir,
+			log: (...message: any[]) => {
+				console.log(...message.map((m) => chalk.magenta(m)))
+			},
+			debug: (...message: any[]) => {
+				console.log(...message.map((m) => chalk.cyan(m)))
+			},
+		})
+
+		const awsIotRootCA = await fs.readFile(
+			path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+			'utf-8',
+		)
+
 		await createDeviceCertificate({
 			deviceId: id,
 			certsDir,
-			mqttEndpoint: endpoint,
-			awsIotRootCA: await fs.readFile(
-				path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-				'utf-8',
-			),
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},
@@ -51,11 +64,33 @@ export const createDeviceCertCommand = ({
 			},
 			daysValid: expires !== undefined ? parseInt(expires, 10) : undefined,
 		})
-		console.log(
-			chalk.green(`Certificate for device ${chalk.yellow(id)} generated.`),
+
+		// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
+		const deviceFiles = deviceFileLocations({ certsDir, deviceId: id })
+		await fs.writeFile(
+			deviceFiles.simulatorJSON,
+			JSON.stringify(
+				{
+					caCert: awsIotRootCA,
+					clientCert: await fs.readFile(deviceFiles.certWithCA, 'utf-8'),
+					privateKey: await fs.readFile(deviceFiles.key, 'utf-8'),
+					clientId: deviceId,
+					brokerHostname: endpoint,
+				},
+				null,
+				2,
+			),
+			'utf-8',
 		)
 
-		const certJSON = deviceFileLocations({ certsDir, deviceId: id }).json
+		console.log(
+			chalk.green(`Certificate for simulator ${chalk.yellow(id)} generated.`),
+		)
+
+		const certJSON = deviceFileLocations({
+			certsDir,
+			deviceId: id,
+		}).simulatorJSON
 
 		console.log()
 		console.log(

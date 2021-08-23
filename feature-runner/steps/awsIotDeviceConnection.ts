@@ -1,7 +1,7 @@
 import { device } from 'aws-iot-device-sdk'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { isNullOrUndefined } from '../../util/isNullOrUndefined'
-import { readFileSync } from 'fs'
+import { promises as fs } from 'fs'
 
 export type Listener = () => unknown
 export type ListenerWithPayload = (payload: Buffer) => unknown
@@ -19,10 +19,11 @@ export const awsIotDeviceConnection = ({
 	mqttEndpoint: string
 	certsDir: string
 	awsIotRootCA: string
-}): ((clientId: string) => Connection) => {
+}): ((clientId: string) => Promise<Connection>) => {
 	const connections: Record<string, Connection> = {}
+	const credentials: Record<string, Promise<[string, string]>> = {}
 
-	return (clientId) => {
+	return async (clientId) => {
 		const onConnectListeners: Listener[] = []
 		const onMessageOnceListeners: Record<string, ListenerWithPayload[]> = {}
 		if (connections[clientId] === undefined) {
@@ -32,9 +33,13 @@ export const awsIotDeviceConnection = ({
 				certsDir,
 				deviceId: clientId,
 			})
-			const { privateKey, clientCert } = JSON.parse(
-				readFileSync(deviceFiles.json, 'utf-8'),
-			)
+			if (credentials[clientId] === undefined) {
+				credentials[clientId] = Promise.all([
+					fs.readFile(deviceFiles.key, 'utf-8'),
+					fs.readFile(deviceFiles.certWithCA, 'utf-8'),
+				])
+			}
+			const [privateKey, clientCert] = await credentials[clientId]
 			const d = new device({
 				privateKey: Buffer.from(privateKey),
 				clientCert: Buffer.from(clientCert),

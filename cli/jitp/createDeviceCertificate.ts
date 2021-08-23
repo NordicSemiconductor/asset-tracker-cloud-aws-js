@@ -9,20 +9,18 @@ export const defaultDeviceCertificateValidityInDays = 10950
 /**
  * Creates a certificate for a device, signed with the CA
  * @see https://docs.aws.amazon.com/iot/latest/developerguide/device-certs-your-own.html
+ *
+ * The device's CSR must already exist.
  */
 export const createDeviceCertificate = async ({
 	certsDir,
 	log,
 	debug,
 	deviceId,
-	awsIotRootCA,
-	mqttEndpoint,
 	daysValid,
 }: {
 	certsDir: string
 	deviceId: string
-	mqttEndpoint: string
-	awsIotRootCA: string
 	log?: (...message: any[]) => void
 	debug?: (...message: any[]) => void
 	daysValid?: number
@@ -38,34 +36,6 @@ export const createDeviceCertificate = async ({
 	const deviceFiles = deviceFileLocations({
 		certsDir,
 		deviceId,
-	})
-
-	await run({
-		command: 'openssl',
-		args: [
-			'ecparam',
-			'-out',
-			deviceFiles.key,
-			'-name',
-			'prime256v1',
-			'-genkey',
-		],
-		log: debug,
-	})
-
-	await run({
-		command: 'openssl',
-		args: [
-			'req',
-			'-new',
-			'-key',
-			deviceFiles.key,
-			'-out',
-			deviceFiles.csr,
-			'-subj',
-			`/CN=${deviceId}`,
-		],
-		log: debug,
 	})
 
 	await run({
@@ -97,23 +67,6 @@ export const createDeviceCertificate = async ({
 	).join(os.EOL)
 
 	await fs.writeFile(deviceFiles.certWithCA, certWithCa, 'utf-8')
-
-	// Writes the JSON file which works with the Certificate Manager of the LTA Link Monitor
-	await fs.writeFile(
-		deviceFiles.json,
-		JSON.stringify(
-			{
-				caCert: awsIotRootCA,
-				clientCert: certWithCa,
-				privateKey: await fs.readFile(deviceFiles.key, 'utf-8'),
-				clientId: deviceId,
-				brokerHostname: mqttEndpoint,
-			},
-			null,
-			2,
-		),
-		'utf-8',
-	)
 
 	return { deviceId }
 }
