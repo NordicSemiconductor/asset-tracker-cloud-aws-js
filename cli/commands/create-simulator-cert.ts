@@ -100,33 +100,6 @@ export const createSimulatorCertCommand = ({
 			),
 			chalk.blueBright(certJSON),
 		)
-
-		console.log()
-		console.log(
-			chalk.green('You can now flash the credentials to your device'),
-			chalk.greenBright(`node cli flash`),
-			chalk.blueBright(id),
-		)
-
-		console.log()
-		console.log(
-			chalk.gray('Alternatively, use the file'),
-			chalk.yellow(certJSON),
-		)
-		console.log(
-			chalk.gray('with the'),
-			chalk.blue.italic('Certificate Manager'),
-			chalk.gray('in the'),
-			chalk.blue('nRF Connect for Desktop'),
-			chalk.gray('app'),
-			chalk.blue.italic('LTE Link Monitor'),
-		)
-		console.log(chalk.gray('to flash the certificate onto the device.'))
-		console.log(
-			chalk.gray(
-				'https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Connect-for-desktop',
-			),
-		)
 	},
 	help: 'Generate a certificate for a device, signed with the CA.',
 })
