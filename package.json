@@ -74,7 +74,7 @@
     "@commitlint/config-angular": "13.1.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "9.1.0",
     "@nordicsemiconductor/cloudformation-helpers": "6.1.0",
-    "@nordicsemiconductor/e2e-bdd-test-runner": "14.3.21",
+    "@nordicsemiconductor/e2e-bdd-test-runner": "14.3.22",
     "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "8.1.0",
     "@nordicsemiconductor/firmware-ci-device-helpers": "10.3.0",
     "@nordicsemiconductor/object-to-env": "2.1.0",
