@@ -40,7 +40,7 @@
     "@nordicsemiconductor/cell-geolocation-helpers": "3.1.0",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "1.0.4",
     "@nordicsemiconductor/random-words": "5.1.0",
-    "@nordicsemiconductor/timestream-helpers": "3.1.22",
+    "@nordicsemiconductor/timestream-helpers": "3.2.0",
     "@sinclair/typebox": "0.20.5",
     "@typescript-eslint/eslint-plugin": "4.29.3",
     "@typescript-eslint/parser": "4.29.3",
