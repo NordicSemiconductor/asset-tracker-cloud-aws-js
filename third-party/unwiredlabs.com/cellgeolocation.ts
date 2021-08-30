@@ -107,7 +107,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			}
 		}
 	} catch (err) {
-		console.error(JSON.stringify({ error: err.message }))
+		console.error(JSON.stringify({ error: (err as Error).message }))
 	}
 	return {
 		located: false,

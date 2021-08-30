@@ -13,7 +13,7 @@ export const retry =
 				return res
 			} catch (err) {
 				if (triesLeft <= 0) throw err
-				lastError = err
+				lastError = err as Error
 				await new Promise((resolve) => {
 					setTimeout(resolve, backoff(tries - triesLeft), [])
 				})

@@ -155,7 +155,7 @@ export const handler = async (
 	} catch (err) {
 		await cfnResponse({
 			Status: ResponseStatus.FAILED,
-			Reason: err.message,
+			Reason: (err as Error).message,
 			event,
 			PhysicalResourceId: ThingGroupName,
 		})

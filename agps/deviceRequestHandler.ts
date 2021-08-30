@@ -187,7 +187,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 									// FIXME: handle (supress) expected errors (duplicate execution)
 									console.error(
 										JSON.stringify({
-											startExecutionError: err.message,
+											startExecutionError: (err as Error).message,
 										}),
 									)
 								}),
@@ -235,7 +235,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						.catch((err) => {
 							console.error(
 								JSON.stringify({
-									resolveRequestsViaIot: err.message,
+									resolveRequestsViaIot: (err as Error).message,
 								}),
 							)
 						})
@@ -309,7 +309,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						.catch((err) => {
 							console.error(
 								JSON.stringify({
-									batchSchedule: err.message,
+									batchSchedule: (err as Error).message,
 								}),
 							)
 						})

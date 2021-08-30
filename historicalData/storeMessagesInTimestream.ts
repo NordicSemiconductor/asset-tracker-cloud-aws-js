@@ -69,7 +69,7 @@ export const handler = async (
 		console.error(err)
 		console.error(
 			JSON.stringify({
-				error: err.message,
+				error: (err as Error).message,
 			}),
 		)
 		return

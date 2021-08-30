@@ -4,6 +4,8 @@ import {
 	WriteRecordsCommand,
 } from '@aws-sdk/client-timestream-write'
 
+type AWSError = { message: string; code: number }
+
 export const storeRecordsInTimeseries =
 	({
 		timestream,
@@ -42,6 +44,6 @@ export const storeRecordsInTimeseries =
 					RejectedRecords,
 				})
 			}
-			throw new Error(`${err.code}: ${err.message}`)
+			throw new Error(`${(err as AWSError).code}: ${(err as AWSError).message}`)
 		}
 	}

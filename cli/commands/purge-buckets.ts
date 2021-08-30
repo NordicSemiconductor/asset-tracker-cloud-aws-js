@@ -95,7 +95,9 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 					} catch (err) {
 						console.error(
 							chalk.yellow.dim(
-								`Failed to purge bucket ${bucketName}: ${err.message}`,
+								`Failed to purge bucket ${bucketName}: ${
+									(err as Error).message
+								}`,
 							),
 						)
 					}
