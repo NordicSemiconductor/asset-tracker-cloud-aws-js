@@ -17,9 +17,9 @@ import { retry } from '../../cli/commands/retry'
 const decoder = new TextDecoder('utf8')
 
 io.enable_logging(
-	process.env.IOT_LOG_LEVEL === undefined
+	process.env.AWS_IOT_SDK_LOG_LEVEL === undefined
 		? io.LogLevel.ERROR
-		: parseInt(process.env.IOT_LOG_LEVEL, 10),
+		: parseInt(process.env.AWS_IOT_SDK_LOG_LEVEL, 10),
 )
 const clientBootstrap = new io.ClientBootstrap()
 
@@ -285,7 +285,7 @@ export const assetTrackerStepRunners = ({
 							? Buffer.from(payload).toString('hex')
 							: JSON.parse(message)
 						messages.push(m)
-						await runner.progress(`Iot`, message)
+						await runner.progress(`Iot`, m)
 						if (messages.length === expectedMessageCount) {
 							clearTimeout(timeout)
 							void connection.unsubscribe(topic)
