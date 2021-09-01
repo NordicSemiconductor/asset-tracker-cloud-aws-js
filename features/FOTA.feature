@@ -57,8 +57,7 @@ Feature: Device Firmware Upgrade over the air
     Then "job" should match this JSON
       """
       {
-        "jobId": "{jobId}",
-        "status": "QUEUED"
+        "jobId": "{jobId}"
       }
       """
     And the tracker marks the job in "job" as in progress
