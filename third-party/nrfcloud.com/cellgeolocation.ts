@@ -40,7 +40,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const mccmnc = cell.mccmnc.toFixed(0)
-	const maybeCeollGeolocation = await c.post({
+	const maybeCellGeolocation = await c.post({
 		resource: 'location/cell',
 		payload: {
 			[cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
@@ -55,13 +55,13 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 		requestSchema: locateRequestSchema,
 		responseSchema: locateResultSchema,
 	})()
-	if (isLeft(maybeCeollGeolocation)) {
-		console.error(JSON.stringify(maybeCeollGeolocation.left))
+	if (isLeft(maybeCellGeolocation)) {
+		console.error(JSON.stringify(maybeCellGeolocation.left))
 		return {
 			located: false,
 		}
 	}
-	const { lat, lon, uncertainty } = maybeCeollGeolocation.right
+	const { lat, lon, uncertainty } = maybeCellGeolocation.right
 	console.debug(
 		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
 	)
