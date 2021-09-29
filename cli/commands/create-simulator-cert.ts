@@ -74,7 +74,7 @@ export const createSimulatorCertCommand = ({
 					caCert: awsIotRootCA,
 					clientCert: await fs.readFile(deviceFiles.certWithCA, 'utf-8'),
 					privateKey: await fs.readFile(deviceFiles.key, 'utf-8'),
-					clientId: deviceId,
+					clientId: id,
 					brokerHostname: endpoint,
 				},
 				null,
