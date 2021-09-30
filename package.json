@@ -77,7 +77,7 @@
     "@nordicsemiconductor/object-to-env": "2.1.0",
     "@nordicsemiconductor/package-layered-lambdas": "9.0.21",
     "@nordicsemiconductor/random-words": "5.1.0",
-    "@octokit/rest": "18.11.2",
+    "@octokit/rest": "18.11.3",
     "@types/aws-iot-device-sdk": "2.2.3",
     "@types/aws-lambda": "8.10.83",
     "@types/backoff": "2.5.2",
