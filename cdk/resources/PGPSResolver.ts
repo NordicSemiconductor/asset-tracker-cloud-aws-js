@@ -50,6 +50,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
+					architectures: [Lambda.Architecture.ARM_64],
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,

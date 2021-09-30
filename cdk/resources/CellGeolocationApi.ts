@@ -43,6 +43,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		const fromSQS = new Lambda.Function(this, 'fromSQS', {
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -78,6 +79,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		const getCell = new Lambda.Function(this, 'getCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -107,6 +109,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		const addCell = new Lambda.Function(this, 'addCell', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,

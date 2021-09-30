@@ -41,6 +41,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 		const fromResolved = new Lambda.Function(this, 'fromResolved', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -75,6 +76,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
+					architectures: [Lambda.Architecture.ARM_64],
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
@@ -103,6 +105,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 		const persist = new Lambda.Function(this, 'persist', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
