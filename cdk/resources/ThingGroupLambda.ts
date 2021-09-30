@@ -25,6 +25,7 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 			description:
 				'Used in CloudFormation to create the thing group for the devices',
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			initialPolicy: [

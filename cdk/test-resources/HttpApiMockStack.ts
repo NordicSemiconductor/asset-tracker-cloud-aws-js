@@ -88,6 +88,7 @@ export class HttpApiMockStack extends CDK.Stack {
 			code: httpAPIMockLambdas.lambdas.httpApiMock,
 			layers: httpAPIMockLambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CDK.Duration.seconds(5),
 			initialPolicy: [logToCloudWatch],

@@ -56,6 +56,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromCache = new Lambda.Function(this, 'fromCache', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -80,6 +81,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromDevices = new Lambda.Function(this, 'fromDevices', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -109,6 +111,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const addToCache = new Lambda.Function(this, 'addToCache', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
+			architectures: [Lambda.Architecture.ARM_64],
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
@@ -142,6 +145,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
+					architectures: [Lambda.Architecture.ARM_64],
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
@@ -176,6 +180,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
+					architectures: [Lambda.Architecture.ARM_64],
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,

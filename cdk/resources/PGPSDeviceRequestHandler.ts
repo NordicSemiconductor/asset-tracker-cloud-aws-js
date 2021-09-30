@@ -102,6 +102,7 @@ export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 			{
 				layers: lambdas.layers,
 				handler: 'index.handler',
+				architectures: [Lambda.Architecture.ARM_64],
 				runtime: Lambda.Runtime.NODEJS_14_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
