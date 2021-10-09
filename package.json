@@ -67,7 +67,7 @@
     "@aws-sdk/client-s3": "3.34.0",
     "@aws-sdk/client-sts": "3.34.0",
     "@aws-sdk/client-timestream-query": "3.34.0",
-    "@commitlint/cli": "13.2.0",
+    "@commitlint/cli": "13.2.1",
     "@commitlint/config-angular": "13.2.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "9.1.0",
     "@nordicsemiconductor/cloudformation-helpers": "6.1.7",
