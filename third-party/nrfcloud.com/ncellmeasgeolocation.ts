@@ -96,11 +96,18 @@ export const handler = async (
 			located: false,
 		}
 	}
+	const { nw, report } = valid.right
+
+	if (nw.includes('NB-IoT')) {
+		console.error(`Resolution of NB-IoT cells not yet supported.`)
+		return {
+			located: false,
+		}
+	}
 
 	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const { nw, report } = valid.right
 	const maybeCeollGeolocation = await c.post({
 		resource: 'location/cell',
 		payload: {

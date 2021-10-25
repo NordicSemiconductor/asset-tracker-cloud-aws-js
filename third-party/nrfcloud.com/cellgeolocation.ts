@@ -36,6 +36,13 @@ const locateRequestSchema = Type.Record(
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 
+	if (cell.nw === NetworkMode.NBIoT) {
+		console.error(`Resolution of NB-IoT cells not yet supported.`)
+		return {
+			located: false,
+		}
+	}
+
 	const { serviceKey, teamId, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
@@ -43,7 +50,8 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	const maybeCellGeolocation = await c.post({
 		resource: 'location/cell',
 		payload: {
-			[cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
+			// FIXME: enable check once NB-IoT is supported: [cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
+			lte: [
 				{
 					eci: cell.cell,
 					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
