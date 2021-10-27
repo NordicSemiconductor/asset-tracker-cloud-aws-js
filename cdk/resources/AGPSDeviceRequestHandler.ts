@@ -79,9 +79,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 					'Devices request A-GPS data by publishing the the AWS IoT topic <deviceId>/agps/get. This puts all requests in a queue so we can resolved the requested data, but also ensure that we do not hit the third part APIs if many devices request the same assistance data at once (cargo container scenario).',
 				ruleDisabled: false,
 				awsIotSqlVersion: '2016-03-23',
-				sql: `SELECT mcc, mnc, cell, area, phycell, types, get_thing_shadow(clientid(), "${
-					topicRuleRole.roleArn
-				}").state.reported.dev.v.nw as nw, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/agps/get' WHERE ${iotRuleSqlCheckUndefined(
+				sql: `SELECT mcc, mnc, cell, area, phycell, types, get_thing_shadow(clientid(), clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/agps/get' WHERE ${iotRuleSqlCheckUndefined(
 					['mcc', 'mnc', 'cell', 'area', 'types'], // phycell is optional
 				)}`,
 				actions: [
