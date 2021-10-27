@@ -127,9 +127,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 											cacheKey: {
 												S: cacheKey,
 											},
-											nw: {
-												S: `${r.nw}`,
-											},
 											mcc: {
 												N: `${r.mcc}`,
 											},

@@ -21,22 +21,6 @@ Feature: A-GPS Data Fan Out (The cargo container scenario)
     And I have a random UUID in "agpsDevice"
     And I generate a certificate for the tracker "{agpsDevice}"
     And I connect the tracker "{agpsDevice}"
-    And I store "$millis()" into "updateShadowTs"
-    And the tracker "{agpsDevice}" updates its reported state with
-      """
-      {
-        "dev": {
-          "v": {
-            "iccid": "89882806660004909182",
-            "modV": "mfw_nrf9160_1.0.0",
-            "brdV": "thingy91_nrf9160",
-            "appV": "0.14.6",
-            "nw": "LTE-M GPS"
-          },
-          "ts": {updateShadowTs}
-        }
-      }
-      """
 
   Scenario: Request A-GPS data
 
