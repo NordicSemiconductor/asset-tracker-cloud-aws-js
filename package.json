@@ -83,7 +83,7 @@
     "@types/jest": "27.0.2",
     "@types/jsonwebtoken": "8.5.6",
     "@types/node": "16.11.7",
-    "@types/uuid": "8.3.1",
+    "@types/uuid": "8.3.3",
     "aws-iot-device-sdk": "2.2.11",
     "backoff": "2.5.0",
     "cdk": "1.132.0",
