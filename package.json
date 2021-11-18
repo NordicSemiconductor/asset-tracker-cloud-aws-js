@@ -37,7 +37,7 @@
     "@nordicsemiconductor/cell-geolocation-helpers": "3.1.5",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "1.2.0",
     "@nordicsemiconductor/timestream-helpers": "3.2.16",
-    "@sinclair/typebox": "0.20.5",
+    "@sinclair/typebox": "0.20.6",
     "ajv": "8.8.1",
     "fp-ts": "2.11.5",
     "jsonwebtoken": "8.5.1",
