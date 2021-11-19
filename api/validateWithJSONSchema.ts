@@ -1,9 +1,16 @@
 import * as E from 'fp-ts/lib/Either'
 import Ajv from 'ajv'
-import { Static, TObject, TProperties } from '@sinclair/typebox'
+import {
+	Static,
+	StaticProperties,
+	TObject,
+	TProperties,
+} from '@sinclair/typebox'
 import { ErrorInfo, ErrorType } from './ErrorInfo'
 
-export const validateWithJSONSchema = <T extends TObject<TProperties>>(
+export const validateWithJSONSchema = <
+	T extends TObject<StaticProperties<TProperties>>,
+>(
 	schema: T,
 ): ((
 	value: Record<string, any>,
