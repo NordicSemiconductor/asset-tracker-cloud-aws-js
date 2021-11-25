@@ -19,6 +19,11 @@ const settingsPromise = getCellLocationApiSettings({
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 const RSRP = Type.Integer({ minimum: -199, maximum: 0, title: 'RSRP' })
 const RSRQ = Type.Integer({ minimum: -99, maximum: 0, title: 'RSRQ' })
+const TimingAdvance = Type.Integer({
+	minimum: 0,
+	maximum: 20512,
+	title: 'Timing advance',
+})
 
 const inputSchema = Type.Object({
 	nw: Type.String({ minLength: 1 }),
@@ -28,7 +33,7 @@ const inputSchema = Type.Object({
 		cell: PositiveInteger,
 		area: PositiveInteger,
 		earfcn: PositiveInteger,
-		adv: PositiveInteger,
+		adv: TimingAdvance,
 		rsrp: RSRP,
 		rsrq: RSRQ,
 		nmr: Type.Optional(
@@ -59,7 +64,7 @@ const locateRequestSchema = Type.Record(
 				eci: PositiveInteger,
 				tac: PositiveInteger,
 				earfcn: PositiveInteger,
-				adv: PositiveInteger,
+				adv: TimingAdvance,
 				rsrp: RSRP,
 				rsrq: RSRQ,
 				nmr: Type.Optional(
