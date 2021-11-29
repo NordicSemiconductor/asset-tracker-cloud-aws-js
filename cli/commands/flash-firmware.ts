@@ -14,13 +14,11 @@ const defaultFirmwareRepository =
 const netrclocation = path.resolve(os.homedir(), '.netrc')
 
 const getLatestFirmware = async ({
-	nbiot,
 	nodebug,
 	dk,
 	firmwareRepository,
 	ghToken,
 }: {
-	nbiot: boolean
 	nodebug: boolean
 	dk: boolean
 	firmwareRepository: string
@@ -49,7 +47,6 @@ const getLatestFirmware = async ({
 		({ name }) =>
 			name.includes('.hex') &&
 			name.includes(dk ? 'nRF9160DK' : 'Thingy91') &&
-			name.includes(nbiot ? 'nbiot' : 'ltem') &&
 			(nodebug ? name.includes('nodebug') : !name.includes('nodebug')),
 	)
 
@@ -78,10 +75,6 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 			description: `Flash a 9160 DK`,
 		},
 		{
-			flags: '--nbiot',
-			description: `Flash NB-IoT firmware`,
-		},
-		{
 			flags: '--nodebugfw',
 			description: `Flash no-debug firmware`,
 		},
@@ -104,7 +97,6 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 	],
 	action: async ({
 		dk,
-		nbiot,
 		nodebugfw,
 		firmware,
 		ghToken,
@@ -219,7 +211,6 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 			firmware ??
 			(await getLatestFirmware({
 				dk,
-				nbiot,
 				nodebug: nodebugfw,
 				ghToken,
 				firmwareRepository: firmwareRepository ?? defaultFirmwareRepository,
