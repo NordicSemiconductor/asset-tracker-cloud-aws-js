@@ -95,7 +95,7 @@
     "jest": "27.4.3",
     "nock": "13.2.1",
     "octokit-auth-netrc": "1.0.1",
-    "ts-jest": "27.0.7"
+    "ts-jest": "27.1.0"
   },
   "lint-staged": {
     "*.{md,json,yaml,yml}": [
