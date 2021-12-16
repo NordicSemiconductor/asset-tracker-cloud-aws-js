@@ -1,4 +1,4 @@
-import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import * as Lambda from 'aws-cdk-lib/aws-lambda'
 
 export type LambdasWithLayer<
 	A extends {

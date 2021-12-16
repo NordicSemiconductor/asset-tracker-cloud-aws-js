@@ -1,10 +1,10 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import { aws_iam as IAM } from 'aws-cdk-lib'
-import { aws_codebuild as CodeBuild } from 'aws-cdk-lib'
-import { aws_codepipeline as CodePipeline } from 'aws-cdk-lib'
-import { aws_s3 as S3 } from 'aws-cdk-lib'
-import { aws_ssm as SSM } from 'aws-cdk-lib'
+import * as IAM from 'aws-cdk-lib/aws-iam'
+import * as CodeBuild from 'aws-cdk-lib/aws-codebuild'
+import * as CodePipeline from 'aws-cdk-lib/aws-codepipeline'
+import * as S3 from 'aws-cdk-lib/aws-s3'
+import * as SSM from 'aws-cdk-lib/aws-ssm'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 
 export const BuildActionCodeBuild = {

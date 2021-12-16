@@ -1,6 +1,6 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import { aws_iam as IAM } from 'aws-cdk-lib'
-import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import * as IAM from 'aws-cdk-lib/aws-iam'
+import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { LambdaLogGroup } from './LambdaLogGroup'
