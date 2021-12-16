@@ -1,5 +1,5 @@
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as S3 from '@aws-cdk/aws-s3'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import { aws_s3 as S3 } from 'aws-cdk-lib'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 
 export const lambdasOnS3 =

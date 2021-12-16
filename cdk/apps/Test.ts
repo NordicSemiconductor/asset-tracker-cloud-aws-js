@@ -1,4 +1,4 @@
-import { App } from '@aws-cdk/core'
+import { App } from 'aws-cdk-lib'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 import { AssetTrackerLambdas, CDKLambdas } from '../stacks/AssetTracker/lambdas'
 import { AssetTrackerStack } from '../stacks/AssetTracker/stack'

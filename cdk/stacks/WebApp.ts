@@ -1,4 +1,4 @@
-import * as CloudFormation from '@aws-cdk/core'
+import * as CloudFormation from 'aws-cdk-lib'
 import { WebAppHosting } from '../resources/WebAppHosting'
 import { WEBAPP_STACK_NAME } from './stackName'
 

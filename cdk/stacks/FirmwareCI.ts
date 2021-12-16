@@ -1,8 +1,8 @@
-import * as CloudFormation from '@aws-cdk/core'
+import * as CloudFormation from 'aws-cdk-lib'
 import { FirmwareCI } from '../resources/FirmwareCI'
 import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from './stackName'
-import * as IAM from '@aws-cdk/aws-iam'
-import { Fn } from '@aws-cdk/core'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { Fn } from 'aws-cdk-lib'
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(parent: CloudFormation.App) {
 		super(parent, FIRMWARE_CI_STACK_NAME)
