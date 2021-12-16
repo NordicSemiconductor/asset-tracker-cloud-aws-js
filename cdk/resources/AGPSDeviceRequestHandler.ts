@@ -1,16 +1,15 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as IoT from '@aws-cdk/aws-iot'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_iot as IoT } from 'aws-cdk-lib'
 import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined'
-import * as SQS from '@aws-cdk/aws-sqs'
-import { Duration } from '@aws-cdk/core'
+import { aws_sqs as SQS } from 'aws-cdk-lib'
+import { Duration } from 'aws-cdk-lib'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import * as Lambda from '@aws-cdk/aws-lambda'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { AGPSResolver } from './AGPSResolver'
 import { AGPSStorage } from './AGPSStorage'
-import { PolicyStatement } from '@aws-cdk/aws-iam'
 
 export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
 
@@ -106,7 +105,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			{
 				layers: lambdas.layers,
 				handler: 'index.handler',
-				architectures: [Lambda.Architecture.ARM_64],
+				architecture: Lambda.Architecture.ARM_64,
 				runtime: Lambda.Runtime.NODEJS_14_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
@@ -123,7 +122,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 					MAX_RESOLUTION_TIME_IN_MINUTES: `${MAX_RESOLUTION_TIME_IN_MINUTES}`,
 				},
 				initialPolicy: [
-					new PolicyStatement({
+					new IAM.PolicyStatement({
 						actions: ['iot:Publish'],
 						resources: [
 							`arn:aws:iot:${parent.region}:${parent.account}:topic/*/agps`,

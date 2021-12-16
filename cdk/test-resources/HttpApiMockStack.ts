@@ -1,12 +1,12 @@
-import * as CDK from '@aws-cdk/core'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as DynamoDB from '@aws-cdk/aws-dynamodb'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as ApiGateway from '@aws-cdk/aws-apigateway'
+import * as CDK from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import { aws_dynamodb as DynamoDB } from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_apigateway as ApiGateway } from 'aws-cdk-lib'
 import { LambdaLogGroup } from '../resources/LambdaLogGroup'
 import { HTTP_MOCK_HTTP_API_STACK_NAME } from '../stacks/stackName'
 import { HTTPAPIMockLambdas } from './prepare-test-resources'
-import * as S3 from '@aws-cdk/aws-s3'
+import { aws_s3 as S3 } from 'aws-cdk-lib'
 import { lambdasOnS3 } from '../resources/lambdasOnS3'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 import { logToCloudWatch } from '../resources/logToCloudWatch'
@@ -88,7 +88,7 @@ export class HttpApiMockStack extends CDK.Stack {
 			code: httpAPIMockLambdas.lambdas.httpApiMock,
 			layers: httpAPIMockLambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CDK.Duration.seconds(5),
 			initialPolicy: [logToCloudWatch],

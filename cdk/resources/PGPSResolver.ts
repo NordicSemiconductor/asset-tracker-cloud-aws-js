@@ -1,23 +1,14 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
-import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
-import * as Lambda from '@aws-cdk/aws-lambda'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_stepfunctions as StepFunctions } from 'aws-cdk-lib'
+import { aws_stepfunctions_tasks as StepFunctionTasks } from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import {
-	Condition,
-	IChainable,
-	JsonPath,
-	Result,
-	StateMachineType,
-} from '@aws-cdk/aws-stepfunctions'
-import { Role } from '@aws-cdk/aws-iam'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import { PGPSStorage } from './PGPSStorage'
-import { DynamoAttributeValue } from '@aws-cdk/aws-stepfunctions-tasks'
 import { logToCloudWatch } from './logToCloudWatch'
 
 /**
@@ -50,7 +41,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
-					architectures: [Lambda.Architecture.ARM_64],
+					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
@@ -76,7 +67,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 			},
 		})
 
-		const stateMachineRole = new Role(this, 'stateMachineRole', {
+		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
 		})
 
@@ -86,8 +77,8 @@ export class PGPSResolver extends CloudFormation.Resource {
 			{
 				table: storage.cacheTable,
 				key: {
-					cacheKey: DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$.cacheKey'),
+					cacheKey: StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.cacheKey'),
 					),
 				},
 				updateExpression:
@@ -99,15 +90,16 @@ export class PGPSResolver extends CloudFormation.Resource {
 					'#updatedAt': 'updatedAt',
 				},
 				expressionAttributeValues: {
-					':unresolved': DynamoAttributeValue.fromBoolean(false),
-					':url': DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$.pgps.url'),
+					':unresolved':
+						StepFunctionTasks.DynamoAttributeValue.fromBoolean(false),
+					':url': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.pgps.url'),
 					),
-					':source': DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$.pgps.source'),
+					':source': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.pgps.source'),
 					),
-					':updatedAt': DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$$.State.EnteredTime'),
+					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$$.State.EnteredTime'),
 					),
 				},
 			},
@@ -115,7 +107,9 @@ export class PGPSResolver extends CloudFormation.Resource {
 			new StepFunctions.Succeed(this, 'Done (resolved using third party API)'),
 		)
 
-		const checkApiResult = (n: number): [Condition, IChainable] => [
+		const checkApiResult = (
+			n: number,
+		): [StepFunctions.Condition, StepFunctions.IChainable] => [
 			StepFunctions.Condition.booleanEquals(`$.pgps[${n}].resolved`, true),
 			new StepFunctions.Pass(
 				this,
@@ -133,8 +127,8 @@ export class PGPSResolver extends CloudFormation.Resource {
 			{
 				table: storage.cacheTable,
 				key: {
-					cacheKey: DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$.cacheKey'),
+					cacheKey: StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.cacheKey'),
 					),
 				},
 				updateExpression:
@@ -144,9 +138,10 @@ export class PGPSResolver extends CloudFormation.Resource {
 					'#updatedAt': 'updatedAt',
 				},
 				expressionAttributeValues: {
-					':unresolved': DynamoAttributeValue.fromBoolean(true),
-					':updatedAt': DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$$.State.EnteredTime'),
+					':unresolved':
+						StepFunctionTasks.DynamoAttributeValue.fromBoolean(true),
+					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$$.State.EnteredTime'),
 					),
 				},
 			},
@@ -157,7 +152,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 			'no: mark request as not resolved',
 			{
 				resultPath: '$.pgps',
-				result: Result.fromObject({ located: false }),
+				result: StepFunctions.Result.fromObject({ located: false }),
 			},
 		)
 			.next(persistFailure)
@@ -174,8 +169,8 @@ export class PGPSResolver extends CloudFormation.Resource {
 			{
 				table: storage.cacheTable,
 				key: {
-					cacheKey: DynamoAttributeValue.fromString(
-						JsonPath.stringAt('$.cacheKey'),
+					cacheKey: StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.cacheKey'),
 					),
 				},
 				resultPath: '$.cached',
@@ -188,7 +183,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 		 */
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-pgps`,
-			stateMachineType: StateMachineType.STANDARD,
+			stateMachineType: StepFunctions.StateMachineType.STANDARD,
 			definition: fetchCache.next(
 				new StepFunctions.Choice(this, 'Already resolved?')
 					.when(
@@ -218,10 +213,10 @@ export class PGPSResolver extends CloudFormation.Resource {
 									`mark source in result as ${source}`,
 									{
 										resultPath: '$.source',
-										result: Result.fromString(source),
+										result: StepFunctions.Result.fromString(source),
 									},
 								)
-							const branches: IChainable[] = []
+							const branches: StepFunctions.IChainable[] = []
 							if (fromNrfCloud !== undefined) {
 								branches.push(
 									new StepFunctionTasks.LambdaInvoke(

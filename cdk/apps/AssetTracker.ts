@@ -1,4 +1,4 @@
-import { App } from '@aws-cdk/core'
+import { App } from 'aws-cdk-lib'
 import { AssetTrackerStack } from '../stacks/AssetTracker/stack'
 import { WebAppStack } from '../stacks/WebApp'
 import { FirmwareCIStack } from '../stacks/FirmwareCI'

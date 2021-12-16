@@ -1,9 +1,10 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as CodeBuild from '@aws-cdk/aws-codebuild'
-import * as CodePipeline from '@aws-cdk/aws-codepipeline'
-import * as S3 from '@aws-cdk/aws-s3'
-import * as SSM from '@aws-cdk/aws-ssm'
+import * as CloudFormation from 'aws-cdk-lib'
+import { Construct } from 'constructs'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_codebuild as CodeBuild } from 'aws-cdk-lib'
+import { aws_codepipeline as CodePipeline } from 'aws-cdk-lib'
+import { aws_s3 as S3 } from 'aws-cdk-lib'
+import { aws_ssm as SSM } from 'aws-cdk-lib'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 
 export const BuildActionCodeBuild = {
@@ -16,7 +17,7 @@ export const BuildActionCodeBuild = {
 /**
  * This sets up the continuous delivery for a web-app
  */
-export class WebAppCD extends CloudFormation.Construct {
+export class WebAppCD extends Construct {
 	public readonly codeBuildProject: CodeBuild.CfnProject
 	public constructor(
 		parent: CloudFormation.Stack,
