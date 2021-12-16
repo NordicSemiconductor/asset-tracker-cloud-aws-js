@@ -1,11 +1,11 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as HttpApi from '@aws-cdk/aws-apigatewayv2'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as SQS from '@aws-cdk/aws-sqs'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_apigatewayv2 as HttpApi } from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import { aws_sqs as SQS } from 'aws-cdk-lib'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdasWithLayer } from './LambdasWithLayer'
-import * as CloudWatchLogs from '@aws-cdk/aws-logs'
+import { aws_logs as CloudWatchLogs } from 'aws-cdk-lib'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import { NeighborCellMeasurementsStorage } from './NeighborCellMeasurementsStorage'
@@ -43,7 +43,7 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 
 		const fromSQS = new Lambda.Function(this, 'fromSQS', {
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -79,7 +79,7 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 		const getReportLocation = new Lambda.Function(this, 'getReportLocation', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,

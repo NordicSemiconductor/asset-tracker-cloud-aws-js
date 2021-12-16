@@ -1,5 +1,5 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as DynamoDB from '@aws-cdk/aws-dynamodb'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_dynamodb as DynamoDB } from 'aws-cdk-lib'
 
 /**
  * Provides storage for A-GPS requests

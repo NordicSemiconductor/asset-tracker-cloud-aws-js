@@ -1,11 +1,11 @@
-import * as CloudFormation from '@aws-cdk/core'
+import { Node } from 'constructs'
 import * as chalk from 'chalk'
 
 const ENABLED = 'enabled'
 const DISABLED = 'disabled'
 
 export const enabledInContext =
-	(node: CloudFormation.ConstructNode) =>
+	(node: Node) =>
 	({
 		key,
 		component,

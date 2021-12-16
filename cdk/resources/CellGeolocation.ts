@@ -1,18 +1,11 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as DynamoDB from '@aws-cdk/aws-dynamodb'
-import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
-import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
-import * as Lambda from '@aws-cdk/aws-lambda'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_dynamodb as DynamoDB } from 'aws-cdk-lib'
+import { aws_stepfunctions as StepFunctions } from 'aws-cdk-lib'
+import { aws_stepfunctions_tasks as StepFunctionTasks } from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import {
-	Condition,
-	IChainable,
-	Result,
-	StateMachineType,
-} from '@aws-cdk/aws-stepfunctions'
-import { Role } from '@aws-cdk/aws-iam'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
@@ -56,7 +49,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromCache = new Lambda.Function(this, 'fromCache', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -81,7 +74,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const fromDevices = new Lambda.Function(this, 'fromDevices', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -111,7 +104,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		const addToCache = new Lambda.Function(this, 'addToCache', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
@@ -145,7 +138,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
-					architectures: [Lambda.Architecture.ARM_64],
+					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
@@ -180,7 +173,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
-					architectures: [Lambda.Architecture.ARM_64],
+					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
@@ -210,7 +203,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			true,
 		)
 
-		const stateMachineRole = new Role(this, 'stateMachineRole', {
+		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
 		})
 
@@ -220,7 +213,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 		 */
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-cellGeo`,
-			stateMachineType: StateMachineType.STANDARD,
+			stateMachineType: StepFunctions.StateMachineType.STANDARD,
 			definition: new StepFunctionTasks.LambdaInvoke(
 				this,
 				'Resolve from cache',
@@ -284,10 +277,10 @@ export class CellGeolocation extends CloudFormation.Resource {
 												`mark source in result as ${source}`,
 												{
 													resultPath: '$.source',
-													result: Result.fromString(source),
+													result: StepFunctions.Result.fromString(source),
 												},
 											)
-										const branches: IChainable[] = []
+										const branches: StepFunctions.IChainable[] = []
 										if (fromUnwiredLabs !== undefined) {
 											branches.push(
 												new StepFunctionTasks.LambdaInvoke(
@@ -330,7 +323,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 										const checkApiResult = (
 											n: number,
-										): [Condition, IChainable] => [
+										): [StepFunctions.Condition, StepFunctions.IChainable] => [
 											StepFunctions.Condition.booleanEquals(
 												`$.cellgeo[${n}].located`,
 												true,
@@ -370,7 +363,9 @@ export class CellGeolocation extends CloudFormation.Resource {
 															'no: mark cell as not located',
 															{
 																resultPath: '$.cellgeo',
-																result: Result.fromObject({ located: false }),
+																result: StepFunctions.Result.fromObject({
+																	located: false,
+																}),
 															},
 														).next(
 															new StepFunctionTasks.LambdaInvoke(

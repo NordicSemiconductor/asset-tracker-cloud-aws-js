@@ -1,6 +1,6 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as S3 from '@aws-cdk/aws-s3'
-import * as IAM from '@aws-cdk/aws-iam'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_s3 as S3 } from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
 
 /**
  * Storage for avatars

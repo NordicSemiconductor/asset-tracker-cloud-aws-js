@@ -1,17 +1,10 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as StepFunctions from '@aws-cdk/aws-stepfunctions'
-import * as StepFunctionTasks from '@aws-cdk/aws-stepfunctions-tasks'
-import * as Lambda from '@aws-cdk/aws-lambda'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_stepfunctions as StepFunctions } from 'aws-cdk-lib'
+import { aws_stepfunctions_tasks as StepFunctionTasks } from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
-import {
-	Condition,
-	IChainable,
-	Result,
-	StateMachineType,
-} from '@aws-cdk/aws-stepfunctions'
-import { Role } from '@aws-cdk/aws-iam'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
@@ -41,7 +34,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 		const fromResolved = new Lambda.Function(this, 'fromResolved', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
@@ -76,7 +69,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
 					handler: 'index.handler',
-					architectures: [Lambda.Architecture.ARM_64],
+					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_14_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
@@ -105,7 +98,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 		const persist = new Lambda.Function(this, 'persist', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
@@ -127,7 +120,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'persistLogs', persist)
 
-		const stateMachineRole = new Role(this, 'stateMachineRole', {
+		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
 		})
 
@@ -137,7 +130,7 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 		 */
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-ncellmeasGeo`,
-			stateMachineType: StateMachineType.STANDARD,
+			stateMachineType: StepFunctions.StateMachineType.STANDARD,
 			definition: new StepFunctionTasks.LambdaInvoke(
 				this,
 				'Check if already resolved',
@@ -170,10 +163,10 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 									`mark source in result as ${source}`,
 									{
 										resultPath: '$.source',
-										result: Result.fromString(source),
+										result: StepFunctions.Result.fromString(source),
 									},
 								)
-							const branches: IChainable[] = []
+							const branches: StepFunctions.IChainable[] = []
 							if (fromNrfCloud !== undefined) {
 								branches.push(
 									new StepFunctionTasks.LambdaInvoke(
@@ -201,7 +194,9 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 									'Done (resolved using third party API)',
 								),
 							)
-							const checkApiResult = (n: number): [Condition, IChainable] => [
+							const checkApiResult = (
+								n: number,
+							): [StepFunctions.Condition, StepFunctions.IChainable] => [
 								StepFunctions.Condition.booleanEquals(
 									`$.ncellmeasgeo[${n}].located`,
 									true,
@@ -241,7 +236,9 @@ export class NeighborCellGeolocation extends CloudFormation.Resource {
 												'no: mark cell as not located',
 												{
 													resultPath: '$.ncellmeasgeo',
-													result: Result.fromObject({ located: false }),
+													result: StepFunctions.Result.fromObject({
+														located: false,
+													}),
 												},
 											)
 												.next(

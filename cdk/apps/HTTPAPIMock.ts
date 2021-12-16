@@ -1,4 +1,4 @@
-import { App } from '@aws-cdk/core'
+import { App } from 'aws-cdk-lib'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 import { HttpApiMockStack } from '../test-resources/HttpApiMockStack'
 import { HTTPAPIMockLambdas } from '../test-resources/prepare-test-resources'

@@ -1,8 +1,8 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as IoT from '@aws-cdk/aws-iot'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as Timestream from '@aws-cdk/aws-timestream'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_iot as IoT } from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import { aws_timestream as Timestream } from 'aws-cdk-lib'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
@@ -64,7 +64,7 @@ export class HistoricalData extends CloudFormation.Resource {
 		const storeMessagesInTimestream = new Lambda.Function(this, 'lambda', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,

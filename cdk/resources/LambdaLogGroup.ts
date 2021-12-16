@@ -1,13 +1,10 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as Lambda from '@aws-cdk/aws-lambda'
-import * as CloudWatchLogs from '@aws-cdk/aws-logs'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
+import { aws_logs as CloudWatchLogs } from 'aws-cdk-lib'
+import { Construct } from 'constructs'
 
 export class LambdaLogGroup extends CloudFormation.Resource {
-	public constructor(
-		parent: CloudFormation.Construct,
-		id: string,
-		lambda: Lambda.IFunction,
-	) {
+	public constructor(parent: Construct, id: string, lambda: Lambda.IFunction) {
 		super(parent, id)
 		const isTest = this.node.tryGetContext('isTest') === true
 		new CloudWatchLogs.LogGroup(this, 'LogGroup', {

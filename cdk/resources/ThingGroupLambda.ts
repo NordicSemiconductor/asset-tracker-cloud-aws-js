@@ -1,6 +1,6 @@
-import * as CloudFormation from '@aws-cdk/core'
-import * as IAM from '@aws-cdk/aws-iam'
-import * as Lambda from '@aws-cdk/aws-lambda'
+import * as CloudFormation from 'aws-cdk-lib'
+import { aws_iam as IAM } from 'aws-cdk-lib'
+import { aws_lambda as Lambda } from 'aws-cdk-lib'
 import { logToCloudWatch } from './logToCloudWatch'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { LambdaLogGroup } from './LambdaLogGroup'
@@ -25,7 +25,7 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 			description:
 				'Used in CloudFormation to create the thing group for the devices',
 			handler: 'index.handler',
-			architectures: [Lambda.Architecture.ARM_64],
+			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_14_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			initialPolicy: [
