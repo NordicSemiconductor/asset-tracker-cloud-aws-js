@@ -1,7 +1,7 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import { aws_s3 as S3 } from 'aws-cdk-lib'
+import * as S3 from 'aws-cdk-lib/aws-s3'
 import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from '../stacks/stackName'
-import { aws_iam as IAM } from 'aws-cdk-lib'
+import * as IAM from 'aws-cdk-lib/aws-iam'
 
 export class FirmwareCI extends CloudFormation.Resource {
 	public readonly bucket

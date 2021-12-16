@@ -1,7 +1,7 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import { aws_iam as IAM } from 'aws-cdk-lib'
-import { aws_iot as IoT } from 'aws-cdk-lib'
-import { aws_dynamodb as DynamoDB } from 'aws-cdk-lib'
+import * as IAM from 'aws-cdk-lib/aws-iam'
+import * as IoT from 'aws-cdk-lib/aws-iot'
+import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 
 /**
  * Provides storage for neighboring cell measurement reports

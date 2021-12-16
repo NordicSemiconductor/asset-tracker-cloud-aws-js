@@ -1,6 +1,6 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import { aws_lambda as Lambda } from 'aws-cdk-lib'
-import { aws_logs as CloudWatchLogs } from 'aws-cdk-lib'
+import * as Lambda from 'aws-cdk-lib/aws-lambda'
+import * as CloudWatchLogs from 'aws-cdk-lib/aws-logs'
 import { Construct } from 'constructs'
 
 export class LambdaLogGroup extends CloudFormation.Resource {
