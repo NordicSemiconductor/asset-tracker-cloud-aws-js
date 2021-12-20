@@ -44,6 +44,10 @@ export const createAndProvisionDeviceCertCommand = ({
 			description: `Use this secTag, defaults to ${defaultSecTag}`,
 		},
 		{
+			flags: '-X, --delete-private-key',
+			description: `Delete the private key (needed if a private key exists with the secTag)`,
+		},
+		{
 			flags: '-a, --at-host <atHost>',
 			description: `Flash at_host from this file`,
 		},
@@ -52,7 +56,15 @@ export const createAndProvisionDeviceCertCommand = ({
 			description: `Log debug messages`,
 		},
 	],
-	action: async ({ dk, expires, port, atHost, secTag, debug }) => {
+	action: async ({
+		dk,
+		expires,
+		port,
+		atHost,
+		secTag,
+		debug,
+		deletePrivateKey,
+	}) => {
 		console.log(
 			chalk.magenta(`Flashing certificate`),
 			chalk.blue(port ?? defaultPort),
@@ -76,6 +88,7 @@ export const createAndProvisionDeviceCertCommand = ({
 		const csr = await createPrivateKeyAndCSR({
 			at: connection.connection.at,
 			secTag: secTag ?? defaultSecTag,
+			deletePrivateKey: deletePrivateKey ?? false,
 		})
 
 		const deviceFiles = deviceFileLocations({ certsDir, deviceId })
