@@ -78,7 +78,7 @@
     "check-node-version": "4.2.1",
     "commander": "8.3.0",
     "constructs": "10.0.16",
-    "date-fns": "2.27.0",
+    "date-fns": "2.28.0",
     "jest": "27.4.5",
     "nock": "13.2.1",
     "octokit-auth-netrc": "1.0.1",
