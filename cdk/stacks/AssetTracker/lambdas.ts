@@ -1,11 +1,11 @@
-import * as path from 'path'
 import {
+	ConsoleProgressReporter,
+	makeLayerFromPackageJSON,
 	packBaseLayer,
 	packLayeredLambdas,
-	makeLayerFromPackageJSON,
-	ConsoleProgressReporter,
 } from '@nordicsemiconductor/package-layered-lambdas'
-import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
+import * as path from 'path'
+import { PackedLambdas } from '../../helper/lambdas/PackedLambdas.js'
 
 export type AssetTrackerLambdas = {
 	storeMessagesInTimestream: string
@@ -156,7 +156,6 @@ export const prepareAssetTrackerLambdas = async ({
 					'pgps.ts',
 				),
 			},
-			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
 		}),
 	}
 }
@@ -203,7 +202,6 @@ export const prepareCDKLambdas = async ({
 			lambdas: {
 				createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
 			},
-			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
 		}),
 	}
 }

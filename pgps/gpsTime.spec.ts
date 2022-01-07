@@ -1,4 +1,4 @@
-import { gpsDay } from './gpsTime'
+import { gpsDay } from './gpsTime.js'
 
 describe('GPS epoch time functions', () => {
 	it('should calculate the GPS epoch day', () => {

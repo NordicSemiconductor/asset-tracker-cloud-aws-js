@@ -1,19 +1,19 @@
 import {
+	InterpolatedStep,
 	regexGroupMatcher,
 	regexMatcher,
 	StepRunnerFunc,
-	InterpolatedStep,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { randomWords } from '@nordicsemiconductor/random-words'
-import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
-import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { expect } from 'chai'
 import { promises as fs } from 'fs'
+import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate.js'
+import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR.js'
+import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import {
 	awsIotDeviceConnection,
 	ListenerWithPayload,
-} from './awsIotDeviceConnection'
-import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR'
+} from './awsIotDeviceConnection.js'
 
 type World = {
 	accountId: string

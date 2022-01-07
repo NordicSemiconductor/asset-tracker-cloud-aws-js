@@ -1,4 +1,4 @@
-import { Location } from './Location'
+import { Location } from './Location.js'
 
 export type MaybeLocation = {
 	located: boolean

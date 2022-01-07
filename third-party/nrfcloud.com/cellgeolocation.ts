@@ -1,14 +1,14 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { URL } from 'url'
-import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
-import { fromEnv } from '../../util/fromEnv'
-import { getCellLocationApiSettings } from './settings'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { TObject, TProperties, Type } from '@sinclair/typebox'
-import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
-import { locateResultSchema } from './locate'
-import { Cell } from '../../geolocation/Cell'
+import { URL } from 'url'
+import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types.js'
+import { Cell } from '../../geolocation/Cell.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { apiClient } from './apiclient.js'
+import { locateResultSchema } from './locate.js'
+import { getCellLocationApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 

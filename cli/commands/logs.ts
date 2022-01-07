@@ -7,9 +7,9 @@ import {
 	DescribeLogStreamsCommand,
 	GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs'
-import { CommandDefinition } from './CommandDefinition'
-import * as chalk from 'chalk'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import chalk from 'chalk'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { CommandDefinition } from './CommandDefinition.js'
 
 export const logsCommand = (): CommandDefinition => ({
 	command: 'logs',

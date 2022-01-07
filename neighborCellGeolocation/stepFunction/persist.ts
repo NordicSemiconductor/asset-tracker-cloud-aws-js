@@ -1,6 +1,6 @@
 import { DynamoDBClient, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
-import { MaybeLocation } from '../../geolocation/types'
-import { fromEnv } from '../../util/fromEnv'
+import { MaybeLocation } from '../../geolocation/types.js'
+import { fromEnv } from '../../util/fromEnv.js'
 
 const { TableName } = fromEnv({
 	TableName: 'REPORTS_TABLE',

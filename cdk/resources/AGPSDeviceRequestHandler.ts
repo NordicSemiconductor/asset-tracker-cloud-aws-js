@@ -1,15 +1,15 @@
 import * as CloudFormation from 'aws-cdk-lib'
+import { Duration } from 'aws-cdk-lib'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as IoT from 'aws-cdk-lib/aws-iot'
-import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined'
-import * as SQS from 'aws-cdk-lib/aws-sqs'
-import { Duration } from 'aws-cdk-lib'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { AGPSResolver } from './AGPSResolver'
-import { AGPSStorage } from './AGPSStorage'
+import * as SQS from 'aws-cdk-lib/aws-sqs'
+import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined.js'
+import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { AGPSResolver } from './AGPSResolver.js'
+import { AGPSStorage } from './AGPSStorage.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import { LambdasWithLayer } from './LambdasWithLayer.js'
 
 export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
 

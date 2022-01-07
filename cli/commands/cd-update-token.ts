@@ -4,11 +4,11 @@ import {
 	UpdatePipelineCommand,
 } from '@aws-sdk/client-codepipeline'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { CommandDefinition } from './CommandDefinition'
-import * as chalk from 'chalk'
-import { listPipelines } from '../cd/listPipelines'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { putSettings } from '../../util/settings'
+import chalk from 'chalk'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { putSettings } from '../../util/settings.js'
+import { listPipelines } from '../cd/listPipelines.js'
+import { CommandDefinition } from './CommandDefinition.js'
 
 export const cdUpdateTokenCommand = (): CommandDefinition => ({
 	command: 'cd-update-token <token>',

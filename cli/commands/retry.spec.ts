@@ -1,4 +1,4 @@
-import { retry } from './retry'
+import { retry } from './retry.js'
 
 describe('retry()', () => {
 	it('should run a passed function and return the resolved promise', async () => {

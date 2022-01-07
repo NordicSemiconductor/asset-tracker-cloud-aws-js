@@ -1,5 +1,5 @@
 import { Type } from '@sinclair/typebox'
-import { minimumGpsDay } from './gpsTime'
+import { minimumGpsDay } from './gpsTime.js'
 
 export const pgpsRequestSchema = Type.Object({
 	n: Type.Optional(

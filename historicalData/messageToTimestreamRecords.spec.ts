@@ -1,4 +1,4 @@
-import { messageToTimestreamRecords } from './messageToTimestreamRecords'
+import { messageToTimestreamRecords } from './messageToTimestreamRecords.js'
 
 describe('messageToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {

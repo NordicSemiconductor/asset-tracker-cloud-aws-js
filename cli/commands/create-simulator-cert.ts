@@ -1,14 +1,14 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
 import { randomWords } from '@nordicsemiconductor/random-words'
+import chalk from 'chalk'
+import { promises as fs } from 'fs'
 import * as path from 'path'
 import {
 	createDeviceCertificate,
 	defaultDeviceCertificateValidityInDays,
-} from '../jitp/createDeviceCertificate'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
-import { promises as fs } from 'fs'
-import { createSimulatorKeyAndCSR } from '../jitp/createSimulatorKeyAndCSR'
+} from '../jitp/createDeviceCertificate.js'
+import { createSimulatorKeyAndCSR } from '../jitp/createSimulatorKeyAndCSR.js'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
+import { CommandDefinition } from './CommandDefinition.js'
 
 export const createSimulatorCertCommand = ({
 	endpoint,

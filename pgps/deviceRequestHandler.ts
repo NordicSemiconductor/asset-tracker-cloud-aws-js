@@ -3,28 +3,28 @@ import {
 	IoTDataPlaneClient,
 	PublishCommand,
 } from '@aws-sdk/client-iot-data-plane'
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import {
-	SQSClient,
 	SendMessageBatchCommand,
 	SendMessageBatchRequestEntry,
+	SQSClient,
 } from '@aws-sdk/client-sqs'
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
+import { Static } from '@sinclair/typebox'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
+import { URL } from 'url'
 import { TextEncoder } from 'util'
 import { v4 } from 'uuid'
-import { fromEnv } from '../util/fromEnv'
+import { fromEnv } from '../util/fromEnv.js'
 import {
 	cacheKey,
 	defaultInterval,
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
-} from './cacheKey'
-import { PGPSDataCache, getCache } from './getCache'
-import { Static } from '@sinclair/typebox'
-import { pgpsRequestSchema } from './types'
-import { gpsDay } from './gpsTime'
-import { URL } from 'url'
+} from './cacheKey.js'
+import { getCache, PGPSDataCache } from './getCache.js'
+import { gpsDay } from './gpsTime.js'
+import { pgpsRequestSchema } from './types.js'
 
 const {
 	binHoursString,

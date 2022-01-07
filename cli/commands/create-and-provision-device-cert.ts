@@ -1,9 +1,3 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
-import {
-	createDeviceCertificate,
-	defaultDeviceCertificateValidityInDays,
-} from '../jitp/createDeviceCertificate'
 import {
 	atHostHexfile,
 	connect,
@@ -11,11 +5,17 @@ import {
 	flashCertificate,
 	getIMEI,
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
+import chalk from 'chalk'
 import { promises as fs } from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
-import { run } from '../process/run'
+import {
+	createDeviceCertificate,
+	defaultDeviceCertificateValidityInDays,
+} from '../jitp/createDeviceCertificate.js'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
+import { run } from '../process/run.js'
+import { CommandDefinition } from './CommandDefinition.js'
 
 export const defaultPort = '/dev/ttyACM0'
 export const defaultSecTag = 42

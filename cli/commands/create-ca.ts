@@ -1,9 +1,9 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
-import { createCA, defaultCAValidityInDays } from '../jitp/createCA'
-import { IoTClient } from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { IoTClient } from '@aws-sdk/client-iot'
+import chalk from 'chalk'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { createCA, defaultCAValidityInDays } from '../jitp/createCA.js'
+import { CommandDefinition } from './CommandDefinition.js'
 
 export const createCACommand = ({
 	certsDir,

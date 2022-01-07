@@ -1,8 +1,8 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
-import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { Location } from '../geolocation/Location'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
+import * as TE from 'fp-ts/lib/TaskEither'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import { Location } from '../geolocation/Location.js'
 
 type Report = {
 	deviceId: string

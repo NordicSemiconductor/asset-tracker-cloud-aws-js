@@ -1,7 +1,7 @@
-import * as E from 'fp-ts/lib/Either'
-import Ajv from 'ajv'
 import { Static, TSchema } from '@sinclair/typebox'
-import { ErrorInfo, ErrorType } from './ErrorInfo'
+import Ajv from 'ajv'
+import * as E from 'fp-ts/lib/Either'
+import { ErrorInfo, ErrorType } from './ErrorInfo.js'
 
 export const validateWithJSONSchema = <T extends TSchema>(
 	schema: T,

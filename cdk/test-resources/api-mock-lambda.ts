@@ -1,13 +1,13 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 import {
 	DeleteItemCommand,
 	DynamoDBClient,
 	GetItemCommand,
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb'
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as querystring from 'querystring'
 import { v4 } from 'uuid'
-import { splitMockResponse } from './splitMockResponse'
+import { splitMockResponse } from './splitMockResponse.js'
 
 const db = new DynamoDBClient({})
 

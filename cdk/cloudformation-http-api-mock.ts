@@ -1,7 +1,7 @@
-import { HTTPAPIMockApp } from './apps/HTTPAPIMock'
-import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
-import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
-import { prepareHTTPAPIMockLambdas } from './test-resources/prepare-test-resources'
+import { HTTPAPIMockApp } from './apps/HTTPAPIMock.js'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName.js'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir.js'
+import { prepareHTTPAPIMockLambdas } from './test-resources/prepare-test-resources.js'
 
 const rootDir = process.cwd()
 

@@ -1,4 +1,4 @@
-import { toTimestreamType } from './toTimestreamType'
+import { toTimestreamType } from './toTimestreamType.js'
 
 describe('toTimestreamType', () => {
 	it.each([
