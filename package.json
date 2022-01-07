@@ -58,7 +58,7 @@
     "@nordicsemiconductor/firmware-ci-device-helpers": "13.0.0",
     "@nordicsemiconductor/object-to-env": "3.0.0",
     "@nordicsemiconductor/package-layered-lambdas": "11.0.1",
-    "@nordicsemiconductor/random-words": "5.1.2",
+    "@nordicsemiconductor/random-words": "6.0.0",
     "@octokit/rest": "18.12.0",
     "@types/aws-iot-device-sdk": "2.2.4",
     "@types/aws-lambda": "8.10.89",
