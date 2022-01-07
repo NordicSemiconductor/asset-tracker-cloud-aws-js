@@ -11,7 +11,7 @@ import { getCellLocationApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const settingsPromise = getCellLocationApiSettings({
+const settings = await getCellLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
@@ -110,7 +110,7 @@ export const handler = async (
 		}
 	}
 
-	const { serviceKey, teamId, endpoint } = await settingsPromise
+	const { serviceKey, teamId, endpoint } = settings
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const maybeCeollGeolocation = await c.post({

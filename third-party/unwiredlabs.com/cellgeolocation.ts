@@ -9,7 +9,7 @@ import { getApiSettings } from './unwiredlabs.js'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const settingsPromise = getApiSettings({
+const settings = await getApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
@@ -17,7 +17,7 @@ const settingsPromise = getApiSettings({
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 	try {
-		const { apiKey, endpoint } = await settingsPromise
+		const { apiKey, endpoint } = settings
 		const { hostname, pathname } = new URL(endpoint)
 
 		// See https://eu1.unwiredlabs.com/docs-html/index.html#response
