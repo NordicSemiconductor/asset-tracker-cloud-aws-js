@@ -56,7 +56,7 @@
     "@nordicsemiconductor/cloudformation-helpers": "7.0.0",
     "@nordicsemiconductor/e2e-bdd-test-runner": "15.0.0",
     "@nordicsemiconductor/firmware-ci-device-helpers": "13.0.0",
-    "@nordicsemiconductor/object-to-env": "2.1.2",
+    "@nordicsemiconductor/object-to-env": "3.0.0",
     "@nordicsemiconductor/package-layered-lambdas": "9.0.63",
     "@nordicsemiconductor/random-words": "5.1.2",
     "@octokit/rest": "18.12.0",
