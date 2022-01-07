@@ -186,6 +186,7 @@ export const prepareCDKLambdas = async ({
 					'@aws-sdk/client-iot',
 					'@nordicsemiconductor/cloudformation-helpers',
 					'uuid',
+					'tslib',
 				],
 				dir: cloudFormationLayerDir,
 				reporter,
