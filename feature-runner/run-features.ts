@@ -1,38 +1,38 @@
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { IoTClient } from '@aws-sdk/client-iot'
+import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import {
-	FeatureRunner,
-	ConsoleReporter,
-	cognitoStepRunners,
 	awsSdkStepRunners,
-	storageStepRunners,
-	restStepRunners,
+	cognitoStepRunners,
+	ConsoleReporter,
+	FeatureRunner,
 	randomStepRunners,
 	RestClient,
+	restStepRunners,
+	storageStepRunners,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
-import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
+import { queryClient } from '@nordicsemiconductor/timestream-helpers'
+import chalk from 'chalk'
 import { program } from 'commander'
-import * as chalk from 'chalk'
-import { StackOutputs } from '../cdk/stacks/AssetTracker/stack'
-import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
-import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack'
-import { assetTrackerStepRunners } from './steps/asset-tracker'
-import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
-import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { IoTClient } from '@aws-sdk/client-iot'
+import { promises as fs } from 'fs'
+import * as path from 'path'
 import { v4 } from 'uuid'
+import { getIotEndpoint } from '../cdk/helper/getIotEndpoint.js'
+import { StackOutputs } from '../cdk/stacks/AssetTracker/stack.js'
+import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI.js'
 import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
 	HTTP_MOCK_HTTP_API_STACK_NAME,
-} from '../cdk/stacks/stackName'
-import { promises as fs } from 'fs'
-import * as path from 'path'
-import { certsDir } from '../cli/jitp/certsDir'
-import { timestreamStepRunners } from './steps/timestream'
-import { queryClient } from '@nordicsemiconductor/timestream-helpers'
-import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
-import { httpApiMockStepRunners } from './steps/httpApiMock'
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { gpsDay } from '../pgps/gpsTime'
+} from '../cdk/stacks/stackName.js'
+import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
+import { certsDir } from '../cli/jitp/certsDir.js'
+import { gpsDay } from '../pgps/gpsTime.js'
+import { assetTrackerStepRunners } from './steps/asset-tracker.js'
+import { httpApiMockStepRunners } from './steps/httpApiMock.js'
+import { timestreamStepRunners } from './steps/timestream.js'
 
 let ran = false
 

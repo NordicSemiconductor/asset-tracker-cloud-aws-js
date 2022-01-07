@@ -1,15 +1,15 @@
 import * as CDK from 'aws-cdk-lib'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
+import * as ApiGateway from 'aws-cdk-lib/aws-apigateway'
 import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as ApiGateway from 'aws-cdk-lib/aws-apigateway'
-import { LambdaLogGroup } from '../resources/LambdaLogGroup'
-import { HTTP_MOCK_HTTP_API_STACK_NAME } from '../stacks/stackName'
-import { HTTPAPIMockLambdas } from './prepare-test-resources'
+import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as S3 from 'aws-cdk-lib/aws-s3'
-import { lambdasOnS3 } from '../resources/lambdasOnS3'
-import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
-import { logToCloudWatch } from '../resources/logToCloudWatch'
+import { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
+import { LambdaLogGroup } from '../resources/LambdaLogGroup.js'
+import { lambdasOnS3 } from '../resources/lambdasOnS3.js'
+import { logToCloudWatch } from '../resources/logToCloudWatch.js'
+import { HTTP_MOCK_HTTP_API_STACK_NAME } from '../stacks/stackName.js'
+import { HTTPAPIMockLambdas } from './prepare-test-resources.js'
 
 /**
  * This is CloudFormation stack sets up a dummy HTTP API which stores all requests in SQS for inspection

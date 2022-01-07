@@ -1,23 +1,23 @@
-import { AssetTrackerApp } from './apps/AssetTracker'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
+import chalk from 'chalk'
 import {
 	getAGPSLocationApiSettings,
 	getCellLocationApiSettings,
 	getPGPSLocationApiSettings,
 	serviceKeyProperty,
-} from '../third-party/nrfcloud.com/settings'
-import { warn } from './helper/note'
-import { CORE_STACK_NAME } from './stacks/stackName'
-import { getSettings } from '../util/settings'
-import * as chalk from 'chalk'
+} from '../third-party/nrfcloud.com/settings.js'
+import { getApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs.js'
+import { getSettings } from '../util/settings.js'
+import { AssetTrackerApp } from './apps/AssetTracker.js'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName.js'
+import { getStackContexts } from './helper/getStackContexts.js'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir.js'
+import { warn } from './helper/note.js'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
-} from './stacks/AssetTracker/lambdas'
-import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
-import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
-import { getStackContexts } from './helper/getStackContexts'
+} from './stacks/AssetTracker/lambdas.js'
+import { CORE_STACK_NAME } from './stacks/stackName.js'
 
 const ssm = new SSMClient({})
 const fetchUnwiredLabsApiSettings = getApiSettings({

@@ -1,7 +1,7 @@
 import { device } from 'aws-iot-device-sdk'
-import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
-import { isNullOrUndefined } from '../../util/isNullOrUndefined'
 import { promises as fs } from 'fs'
+import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
+import { isNullOrUndefined } from '../../util/isNullOrUndefined.js'
 
 export type Listener = () => unknown
 export type ListenerWithPayload = (payload: Buffer) => unknown

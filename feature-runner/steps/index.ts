@@ -1,1 +1,1 @@
-export * from './asset-tracker'
+export * from './asset-tracker.js'

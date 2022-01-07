@@ -1,11 +1,11 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
+import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { request as nodeRequest } from 'https'
 import { URL } from 'url'
-import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
-import { fromEnv } from '../../util/fromEnv'
-import { getApiSettings } from './unwiredlabs'
-import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { Cell } from '../../geolocation/Cell'
+import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types.js'
+import { Cell } from '../../geolocation/Cell.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { getApiSettings } from './unwiredlabs.js'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 

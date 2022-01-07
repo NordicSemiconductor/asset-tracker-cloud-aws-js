@@ -1,22 +1,22 @@
+import { Static, TObject, TProperties } from '@sinclair/typebox'
+import Ajv from 'ajv'
+import * as J from 'fp-ts/Json'
+import * as E from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/lib/function'
 import {
 	chain,
+	fromEither,
 	left,
+	map,
 	right,
 	TaskEither,
 	tryCatch,
-	fromEither,
-	map,
 } from 'fp-ts/lib/TaskEither'
-import * as E from 'fp-ts/lib/Either'
-import { request as nodeRequest, RequestOptions } from 'https'
-import { URL } from 'url'
-import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
-import { Static, TObject, TProperties } from '@sinclair/typebox'
-import { pipe } from 'fp-ts/lib/function'
-import Ajv from 'ajv'
-import * as jwt from 'jsonwebtoken'
 import { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
-import * as J from 'fp-ts/Json'
+import { request as nodeRequest, RequestOptions } from 'https'
+import * as jwt from 'jsonwebtoken'
+import { URL } from 'url'
+import { ErrorInfo, ErrorType } from '../../api/ErrorInfo.js'
 
 const ajv = new Ajv()
 // see @https://github.com/sinclairzx81/typebox/issues/51

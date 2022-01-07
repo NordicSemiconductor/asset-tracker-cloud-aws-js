@@ -1,4 +1,4 @@
-import { batchToTimestreamRecords } from './batchToTimestreamRecords'
+import { batchToTimestreamRecords } from './batchToTimestreamRecords.js'
 
 describe('batchToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {

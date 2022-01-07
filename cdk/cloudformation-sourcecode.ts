@@ -1,3 +1,3 @@
-import { LambdaSourceCodeStorageApp } from './apps/LambdaSourceCodeStorage'
+import { LambdaSourceCodeStorageApp } from './apps/LambdaSourceCodeStorage.js'
 
 new LambdaSourceCodeStorageApp().synth()

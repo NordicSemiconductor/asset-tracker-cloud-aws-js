@@ -1,4 +1,4 @@
-import { iotRuleSqlCheckUndefined } from './iotRuleSqlCheckUndefined'
+import { iotRuleSqlCheckUndefined } from './iotRuleSqlCheckUndefined.js'
 
 describe('iotRuleSqlCheckUndefined', () => {
 	it('should check for undefined for the given values', () =>

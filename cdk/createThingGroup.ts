@@ -11,12 +11,12 @@ import {
 	ListThingsInThingGroupCommand,
 	UpdateCertificateCommand,
 } from '@aws-sdk/client-iot'
-import { CloudFormationCustomResourceEvent } from 'aws-lambda'
-import { paginate } from '../util/paginate'
 import {
 	cfnResponse,
 	ResponseStatus,
 } from '@nordicsemiconductor/cloudformation-helpers'
+import { CloudFormationCustomResourceEvent } from 'aws-lambda'
+import { paginate } from '../util/paginate.js'
 
 const iot = new IoTClient({})
 

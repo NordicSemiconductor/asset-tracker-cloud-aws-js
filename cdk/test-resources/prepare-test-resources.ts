@@ -1,10 +1,10 @@
-import * as path from 'path'
 import {
-	packLayeredLambdas,
-	makeLayerFromPackageJSON,
 	ConsoleProgressReporter,
+	makeLayerFromPackageJSON,
+	packLayeredLambdas,
 } from '@nordicsemiconductor/package-layered-lambdas'
-import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import * as path from 'path'
+import { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 
 export type HTTPAPIMockLambdas = {
 	httpApiMock: string
@@ -53,7 +53,6 @@ export const prepareHTTPAPIMockLambdas = async ({
 					'api-mock-lambda.ts',
 				),
 			},
-			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
 		}),
 	}
 }

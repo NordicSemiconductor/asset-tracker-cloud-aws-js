@@ -1,4 +1,4 @@
-import { iotRuleSqlCheckIfDefinedAndNotZero } from './iotRuleSqlCheckIfDefinedAndNotZero'
+import { iotRuleSqlCheckIfDefinedAndNotZero } from './iotRuleSqlCheckIfDefinedAndNotZero.js'
 
 describe('iotRuleSqlCheckIfDefinedAndNotZero', () => {
 	it('should check for undefined for the given values', () =>

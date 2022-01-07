@@ -1,5 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getSettings } from '../../util/settings'
+import { getSettings } from '../../util/settings.js'
 
 export const getApiSettings =
 	({ ssm, stackName }: { ssm: SSMClient; stackName: string }) =>

@@ -1,10 +1,10 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { MaybeCellGeoLocation } from './types'
 import { isSome } from 'fp-ts/lib/Option'
-import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
-import { fromEnv } from '../../util/fromEnv'
-import { Cell } from '../../geolocation/Cell'
+import { Cell } from '../../geolocation/Cell.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations.js'
+import { MaybeCellGeoLocation } from './types.js'
 
 const { TableName, IndexName } = fromEnv({
 	TableName: 'LOCATIONS_TABLE',
