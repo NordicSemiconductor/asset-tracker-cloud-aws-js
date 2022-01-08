@@ -55,7 +55,7 @@
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "11.0.3",
     "@nordicsemiconductor/cloudformation-helpers": "7.0.0",
     "@nordicsemiconductor/e2e-bdd-test-runner": "15.0.2",
-    "@nordicsemiconductor/firmware-ci-device-helpers": "13.0.0",
+    "@nordicsemiconductor/firmware-ci-device-helpers": "13.0.1",
     "@nordicsemiconductor/object-to-env": "3.0.0",
     "@nordicsemiconductor/package-layered-lambdas": "11.0.1",
     "@nordicsemiconductor/random-words": "6.0.0",
