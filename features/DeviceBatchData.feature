@@ -14,7 +14,7 @@ Feature: Device: Batch Data
     Given the tracker publishes this message to the topic {tracker:id}/batch
       """
       {
-        "gps": [
+        "gnss": [
           {
             "v": {
               "lng": {lng1},
@@ -46,7 +46,7 @@ Feature: Device: Batch Data
       SELECT measure_value::double AS value
       FROM "{historicaldataDatabaseName}"."{historicaldataTableName}"
       WHERE deviceId='{tracker:id}'
-      AND measure_name='gps.lng'
+      AND measure_name='gnss.lng'
       AND measure_value::double IS NOT NULL
       ORDER BY time DESC
       """

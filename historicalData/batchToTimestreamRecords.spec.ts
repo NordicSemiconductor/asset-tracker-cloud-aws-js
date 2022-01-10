@@ -12,7 +12,7 @@ describe('batchToTimestreamRecords', () => {
 		]
 		const r = batchToTimestreamRecords({
 			batch: {
-				gps: [
+				gnss: [
 					{
 						v: {
 							lng: 8.669555,
@@ -42,28 +42,28 @@ describe('batchToTimestreamRecords', () => {
 		expect(r).toEqual([
 			{
 				Dimensions,
-				MeasureName: 'gps.lng',
+				MeasureName: 'gnss.lng',
 				MeasureValue: '8.669555',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483136657',
 			},
 			{
 				Dimensions,
-				MeasureName: 'gps.lat',
+				MeasureName: 'gnss.lat',
 				MeasureValue: '50.109177',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483136657',
 			},
 			{
 				Dimensions,
-				MeasureName: 'gps.lng',
+				MeasureName: 'gnss.lng',
 				MeasureValue: '10.424793',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483256659',
 			},
 			{
 				Dimensions,
-				MeasureName: 'gps.lat',
+				MeasureName: 'gnss.lat',
 				MeasureValue: '63.422975',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483256659',

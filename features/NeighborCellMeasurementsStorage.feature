@@ -17,7 +17,7 @@ Feature: Store neighboring cell measurement reports
             {
             "dev": {
                 "v": {
-                    "nw": "LTE-M GPS"
+                    "nw": "LTE-M GNSS"
                 },
                 "ts": {ts}
             },
@@ -136,7 +136,7 @@ Feature: Store neighboring cell measurement reports
                 "ts": { "N": "{ts}" }
             }
             },
-            "nw": { "S": "LTE-M GPS" },
+            "nw": { "S": "LTE-M GNSS" },
             "deviceId": { "S": "{tracker:id}" }
         }
         """

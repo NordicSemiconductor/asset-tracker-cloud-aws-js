@@ -23,7 +23,7 @@ Feature: Read Device Shadow
               "modV": "mfw_nrf9160_1.0.0",
               "brdV": "thingy91_nrf9160",
               "appV": "0.14.6",
-              "nw": "LTE-M GPS"
+              "nw": "LTE-M GNSS"
             },
             "ts": {updateShadowTs}
          },
@@ -43,7 +43,7 @@ Feature: Read Device Shadow
             "actwt": 60,
             "mvres": 60,
             "mvt": 3600,
-            "gpst": 1000,
+            "gnsst": 1000,
             "acct": 0.5
           }
        }

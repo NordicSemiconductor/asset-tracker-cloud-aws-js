@@ -20,7 +20,7 @@ Feature: Update Device Configuration
                 "actwt": 60,
                 "mvres": 60,
                 "mvt": 3600,
-                "gpst": 1000,
+                "gnsst": 1000,
                 "acct": 0.5
               }
             }
