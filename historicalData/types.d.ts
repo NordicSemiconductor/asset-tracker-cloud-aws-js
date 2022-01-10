@@ -21,7 +21,7 @@ type UpdatedDeviceState = {
 		bat?: NumberValueSensor
 		env?: NumbersValueSensor
 		acc?: NumbersValueSensor
-		gps?: NumbersValueSensor
+		gnss?: NumbersValueSensor
 		dev?: NumbersAndStringsValueSensor
 		roam?: NumbersAndStringsValueSensor
 	}
@@ -44,7 +44,7 @@ type BatchMessage = {
 		bat?: NumberValueSensor[]
 		env?: NumbersValueSensor[]
 		acc?: NumbersValueSensor[]
-		gps?: NumbersValueSensor[]
+		gnss?: NumbersValueSensor[]
 		dev?: NumbersAndStringsValueSensor[]
 		roam?: NumbersAndStringsValueSensor[]
 	}

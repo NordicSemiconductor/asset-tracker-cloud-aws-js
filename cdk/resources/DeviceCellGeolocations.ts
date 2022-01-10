@@ -1,7 +1,7 @@
 import * as CloudFormation from 'aws-cdk-lib'
+import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as IoT from 'aws-cdk-lib/aws-iot'
-import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 
 /**
  * Store Cell Geolocation from Devices.
@@ -100,9 +100,9 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 					'"-",',
 					'current.state.reported.roam.v.area',
 					') AS cellId,',
-					'current.state.reported.gps.v.lat AS lat,',
-					'current.state.reported.gps.v.lng AS lng,',
-					'current.state.reported.gps.v.acc AS accuracy,',
+					'current.state.reported.gnss.v.lat AS lat,',
+					'current.state.reported.gnss.v.lng AS lng,',
+					'current.state.reported.gnss.v.acc AS accuracy,',
 					'concat("device:", topic(3)) as source,',
 					"parse_time(\"yyyy-MM-dd'T'HH:mm:ss.S'Z'\", timestamp()) as timestamp",
 					`FROM '$aws/things/+/shadow/update/documents'`,
@@ -112,18 +112,18 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 					'AND isUndefined(current.state.reported.roam.v.mccmnc) = false',
 					'AND isUndefined(current.state.reported.roam.v.cell) = false',
 					`AND isUndefined(current.state.reported.dev.v.nw) = false`,
-					// and if it has GPS location
-					'AND isUndefined(current.state.reported.gps.v.lat) = false AND current.state.reported.gps.v.lat <> 0',
-					'AND isUndefined(current.state.reported.gps.v.lng) = false AND current.state.reported.gps.v.lng <> 0',
+					// and if it has GNSS location
+					'AND isUndefined(current.state.reported.gnss.v.lat) = false AND current.state.reported.gnss.v.lat <> 0',
+					'AND isUndefined(current.state.reported.gnss.v.lng) = false AND current.state.reported.gnss.v.lng <> 0',
 					// only if the location has changed
 					'AND (',
-					'isUndefined(previous.state.reported.gps.v.lat)',
+					'isUndefined(previous.state.reported.gnss.v.lat)',
 					'OR',
-					'previous.state.reported.gps.v.lat <> current.state.reported.gps.v.lat',
+					'previous.state.reported.gnss.v.lat <> current.state.reported.gnss.v.lat',
 					'OR',
-					'isUndefined(previous.state.reported.gps.v.lng)',
+					'isUndefined(previous.state.reported.gnss.v.lng)',
 					'OR',
-					'previous.state.reported.gps.v.lng <> current.state.reported.gps.v.lng',
+					'previous.state.reported.gnss.v.lng <> current.state.reported.gnss.v.lng',
 					')',
 				].join(' '),
 				actions: [
