@@ -19,10 +19,8 @@
   },
   "homepage": "https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js#readme",
   "keywords": [
-    "Cloud",
-    "IoT",
-    "nRF Asset Tracker",
-    "Nordic Semiconductor"
+    "nrf-asset-tracker",
+    "iot"
   ],
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "BSD-3-Clause",
