@@ -24,22 +24,17 @@ Feature: Cell Geolocation API
         Then the tracker updates its reported state with
             """
             {
-            "dev": {
-                "v": {
-                    "nw": "<nw-modem>"
-                },
-                "ts": {ts}
-            },
-            "roam": {
-            "v": {
-            "rsrp": -97,
-            "area": 211,
-            "mccmnc": 26201,
-            "cell": {cellId},
-            "ip": "10.202.80.9"
-            },
-            "ts": {ts}
-            }
+                "roam": {
+                    "v": {
+                        "nw": "<nw-modem>",
+                        "rsrp": -97,
+                        "area": 211,
+                        "mccmnc": 26201,
+                        "cell": {cellId},
+                        "ip": "10.202.80.9"
+                    },
+                    "ts": {ts}
+                }
             }
             """
 

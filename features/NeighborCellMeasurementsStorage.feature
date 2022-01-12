@@ -15,22 +15,17 @@ Feature: Store neighboring cell measurement reports
         Then the tracker updates its reported state with
             """
             {
-            "dev": {
+            "roam": {
                 "v": {
                     "nw": "LTE-M"
+                    "rsrp": -97,
+                    "area": {ncellmeasAreaId},
+                    "mccmnc": 24201,
+                    "cell": {ncellmeasCellId},
+                    "ip": "10.202.80.9"
                 },
                 "ts": {ts}
-            },
-            "roam": {
-            "v": {
-            "rsrp": -97,
-            "area": {ncellmeasAreaId},
-            "mccmnc": 24201,
-            "cell": {ncellmeasCellId},
-            "ip": "10.202.80.9"
-            },
-            "ts": {ts}
-            }
+                }
             }
             """
 
