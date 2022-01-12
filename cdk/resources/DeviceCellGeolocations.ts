@@ -87,12 +87,12 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 					'SELECT',
 					'newuuid() as uuid,',
 					'current.state.reported.roam.v.cell as cell,',
-					`current.state.reported.dev.v.nw as nw,`,
+					`current.state.reported.roam.v.nw as nw,`,
 					'current.state.reported.roam.v.mccmnc as mccmnc,',
 					'current.state.reported.roam.v.area as area,',
 					// see cellId in @nordicsemiconductor/cell-geolocation-helpers for format of cellId
 					'concat(',
-					`CASE startswith(current.state.reported.dev.v.nw, "NB-IoT") WHEN true THEN "nbiot" ELSE "ltem" END,`,
+					`CASE startswith(current.state.reported.roam.v.nw, "NB-IoT") WHEN true THEN "nbiot" ELSE "ltem" END,`,
 					'"-",',
 					'current.state.reported.roam.v.cell,',
 					'"-",',
@@ -111,7 +111,7 @@ export class DeviceCellGeolocations extends CloudFormation.Resource {
 					'isUndefined(current.state.reported.roam.v.area) = false',
 					'AND isUndefined(current.state.reported.roam.v.mccmnc) = false',
 					'AND isUndefined(current.state.reported.roam.v.cell) = false',
-					`AND isUndefined(current.state.reported.dev.v.nw) = false`,
+					`AND isUndefined(current.state.reported.roam.v.nw) = false`,
 					// and if it has GNSS location
 					'AND isUndefined(current.state.reported.gnss.v.lat) = false AND current.state.reported.gnss.v.lat <> 0',
 					'AND isUndefined(current.state.reported.gnss.v.lng) = false AND current.state.reported.gnss.v.lng <> 0',
