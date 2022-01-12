@@ -17,7 +17,7 @@ Feature: Store neighboring cell measurement reports
             {
             "roam": {
                 "v": {
-                    "nw": "LTE-M"
+                    "nw": "LTE-M",
                     "rsrp": -97,
                     "area": {ncellmeasAreaId},
                     "mccmnc": 24201,
