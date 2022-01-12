@@ -6,9 +6,9 @@ Feature: Cell Geolocation API
 
     Contexts:
 
-    | nw    | nw-modem   |
-    | ltem  | LTE-M GNSS  |
-    | nbiot | NB-IoT GNSS |
+    | nw    | nw-modem |
+    | ltem  | LTE-M    |
+    | nbiot | NB-IoT   |
 
     Background:
 
