@@ -22,8 +22,6 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				},
 				dev: {
 					v: {
-						band: 666,
-						nw: 'LAN',
 						modV: 'device-simulator',
 						brdV: 'device-simulator',
 						appV: '0.0.0-development',
@@ -34,6 +32,8 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				},
 				roam: {
 					v: {
+						band: 666,
+						nw: 'LAN',
 						rsrp: -97,
 						area: 30401,
 						mccmnc: 24201,
@@ -46,20 +46,6 @@ describe('shadowUpdateToTimestreamRecords', () => {
 			deviceId: 'slipslop-particle-santalum',
 		})
 		expect(r).toEqual([
-			{
-				Dimensions,
-				MeasureName: 'dev.band',
-				MeasureValue: '666',
-				MeasureValueType: 'DOUBLE',
-				Time: '1606395292763',
-			},
-			{
-				Dimensions,
-				MeasureName: 'dev.nw',
-				MeasureValue: 'LAN',
-				MeasureValueType: 'VARCHAR',
-				Time: '1606395292763',
-			},
 			{
 				Dimensions,
 				MeasureName: 'dev.modV',
@@ -92,6 +78,20 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				Dimensions,
 				MeasureName: 'dev.imei',
 				MeasureValue: '352656106111232',
+				MeasureValueType: 'VARCHAR',
+				Time: '1606395292763',
+			},
+			{
+				Dimensions,
+				MeasureName: 'roam.band',
+				MeasureValue: '666',
+				MeasureValueType: 'DOUBLE',
+				Time: '1606395292763',
+			},
+			{
+				Dimensions,
+				MeasureName: 'roam.nw',
+				MeasureValue: 'LAN',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
 			},

@@ -1,7 +1,7 @@
 import * as CloudFormation from 'aws-cdk-lib'
+import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as IoT from 'aws-cdk-lib/aws-iot'
-import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 
 /**
  * Provides storage for neighboring cell measurement reports
@@ -73,7 +73,7 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				description:
 					'Store all neighboring cell measurement reports sent by devices in DynamoDB',
 				ruleDisabled: false,
-				sql: `SELECT newuuid() as reportId, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp, * as report, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.dev.v.nw as nw FROM '+/ncellmeas'`,
+				sql: `SELECT newuuid() as reportId, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp, * as report, get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.roam.v.nw as nw FROM '+/ncellmeas'`,
 				actions: [
 					{
 						dynamoDBv2: {
