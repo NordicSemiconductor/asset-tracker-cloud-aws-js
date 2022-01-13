@@ -4,6 +4,8 @@ phases:
     runtime-versions:
       nodejs: 14
     commands:
+      # Next will install Node.js 16
+      - n 16
       - npm install --global npm
       - npm ci --no-audit
       - npx tsc
