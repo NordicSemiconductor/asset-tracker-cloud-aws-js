@@ -37,7 +37,7 @@
     "@nordicsemiconductor/timestream-helpers": "4.0.1",
     "@sinclair/typebox": "0.23.2",
     "ajv": "8.9.0",
-    "fp-ts": "2.11.7",
+    "fp-ts": "2.11.8",
     "jsonwebtoken": "8.5.1",
     "uuid": "8.3.2"
   },
