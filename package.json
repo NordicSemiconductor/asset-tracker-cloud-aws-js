@@ -59,7 +59,7 @@
     "@nordicsemiconductor/random-words": "6.0.0",
     "@octokit/rest": "18.12.0",
     "@types/aws-iot-device-sdk": "2.2.4",
-    "@types/aws-lambda": "8.10.89",
+    "@types/aws-lambda": "8.10.90",
     "@types/backoff": "2.5.2",
     "@types/cfn-response": "1.0.5",
     "@types/chai-subset": "1.3.3",
