@@ -79,8 +79,8 @@ jobs:
       - run: echo "VERSION=${{ github.sha }}" >> $GITHUB_ENV
       - name: Set up stack for End-to-End tests
         run: |
+          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
-          npx cdk bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-http-api-mock.js' deploy '*' --require-approval never
           node cli configure thirdParty unwiredlabs apiKey my-secret
           node cli configure thirdParty nrfcloud teamId `uuidgen`
