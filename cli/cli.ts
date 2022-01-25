@@ -1,29 +1,30 @@
-import { program } from 'commander'
-import * as chalk from 'chalk'
-import * as fs from 'fs'
 import { IoTClient } from '@aws-sdk/client-iot'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
+import * as chalk from 'chalk'
+import { program } from 'commander'
+import * as fs from 'fs'
 import * as path from 'path'
-import { cdCommand } from './commands/cd'
-import { createAndProvisionDeviceCertCommand } from './commands/create-and-provision-device-cert'
-import { reactConfigCommand } from './commands/react-config'
-import { infoCommand } from './commands/info'
-import { createCACommand } from './commands/create-ca'
+import * as readline from 'readline'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
-import { purgeBucketsCommand } from './commands/purge-buckets'
-import { logsCommand } from './commands/logs'
+import { cdCommand } from './commands/cd'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
 import { CommandDefinition } from './commands/CommandDefinition'
-import * as readline from 'readline'
-import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
-import { purgeCAsCommand } from './commands/purge-cas'
-import { firmwareCICommand } from './commands/firmware-ci'
-import { certsDir as provideCertsDir } from './jitp/certsDir'
-import { flashFirmwareCommand } from './commands/flash-firmware'
 import { configureCommand } from './commands/configure'
-import { showAPIConfigurationCommand } from './commands/show-api-configuration'
-import { imeiCommand } from './commands/imei'
+import { createAndProvisionDeviceCertCommand } from './commands/create-and-provision-device-cert'
+import { createCACommand } from './commands/create-ca'
 import { createSimulatorCertCommand } from './commands/create-simulator-cert'
+import { firmwareCICommand } from './commands/firmware-ci'
+import { flashFirmwareCommand } from './commands/flash-firmware'
+import { imeiCommand } from './commands/imei'
+import { infoCommand } from './commands/info'
+import { logsCommand } from './commands/logs'
+import { purgeBucketsCommand } from './commands/purge-buckets'
+import { purgeCAsCommand } from './commands/purge-cas'
+import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
+import { reactConfigCommand } from './commands/react-config'
+import { showAPIConfigurationCommand } from './commands/show-api-configuration'
+import { webappCICommand } from './commands/web-app-ci'
+import { certsDir as provideCertsDir } from './jitp/certsDir'
 
 const iot = new IoTClient({})
 const version = JSON.parse(
@@ -104,6 +105,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 			firmwareCICommand({
 				endpoint,
 			}),
+			webappCICommand(),
 			imeiCommand(),
 		)
 	}

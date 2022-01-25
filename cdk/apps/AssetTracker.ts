@@ -1,14 +1,15 @@
 import { App } from 'aws-cdk-lib'
-import { AssetTrackerStack } from '../stacks/AssetTracker/stack'
-import { WebAppStack } from '../stacks/WebApp'
-import { FirmwareCIStack } from '../stacks/FirmwareCI'
-import * as path from 'path'
 import { readFileSync } from 'fs'
-import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
-import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
+import * as path from 'path'
 import { enabledInContext } from '../helper/enabledInContext'
+import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
 import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
 import { AssetTrackerLambdas, CDKLambdas } from '../stacks/AssetTracker/lambdas'
+import { AssetTrackerStack } from '../stacks/AssetTracker/stack'
+import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
+import { FirmwareCIStack } from '../stacks/FirmwareCI'
+import { WebAppStack } from '../stacks/WebApp'
+import { WebAppCIStack } from '../stacks/WebAppCI'
 
 export class AssetTrackerApp extends App {
 	public constructor(args: {
@@ -36,6 +37,14 @@ export class AssetTrackerApp extends App {
 			component: 'Firmware CI',
 			onEnabled: () => {
 				new FirmwareCIStack(this)
+			},
+		})
+		// Web App CI
+		checkFlag({
+			key: 'web-app-ci',
+			component: 'Web App CI',
+			onEnabled: () => {
+				new WebAppCIStack(this)
 			},
 		})
 		// CD
