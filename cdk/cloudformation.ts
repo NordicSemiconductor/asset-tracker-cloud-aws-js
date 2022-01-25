@@ -1,23 +1,23 @@
-import { AssetTrackerApp } from './apps/AssetTracker'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { getApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
+import * as chalk from 'chalk'
 import {
 	getAGPSLocationApiSettings,
 	getCellLocationApiSettings,
 	getPGPSLocationApiSettings,
 	serviceKeyProperty,
 } from '../third-party/nrfcloud.com/settings'
-import { warn } from './helper/note'
-import { CORE_STACK_NAME } from './stacks/stackName'
+import { getApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
 import { getSettings } from '../util/settings'
-import * as chalk from 'chalk'
+import { AssetTrackerApp } from './apps/AssetTracker'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
+import { getStackContexts } from './helper/getStackContexts'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
+import { warn } from './helper/note'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
 } from './stacks/AssetTracker/lambdas'
-import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
-import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
-import { getStackContexts } from './helper/getStackContexts'
+import { CORE_STACK_NAME } from './stacks/stackName'
 
 const ssm = new SSMClient({})
 const fetchUnwiredLabsApiSettings = getApiSettings({
@@ -145,9 +145,8 @@ Promise.all([
 					'Continuous Deployment',
 					'No GitHub API key configured. Continuous deployment will be disabled.',
 				)
-
 				warn(
-					'Cell Geolocation',
+					'Continuous Deployment',
 					`Use ${chalk.greenBright(
 						`node cli configure codebuild github token <token>`,
 					)} to set the token`,

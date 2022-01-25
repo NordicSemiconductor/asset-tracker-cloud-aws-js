@@ -260,6 +260,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: `${this.stackName}:userPoolClientId`,
 		})
 
+		new CloudFormation.CfnOutput(this, 'userPoolArn', {
+			value: userPool.userPoolArn,
+			exportName: `${this.stackName}:userPoolArn`,
+		})
+
 		// IoT Policy for Cognito user
 
 		const userIotPolicy = new Iot.CfnPolicy(this, 'userIotPolicy', {
@@ -545,6 +550,7 @@ export type StackOutputs = {
 	identityPoolId: string
 	developerProviderName: string
 	userPoolClientId: string
+	userPoolArn: string
 	webAppBucketName: string
 	cloudfrontDistributionIdWebApp: string
 	webAppDomainName: string
