@@ -11,7 +11,8 @@ phases:
       - npx tsc
   build:
     commands:
-      - node cli react-config > $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+      - node cli web-app-config >
+        $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export INITIATOR_PIPELINE_NAME=`echo $CODEBUILD_INITIATOR | cut -d'/'
         -f2`
       - export SOURCE_VERSION=`aws codepipeline get-pipeline-state --name
