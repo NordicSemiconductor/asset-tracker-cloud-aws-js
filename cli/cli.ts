@@ -21,9 +21,9 @@ import { logsCommand } from './commands/logs'
 import { purgeBucketsCommand } from './commands/purge-buckets'
 import { purgeCAsCommand } from './commands/purge-cas'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
-import { reactConfigCommand } from './commands/react-config'
 import { showAPIConfigurationCommand } from './commands/show-api-configuration'
 import { webappCICommand } from './commands/web-app-ci'
+import { webAppConfigCommand } from './commands/web-app-config'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 
 const iot = new IoTClient({})
@@ -77,7 +77,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 	const commands = [
 		createCACommand({ certsDir }),
 		createSimulatorCertCommand({ certsDir, endpoint }),
-		reactConfigCommand(),
+		webAppConfigCommand(),
 		infoCommand(),
 		cdCommand(),
 		purgeIotUserPolicyPrincipals(),
