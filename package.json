@@ -115,6 +115,7 @@
     "dist/util",
     "dist/feature-runner",
     "dist/cli",
+    "dist/cdk",
     "cli/index.js",
     "LICENSE",
     "README.md"
