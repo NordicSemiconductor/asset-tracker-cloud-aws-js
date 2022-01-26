@@ -69,6 +69,16 @@ export class WebAppCI extends CloudFormation.Resource {
 			}),
 		)
 
+		// Read stack config
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: ['ssm:GetParametersByPath'],
+				resources: [
+					`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/config/stack`,
+				],
+			}),
+		)
+
 		this.userAccessKey = new IAM.CfnAccessKey(this, 'userAccessKey', {
 			userName: ciUser.userName,
 			status: 'Active',

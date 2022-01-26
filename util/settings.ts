@@ -1,14 +1,14 @@
 import {
-	GetParametersByPathCommand,
-	SSMClient,
-	PutParameterCommand,
 	DeleteParameterCommand,
+	GetParametersByPathCommand,
+	PutParameterCommand,
+	SSMClient,
 } from '@aws-sdk/client-ssm'
 
-type Scopes = 'context' | 'thirdParty' | 'codebuild'
+type Scopes = 'context' | 'config' | 'thirdParty' | 'codebuild'
 type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfcloud'
 
-const settingsPath = ({
+export const settingsPath = ({
 	stackName,
 	scope,
 	system,

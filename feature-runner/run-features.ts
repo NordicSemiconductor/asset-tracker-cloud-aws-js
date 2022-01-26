@@ -36,7 +36,7 @@ import { timestreamStepRunners } from './steps/timestream'
 
 let ran = false
 
-export type AssetTrackerWorld = StackOutputs & {
+export type AssetTrackerWorld = typeof StackOutputs & {
 	accountId: string
 	userIotPolicyName: string
 	historicaldataTableName: string
@@ -85,7 +85,7 @@ program
 				retry,
 			} = options
 			const cf = new CloudFormationClient({})
-			const stackConfig = await stackOutput(cf)<StackOutputs>(stackName)
+			const stackConfig = await stackOutput(cf)<typeof StackOutputs>(stackName)
 			const mqttEndpoint = await getIotEndpoint(new IoTClient({}))
 
 			const firmwareCIStackConfig = await stackOutput(
