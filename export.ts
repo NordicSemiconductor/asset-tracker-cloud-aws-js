@@ -1,4 +1,3 @@
-export * from './cdk/webAppConfig'
 export * from './cli/jitp/caFileLocations'
 export * from './cli/jitp/certsDir'
 export * from './cli/jitp/createCA'

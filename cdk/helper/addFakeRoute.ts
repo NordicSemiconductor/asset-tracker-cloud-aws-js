@@ -1,12 +1,12 @@
-import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import {
 	ApiGatewayV2Client,
 	CreateRouteCommand,
 } from '@aws-sdk/client-apigatewayv2'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
+import { v4 } from 'uuid'
 import { StackOutputs } from '../stacks/AssetTracker/stack'
 import { CORE_STACK_NAME } from '../stacks/stackName'
-import { v4 } from 'uuid'
 
 /**
  * This creates a fake route after CloudFormation has finished deploying the
@@ -15,9 +15,9 @@ import { v4 } from 'uuid'
  * @see https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js/issues/455
  */
 const main = async () => {
-	const { geolocationApiId } = await stackOutput(
-		new CloudFormationClient({}),
-	)<StackOutputs>(CORE_STACK_NAME)
+	const { geolocationApiId } = await stackOutput(new CloudFormationClient({}))<
+		typeof StackOutputs
+	>(CORE_STACK_NAME)
 
 	const r = await new ApiGatewayV2Client({}).send(
 		new CreateRouteCommand({

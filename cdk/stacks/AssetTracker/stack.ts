@@ -29,6 +29,33 @@ import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
 import { CORE_STACK_NAME } from '../stackName'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 
+/**
+ * Defines the names use for stack outputs, which are used below to ensure
+ * that the names of output variables are correct across stacks.
+ */
+export const StackOutputs = {
+	userPoolId: `${CORE_STACK_NAME}:userPoolId`,
+	identityPoolId: `${CORE_STACK_NAME}:identityPoolId`,
+	developerProviderName: `${CORE_STACK_NAME}:developerProviderName`,
+	userPoolClientId: `${CORE_STACK_NAME}:userPoolClientId`,
+	userPoolArn: `${CORE_STACK_NAME}:userPoolArn`,
+	jitpRoleArn: `${CORE_STACK_NAME}:jitpRoleArn`,
+	thingPolicyArn: `${CORE_STACK_NAME}:thingPolicyArn`,
+	thingGroupName: `${CORE_STACK_NAME}:thingGroupName`,
+	thingGroupLambdaArn: `${CORE_STACK_NAME}:thingGroupLambdaArn`,
+	userIotPolicyArn: `${CORE_STACK_NAME}:userIotPolicyArn`,
+	avatarBucketName: `${CORE_STACK_NAME}:avatarBucketName`,
+	fotaBucketName: `${CORE_STACK_NAME}:fotaBucketName`,
+	historicaldataTableInfo: `${CORE_STACK_NAME}:historicaldataTableInfo`,
+	geolocationApiUrl: `${CORE_STACK_NAME}:geolocationApiUrl`,
+	geolocationApiId: `${CORE_STACK_NAME}:geolocationApiId`,
+	neighborCellGeolocationApiUrl: `${CORE_STACK_NAME}:neighborCellGeolocationApiUrl`,
+	neighborCellGeolocationApiId: `${CORE_STACK_NAME}:neighborCellGeolocationApiId`,
+	ncellmeasStorageTableName: `${CORE_STACK_NAME}:ncellmeasStorageTableName`,
+	ncellmeasStorageTableArn: `${CORE_STACK_NAME}:ncellmeasStorageTableArn`,
+	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
+} as const
+
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
@@ -79,7 +106,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'cloudformationLayerVersionArn', {
 			value: cloudFormationLayer.layerVersionArn,
-			exportName: `${this.stackName}:cloudformationLayerVersionArn`,
+			exportName: StackOutputs.cloudformationLayerVersionArn,
 		})
 
 		const isTest = this.node.tryGetContext('isTest') === true
@@ -117,7 +144,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'userPoolId', {
 			value: userPool.userPoolId,
-			exportName: `${this.stackName}:userPoolId`,
+			exportName: StackOutputs.userPoolId,
 		})
 
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
@@ -132,7 +159,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'developerProviderName', {
 			value: developerProviderName,
-			exportName: `${this.stackName}:developerProviderName`,
+			exportName: StackOutputs.developerProviderName,
 		})
 
 		const identityPool = new Cognito.CfnIdentityPool(this, 'identityPool', {
@@ -252,17 +279,17 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'identityPoolId', {
 			value: identityPool.ref,
-			exportName: `${this.stackName}:identityPoolId`,
+			exportName: StackOutputs.identityPoolId,
 		})
 
 		new CloudFormation.CfnOutput(this, 'userPoolClientId', {
 			value: userPoolClient.userPoolClientId,
-			exportName: `${this.stackName}:userPoolClientId`,
+			exportName: StackOutputs.userPoolClientId,
 		})
 
 		new CloudFormation.CfnOutput(this, 'userPoolArn', {
 			value: userPool.userPoolArn,
-			exportName: `${this.stackName}:userPoolArn`,
+			exportName: StackOutputs.userPoolArn,
 		})
 
 		// IoT Policy for Cognito user
@@ -301,7 +328,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'userIotPolicyArn', {
 			value: userIotPolicy.attrArn,
-			exportName: `${this.stackName}:userIotPolicyArn`,
+			exportName: StackOutputs.userIotPolicyArn,
 		})
 
 		const iotJitpRole = new IAM.Role(this, 'iotJitpRole', {
@@ -320,7 +347,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'jitpRoleArn', {
 			value: iotJitpRole.roleArn,
-			exportName: `${this.stackName}:jitpRoleArn`,
+			exportName: StackOutputs.jitpRoleArn,
 		})
 
 		const iotThingPolicy = new Iot.CfnPolicy(this, 'thingPolicy', {
@@ -364,7 +391,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'thingPolicyArn', {
 			value: iotThingPolicy.attrArn,
-			exportName: `${this.stackName}:thingPolicyArn`,
+			exportName: StackOutputs.thingPolicyArn,
 		})
 
 		const cdkLambdas = {
@@ -378,7 +405,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'thingGroupLambdaArn', {
 			value: thingGroupLambda.function.functionArn,
-			exportName: `${this.stackName}:thingGroupLambdaArn`,
+			exportName: StackOutputs.thingGroupLambdaArn,
 		})
 
 		new ThingGroup(this, 'deviceThingGroup', {
@@ -391,7 +418,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'thingGroupName', {
 			value: CORE_STACK_NAME,
-			exportName: `${this.stackName}:thingGroupName`,
+			exportName: StackOutputs.thingGroupName,
 		})
 
 		new RepublishDesiredConfig(this, 'republishDesiredConfig')
@@ -400,7 +427,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'avatarBucketName', {
 			value: avatarStorage.bucket.bucketName,
-			exportName: `${this.stackName}:avatarBucketName`,
+			exportName: StackOutputs.avatarBucketName,
 		})
 
 		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
@@ -415,7 +442,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'historicaldataTableInfo', {
 			value: hd.table.ref,
-			exportName: `${this.stackName}:historicaldataTableInfo`,
+			exportName: StackOutputs.historicaldataTableInfo,
 		})
 
 		// FOTA
@@ -423,7 +450,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'fotaBucketName', {
 			value: fotaBucket.bucket.bucketName,
-			exportName: `${this.stackName}:fotaBucketName`,
+			exportName: StackOutputs.fotaBucketName,
 		})
 
 		userRole.addToPolicy(
@@ -466,12 +493,12 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {
 			value: `https://${cellGeoApi.api.ref}.execute-api.${this.region}.amazonaws.com/${cellGeoApi.stage.stageName}/`,
-			exportName: `${this.stackName}:geolocationApiUrl`,
+			exportName: StackOutputs.geolocationApiUrl,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiId', {
 			value: cellGeoApi.api.ref,
-			exportName: `${this.stackName}:geolocationApiId`,
+			exportName: StackOutputs.geolocationApiId,
 		})
 
 		// Neighbor Cell Measurements
@@ -482,11 +509,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		)
 		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableName', {
 			value: ncellmeasStorage.reportsTable.tableName,
-			exportName: `${this.stackName}:ncellmeasStorageTableName`,
+			exportName: StackOutputs.ncellmeasStorageTableName,
 		})
 		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableArn', {
 			value: ncellmeasStorage.reportsTable.tableArn,
-			exportName: `${this.stackName}:ncellmeasStorageTableArn`,
+			exportName: StackOutputs.ncellmeasStorageTableArn,
 		})
 		ncellmeasStorage.reportsTable.grantReadData(userRole)
 
@@ -511,12 +538,12 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiUrl', {
 			value: `https://${neighborCellGeolocationApi.api.ref}.execute-api.${this.region}.amazonaws.com/${neighborCellGeolocationApi.stage.stageName}/`,
-			exportName: `${this.stackName}:neighborCellGeolocationApiUrl`,
+			exportName: StackOutputs.neighborCellGeolocationApiUrl,
 		})
 
 		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiId', {
 			value: neighborCellGeolocationApi.api.ref,
-			exportName: `${this.stackName}:neighborCellGeolocationApiId`,
+			exportName: StackOutputs.neighborCellGeolocationApiId,
 		})
 
 		// A-GPS support
@@ -543,28 +570,4 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			resolver: pgpsResolver,
 		})
 	}
-}
-
-export type StackOutputs = {
-	userPoolId: string
-	identityPoolId: string
-	developerProviderName: string
-	userPoolClientId: string
-	userPoolArn: string
-	webAppBucketName: string
-	cloudfrontDistributionIdWebApp: string
-	webAppDomainName: string
-	jitpRoleArn: string
-	thingPolicyArn: string
-	thingGroupName: string
-	userIotPolicyArn: string
-	avatarBucketName: string
-	fotaBucketName: string
-	historicaldataTableInfo: string
-	geolocationApiUrl: string
-	geolocationApiId: string
-	neighborCellGeolocationApiUrl: string
-	neighborCellGeolocationApiId: string
-	ncellmeasStorageTableName: string
-	ncellmeasStorageTableArn: string
 }
