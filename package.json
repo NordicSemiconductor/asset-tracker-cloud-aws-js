@@ -55,7 +55,7 @@
     "@nordicsemiconductor/e2e-bdd-test-runner": "15.0.22",
     "@nordicsemiconductor/firmware-ci-device-helpers": "13.0.20",
     "@nordicsemiconductor/object-to-env": "3.0.0",
-    "@nordicsemiconductor/package-layered-lambdas": "11.0.4",
+    "@nordicsemiconductor/package-layered-lambdas": "11.0.5",
     "@nordicsemiconductor/random-words": "6.0.0",
     "@octokit/rest": "18.12.0",
     "@types/aws-iot-device-sdk": "2.2.4",
