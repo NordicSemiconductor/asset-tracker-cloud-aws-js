@@ -1,7 +1,8 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import * as Cognito from 'aws-cdk-lib/aws-cognito'
 import { WebAppCI } from '../resources/WebAppCI'
-import { CORE_STACK_NAME, WEBAPP_CI_STACK_NAME } from './stackName'
+import { StackOutputs } from './AssetTracker/stack'
+import { WEBAPP_CI_STACK_NAME } from './stackName'
 
 export class WebAppCIStack extends CloudFormation.Stack {
 	public constructor(parent: CloudFormation.App) {
@@ -11,7 +12,7 @@ export class WebAppCIStack extends CloudFormation.Stack {
 			userPool: Cognito.UserPool.fromUserPoolArn(
 				this,
 				'userPoolArn',
-				CloudFormation.Fn.importValue(`${CORE_STACK_NAME}:userPoolArn`),
+				CloudFormation.Fn.importValue(StackOutputs.userPoolArn),
 			),
 		})
 

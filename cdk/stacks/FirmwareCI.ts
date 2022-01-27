@@ -2,7 +2,8 @@ import * as CloudFormation from 'aws-cdk-lib'
 import { Fn } from 'aws-cdk-lib'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import { FirmwareCI } from '../resources/FirmwareCI'
-import { CORE_STACK_NAME, FIRMWARE_CI_STACK_NAME } from './stackName'
+import { StackOutputs } from './AssetTracker/stack'
+import { FIRMWARE_CI_STACK_NAME } from './stackName'
 export class FirmwareCIStack extends CloudFormation.Stack {
 	public constructor(parent: CloudFormation.App) {
 		super(parent, FIRMWARE_CI_STACK_NAME)
@@ -11,7 +12,7 @@ export class FirmwareCIStack extends CloudFormation.Stack {
 			jitpRole: IAM.Role.fromRoleArn(
 				this,
 				'jitpRole',
-				Fn.importValue(`${CORE_STACK_NAME}:jitpRoleArn`),
+				Fn.importValue(StackOutputs.jitpRoleArn),
 			),
 		})
 

@@ -50,12 +50,12 @@ export class WebAppCI extends CloudFormation.Resource {
 		// Manage user accounts
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				resources: [userPool.userPoolArn],
 				actions: [
 					'cognito-idp:AdminConfirmSignUp',
 					'cognito-idp:AdminUpdateUserAttributes',
 					'cognito-idp:AdminDeleteUser',
 				],
+				resources: [userPool.userPoolArn],
 			}),
 		)
 
