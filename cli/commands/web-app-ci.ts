@@ -1,7 +1,10 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as chalk from 'chalk'
-import { WEBAPP_CI_STACK_NAME } from '../../cdk/stacks/stackName'
+import {
+	WEBAPP_CI_STACK_NAME,
+	WEBAPP_STACK_NAME,
+} from '../../cdk/stacks/stackName'
 import { StackOutputs as WebAppCIStackOutputs } from '../../cdk/stacks/WebAppCI'
 import { fromEnv } from '../../util/fromEnv'
 import { CommandDefinition } from './CommandDefinition'
@@ -23,6 +26,10 @@ export const webappCICommand = (): CommandDefinition => ({
 			WEBAPP_CI_STACK_NAME,
 		)
 		console.log()
+		console.log(
+			chalk.grey('  Stack name:        '),
+			chalk.yellow(WEBAPP_STACK_NAME),
+		)
 		console.log(chalk.grey('  Region:            '), chalk.yellow(region))
 		console.log(
 			chalk.grey('  Access Key ID:     '),
