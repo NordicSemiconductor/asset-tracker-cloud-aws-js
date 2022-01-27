@@ -59,12 +59,12 @@ export class WebAppCI extends CloudFormation.Resource {
 			}),
 		)
 
-		// Read stack config
+		// Read web app stack config
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
 				actions: ['ssm:GetParametersByPath'],
 				resources: [
-					`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/config/stack`,
+					`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${WEBAPP_STACK_NAME}/config/stack`,
 				],
 			}),
 		)
