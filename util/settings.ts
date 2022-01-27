@@ -1,9 +1,11 @@
 import {
 	DeleteParameterCommand,
 	GetParametersByPathCommand,
+	Parameter,
 	PutParameterCommand,
 	SSMClient,
 } from '@aws-sdk/client-ssm'
+import { paginate } from './paginate'
 
 type Scopes = 'context' | 'config' | 'thirdParty' | 'codebuild'
 type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfcloud'
@@ -44,14 +46,25 @@ export const getSettings =
 	}) =>
 	async (): Promise<Settings> => {
 		const Path = settingsPath({ stackName, scope, system })
-		const { Parameters } = await ssm.send(
-			new GetParametersByPathCommand({
-				Path,
-				Recursive: true,
-			}),
-		)
+		const Parameters: Parameter[] = []
+		await paginate({
+			paginator: async (NextToken?: string) =>
+				ssm
+					.send(
+						new GetParametersByPathCommand({
+							Path,
+							Recursive: true,
+							NextToken,
+						}),
+					)
 
-		if (Parameters === undefined)
+					.then(async ({ Parameters: p, NextToken }) => {
+						if (p !== undefined) Parameters.push(...p)
+						return NextToken
+					}),
+		})
+
+		if (Parameters.length === 0)
 			throw new Error(`System not configured: ${Path}!`)
 
 		return Parameters.map(({ Name, ...rest }) => ({
