@@ -1,33 +1,33 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import * as Cognito from 'aws-cdk-lib/aws-cognito'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as S3 from 'aws-cdk-lib/aws-s3'
 import * as Iot from 'aws-cdk-lib/aws-iot'
-import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
+import * as Lambda from 'aws-cdk-lib/aws-lambda'
+import * as S3 from 'aws-cdk-lib/aws-s3'
+import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
+import { warn } from '../../helper/note'
+import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
+import { AGPSResolver } from '../../resources/AGPSResolver'
+import { AGPSStorage } from '../../resources/AGPSStorage'
 import { AvatarStorage } from '../../resources/AvatarStorage'
-import { FOTAStorage } from '../../resources/FOTAStorage'
 import { CellGeolocation } from '../../resources/CellGeolocation'
 import { CellGeolocationApi } from '../../resources/CellGeolocationApi'
-import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
-import { ThingGroup } from '../../resources/ThingGroup'
-import { CORE_STACK_NAME } from '../stackName'
-import { LambdasWithLayer } from '../../resources/LambdasWithLayer'
-import { lambdasOnS3 } from '../../resources/lambdasOnS3'
-import { HistoricalData } from '../../resources/HistoricalData'
-import { warn } from '../../helper/note'
-import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
-import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
-import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
 import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
-import { NeighborCellGeolocationApi } from '../../resources/NeighborCellGeolocationApi'
+import { FOTAStorage } from '../../resources/FOTAStorage'
+import { HistoricalData } from '../../resources/HistoricalData'
+import { lambdasOnS3 } from '../../resources/lambdasOnS3'
+import { LambdasWithLayer } from '../../resources/LambdasWithLayer'
 import { NeighborCellGeolocation } from '../../resources/NeighborCellGeolocation'
-import { AGPSStorage } from '../../resources/AGPSStorage'
-import { AGPSResolver } from '../../resources/AGPSResolver'
-import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
-import { PGPSStorage } from '../../resources/PGPSStorage'
-import { PGPSResolver } from '../../resources/PGPSResolver'
+import { NeighborCellGeolocationApi } from '../../resources/NeighborCellGeolocationApi'
+import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
 import { PGPSDeviceRequestHandler } from '../../resources/PGPSDeviceRequestHandler'
+import { PGPSResolver } from '../../resources/PGPSResolver'
+import { PGPSStorage } from '../../resources/PGPSStorage'
+import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
+import { ThingGroup } from '../../resources/ThingGroup'
+import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
+import { CORE_STACK_NAME } from '../stackName'
+import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
@@ -106,9 +106,9 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			accountRecovery: Cognito.AccountRecovery.EMAIL_ONLY,
 			userVerification: {
 				emailBody:
-					'The verification code to your new Cat Tracker account is {####}',
+					'The verification code to your new nRF Asset Tracker account is {####}',
 				emailStyle: Cognito.VerificationEmailStyle.CODE,
-				emailSubject: 'Verify your new Cat Tracker account',
+				emailSubject: 'Verify your new nRF Asset Tracker account',
 			},
 			removalPolicy: isTest
 				? CloudFormation.RemovalPolicy.DESTROY

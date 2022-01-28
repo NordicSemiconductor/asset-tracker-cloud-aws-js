@@ -1,14 +1,14 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as CodeBuild from 'aws-cdk-lib/aws-codebuild'
 import * as CodePipeline from 'aws-cdk-lib/aws-codepipeline'
-import * as SSM from 'aws-cdk-lib/aws-ssm'
+import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as S3 from 'aws-cdk-lib/aws-s3'
-import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
-import { CONTINUOUS_DEPLOYMENT_STACK_NAME, CORE_STACK_NAME } from './stackName'
+import * as SSM from 'aws-cdk-lib/aws-ssm'
+import * as chalk from 'chalk'
 import { enabledInContext } from '../helper/enabledInContext'
 import { info } from '../helper/note'
-import * as chalk from 'chalk'
+import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
+import { CONTINUOUS_DEPLOYMENT_STACK_NAME, CORE_STACK_NAME } from './stackName'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.
@@ -205,7 +205,8 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 				this,
 				`${CONTINUOUS_DEPLOYMENT_STACK_NAME}-webAppCD`,
 				{
-					description: 'Continuously deploys the Cat Tracker web application',
+					description:
+						'Continuously deploys the nRF Asset Tracker web application',
 					sourceCodeActions: {
 						core: coreSourceCodeAction,
 						webApp: webAppSourceCodeAction,
