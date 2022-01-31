@@ -11,24 +11,23 @@ phases:
       - npx tsc
   build:
     commands:
-      - node cli web-app-config >
-        $CODEBUILD_SRC_DIR_WebApp/.env.production.local
+      - $(node cli web-app-config)
       - export INITIATOR_PIPELINE_NAME=`echo $CODEBUILD_INITIATOR | cut -d'/'
         -f2`
       - export SOURCE_VERSION=`aws codepipeline get-pipeline-state --name
         $INITIATOR_PIPELINE_NAME  | jq -r '.stageStates[0].actionStates[] |
         select(.actionName == "WebAppSourceCode").currentRevision.revisionId'`
-      - export REACT_APP_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
+      - export PUBLIC_VERSION=`git ls-remote --tags $SOURCE_REPO_URL | grep
         $SOURCE_VERSION | cut -d'/' -f3 | cut -d'^' -f1`
-      - echo REACT_APP_VERSION=${REACT_APP_VERSION:-$SOURCE_VERSION} >>
+      - echo PUBLIC_VERSION=${PUBLIC_VERSION:-$SOURCE_VERSION} >>
         $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local
       - export $(cat $CODEBUILD_SRC_DIR_WebApp/.env.production.local | xargs)
       - export EXTEND_ESLINT=true
-      - export PUBLIC_URL="https://$REACT_APP_WEB_APP_DOMAIN_NAME"
+      - export PUBLIC_URL="https://$PUBLIC_WEB_APP_DOMAIN_NAME"
       - cd $CODEBUILD_SRC_DIR_WebApp/; npm ci --no-audit; npm run build
       - aws s3 cp $CODEBUILD_SRC_DIR_WebApp/build
-        s3://$REACT_APP_WEB_APP_BUCKET_NAME --recursive --metadata-directive
+        s3://$PUBLIC_WEB_APP_BUCKET_NAME --recursive --metadata-directive
         REPLACE --cache-control 'public,max-age=600' --expires ''
       - aws cloudfront create-invalidation --distribution-id
-        $REACT_APP_CLOUDFRONT_DISTRIBUTION_ID_WEB_APP --paths /,/index.html
+        $PUBLIC_CLOUDFRONT_DISTRIBUTION_ID_WEB_APP --paths /,/index.html
