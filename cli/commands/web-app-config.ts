@@ -13,8 +13,12 @@ export const webAppConfigCommand = (): CommandDefinition => ({
 			flags: '-p, --prefix <prefix>',
 			description: `Prefix printed environment variables with this string. Defaults to "export PUBLIC_".`,
 		},
+		{
+			flags: '-Q, --no-quote',
+			description: `Whether to quote values.`,
+		},
 	],
-	action: async ({ prefix }) => {
+	action: async ({ prefix, quote }: { prefix?: string; quote: boolean }) => {
 		process.stdout.write(
 			objectToEnv(
 				{
@@ -27,7 +31,10 @@ export const webAppConfigCommand = (): CommandDefinition => ({
 					region: process.env.AWS_REGION,
 					mqttEndpoint: await getIotEndpoint(new IoTClient({})),
 				},
-				prefix ?? 'export PUBLIC_',
+				{
+					prefix: prefix ?? 'export PUBLIC_',
+					quote: quote ? '"' : '',
+				},
 			),
 		)
 	},

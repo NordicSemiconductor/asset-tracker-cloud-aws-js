@@ -124,7 +124,7 @@
       "saga"
     ],
     "webApp": {
-      "repository": "https://github.com/NordicSemiconductor/asset-tracker-cloud-app-js.git",
+      "repository": "https://github.com/NordicSemiconductor/asset-tracker-cloud-app-aws-js.git",
       "branch": "saga"
     }
   },
