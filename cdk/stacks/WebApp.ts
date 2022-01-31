@@ -19,7 +19,6 @@ const SSMParameterName = {
 	webAppBucketName: 'webAppBucketName',
 	cloudfrontDistributionId: 'cloudfrontDistributionId',
 	webAppDomainName: 'webAppDomainName',
-	avatarBucketName: 'avatarBucketName',
 	fotaBucketName: 'fotaBucketName',
 	geolocationApiUrl: 'geolocationApiUrl',
 	historicaldataTableInfo: 'historicaldataTableInfo',
@@ -94,16 +93,6 @@ export class WebAppStack extends CloudFormation.Stack {
 		)
 
 		// Put neccessary core outputs in SSM
-		new SSM.StringParameter(
-			this,
-			`${SSMParameterName.avatarBucketName}SSMParameter`,
-			{
-				stringValue: CloudFormation.Fn.importValue(
-					CoreStackOutputs.avatarBucketName,
-				),
-				parameterName: `${ssmPrefix}/${SSMParameterName.avatarBucketName}`,
-			},
-		)
 		new SSM.StringParameter(
 			this,
 			`${SSMParameterName.fotaBucketName}SSMParameter`,
