@@ -9,7 +9,6 @@ import { warn } from '../../helper/note'
 import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
 import { AGPSResolver } from '../../resources/AGPSResolver'
 import { AGPSStorage } from '../../resources/AGPSStorage'
-import { AvatarStorage } from '../../resources/AvatarStorage'
 import { CellGeolocation } from '../../resources/CellGeolocation'
 import { CellGeolocationApi } from '../../resources/CellGeolocationApi'
 import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
@@ -44,7 +43,6 @@ export const StackOutputs = {
 	thingGroupName: `${CORE_STACK_NAME}:thingGroupName`,
 	thingGroupLambdaArn: `${CORE_STACK_NAME}:thingGroupLambdaArn`,
 	userIotPolicyArn: `${CORE_STACK_NAME}:userIotPolicyArn`,
-	avatarBucketName: `${CORE_STACK_NAME}:avatarBucketName`,
 	fotaBucketName: `${CORE_STACK_NAME}:fotaBucketName`,
 	historicaldataTableInfo: `${CORE_STACK_NAME}:historicaldataTableInfo`,
 	geolocationApiUrl: `${CORE_STACK_NAME}:geolocationApiUrl`,
@@ -422,13 +420,6 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 
 		new RepublishDesiredConfig(this, 'republishDesiredConfig')
-
-		const avatarStorage = new AvatarStorage(this, 'avatars', { userRole })
-
-		new CloudFormation.CfnOutput(this, 'avatarBucketName', {
-			value: avatarStorage.bucket.bucketName,
-			exportName: StackOutputs.avatarBucketName,
-		})
 
 		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
 			lambdas: lambasOnBucket(packedLambdas),
