@@ -9,10 +9,10 @@ Feature: Attach Iot Policy to user
 
     Scenario: Initially the user should not have policies
 
-        When I execute "listPrincipalPolicies" of the AWS Iot SDK with
+        When I execute "listAttachedPolicies" of the AWS Iot SDK with
            """
            {
-             "principal": "{cognito:IdentityId}"
+             "target": "{cognito:IdentityId}"
            }
            """
         Then "awsSdk.res.policies" should match this JSON
@@ -22,20 +22,20 @@ Feature: Attach Iot Policy to user
 
     Scenario: Self-assign the policy
 
-        When I execute "attachPrincipalPolicy" of the AWS Iot SDK with
+        When I execute "attachPolicy" of the AWS Iot SDK with
            """
            {
-             "principal": "{cognito:IdentityId}",
+             "target": "{cognito:IdentityId}",
              "policyName": "{userIotPolicyName}"
            }
            """
-      And I execute "listPrincipalPolicies" of the AWS Iot SDK with
+      And I execute "listAttachedPolicies" of the AWS Iot SDK with
            """
            {
-             "principal": "{cognito:IdentityId}"
+             "target": "{cognito:IdentityId}"
            }
            """
-      Then "awsSdk.res.policies" should equal this JSON
+      Then "awsSdk.res.policies" should match this JSON
            """
-            [{"policyName":"{userIotPolicyName}","policyArn":"{userIotPolicyArn}"}]
+            [{"policyName":"{userIotPolicyName}"}]
            """

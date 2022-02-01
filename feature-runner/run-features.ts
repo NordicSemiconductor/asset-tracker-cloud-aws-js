@@ -108,7 +108,7 @@ program
 				'firmwareCI:userSecretAccessKey':
 					firmwareCIStackConfig.userSecretAccessKey,
 				'firmwareCI:bucketName': firmwareCIStackConfig.bucketName,
-				userIotPolicyName: stackConfig.userIotPolicyArn.split('/')[1],
+				userIotPolicyName: stackConfig.userIotPolicyName,
 				historicaldataTableName,
 				historicaldataDatabaseName,
 				accountId: accountId as string,

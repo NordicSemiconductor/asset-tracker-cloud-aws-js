@@ -25,7 +25,7 @@ const SSMParameterName = {
 	identityPoolId: 'identityPoolId',
 	ncellmeasStorageTableName: 'ncellmeasStorageTableName',
 	neighborCellGeolocationApiUrl: 'neighborCellGeolocationApiUrl',
-	userIotPolicyArn: 'userIotPolicyArn',
+	userIotPolicyName: 'userIotPolicyName',
 	userPoolClientId: 'userPoolClientId',
 	userPoolId: 'userPoolId',
 } as const
@@ -155,12 +155,12 @@ export class WebAppStack extends CloudFormation.Stack {
 		)
 		new SSM.StringParameter(
 			this,
-			`${SSMParameterName.userIotPolicyArn}SSMParameter`,
+			`${SSMParameterName.userIotPolicyName}SSMParameter`,
 			{
 				stringValue: CloudFormation.Fn.importValue(
-					CoreStackOutputs.userIotPolicyArn,
+					CoreStackOutputs.userIotPolicyName,
 				),
-				parameterName: `${ssmPrefix}/${SSMParameterName.userIotPolicyArn}`,
+				parameterName: `${ssmPrefix}/${SSMParameterName.userIotPolicyName}`,
 			},
 		)
 		new SSM.StringParameter(

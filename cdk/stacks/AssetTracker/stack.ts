@@ -42,7 +42,7 @@ export const StackOutputs = {
 	thingPolicyArn: `${CORE_STACK_NAME}:thingPolicyArn`,
 	thingGroupName: `${CORE_STACK_NAME}:thingGroupName`,
 	thingGroupLambdaArn: `${CORE_STACK_NAME}:thingGroupLambdaArn`,
-	userIotPolicyArn: `${CORE_STACK_NAME}:userIotPolicyArn`,
+	userIotPolicyName: `${CORE_STACK_NAME}:userIotPolicyName`,
 	fotaBucketName: `${CORE_STACK_NAME}:fotaBucketName`,
 	historicaldataTableInfo: `${CORE_STACK_NAME}:historicaldataTableInfo`,
 	geolocationApiUrl: `${CORE_STACK_NAME}:geolocationApiUrl`,
@@ -205,10 +205,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					statements: [
 						new IAM.PolicyStatement({
 							resources: ['*'],
-							actions: [
-								'iot:attachPrincipalPolicy',
-								'iot:listPrincipalPolicies',
-							],
+							actions: ['iot:AttachPolicy', 'iot:ListAttachedPolicies'],
 						}),
 					],
 				}),
@@ -235,7 +232,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 						new IAM.PolicyStatement({
 							actions: [
 								'iot:ListThingPrincipals',
-								'iot:DetachPrincipalPolicy',
+								'iot:DetachPolicy',
 								'iot:DetachThingPrincipal',
 								'iot:updateCertificate',
 								'iot:deleteCertificate',
@@ -324,9 +321,9 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			},
 		})
 
-		new CloudFormation.CfnOutput(this, 'userIotPolicyArn', {
-			value: userIotPolicy.attrArn,
-			exportName: StackOutputs.userIotPolicyArn,
+		new CloudFormation.CfnOutput(this, 'userIotPolicyName', {
+			value: userIotPolicy.ref,
+			exportName: StackOutputs.userIotPolicyName,
 		})
 
 		const iotJitpRole = new IAM.Role(this, 'iotJitpRole', {
