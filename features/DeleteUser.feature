@@ -10,17 +10,17 @@ Feature: Delete a user
 
   Scenario: un-assign the IoT policy
 
-    When I execute "detachPrincipalPolicy" of the AWS Iot SDK with
+    When I execute "detachPolicy" of the AWS Iot SDK with
            """
            {
-             "principal": "{cognito:IdentityId}",
+             "target": "{cognito:IdentityId}",
              "policyName": "{userIotPolicyName}"
            }
            """
-    And I execute "listPrincipalPolicies" of the AWS Iot SDK with
+    And I execute "listAttachedPolicies" of the AWS Iot SDK with
            """
            {
-             "principal": "{cognito:IdentityId}"
+             "target": "{cognito:IdentityId}"
            }
            """
     Then "awsSdk.res.policies" should equal this JSON

@@ -1,40 +1,39 @@
-import { CommandDefinition } from './CommandDefinition'
-import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import {
-	DetachPrincipalPolicyCommand,
-	IoTClient,
-	ListPolicyPrincipalsCommand,
-} from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { paginate } from '../../util/paginate'
+import {
+	DetachPolicyCommand,
+	IoTClient,
+	ListTargetsForPolicyCommand,
+} from '@aws-sdk/client-iot'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { paginate } from '../../util/paginate'
+import { CommandDefinition } from './CommandDefinition'
 
 export const purgeIotUserPolicyPrincipals = (): CommandDefinition => ({
 	command: 'purge-iot-user-policy-principals',
 	action: async () => {
-		const { userIotPolicyArn } = {
+		const { userIotPolicyName } = {
 			...(await stackOutput(new CloudFormationClient({}))(CORE_STACK_NAME)),
 		} as { [key: string]: string }
-		const policyName = userIotPolicyArn?.split('/').pop() as string
 		const iot = new IoTClient({})
 		await paginate({
 			paginator: async (marker?: any) => {
-				const { principals, nextMarker } = await iot.send(
-					new ListPolicyPrincipalsCommand({
-						policyName,
+				const { targets, nextMarker } = await iot.send(
+					new ListTargetsForPolicyCommand({
+						policyName: userIotPolicyName,
 						marker,
 					}),
 				)
 
 				await Promise.all(
-					principals?.map(async (principal) => {
+					targets?.map(async (target) => {
 						console.log(
-							`Detaching principal ${principal} from policy ${policyName} ...`,
+							`Detaching principal ${target} from policy ${userIotPolicyName} ...`,
 						)
 						return iot.send(
-							new DetachPrincipalPolicyCommand({
-								policyName,
-								principal,
+							new DetachPolicyCommand({
+								policyName: userIotPolicyName,
+								target,
 							}),
 						)
 					}) ?? [],
