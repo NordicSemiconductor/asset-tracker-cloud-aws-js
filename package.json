@@ -78,7 +78,7 @@
     "constructs": "10.0.52",
     "date-fns": "2.28.0",
     "jest": "27.4.7",
-    "nock": "13.2.2",
+    "nock": "13.2.3",
     "octokit-auth-netrc": "1.0.1",
     "ts-jest": "27.1.3"
   },
