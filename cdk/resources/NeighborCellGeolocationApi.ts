@@ -2,14 +2,14 @@ import * as CloudFormation from 'aws-cdk-lib'
 import * as HttpApi from 'aws-cdk-lib/aws-apigatewayv2'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as SQS from 'aws-cdk-lib/aws-sqs'
-import { logToCloudWatch } from './logToCloudWatch'
-import { LambdasWithLayer } from './LambdasWithLayer'
 import * as CloudWatchLogs from 'aws-cdk-lib/aws-logs'
-import { LambdaLogGroup } from './LambdaLogGroup'
+import * as SQS from 'aws-cdk-lib/aws-sqs'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { NeighborCellMeasurementsStorage } from './NeighborCellMeasurementsStorage'
+import { LambdaLogGroup } from './LambdaLogGroup'
+import { LambdasWithLayer } from './LambdasWithLayer'
+import { logToCloudWatch } from './logToCloudWatch'
 import { NeighborCellGeolocation } from './NeighborCellGeolocation'
+import { NeighborCellMeasurementsStorage } from './NeighborCellMeasurementsStorage'
 
 /**
  * Provides geo-location for neighboring cell measurement report from devices through a HTTP API
@@ -38,7 +38,7 @@ export class NeighborCellGeolocationApi extends CloudFormation.Resource {
 
 		const resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
 			fifo: true,
-			queueName: `${`${id}-${this.stack.stackName}`.substr(0, 75)}.fifo`,
+			queueName: `${`${id}-${this.stack.stackName}`.slice(0, 75)}.fifo`,
 		})
 
 		const fromSQS = new Lambda.Function(this, 'fromSQS', {
