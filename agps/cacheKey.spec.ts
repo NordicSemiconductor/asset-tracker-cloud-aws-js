@@ -16,7 +16,7 @@ describe('cacheKey', () => {
 		).toEqual(
 			`242-1-21626624-30401-1_2_3_4_6_7_8_9-${new Date()
 				.toISOString()
-				.substr(0, 13)
+				.slice(0, 13)
 				.replace(/[:-]/g, '')}0000`,
 		))
 })

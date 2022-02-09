@@ -1,9 +1,9 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { CommandDefinition } from './CommandDefinition'
+import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as chalk from 'chalk'
 import { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI'
 import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName'
-import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
+import { CommandDefinition } from './CommandDefinition'
 
 export const firmwareCICommand = ({
 	endpoint,
@@ -41,7 +41,7 @@ export const firmwareCICommand = ({
 			chalk.yellow(
 				showSecret === true
 					? firmwareCIStackConfig.userSecretAccessKey
-					: firmwareCIStackConfig.userSecretAccessKey.substr(0, 5) + '***',
+					: firmwareCIStackConfig.userSecretAccessKey.slice(0, 5) + '***',
 			),
 		)
 	},
