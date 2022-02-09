@@ -14,6 +14,6 @@ export const cacheKey = ({
 		Math.floor(Date.now() / binMs) * binMs,
 	)
 		.toISOString()
-		.substr(0, 19)
+		.substring(0, 19)
 		.replace(/[:-]/g, '')}`
 }

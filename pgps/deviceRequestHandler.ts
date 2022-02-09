@@ -3,14 +3,16 @@ import {
 	IoTDataPlaneClient,
 	PublishCommand,
 } from '@aws-sdk/client-iot-data-plane'
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import {
-	SQSClient,
 	SendMessageBatchCommand,
 	SendMessageBatchRequestEntry,
+	SQSClient,
 } from '@aws-sdk/client-sqs'
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
+import { Static } from '@sinclair/typebox'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
+import { URL } from 'url'
 import { TextEncoder } from 'util'
 import { v4 } from 'uuid'
 import { fromEnv } from '../util/fromEnv'
@@ -20,11 +22,9 @@ import {
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
 } from './cacheKey'
-import { PGPSDataCache, getCache } from './getCache'
-import { Static } from '@sinclair/typebox'
-import { pgpsRequestSchema } from './types'
+import { getCache, PGPSDataCache } from './getCache'
 import { gpsDay } from './gpsTime'
-import { URL } from 'url'
+import { pgpsRequestSchema } from './types'
 
 const {
 	binHoursString,
@@ -214,7 +214,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 									topic: `${deviceRequest.request.deviceId}/pgps`,
 									payload: new TextEncoder().encode(
 										JSON.stringify({
-											path: url.pathname.substr(1), // remove leading slash
+											path: url.pathname.substring(1), // remove leading slash
 											host: url.hostname,
 										}),
 									),

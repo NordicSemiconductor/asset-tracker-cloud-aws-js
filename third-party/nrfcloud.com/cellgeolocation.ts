@@ -1,14 +1,14 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { URL } from 'url'
-import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
-import { fromEnv } from '../../util/fromEnv'
-import { getCellLocationApiSettings } from './settings'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { TObject, TProperties, Type } from '@sinclair/typebox'
-import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
-import { locateResultSchema } from './locate'
+import { URL } from 'url'
+import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { Cell } from '../../geolocation/Cell'
+import { fromEnv } from '../../util/fromEnv'
+import { apiClient } from './apiclient'
+import { locateResultSchema } from './locate'
+import { getCellLocationApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
@@ -54,8 +54,8 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			lte: [
 				{
 					eci: cell.cell,
-					mcc: parseInt(mccmnc.substr(0, mccmnc.length - 2), 10),
-					mnc: parseInt(mccmnc.substr(-2), 10),
+					mcc: parseInt(mccmnc.substring(0, mccmnc.length - 2), 10),
+					mnc: parseInt(mccmnc.substring(-2), 10),
 					tac: cell.area,
 				},
 			],

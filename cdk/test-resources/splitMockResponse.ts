@@ -9,10 +9,10 @@ export const splitMockResponse = (
 		}
 	return {
 		headers: r
-			.substr(0, blankLineLocation)
+			.substring(0, blankLineLocation)
 			.split('\n')
 			.map((s) => s.split(':', 2))
 			.reduce((headers, [k, v]) => ({ ...headers, [k]: v.trim() }), {}),
-		body: r.substr(blankLineLocation + 2),
+		body: r.substring(blankLineLocation + 2),
 	}
 }
