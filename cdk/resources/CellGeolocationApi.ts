@@ -6,7 +6,6 @@ import * as CloudWatchLogs from 'aws-cdk-lib/aws-logs'
 import * as SQS from 'aws-cdk-lib/aws-sqs'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import { CellGeolocation } from './CellGeolocation'
-import { DeviceCellGeolocations } from './DeviceCellGeolocations'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { logToCloudWatch } from './logToCloudWatch'
@@ -26,11 +25,9 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		id: string,
 		{
 			cellgeo,
-			deviceCellGeo,
 			lambdas,
 		}: {
 			cellgeo: CellGeolocation
-			deviceCellGeo: DeviceCellGeolocations
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
 		},
 	) {
@@ -105,36 +102,6 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		})
 
 		new LambdaLogGroup(this, 'getCellLogs', getCell)
-
-		const addCell = new Lambda.Function(this, 'addCell', {
-			layers: lambdas.layers,
-			handler: 'index.handler',
-			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_14_X,
-			timeout: CloudFormation.Duration.seconds(10),
-			memorySize: 1792,
-			code: lambdas.lambdas.addCellGeolocationHttpApi,
-			description: 'Stores geolocations for cells',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: ['dynamodb:PutItem'],
-					resources: [
-						cellgeo.cacheTable.tableArn,
-						deviceCellGeo.deviceCellGeolocationTable.tableArn,
-					],
-				}),
-			],
-			environment: {
-				CACHE_TABLE: cellgeo.cacheTable.tableName,
-				DEVICE_CELL_GEOLOCATION_TABLE:
-					deviceCellGeo.deviceCellGeolocationTable.tableName,
-				VERSION: this.node.tryGetContext('version'),
-				STACK_NAME: this.stack.stackName,
-			},
-		})
-
-		new LambdaLogGroup(this, 'addCellLogs', addCell)
 
 		this.api = new HttpApi.CfnApi(this, 'httpApi', {
 			name: 'Cell Geolocation',
@@ -211,31 +178,6 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/GET/cell`,
 		})
 
-		// POST /cell
-
-		const geolocationIntegration = new HttpApi.CfnIntegration(
-			this,
-			'geolocationIntegration',
-			{
-				apiId: this.api.ref,
-				integrationType: 'AWS_PROXY',
-				integrationUri: integrationUri(addCell),
-				integrationMethod: 'POST',
-				payloadFormatVersion: '1.0',
-			},
-		)
-
-		const geolocationRoute = new HttpApi.CfnRoute(this, 'geolocationRoute', {
-			apiId: this.api.ref,
-			routeKey: 'POST /cell',
-			target: `integrations/${geolocationIntegration.ref}`,
-		})
-
-		addCell.addPermission('invokeByHttpApi', {
-			principal: new IAM.ServicePrincipal('apigateway.amazonaws.com'),
-			sourceArn: `arn:aws:execute-api:${this.stack.region}:${this.stack.account}:${this.api.ref}/${this.stage.stageName}/POST/cell`,
-		})
-
 		// Add $default route, this is a attempt to fix https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js/issues/455
 		new HttpApi.CfnRoute(this, 'defaultRoute', {
 			apiId: this.api.ref,
@@ -248,6 +190,5 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		})
 		deployment.node.addDependency(this.stage)
 		deployment.node.addDependency(geolocateRoute)
-		deployment.node.addDependency(geolocationRoute)
 	}
 }

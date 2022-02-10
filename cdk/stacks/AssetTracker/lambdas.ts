@@ -1,10 +1,10 @@
-import * as path from 'path'
 import {
+	ConsoleProgressReporter,
+	makeLayerFromPackageJSON,
 	packBaseLayer,
 	packLayeredLambdas,
-	makeLayerFromPackageJSON,
-	ConsoleProgressReporter,
 } from '@nordicsemiconductor/package-layered-lambdas'
+import * as path from 'path'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 
 export type AssetTrackerLambdas = {
@@ -17,7 +17,6 @@ export type AssetTrackerLambdas = {
 	geolocateCellFromNrfCloudStepFunction: string
 	neighborCellGeolocationFromNrfCloudStepFunction: string
 	cacheCellGeolocationStepFunction: string
-	addCellGeolocationHttpApi: string
 	neighborCellGeolocateReportHttpApi: string
 	geolocateNeighborCellFromResolvedStepFunction: string
 	persistNeighborCellGeolocationStepFunction: string
@@ -102,12 +101,6 @@ export const prepareAssetTrackerLambdas = async ({
 					'cellGeolocation',
 					'httpApi',
 					'cell.ts',
-				),
-				addCellGeolocationHttpApi: path.resolve(
-					rootDir,
-					'cellGeolocation',
-					'httpApi',
-					'addCellGeolocation.ts',
 				),
 				neighborCellGeolocationFromNrfCloudStepFunction: path.resolve(
 					rootDir,
