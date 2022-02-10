@@ -476,7 +476,6 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
 			lambdas,
 			cellgeo,
-			deviceCellGeo,
 		})
 
 		new CloudFormation.CfnOutput(this, 'geolocationApiUrl', {
