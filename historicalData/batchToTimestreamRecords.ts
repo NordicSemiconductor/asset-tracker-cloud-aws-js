@@ -1,7 +1,7 @@
 import { _Record } from '@aws-sdk/client-timestream-write'
+import { toRecord } from '@nordicsemiconductor/timestream-helpers'
 import { v4 } from 'uuid'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
-import { toRecord } from './toRecord'
 
 export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 	const Records: (_Record | undefined)[] = Object.entries(event.batch)
@@ -21,7 +21,7 @@ export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 							name: name,
 							v: m.v,
 							ts,
-							measureGroup,
+							dimensions: { measureGroup },
 						})
 					}
 					return Object.entries(m.v)
@@ -30,7 +30,7 @@ export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 								name: `${name}.${k}`,
 								v,
 								ts,
-								measureGroup,
+								dimensions: { measureGroup },
 							}),
 						)
 						.filter(isNotNullOrUndefined)

@@ -1,7 +1,7 @@
 import { _Record } from '@aws-sdk/client-timestream-write'
+import { toRecord } from '@nordicsemiconductor/timestream-helpers'
 import { v4 } from 'uuid'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
-import { toRecord } from './toRecord'
 
 export const shadowUpdateToTimestreamRecords = (
 	event: UpdatedDeviceState,
@@ -15,7 +15,7 @@ export const shadowUpdateToTimestreamRecords = (
 				name: 'bat',
 				ts: event.reported.bat.ts,
 				v: event.reported.bat.v,
-				measureGroup,
+				dimensions: { measureGroup },
 			}),
 		)
 	}
@@ -34,7 +34,7 @@ export const shadowUpdateToTimestreamRecords = (
 						name: `${s}.${k}`,
 						v,
 						ts,
-						measureGroup,
+						dimensions: { measureGroup },
 					}),
 				),
 			)
