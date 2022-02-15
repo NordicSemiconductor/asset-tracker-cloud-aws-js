@@ -32,8 +32,7 @@ Feature: Device Firmware Upgrade over the air
               "host": "{fotaBucketName}.s3.amazonaws.com",
               "path": "{jobId}"
           },
-          "fwversion": "1.0.1",
-          "targetBoard": "Thingy91"
+          "fwversion": "1.0.1"
       }
       """
     And I execute "createJob" of the AWS Iot SDK with
