@@ -52,6 +52,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: 'device-simulator',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -59,6 +60,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: 'device-simulator',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -66,6 +68,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '0.0.0-development',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -73,6 +76,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '12345678901234567890',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -80,6 +84,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '352656106111232',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -87,6 +92,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '666',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -94,6 +100,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: 'LAN',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -101,6 +108,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '-97',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -108,6 +116,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '30401',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -115,6 +124,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '24201',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -122,6 +132,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '16964098',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -129,6 +140,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				MeasureValue: '0.0.0.0',
 				MeasureValueType: 'VARCHAR',
 				Time: '1606395292763',
+				TimeUnit: 'MILLISECONDS',
 			},
 		])
 		const first = r[0].Dimensions?.find(({ Name }) => Name === 'measureGroup')

@@ -46,6 +46,7 @@ describe('batchToTimestreamRecords', () => {
 				MeasureValue: '8.669555',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483136657',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -53,6 +54,7 @@ describe('batchToTimestreamRecords', () => {
 				MeasureValue: '50.109177',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483136657',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -60,6 +62,7 @@ describe('batchToTimestreamRecords', () => {
 				MeasureValue: '10.424793',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483256659',
+				TimeUnit: 'MILLISECONDS',
 			},
 			{
 				Dimensions,
@@ -67,6 +70,7 @@ describe('batchToTimestreamRecords', () => {
 				MeasureValue: '63.422975',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606483256659',
+				TimeUnit: 'MILLISECONDS',
 			},
 		])
 
@@ -107,6 +111,7 @@ describe('batchToTimestreamRecords', () => {
 				MeasureValue: '4460',
 				MeasureValueType: 'DOUBLE',
 				Time: '1614959974018',
+				TimeUnit: 'MILLISECONDS',
 			},
 		])
 	})

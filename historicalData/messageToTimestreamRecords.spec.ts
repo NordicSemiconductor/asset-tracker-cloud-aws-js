@@ -27,6 +27,7 @@ describe('messageToTimestreamRecords', () => {
 				MeasureValue: '0',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606474470069',
+				TimeUnit: 'MILLISECONDS',
 			},
 		])
 	})
