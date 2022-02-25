@@ -47,6 +47,7 @@ export const StackOutputs = {
 	historicaldataTableInfo: `${CORE_STACK_NAME}:historicaldataTableInfo`,
 	geolocationApiUrl: `${CORE_STACK_NAME}:geolocationApiUrl`,
 	geolocationApiId: `${CORE_STACK_NAME}:geolocationApiId`,
+	cellGeolocationCacheTableName: `${CORE_STACK_NAME}:cellGeolocationCacheTableName`,
 	neighborCellGeolocationApiUrl: `${CORE_STACK_NAME}:neighborCellGeolocationApiUrl`,
 	neighborCellGeolocationApiId: `${CORE_STACK_NAME}:neighborCellGeolocationApiId`,
 	ncellmeasStorageTableName: `${CORE_STACK_NAME}:ncellmeasStorageTableName`,
@@ -471,6 +472,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			lambdas,
 			deviceCellGeo,
+		})
+
+		new CloudFormation.CfnOutput(this, 'cellGeolocationCacheTableName', {
+			value: cellgeo.cacheTable.tableName,
+			exportName: StackOutputs.cellGeolocationCacheTableName,
 		})
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
