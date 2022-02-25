@@ -26,5 +26,5 @@ phases:
         $PUBLIC_WEB_APP_BUCKET_NAME | tr -d '"'` --recursive
         --metadata-directive REPLACE --cache-control 'public,max-age=600'
         --expires ''
-      - aws cloudfront create-invalidation --distribution-id
-        $PUBLIC_CLOUDFRONT_DISTRIBUTION_ID_WEB_APP --paths /,/index.html
+      - aws cloudfront create-invalidation --distribution-id `echo
+        $PUBLIC_CLOUDFRONT_DISTRIBUTION_ID | tr -d '"'` --paths /,/index.html
