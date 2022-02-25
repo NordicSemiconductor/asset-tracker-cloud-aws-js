@@ -1,5 +1,6 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import * as Cognito from 'aws-cdk-lib/aws-cognito'
+import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import { WebAppCI } from '../resources/WebAppCI'
 import { StackOutputs } from './AssetTracker/stack'
 import { WEBAPP_CI_STACK_NAME } from './stackName'
@@ -13,6 +14,21 @@ export class WebAppCIStack extends CloudFormation.Stack {
 				this,
 				'userPoolArn',
 				CloudFormation.Fn.importValue(StackOutputs.userPoolArn),
+			),
+			cellGeoLocationCacheTable: DynamoDB.Table.fromTableArn(
+				this,
+				'cellGeoLocationCacheTable',
+				CloudFormation.Fn.importValue(
+					StackOutputs.cellGeolocationCacheTableArn,
+				),
+			),
+			ncellmeasStorageTable: DynamoDB.Table.fromTableArn(
+				this,
+				'ncellmeasStorageTable',
+				CloudFormation.Fn.importValue(StackOutputs.ncellmeasStorageTableArn),
+			),
+			historicalDataTableArn: CloudFormation.Fn.importValue(
+				StackOutputs.historicaldataTableArn,
 			),
 		})
 

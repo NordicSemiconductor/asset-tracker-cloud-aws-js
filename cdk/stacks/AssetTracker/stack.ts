@@ -45,9 +45,11 @@ export const StackOutputs = {
 	userIotPolicyName: `${CORE_STACK_NAME}:userIotPolicyName`,
 	fotaBucketName: `${CORE_STACK_NAME}:fotaBucketName`,
 	historicaldataTableInfo: `${CORE_STACK_NAME}:historicaldataTableInfo`,
+	historicaldataTableArn: `${CORE_STACK_NAME}:historicaldataTableArn`,
 	geolocationApiUrl: `${CORE_STACK_NAME}:geolocationApiUrl`,
 	geolocationApiId: `${CORE_STACK_NAME}:geolocationApiId`,
 	cellGeolocationCacheTableName: `${CORE_STACK_NAME}:cellGeolocationCacheTableName`,
+	cellGeolocationCacheTableArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableArn`,
 	neighborCellGeolocationApiUrl: `${CORE_STACK_NAME}:neighborCellGeolocationApiUrl`,
 	neighborCellGeolocationApiId: `${CORE_STACK_NAME}:neighborCellGeolocationApiId`,
 	ncellmeasStorageTableName: `${CORE_STACK_NAME}:ncellmeasStorageTableName`,
@@ -434,6 +436,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: StackOutputs.historicaldataTableInfo,
 		})
 
+		new CloudFormation.CfnOutput(this, 'historicaldataTableArn', {
+			value: hd.table.attrArn,
+			exportName: StackOutputs.historicaldataTableArn,
+		})
+
 		// FOTA
 		const fotaBucket = new FOTAStorage(this, 'Storage', { userRole })
 
@@ -477,6 +484,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'cellGeolocationCacheTableName', {
 			value: cellgeo.cacheTable.tableName,
 			exportName: StackOutputs.cellGeolocationCacheTableName,
+		})
+
+		new CloudFormation.CfnOutput(this, 'cellGeolocationCacheTableArn', {
+			value: cellgeo.cacheTable.tableArn,
+			exportName: StackOutputs.cellGeolocationCacheTableArn,
 		})
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {

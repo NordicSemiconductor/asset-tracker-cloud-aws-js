@@ -1,5 +1,6 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import * as Cognito from 'aws-cdk-lib/aws-cognito'
+import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import { CORE_STACK_NAME, WEBAPP_STACK_NAME } from '../stacks/stackName'
 
@@ -8,7 +9,17 @@ export class WebAppCI extends CloudFormation.Resource {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
-		{ userPool }: { userPool: Cognito.IUserPool },
+		{
+			userPool,
+			ncellmeasStorageTable,
+			cellGeoLocationCacheTable,
+			historicalDataTableArn,
+		}: {
+			userPool: Cognito.IUserPool
+			ncellmeasStorageTable: DynamoDB.ITable
+			cellGeoLocationCacheTable: DynamoDB.ITable
+			historicalDataTableArn: string
+		},
 	) {
 		super(parent, id)
 
@@ -76,6 +87,38 @@ export class WebAppCI extends CloudFormation.Resource {
 				resources: [
 					`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/config/stack`,
 				],
+			}),
+		)
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: ['ssm:GetParametersByPath'],
+				resources: [
+					`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${WEBAPP_STACK_NAME}/config/stack`,
+				],
+			}),
+		)
+
+		// Write to neighboring cell reports table
+		ncellmeasStorageTable.grantWriteData(ciUser)
+
+		// Write to cell geolocation cache
+		cellGeoLocationCacheTable.grantWriteData(ciUser)
+
+		// Write to timestream
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: ['*'],
+				resources: [historicalDataTableArn],
+			}),
+		)
+		ciUser.addToPolicy(
+			new IAM.PolicyStatement({
+				actions: [
+					'timestream:DescribeEndpoints',
+					'timestream:SelectValues',
+					'timestream:CancelQuery',
+				],
+				resources: ['*'],
 			}),
 		)
 
