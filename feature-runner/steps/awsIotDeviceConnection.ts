@@ -1,7 +1,7 @@
 import { device } from 'aws-iot-device-sdk'
+import { promises as fs } from 'fs'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import { isNullOrUndefined } from '../../util/isNullOrUndefined'
-import { promises as fs } from 'fs'
 
 export type Listener = () => unknown
 export type ListenerWithPayload = (payload: Buffer) => unknown
@@ -69,10 +69,17 @@ export const awsIotDeviceConnection = ({
 				},
 				publish: async (topic, message) =>
 					new Promise<void>((resolve, reject) => {
-						d.publish(topic, message, undefined, (error) => {
-							if (isNullOrUndefined(error)) return resolve()
-							return reject(error)
-						})
+						d.publish(
+							topic,
+							message,
+							{
+								qos: 1,
+							},
+							(error) => {
+								if (isNullOrUndefined(error)) return resolve()
+								return reject(error)
+							},
+						)
 					}),
 				onMessageOnce: async (topic, listener) =>
 					new Promise((resolve, reject) => {
