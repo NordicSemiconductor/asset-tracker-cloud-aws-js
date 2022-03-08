@@ -4,7 +4,7 @@ import * as chalk from 'chalk'
 import { program } from 'commander'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as readline from 'readline'
+import { createInterface } from 'readline'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { cdCommand } from './commands/cd'
 import { cdUpdateTokenCommand } from './commands/cd-update-token'
@@ -49,7 +49,7 @@ const confirm = (
 ): CommandDefinition => ({
 	...command,
 	action: async (...args) => {
-		const rl = readline.createInterface({
+		const rl = createInterface({
 			input: process.stdin,
 			output: process.stdout,
 		})
