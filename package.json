@@ -32,7 +32,7 @@
     "@aws-sdk/client-ssm": "3.54.1",
     "@aws-sdk/client-timestream-write": "3.54.1",
     "@aws-sdk/util-dynamodb": "3.54.1",
-    "@nordicsemiconductor/cell-geolocation-helpers": "4.0.2",
+    "@nordicsemiconductor/cell-geolocation-helpers": "4.0.3",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "2.0.3",
     "@nordicsemiconductor/timestream-helpers": "4.1.1",
     "@sinclair/typebox": "0.23.4",
