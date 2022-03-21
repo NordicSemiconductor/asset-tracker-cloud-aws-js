@@ -34,7 +34,7 @@ jobs:
       - name: Cache AWS CLI (Linux)
         if: runner.OS == 'Linux'
         id: cache-aws-cli-linux
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: aws/
           key: ${{ runner.OS }}-cache-aws-cli
@@ -49,7 +49,7 @@ jobs:
       - name: Cache AWS CLI (MacOS)
         if: runner.OS == 'macOS'
         id: cache-aws-cli-macos
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: AWSCLIV2.pkg
           key: ${{ runner.OS }}-cache-aws-cli
@@ -61,7 +61,7 @@ jobs:
           curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
           sudo installer -pkg AWSCLIV2.pkg -target /
       - name: Keep npm cache around to speed up installs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -139,7 +139,7 @@ jobs:
           node-version: "16.x"
 
       - name: Keep npm cache around to speed up installs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
