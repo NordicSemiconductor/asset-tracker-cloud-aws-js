@@ -1,21 +1,23 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
-import {
-	createDeviceCertificate,
-	defaultDeviceCertificateValidityInDays,
-} from '../jitp/createDeviceCertificate'
 import {
 	atHostHexfile,
 	connect,
+	Connection,
 	createPrivateKeyAndCSR,
 	flashCertificate,
 	getIMEI,
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
+import * as chalk from 'chalk'
 import { promises as fs } from 'fs'
 import * as os from 'os'
 import * as path from 'path'
+import {
+	createDeviceCertificate,
+	defaultDeviceCertificateValidityInDays,
+} from '../jitp/createDeviceCertificate'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
+import { readlineDevice } from '../jitp/readlineDevice'
 import { run } from '../process/run'
+import { CommandDefinition } from './CommandDefinition'
 
 export const defaultPort = '/dev/ttyACM0'
 export const defaultSecTag = 42
@@ -55,6 +57,10 @@ export const createAndProvisionDeviceCertCommand = ({
 			flags: '--debug',
 			description: `Log debug messages`,
 		},
+		{
+			flags: '-s, --simulated-device',
+			description: `Use a simulated (soft) device. Useful if you do not have physical access to the device. Will print the AT commands sent to the device allows to provide responses on the command line.`,
+		},
 	],
 	action: async ({
 		dk,
@@ -64,29 +70,41 @@ export const createAndProvisionDeviceCertCommand = ({
 		secTag,
 		debug,
 		deletePrivateKey,
+		simulatedDevice,
 	}) => {
-		console.log(
-			chalk.magenta(`Flashing certificate`),
-			chalk.blue(port ?? defaultPort),
-		)
+		let connection: Connection
 
-		const connection = await connect({
-			atHostHexfile:
-				atHost ??
-				(dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91']),
-			device: port ?? defaultPort,
-			warn: console.error,
-			debug: debug === true ? console.debug : undefined,
-			progress: debug === true ? console.log : undefined,
-			inactivityTimeoutInSeconds: 10,
-		})
+		if (simulatedDevice === true) {
+			console.log(
+				chalk.magenta(`Flashing certificate`),
+				chalk.blue('(simulated device)'),
+			)
+			connection = await readlineDevice()
+		} else {
+			console.log(
+				chalk.magenta(`Flashing certificate`),
+				chalk.blue(port ?? defaultPort),
+			)
+			connection = (
+				await connect({
+					atHostHexfile:
+						atHost ??
+						(dk === true ? atHostHexfile['9160dk'] : atHostHexfile['thingy91']),
+					device: port ?? defaultPort,
+					warn: console.error,
+					debug: debug === true ? console.debug : undefined,
+					progress: debug === true ? console.log : undefined,
+					inactivityTimeoutInSeconds: 10,
+				})
+			).connection
+		}
 
-		const deviceId = await getIMEI({ at: connection.connection.at })
+		const deviceId = await getIMEI({ at: connection.at })
 
 		console.log(chalk.magenta(`IMEI`), chalk.blue(deviceId))
 
 		const csr = await createPrivateKeyAndCSR({
-			at: connection.connection.at,
+			at: connection.at,
 			secTag: secTag ?? defaultSecTag,
 			deletePrivateKey: deletePrivateKey ?? false,
 		})
@@ -130,7 +148,7 @@ export const createAndProvisionDeviceCertCommand = ({
 		)
 
 		await flashCertificate({
-			at: connection.connection.at,
+			at: connection.at,
 			caCert: await fs.readFile(
 				path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 				'utf-8',
@@ -139,7 +157,7 @@ export const createAndProvisionDeviceCertCommand = ({
 			clientCert: await fs.readFile(deviceFiles.certWithCA, 'utf-8'),
 		})
 
-		await connection.connection.end()
+		await connection.end()
 
 		console.log()
 		console.log(
