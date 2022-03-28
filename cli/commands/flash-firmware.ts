@@ -1,15 +1,15 @@
-import { CommandDefinition } from './CommandDefinition'
-import * as path from 'path'
-import * as fs from 'fs'
-import * as os from 'os'
 import { flash } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import { Octokit } from '@octokit/rest'
 import * as chalk from 'chalk'
+import * as fs from 'fs'
 import * as https from 'https'
+import * as os from 'os'
+import * as path from 'path'
 import { v4 } from 'uuid'
 import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
+import { CommandDefinition } from './CommandDefinition'
 
-const defaultFirmwareRepository =
+export const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
 const netrclocation = path.resolve(os.homedir(), '.netrc')
 

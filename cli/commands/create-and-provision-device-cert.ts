@@ -164,6 +164,8 @@ export const createAndProvisionDeviceCertCommand = ({
 			chalk.green('Certificate written to device'),
 			chalk.blueBright(deviceId),
 		)
+
+		process.exit()
 	},
 	help: 'Generate a certificate for the connected device using device-generated keys, signed with the CA, and flash it to the device.',
 })

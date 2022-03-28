@@ -1,6 +1,7 @@
 import { Connection } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import * as chalk from 'chalk'
 import * as readline from 'readline'
+import { defaultFirmwareRepository } from '../commands/flash-firmware'
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -52,6 +53,17 @@ export const readlineDevice = async (): Promise<Connection> => {
 			)
 			return [response as string]
 		},
-		end: async () => Promise.resolve(),
+		end: async () => {
+			console.log('')
+			console.log(
+				chalk.white(
+					'Now program the device with the asset_tracker_v2 firmware.',
+				),
+			)
+			console.log('')
+			console.log(chalk.gray('You can find a pre-compiled HEX file on'))
+			console.log(chalk.blue.underline(defaultFirmwareRepository))
+			console.log('')
+		},
 	}
 }
