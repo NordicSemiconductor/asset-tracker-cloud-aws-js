@@ -3,16 +3,15 @@ import * as chalk from 'chalk'
 import * as readline from 'readline'
 import { defaultFirmwareRepository } from '../commands/flash-firmware'
 
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout,
-})
-
 /**
  * Provides a device that uses readline as the UART interface and requires a human to provide the input.
  * Useful if you do not have physical access to the device.
  */
 export const readlineDevice = async (): Promise<Connection> => {
+	const rl = readline.createInterface({
+		input: process.stdin,
+		output: process.stdout,
+	})
 	console.log('')
 	console.log(chalk.white('Please program the device with the AT host.'))
 	console.log('')
