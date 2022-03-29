@@ -9,7 +9,7 @@ import { v4 } from 'uuid'
 import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
 import { CommandDefinition } from './CommandDefinition'
 
-const defaultFirmwareRepository =
+export const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
 const netrclocation = path.resolve(os.homedir(), '.netrc')
 
