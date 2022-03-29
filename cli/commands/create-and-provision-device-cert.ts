@@ -147,17 +147,52 @@ export const createAndProvisionDeviceCertCommand = ({
 			),
 		)
 
-		await flashCertificate({
-			at: connection.at,
-			caCert: await fs.readFile(
-				path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-				'utf-8',
-			),
-			secTag: secTag ?? defaultSecTag,
-			clientCert: await fs.readFile(deviceFiles.certWithCA, 'utf-8'),
-		})
+		const caCert = await fs.readFile(
+			path.resolve(process.cwd(), 'data', 'AmazonRootCA1.pem'),
+			'utf-8',
+		)
+		const clientCert = await fs.readFile(deviceFiles.certWithCA, 'utf-8')
+		const effectiveSecTag = secTag ?? defaultSecTag
 
-		await connection.end()
+		if (simulatedDevice === true) {
+			await connection.end()
+
+			console.log('')
+			console.log(
+				chalk.white(
+					'Please program the certificates using the certificate manager.',
+				),
+			)
+			console.log('')
+			console.log(
+				chalk.whiteBright('for'),
+				chalk.whiteBright.bold('CA certificate:'),
+			)
+			console.log(chalk.blueBright(caCert))
+			console.log('')
+
+			console.log(
+				chalk.whiteBright('for'),
+				chalk.whiteBright.bold('Client certificate:'),
+			)
+			console.log(chalk.blueBright(clientCert))
+			console.log('')
+
+			console.log(
+				chalk.whiteBright('for'),
+				chalk.whiteBright.bold('Security tag:'),
+				chalk.blueBright(effectiveSecTag),
+			)
+			console.log('')
+		} else {
+			await flashCertificate({
+				at: connection.at,
+				caCert,
+				secTag: effectiveSecTag,
+				clientCert,
+			})
+			await connection.end()
+		}
 
 		console.log()
 		console.log(
