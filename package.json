@@ -68,7 +68,7 @@
     "@types/node": "17.0.21",
     "@types/uuid": "8.3.4",
     "aws-cdk-lib": "2.18.0",
-    "aws-iot-device-sdk": "2.2.11",
+    "aws-iot-device-sdk": "2.2.12",
     "backoff": "2.5.0",
     "cdk": "2.18.0",
     "chalk": "4.1.2",
