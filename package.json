@@ -77,7 +77,7 @@
     "commander": "9.2.0",
     "constructs": "10.0.130",
     "date-fns": "2.28.0",
-    "jest": "27.5.1",
+    "jest": "28.0.3",
     "nock": "13.2.4",
     "octokit-auth-netrc": "2.0.0",
     "ts-jest": "27.1.4"
