@@ -1,10 +1,9 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { MaybeCellGeoLocation } from './types'
-import { isSome } from 'fp-ts/lib/Option'
-import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
-import { fromEnv } from '../../util/fromEnv'
 import { Cell } from '../../geolocation/Cell'
+import { fromEnv } from '../../util/fromEnv'
+import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
+import { MaybeCellGeoLocation } from './types'
 
 const { TableName, IndexName } = fromEnv({
 	TableName: 'LOCATIONS_TABLE',
@@ -35,7 +34,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			})),
 		)
 
-		if (isSome(location)) {
+		if (location !== undefined) {
 			console.log(
 				JSON.stringify({
 					cell,
@@ -45,7 +44,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 
 			return {
 				located: true,
-				...location.value,
+				...location,
 			}
 		}
 	}
