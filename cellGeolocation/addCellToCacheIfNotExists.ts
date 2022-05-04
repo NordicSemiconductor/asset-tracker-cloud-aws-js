@@ -1,12 +1,11 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
+import { pipe } from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { pipe } from 'fp-ts/lib/function'
-import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations'
-import { isSome } from 'fp-ts/lib/Option'
 import { Cell } from '../geolocation/Cell'
 import { Location } from '../geolocation/Location'
+import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations'
 
 export const addCellToCacheIfNotExists =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
@@ -21,13 +20,13 @@ export const addCellToCacheIfNotExists =
 		pipe(
 			TE.tryCatch<ErrorInfo, void>(
 				async () => {
-					const location = fromDeviceLocations([
+					const cellGeolocation = fromDeviceLocations([
 						{
 							lat,
 							lng,
 						},
 					])
-					if (!isSome(location)) {
+					if (cellGeolocation === undefined) {
 						throw new Error(
 							`Failed to determine cell location from ${JSON.stringify({
 								lat,
@@ -35,7 +34,6 @@ export const addCellToCacheIfNotExists =
 							})}`,
 						)
 					}
-					const cellGeolocation = location.value
 					const query = {
 						TableName,
 						Item: {
