@@ -1,9 +1,9 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
-import { createCA, defaultCAValidityInDays } from '../jitp/createCA'
-import { IoTClient } from '@aws-sdk/client-iot'
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { IoTClient } from '@aws-sdk/client-iot'
+import * as chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { createCA, defaultCAValidityInDays } from '../jitp/createCA'
+import { CommandDefinition } from './CommandDefinition'
 
 export const createCACommand = ({
 	certsDir,
@@ -16,8 +16,12 @@ export const createCACommand = ({
 			flags: '-e, --expires <expires>',
 			description: `Validity of device certificate in days. Defaults to ${defaultCAValidityInDays} days.`,
 		},
+		{
+			flags: '-t, --tags <tags>',
+			description: `Comma-separated list of tags to assign to the CA certificate (tag1=value1,tag2=value2,tag3).`,
+		},
 	],
-	action: async ({ expires }: { expires?: string }) => {
+	action: async ({ expires, tags }: { expires?: string; tags?: string }) => {
 		const iot = new IoTClient({})
 		const cf = new CloudFormationClient({})
 
@@ -33,6 +37,10 @@ export const createCACommand = ({
 				console.log(...message.map((m) => chalk.cyan(m)))
 			},
 			daysValid: expires !== undefined ? parseInt(expires, 10) : undefined,
+			tags: (tags ?? '')
+				.split(',')
+				.map((tagDefinition) => tagDefinition.split('=', 2))
+				.map(([Key, Value]) => ({ Key, Value })),
 		})
 		console.log(
 			chalk.green(`CA certificate ${chalk.yellow(certificateId)} registered.`),

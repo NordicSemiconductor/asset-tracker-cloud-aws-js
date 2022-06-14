@@ -91,7 +91,7 @@ jobs:
           node cli configure thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
           node cli configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
           npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' deploy '*' --require-approval never
-          node cli create-ca
+          node cli create-ca --tags ci,repository=${{ github.repository }}
       - run: node --unhandled-rejections=strict dist/cdk/helper/addFakeRoute.js
       - name: Run End-to-End Tests
         run: npm run test:e2e

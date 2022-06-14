@@ -6,12 +6,13 @@ import {
 	GetRegistrationCodeCommand,
 	IoTClient,
 	RegisterCACertificateCommand,
+	Tag,
 	UpdateEventConfigurationsCommand,
 } from '@aws-sdk/client-iot'
-import { promises as fs } from 'fs'
-import { caFileLocations } from './caFileLocations'
-import { run } from '../process/run'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
+import { promises as fs } from 'fs'
+import { run } from '../process/run'
+import { caFileLocations } from './caFileLocations'
 
 export const defaultCAValidityInDays = 356
 
@@ -29,6 +30,7 @@ export const createCA = async (args: {
 	log: (...message: any[]) => void
 	debug: (...message: any[]) => void
 	daysValid?: number
+	tags?: Tag[]
 }): Promise<{ certificateId: string }> => {
 	const { certsDir, log, debug, iot, cf } = args
 	const caFiles = caFileLocations(certsDir)
@@ -204,6 +206,7 @@ export const createCA = async (args: {
 				templateBody: JSON.stringify(jitpTemplate),
 				roleArn: stackOutput?.jitpRoleArn,
 			},
+			tags: args.tags ?? [],
 		}),
 	)
 
