@@ -1,10 +1,10 @@
-import * as chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
 import {
 	atHostHexfile,
 	connect,
 	getIMEI,
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
+import * as chalk from 'chalk'
+import { CommandDefinition } from './CommandDefinition'
 import { defaultPort } from './create-and-provision-device-cert'
 
 export const imeiCommand = (): CommandDefinition => ({

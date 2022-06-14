@@ -1,6 +1,6 @@
-import * as path from 'path'
-import { promises as fs } from 'fs'
 import * as chalk from 'chalk'
+import { promises as fs } from 'fs'
+import * as path from 'path'
 
 /**
  * Ensures the directory for storing certificates is available

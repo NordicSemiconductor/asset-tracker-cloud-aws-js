@@ -1,19 +1,19 @@
 import {
-	StepRunnerFunc,
-	InterpolatedStep,
-	regexGroupMatcher,
-} from '@nordicsemiconductor/e2e-bdd-test-runner'
-import { AssetTrackerWorld } from '../run-features'
-import {
 	DeleteItemCommand,
 	DynamoDBClient,
 	PutItemCommand,
 	QueryCommand,
 } from '@aws-sdk/client-dynamodb'
+import {
+	InterpolatedStep,
+	regexGroupMatcher,
+	StepRunnerFunc,
+} from '@nordicsemiconductor/e2e-bdd-test-runner'
 import * as chai from 'chai'
 import { expect } from 'chai'
-import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse'
 import * as chaiSubset from 'chai-subset'
+import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse'
+import { AssetTrackerWorld } from '../run-features'
 chai.use(chaiSubset)
 
 export const httpApiMockStepRunners = ({

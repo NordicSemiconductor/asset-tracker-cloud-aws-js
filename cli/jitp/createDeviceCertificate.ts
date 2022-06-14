@@ -1,8 +1,8 @@
-import * as os from 'os'
 import { promises as fs } from 'fs'
+import * as os from 'os'
+import { run } from '../process/run'
 import { caFileLocations } from './caFileLocations'
 import { deviceFileLocations } from './deviceFileLocations'
-import { run } from '../process/run'
 
 export const defaultDeviceCertificateValidityInDays = 10950
 

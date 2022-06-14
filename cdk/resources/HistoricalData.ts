@@ -3,10 +3,10 @@ import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as IoT from 'aws-cdk-lib/aws-iot'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as Timestream from 'aws-cdk-lib/aws-timestream'
-import { logToCloudWatch } from './logToCloudWatch'
+import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import { logToCloudWatch } from './logToCloudWatch'
 
 /**
  * Provides resources for historical data

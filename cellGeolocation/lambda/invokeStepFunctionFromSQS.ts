@@ -1,5 +1,5 @@
-import { SQSEvent } from 'aws-lambda'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
+import { SQSEvent } from 'aws-lambda'
 import { fromEnv } from '../../util/fromEnv'
 
 const sf = new SFNClient({})

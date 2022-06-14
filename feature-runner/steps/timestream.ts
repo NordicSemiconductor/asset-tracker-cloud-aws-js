@@ -1,14 +1,14 @@
 import {
-	regexMatcher,
-	StepRunnerFunc,
-	InterpolatedStep,
-} from '@nordicsemiconductor/e2e-bdd-test-runner'
-import { AssetTrackerWorld } from '../run-features'
-import {
 	QueryCommand,
 	TimestreamQueryClient,
 } from '@aws-sdk/client-timestream-query'
+import {
+	InterpolatedStep,
+	regexMatcher,
+	StepRunnerFunc,
+} from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { parseResult } from '@nordicsemiconductor/timestream-helpers'
+import { AssetTrackerWorld } from '../run-features'
 
 export const timestreamStepRunners = ({
 	timestream,

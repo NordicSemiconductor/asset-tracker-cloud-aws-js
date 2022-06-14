@@ -1,15 +1,15 @@
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { SQSClient } from '@aws-sdk/client-sqs'
+import { Type } from '@sinclair/typebox'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as E from 'fp-ts/lib/Either'
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { toStatusCode, ErrorType } from '../../api/ErrorInfo'
+import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
-import { SQSClient } from '@aws-sdk/client-sqs'
-import { fromEnv } from '../../util/fromEnv'
-import { Type } from '@sinclair/typebox'
-import { queueJob } from '../../geolocation/queueJob'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
-import { geolocateReport } from '../geolocateReport'
 import { Location } from '../../geolocation/Location'
+import { queueJob } from '../../geolocation/queueJob'
+import { fromEnv } from '../../util/fromEnv'
+import { geolocateReport } from '../geolocateReport'
 
 const { neighborCellGeolocationResolutionJobsQueue, reportsTable } = fromEnv({
 	neighborCellGeolocationResolutionJobsQueue:

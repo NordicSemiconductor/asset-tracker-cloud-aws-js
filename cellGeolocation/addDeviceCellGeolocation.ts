@@ -1,8 +1,8 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
 import { v4 } from 'uuid'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
 import { Cell } from '../geolocation/Cell'
 import { Location } from '../geolocation/Location'
 

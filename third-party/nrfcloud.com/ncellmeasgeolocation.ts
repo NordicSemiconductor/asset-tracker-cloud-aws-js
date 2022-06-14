@@ -1,13 +1,13 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
+import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
+import { isLeft } from 'fp-ts/lib/Either'
 import { URL } from 'url'
+import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
-import { getCellLocationApiSettings } from './settings'
-import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
 import { apiClient } from './apiclient'
-import { isLeft } from 'fp-ts/lib/Either'
 import { locateResultSchema } from './locate'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { getCellLocationApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 

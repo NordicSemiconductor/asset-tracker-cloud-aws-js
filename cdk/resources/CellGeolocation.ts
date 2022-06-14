@@ -1,16 +1,16 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
+import * as IAM from 'aws-cdk-lib/aws-iam'
+import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
 import * as StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import { logToCloudWatch } from './logToCloudWatch'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { CORE_STACK_NAME } from '../stacks/stackName'
 import { enabledInContext } from '../helper/enabledInContext'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import { CORE_STACK_NAME } from '../stacks/stackName'
 import { DeviceCellGeolocations } from './DeviceCellGeolocations'
+import { LambdaLogGroup } from './LambdaLogGroup'
+import { LambdasWithLayer } from './LambdasWithLayer'
+import { logToCloudWatch } from './logToCloudWatch'
 
 /**
  * Describes the step functions which resolves the geolocation of LTE/NB-IoT network cells using third-party location providers

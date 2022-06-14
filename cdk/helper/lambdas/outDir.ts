@@ -1,5 +1,5 @@
-import * as path from 'path'
 import { promises as fs } from 'fs'
+import * as path from 'path'
 
 // Prepares the storage director for packed lambdas
 export const preparePackagedLambdaStorageDir = async ({

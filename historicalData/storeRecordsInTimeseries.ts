@@ -1,7 +1,7 @@
 import {
-	_Record,
 	TimestreamWriteClient,
 	WriteRecordsCommand,
+	_Record,
 } from '@aws-sdk/client-timestream-write'
 
 type AWSError = { message: string; code: number }

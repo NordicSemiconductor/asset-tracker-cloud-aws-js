@@ -1,20 +1,20 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { pipe } from 'fp-ts/lib/pipeable'
-import * as TE from 'fp-ts/lib/TaskEither'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { SQSClient } from '@aws-sdk/client-sqs'
 import {
 	cellId,
 	NetworkMode,
 } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { geolocateFromCache } from '../geolocateFromCache'
-import { toStatusCode, ErrorType } from '../../api/ErrorInfo'
+import { Type } from '@sinclair/typebox'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { pipe } from 'fp-ts/lib/pipeable'
+import * as TE from 'fp-ts/lib/TaskEither'
+import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
-import { SQSClient } from '@aws-sdk/client-sqs'
+import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { queueJob } from '../../geolocation/queueJob'
 import { getOrElse } from '../../util/fp-ts'
 import { fromEnv } from '../../util/fromEnv'
-import { Type } from '@sinclair/typebox'
-import { queueJob } from '../../geolocation/queueJob'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { geolocateFromCache } from '../geolocateFromCache'
 
 const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
 	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',

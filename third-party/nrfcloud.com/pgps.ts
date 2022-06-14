@@ -1,18 +1,18 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { URL } from 'url'
-import { fromEnv } from '../../util/fromEnv'
-import { getPGPSLocationApiSettings } from './settings'
 import { Static, Type } from '@sinclair/typebox'
-import { apiClient } from './apiclient'
 import { isLeft } from 'fp-ts/lib/Either'
+import { URL } from 'url'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
-import { pgpsRequestSchema } from '../../pgps/types'
 import {
 	defaultInterval,
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
 } from '../../pgps/cacheKey'
 import { gpsDay, minimumGpsDay } from '../../pgps/gpsTime'
+import { pgpsRequestSchema } from '../../pgps/types'
+import { fromEnv } from '../../util/fromEnv'
+import { apiClient } from './apiclient'
+import { getPGPSLocationApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 

@@ -1,10 +1,10 @@
-import { CommandDefinition } from './CommandDefinition'
+import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { IoTClient } from '@aws-sdk/client-iot'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import * as chalk from 'chalk'
-import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint'
-import { IoTClient } from '@aws-sdk/client-iot'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
+import { CommandDefinition } from './CommandDefinition'
 
 export const infoCommand = (): CommandDefinition => ({
 	command: 'info',

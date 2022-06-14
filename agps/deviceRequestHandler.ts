@@ -3,19 +3,19 @@ import {
 	IoTDataPlaneClient,
 	PublishCommand,
 } from '@aws-sdk/client-iot-data-plane'
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import {
-	SQSClient,
 	SendMessageBatchCommand,
 	SendMessageBatchRequestEntry,
+	SQSClient,
 } from '@aws-sdk/client-sqs'
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
+import { Static } from '@sinclair/typebox'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
 import { v4 } from 'uuid'
 import { fromEnv } from '../util/fromEnv'
 import { cacheKey } from './cacheKey'
 import { AGPSDataCache, getCache } from './getCache'
-import { Static } from '@sinclair/typebox'
 import { agpsRequestSchema } from './types'
 
 const {

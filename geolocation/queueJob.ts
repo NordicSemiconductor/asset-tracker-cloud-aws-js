@@ -1,6 +1,6 @@
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
 
 export const queueJob =
 	({ sqs, QueueUrl }: { sqs: SQSClient; QueueUrl: string }) =>

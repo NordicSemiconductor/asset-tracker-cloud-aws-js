@@ -1,10 +1,10 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
+import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
+import { none, Option, some } from 'fp-ts/lib/Option'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { Option, some, none } from 'fp-ts/lib/Option'
-import { Location } from '../geolocation/Location'
 import { Cell } from '../geolocation/Cell'
-import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
+import { Location } from '../geolocation/Location'
 
 export const geolocateFromCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
