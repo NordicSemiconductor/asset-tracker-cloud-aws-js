@@ -79,7 +79,7 @@
     "constructs": "10.1.42",
     "date-fns": "2.28.0",
     "jest": "28.1.1",
-    "nock": "13.2.6",
+    "nock": "13.2.7",
     "octokit-auth-netrc": "2.0.0"
   },
   "lint-staged": {
