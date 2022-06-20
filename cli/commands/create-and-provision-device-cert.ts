@@ -58,7 +58,7 @@ export const createAndProvisionDeviceCertCommand = ({
 			description: `Log debug messages`,
 		},
 		{
-			flags: '-s, --simulated-device',
+			flags: '-S, --simulated-device',
 			description: `Use a simulated (soft) device. Useful if you do not have physical access to the device. Will print the AT commands sent to the device allows to provide responses on the command line.`,
 		},
 	],
