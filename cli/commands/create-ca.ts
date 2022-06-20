@@ -40,7 +40,8 @@ export const createCACommand = ({
 			tags: (tags ?? '')
 				.split(',')
 				.map((tagDefinition) => tagDefinition.split('=', 2))
-				.map(([Key, Value]) => ({ Key, Value: Value ?? '' })),
+				.map(([Key, Value]) => ({ Key, Value: Value ?? '' }))
+				.filter(({ Key }) => Key !== ''),
 		})
 		console.log(
 			chalk.green(`CA certificate ${chalk.yellow(certificateId)} registered.`),
