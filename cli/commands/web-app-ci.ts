@@ -40,7 +40,7 @@ export const webappCICommand = (): CommandDefinition => ({
 			chalk.yellow(
 				showSecret === true
 					? webappCIStackConfig.userSecretAccessKey
-					: webappCIStackConfig.userSecretAccessKey.substr(0, 5) + '***',
+					: webappCIStackConfig.userSecretAccessKey.slice(0, 5) + '***',
 			),
 		)
 	},
