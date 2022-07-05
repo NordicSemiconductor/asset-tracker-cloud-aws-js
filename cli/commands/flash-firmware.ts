@@ -13,13 +13,15 @@ export const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
 const netrclocation = path.resolve(os.homedir(), '.netrc')
 
+type FWVariant = 'memfault' | 'debug' | 'nodebug'
+
 const getLatestFirmware = async ({
-	nodebug,
+	variant,
 	dk,
 	firmwareRepository,
 	ghToken,
 }: {
-	nodebug: boolean
+	variant?: FWVariant
 	dk: boolean
 	firmwareRepository: string
 	ghToken: string
@@ -43,13 +45,23 @@ const getLatestFirmware = async ({
 		})
 	).data
 
-	const hexfile = assets.find(
-		({ name }) =>
-			name.includes('.hex') &&
-			!name.includes('-signed') &&
-			name.includes(dk ? 'nRF9160DK' : 'Thingy91') &&
-			(nodebug ? name.includes('nodebug') : !name.includes('nodebug')),
-	)
+	const hexfile = assets.find(({ name }) => {
+		if (!name.includes('.hex')) return false
+		if (name.includes('-signed')) return false
+		if (!name.includes(dk ? 'nRF9160DK' : 'Thingy91')) return false
+		switch (variant) {
+			case 'memfault':
+				return name.includes('debugWithMemfault')
+			case 'nodebug':
+				return name.includes('nodebug')
+			default:
+				return (
+					name.includes('debug') &&
+					!name.includes('nodebug') &&
+					!name.includes('debugWithMemfault')
+				)
+		}
+	})
 
 	if (hexfile === undefined) throw new Error(`Failed to detect latest release.`)
 
@@ -76,8 +88,8 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 			description: `Flash a 9160 DK`,
 		},
 		{
-			flags: '--nodebugfw',
-			description: `Flash no-debug firmware`,
+			flags: '--variant <variant>',
+			description: `Flash firmware variant (debug|nodebug|memfault), defaults to debug`,
 		},
 		{
 			flags: '-f, --firmware <firmware>',
@@ -98,7 +110,7 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 	],
 	action: async ({
 		dk,
-		nodebugfw,
+		variant,
 		firmware,
 		ghToken,
 		firmwareRepository,
@@ -212,7 +224,7 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 			firmware ??
 			(await getLatestFirmware({
 				dk,
-				nodebug: nodebugfw,
+				variant: variant !== undefined ? (variant as FWVariant) : undefined,
 				ghToken,
 				firmwareRepository: firmwareRepository ?? defaultFirmwareRepository,
 			}))
