@@ -11,7 +11,7 @@ export const preparePackagedLambdaStorageDir = async ({
 	try {
 		await fs.stat(outDir)
 	} catch (_) {
-		await fs.mkdir(outDir)
+		await fs.mkdir(outDir, { recursive: true })
 	}
 	return outDir
 }

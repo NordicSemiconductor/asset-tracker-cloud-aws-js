@@ -8,7 +8,6 @@ phases:
       - n 16
       - npm install --global npm
       - npm ci --no-audit
-      - npx tsc
   build:
     commands:
       - npx cdk deploy --trace -v --require-approval never '*'

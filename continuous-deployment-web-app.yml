@@ -15,9 +15,8 @@ phases:
     commands:
       # Install dependencies of nRF Asset Tracker for AWS
       - npm ci --no-audit
-      - npx tsc
       # Export web app configuration
-      - $(node cli web-app-config -Q)
+      - $(./cli.sh web-app-config -Q)
       - export INITIATOR_PIPELINE_NAME=`echo $CODEBUILD_INITIATOR | cut -d'/'
         -f2`
       - export SOURCE_VERSION=`aws codepipeline get-pipeline-state --name

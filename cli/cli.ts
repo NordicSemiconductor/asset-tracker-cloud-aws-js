@@ -26,6 +26,18 @@ import { webappCICommand } from './commands/web-app-ci'
 import { webAppConfigCommand } from './commands/web-app-config'
 import { certsDir as provideCertsDir } from './jitp/certsDir'
 
+const die = (err: Error, origin: any) => {
+	console.error(`An unhandled exception occured!`)
+	console.error(`Exception origin: ${JSON.stringify(origin)}`)
+	console.error(err)
+	process.exit(1)
+}
+
+process.on('uncaughtException', die)
+process.on('unhandledRejection', die)
+
+console.log('')
+
 const iot = new IoTClient({})
 const version = JSON.parse(
 	fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
