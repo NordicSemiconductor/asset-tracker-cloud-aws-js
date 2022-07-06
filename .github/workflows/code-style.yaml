@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Compile TypeScript
+      - name: Compile TypeScript for type checking
         run: npx tsc
 
       - name: Check source code with eslint

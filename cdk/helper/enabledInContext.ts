@@ -31,7 +31,7 @@ export const enabledInContext =
 			)
 			help.push(
 				chalk.gray(`Run`),
-				chalk.yellow.dim(`node cli configure context stack ${key} 0`),
+				chalk.yellow.dim(`./cli.sh configure context stack ${key} 0`),
 				chalk.gray(`to disable.`),
 			)
 			!(silent ?? false) && console.error(...help)
@@ -45,7 +45,7 @@ export const enabledInContext =
 		]
 		help.push(
 			chalk.gray(`Run`),
-			chalk.yellow.dim(`node cli configure context stack ${key} 1`),
+			chalk.yellow.dim(`./cli.sh configure context stack ${key} 1`),
 			chalk.grey(`to enable.`),
 		)
 		!(silent ?? false) && console.error(...help)

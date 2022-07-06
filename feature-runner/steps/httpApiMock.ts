@@ -9,9 +9,8 @@ import {
 	regexGroupMatcher,
 	StepRunnerFunc,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
-import * as chai from 'chai'
-import { expect } from 'chai'
-import * as chaiSubset from 'chai-subset'
+import chai, { expect } from 'chai'
+import chaiSubset from 'chai-subset'
 import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse'
 import { AssetTrackerWorld } from '../run-features'
 chai.use(chaiSubset)
