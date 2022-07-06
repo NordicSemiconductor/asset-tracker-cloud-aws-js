@@ -79,9 +79,9 @@ jobs:
       - run: echo "VERSION=${{ github.sha }}" >> $GITHUB_ENV
       - name: Set up stack for End-to-End tests
         run: |
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' deploy
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-http-api-mock.js' deploy '*' --require-approval never
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-sourcecode.js' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-sourcecode.js' deploy
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-http-api-mock.js' deploy '*' --require-approval never
           node cli configure thirdParty unwiredlabs apiKey my-secret
           node cli configure thirdParty nrfcloud teamId `uuidgen`
           openssl ecparam -name secp256k1 -genkey | node cli configure thirdParty nrfcloud cellLocationServiceKey
@@ -90,9 +90,11 @@ jobs:
           MOCK_HTTP_API_ENDPOINT=`aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue' | sed -E 's/\/$//g'`
           node cli configure thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
           node cli configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' deploy '*' --require-approval never
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-test.js' deploy '*' --require-approval never
           node cli create-ca --tags ci,repository=${{ github.repository }}
-      - run: node --unhandled-rejections=strict dist/cdk/helper/addFakeRoute.js
+      - run:
+          node --loader tsx
+          --unhandled-rejections=strictcdk/helper/addFakeRoute.js
       - name: Run End-to-End Tests
         run: npm run test:e2e
       - name: Get logs
@@ -114,13 +116,13 @@ jobs:
           node cli purge-cas -i `cat certificates/**/rootCA.id`
           # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
           node cli purge-buckets
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-test.js' destroy -f '*'
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-http-api-mock.js' destroy -f '*'
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-test.js' destroy -f '*'
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-http-api-mock.js' destroy -f '*'
           # Delete sourcecode bucket
           SOURCE_CODE_BUCKET=`aws cloudformation describe-stacks --stack-name $STACK_NAME-sourcecode | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "bucketName") | .OutputValue'`
           aws s3 rb s3://$SOURCE_CODE_BUCKET --force
           # Delete the sourceode stack
-          npx cdk -a 'node --unhandled-rejections=strict dist/cdk/cloudformation-sourcecode.js' destroy -f '*'
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strictcdk/cloudformation-sourcecode.js' destroy -f '*'
       - uses: actions/upload-artifact@v3
         if: always()
         with:

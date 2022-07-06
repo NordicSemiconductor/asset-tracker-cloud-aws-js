@@ -5,10 +5,11 @@
   "main": "./dist/export.js",
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
-    "test:e2e": "node --unhandled-rejections=strict dist/feature-runner/run-features.js ./features --print-results --progress",
+    "test:e2e": "node --unhandled-rejections=strict --loader tsx feature-runner/run-features.ts ./features --print-results --progress",
     "postinstall": "husky install && check-node-version --package",
-    "prepublishOnly": "pinst --disable",
-    "postpublish": "pinst --enable"
+    "prepublishOnly": "pinst --disable && npx tsc --noEmit false --outDir ./dist",
+    "postpublish": "pinst --enable",
+    "cli": "node --loader tsx ./cli/cli.ts"
   },
   "repository": {
     "type": "git",
@@ -58,6 +59,8 @@
     "@nordicsemiconductor/package-layered-lambdas": "11.0.66",
     "@nordicsemiconductor/random-words": "6.0.0",
     "@octokit/rest": "18.12.0",
+    "@swc/cli": "0.1.57",
+    "@swc/core": "1.2.210",
     "@swc/jest": "0.2.21",
     "@types/aws-iot-device-sdk": "2.2.4",
     "@types/aws-lambda": "8.10.101",
@@ -80,7 +83,8 @@
     "date-fns": "2.28.0",
     "jest": "28.1.2",
     "nock": "13.2.8",
-    "octokit-auth-netrc": "2.0.0"
+    "octokit-auth-netrc": "2.0.0",
+    "tsx": "3.7.1"
   },
   "lint-staged": {
     "*.{md,json,yaml,yml}": [
