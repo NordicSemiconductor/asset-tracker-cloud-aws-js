@@ -1,5 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
+import { Static, TObject, TProperties } from '@sinclair/typebox'
 import { isLeft } from 'fp-ts/lib/Either'
 import { URL } from 'url'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
@@ -7,6 +7,10 @@ import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { locateResultSchema } from './locate'
+import {
+	ncellMeasLocateInputSchema,
+	ncellMeasLocateRequestSchema,
+} from './ncellMeasLocateSchema'
 import { getCellLocationApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
@@ -16,82 +20,10 @@ const settingsPromise = getCellLocationApiSettings({
 	stackName,
 })()
 
-const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
-const RSRP = Type.Integer({ minimum: -199, maximum: 0, title: 'RSRP' })
-const RSRQ = Type.Integer({ minimum: -99, maximum: 0, title: 'RSRQ' })
-const TimingAdvance = Type.Integer({
-	minimum: 0,
-	maximum: 20512,
-	title: 'Timing advance',
-})
-
-const inputSchema = Type.Object({
-	nw: Type.String({ minLength: 1 }),
-	report: Type.Object({
-		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-		mnc: Type.Integer({ minimum: 0, maximum: 99 }),
-		cell: PositiveInteger,
-		area: PositiveInteger,
-		earfcn: PositiveInteger,
-		adv: TimingAdvance,
-		rsrp: RSRP,
-		rsrq: RSRQ,
-		nmr: Type.Optional(
-			Type.Array(
-				Type.Object(
-					{
-						cell: PositiveInteger,
-						earfcn: PositiveInteger,
-						rsrp: RSRP,
-						rsrq: RSRQ,
-					},
-					{ additionalProperties: false },
-				),
-				{ minItems: 1 },
-			),
-		),
-		ts: PositiveInteger,
-	}),
-})
-
-const locateRequestSchema = Type.Record(
-	Type.Union([Type.Literal('nbiot'), Type.Literal('lte')]),
-	Type.Array(
-		Type.Object(
-			{
-				mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-				mnc: Type.Integer({ minimum: 0, maximum: 99 }),
-				eci: PositiveInteger,
-				tac: PositiveInteger,
-				earfcn: PositiveInteger,
-				adv: TimingAdvance,
-				rsrp: RSRP,
-				rsrq: RSRQ,
-				nmr: Type.Optional(
-					Type.Array(
-						Type.Object(
-							{
-								pci: PositiveInteger,
-								earfcn: PositiveInteger,
-								rsrp: RSRP,
-								rsrq: RSRQ,
-							},
-							{ additionalProperties: false },
-						),
-						{ minItems: 1 },
-					),
-				),
-			},
-			{ additionalProperties: false },
-		),
-		{ minItems: 1 },
-	),
-)
-
-const validateInput = validateWithJSONSchema(inputSchema)
+const validateInput = validateWithJSONSchema(ncellMeasLocateInputSchema)
 
 export const handler = async (
-	ncellmeas: Static<typeof inputSchema>,
+	ncellmeas: Static<typeof ncellMeasLocateInputSchema>,
 ): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(ncellmeas))
 	const valid = validateInput(ncellmeas)
@@ -133,7 +65,8 @@ export const handler = async (
 				},
 			],
 		},
-		requestSchema: locateRequestSchema as unknown as TObject<TProperties>,
+		requestSchema:
+			ncellMeasLocateRequestSchema as unknown as TObject<TProperties>,
 		responseSchema: locateResultSchema,
 	})()
 	if (isLeft(maybeCeollGeolocation)) {

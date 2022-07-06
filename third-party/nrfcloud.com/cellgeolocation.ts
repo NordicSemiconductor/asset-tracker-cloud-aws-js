@@ -1,6 +1,6 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { TObject, TProperties, Type } from '@sinclair/typebox'
+import { TObject, TProperties } from '@sinclair/typebox'
 import { isLeft } from 'fp-ts/lib/Either'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
@@ -8,6 +8,7 @@ import { Cell } from '../../geolocation/Cell'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { locateResultSchema } from './locate'
+import { locateRequestSchema } from './locateRequestSchema'
 import { getCellLocationApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
@@ -16,22 +17,6 @@ const fetchSettings = getCellLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
-
-const locateRequestSchema = Type.Record(
-	Type.Union([Type.Literal('nbiot'), Type.Literal('lte')]),
-	Type.Array(
-		Type.Object(
-			{
-				eci: Type.Integer({ minimum: 1 }),
-				mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-				mnc: Type.Integer({ minimum: 1, maximum: 99 }),
-				tac: Type.Integer({ minimum: 1 }),
-			},
-			{ additionalProperties: false },
-		),
-		{ minItems: 1 },
-	),
-)
 
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
