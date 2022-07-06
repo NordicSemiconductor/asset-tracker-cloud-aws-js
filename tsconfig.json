@@ -2,6 +2,7 @@
   "extends": "@nordicsemiconductor/asset-tracker-cloud-code-style/tsconfig.json",
   "include": ["**/*.ts"],
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "esModuleInterop": true
   }
 }

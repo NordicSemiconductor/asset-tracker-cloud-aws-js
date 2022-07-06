@@ -98,7 +98,7 @@ Promise.all([
 				warn(
 					'Location Services',
 					`Use ${chalk.greenBright(
-						`node cli configure thirdParty unwiredlabs apiKey <API key>`,
+						`npm run cli configure thirdParty unwiredlabs apiKey <API key>`,
 					)} to set the API key`,
 				)
 				ctx.unwiredlabs = '0'
@@ -132,7 +132,7 @@ Promise.all([
 					warn(
 						'Location Services',
 						`Use ${chalk.greenBright(
-							`node cli configure thirdParty nrfcloud ${configProperty} <service key>`,
+							`npm run cli configure thirdParty nrfcloud ${configProperty} <service key>`,
 						)} to set the service key`,
 					)
 					ctx[context] = '0'
@@ -148,7 +148,7 @@ Promise.all([
 				warn(
 					'Continuous Deployment',
 					`Use ${chalk.greenBright(
-						`node cli configure codebuild github token <token>`,
+						`npm run cli configure codebuild github token <token>`,
 					)} to set the token`,
 				)
 				ctx.cd = '0'

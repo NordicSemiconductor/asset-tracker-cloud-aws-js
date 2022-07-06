@@ -187,7 +187,7 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 					console.error('')
 					console.error(
 						'  ',
-						chalk.greenBright(`node cli flash-firmare --gh-token`),
+						chalk.greenBright(`npm run cli flash-firmare --gh-token`),
 						chalk.blueBright(`"your personal access token"`),
 					)
 					console.error('')
@@ -212,7 +212,7 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 					console.error('')
 					console.error(
 						'  ',
-						chalk.greenBright(`node cli flash-firmare --firmware`),
+						chalk.greenBright(`npm run cli flash-firmare --firmware`),
 						chalk.blueBright(`/path/to/firmware.hex`),
 					)
 					process.exit(1)

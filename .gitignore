@@ -8,3 +8,4 @@ dist/
 cdk.out/
 certificates/
 log.log
+tsconfig.tsbuildinfo
