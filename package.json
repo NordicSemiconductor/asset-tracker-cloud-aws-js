@@ -83,7 +83,7 @@
     "jest": "28.1.2",
     "nock": "13.2.8",
     "octokit-auth-netrc": "2.0.1",
-    "tsx": "3.7.1"
+    "tsx": "3.8.0"
   },
   "lint-staged": {
     "*.{md,json,yaml,yml}": [
