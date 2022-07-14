@@ -59,7 +59,7 @@
     "@nordicsemiconductor/random-words": "6.0.0",
     "@octokit/rest": "19.0.3",
     "@swc/cli": "0.1.57",
-    "@swc/core": "1.2.213",
+    "@swc/core": "1.2.215",
     "@swc/jest": "0.2.21",
     "@types/aws-iot-device-sdk": "2.2.4",
     "@types/aws-lambda": "8.10.101",
