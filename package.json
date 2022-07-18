@@ -60,7 +60,7 @@
     "@octokit/rest": "19.0.3",
     "@swc/cli": "0.1.57",
     "@swc/core": "1.2.215",
-    "@swc/jest": "0.2.21",
+    "@swc/jest": "0.2.22",
     "@types/aws-iot-device-sdk": "2.2.4",
     "@types/aws-lambda": "8.10.101",
     "@types/backoff": "2.5.2",
