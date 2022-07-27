@@ -29,7 +29,7 @@
     "@aws-sdk/client-iot-data-plane": "3.137.0",
     "@aws-sdk/client-sfn": "3.137.0",
     "@aws-sdk/client-sqs": "3.137.0",
-    "@aws-sdk/client-ssm": "3.137.0",
+    "@aws-sdk/client-ssm": "3.138.0",
     "@aws-sdk/client-timestream-write": "3.137.0",
     "@aws-sdk/util-dynamodb": "3.137.0",
     "@nordicsemiconductor/cell-geolocation-helpers": "5.0.1",
