@@ -46,7 +46,7 @@
     "@aws-sdk/client-cloudformation": "3.142.0",
     "@aws-sdk/client-cloudwatch-logs": "3.142.0",
     "@aws-sdk/client-codepipeline": "3.142.0",
-    "@aws-sdk/client-iot": "3.142.0",
+    "@aws-sdk/client-iot": "3.144.0",
     "@aws-sdk/client-s3": "3.142.0",
     "@aws-sdk/client-sts": "3.142.0",
     "@aws-sdk/client-timestream-query": "3.142.0",
