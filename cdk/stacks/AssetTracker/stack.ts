@@ -152,6 +152,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			userPool: userPool,
 			authFlows: {
 				userPassword: true,
+				userSrp: true,
 				adminUserPassword: true,
 			},
 		})
