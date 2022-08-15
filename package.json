@@ -57,7 +57,7 @@
     "@nordicsemiconductor/object-to-env": "4.1.1",
     "@nordicsemiconductor/package-layered-lambdas": "11.0.79",
     "@nordicsemiconductor/random-words": "6.0.0",
-    "@octokit/rest": "19.0.3",
+    "@octokit/rest": "19.0.4",
     "@swc/cli": "0.1.57",
     "@swc/core": "1.2.231",
     "@swc/jest": "0.2.22",
