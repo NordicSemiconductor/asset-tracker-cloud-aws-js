@@ -47,7 +47,7 @@
     "@aws-sdk/client-cloudwatch-logs": "3.154.0",
     "@aws-sdk/client-codepipeline": "3.154.0",
     "@aws-sdk/client-iot": "3.154.0",
-    "@aws-sdk/client-s3": "3.154.0",
+    "@aws-sdk/client-s3": "3.157.0",
     "@aws-sdk/client-sts": "3.154.0",
     "@aws-sdk/client-timestream-query": "3.154.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "11.0.113",
