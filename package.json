@@ -52,7 +52,7 @@
     "@aws-sdk/client-timestream-query": "3.161.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "11.0.118",
     "@nordicsemiconductor/cloudformation-helpers": "7.0.6",
-    "@nordicsemiconductor/e2e-bdd-test-runner": "15.1.94",
+    "@nordicsemiconductor/e2e-bdd-test-runner": "15.1.96",
     "@nordicsemiconductor/firmware-ci-device-helpers": "13.0.240",
     "@nordicsemiconductor/object-to-env": "4.1.1",
     "@nordicsemiconductor/package-layered-lambdas": "11.0.85",
