@@ -21,7 +21,9 @@ Feature: Update Device Configuration
                 "mvres": 60,
                 "mvt": 3600,
                 "gnsst": 1000,
-                "acct": 0.5
+                "accath": 10.5,
+                "accith": 5.2,
+                "accito": 1.7
               }
             }
          }
