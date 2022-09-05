@@ -16,5 +16,16 @@ export const messageToTimestreamRecords = (event: DeviceMessage): _Record[] => {
 		)
 	}
 
+	if (event.message.impact !== undefined) {
+		Records.push(
+			toRecord({
+				name: 'impact',
+				ts: event.message.impact.ts,
+				v: event.message.impact.v,
+				dimensions: { measureGroup: v4() },
+			}),
+		)
+	}
+
 	return Records.filter(isNotNullOrUndefined) as _Record[]
 }

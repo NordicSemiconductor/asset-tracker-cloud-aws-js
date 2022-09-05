@@ -30,6 +30,10 @@ type UpdatedDeviceState = {
 
 type DeviceMessage = {
 	message: {
+		impact?: {
+			ts: number
+			v: number
+		}
 		btn?: {
 			v: number
 			ts: number
