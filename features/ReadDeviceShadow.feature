@@ -45,7 +45,9 @@ Feature: Read Device Shadow
             "mvres": 60,
             "mvt": 3600,
             "gnsst": 1000,
-            "acct": 0.5
+            "accath": 10,
+            "accith": 5,
+            "accito": 1,
           }
        }
        """
