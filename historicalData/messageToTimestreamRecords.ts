@@ -16,12 +16,12 @@ export const messageToTimestreamRecords = (event: DeviceMessage): _Record[] => {
 		)
 	}
 
-	if (event.message.magnitude !== undefined) {
+	if (event.message.impact !== undefined) {
 		Records.push(
 			toRecord({
-				name: 'magnitude',
-				ts: event.message.magnitude.ts,
-				v: event.message.magnitude.v,
+				name: 'impact',
+				ts: event.message.impact.ts,
+				v: event.message.impact.v,
 				dimensions: { measureGroup: v4() },
 			}),
 		)

@@ -31,7 +31,7 @@ describe('messageToTimestreamRecords', () => {
 			},
 		])
 	})
-	it('should convert a magnitude message to Timestream records', () => {
+	it('should convert a impact message to Timestream records', () => {
 		const Dimensions = [
 			{
 				Name: 'measureGroup',
@@ -43,7 +43,7 @@ describe('messageToTimestreamRecords', () => {
 		expect(
 			messageToTimestreamRecords({
 				message: {
-					magnitude: {
+					impact: {
 						v: 200,
 						ts: 1606474470069,
 					},
@@ -53,7 +53,7 @@ describe('messageToTimestreamRecords', () => {
 		).toEqual([
 			{
 				Dimensions,
-				MeasureName: 'magnitude',
+				MeasureName: 'impact',
 				MeasureValue: '200',
 				MeasureValueType: 'DOUBLE',
 				Time: '1606474470069',

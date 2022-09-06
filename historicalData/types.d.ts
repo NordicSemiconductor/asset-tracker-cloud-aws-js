@@ -30,7 +30,7 @@ type UpdatedDeviceState = {
 
 type DeviceMessage = {
 	message: {
-		magnitude?: {
+		impact?: {
 			ts: number
 			v: number
 		}
