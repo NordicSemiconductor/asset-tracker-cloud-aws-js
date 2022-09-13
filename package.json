@@ -6,9 +6,8 @@
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
     "test:e2e": "node --unhandled-rejections=strict --loader tsx feature-runner/run-features.ts ./features --print-results --progress",
-    "postinstall": "husky install && check-node-version --package",
-    "prepublishOnly": "pinst --disable && npx tsc --noEmit false --outDir ./dist",
-    "postpublish": "pinst --enable"
+    "prepare": "husky install && check-node-version --package",
+    "prepublishOnly": "npx tsc --noEmit false --outDir ./dist"
   },
   "repository": {
     "type": "git",
