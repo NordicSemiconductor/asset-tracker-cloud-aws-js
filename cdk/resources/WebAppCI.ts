@@ -42,7 +42,7 @@ export class WebAppCI extends CloudFormation.Resource {
 		)
 		ciUser.addToPolicy(
 			new IAM.PolicyStatement({
-				actions: ['iot:DescribeEndpoint'],
+				actions: ['iot:DescribeEndpoint', 'iot:ListThings'],
 				resources: [`*`],
 			}),
 		)
