@@ -1,20 +1,20 @@
 import { Static } from '@sinclair/typebox'
 import { converter } from './converter'
 import { assetTrackerShadow } from './types/assetTrackerShadow'
-import { coioteShadow } from './types/coioteShadow'
+import { tempShadow } from './types/temp'
 
 const assetTracker: assetTrackerShadow = {
 	state: {
 		reported: {
 			cfg: {
 				act: true,
-				gnsst: 1, //30,
-				actwt: 1, //120,
-				mvres: 1, //120,
-				mvt: 1, //3600,
-				accath: 1, //10,
-				accith: 1, //10,
-				accito: 1, //10,
+				gnsst: 30, //30,
+				actwt: 5, //120,
+				mvres: 120, //120,
+				mvt: 3600, //3600,
+				accath: 10, //10,
+				accith: 5, //10,
+				accito: 60, //10,
 				nod: [],
 			},
 			dev: {
@@ -59,7 +59,7 @@ const assetTracker: assetTrackerShadow = {
 	},
 }
 
-const avSystemShadow: Static<typeof coioteShadow> = {
+const avSystemShadow: Static<typeof tempShadow> = {
 	state: {
 		reported: {
 			Accelerometer: {
@@ -323,6 +323,9 @@ const avSystemShadow: Static<typeof coioteShadow> = {
 			},
 			'Location Assistance': {
 				'0': {
+					assistance_data: {
+						noValue: true,
+					},
 					'A-GPS assistance mask': '0',
 					'Assistance type': '4',
 					'P-GPS predictionCount': '0',
@@ -457,15 +460,6 @@ const avSystemShadow: Static<typeof coioteShadow> = {
 					},
 					Timestamp: '1970-01-01T00:00:00Z',
 				},
-				'1': {
-					'Application Type': 'Push button 2',
-					'Digital Input Counter': '0',
-					'Digital Input State': 'false',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					Timestamp: '1970-01-01T00:00:00Z',
-				},
 			},
 			Temperature: {
 				'0': {
@@ -506,6 +500,20 @@ const avSystemShadow: Static<typeof coioteShadow> = {
 					},
 				},
 			},
+			Configuration: {
+				'0': {
+					'Accelerometer activity threshold': '10.0',
+					'Accelerometer inactivity threshold': '5.0',
+					'Accelerometer inactivity timeout': '60.0',
+					'Active wait time': '120',
+					'GNSS enable': 'true',
+					'GNSS timeout': '30',
+					'Movement resolution': '120',
+					'Movement timeout': '3600',
+					'Neighbor cell measurements enable': 'true',
+					'Passive mode': 'false',
+				},
+			},
 		},
 	},
 }
@@ -518,6 +526,6 @@ describe('AV System', () => {
 		const shadow = converter(coioteShadow)
 
 		expect(shadow).toEqual(nrfAssetTrackerShadow)
-		expect(typeof shadow).toEqual(typeof coioteShadow) // TODO: make it better
+		expect(typeof shadow).toEqual(typeof tempShadow) // TODO: make it better
 	})
 })

@@ -8,40 +8,23 @@ import {
 	Roaming,
 } from './types/assetTrackerShadow'
 import {
-	coioteShadow,
 	connectivityMonitoring,
 	device as dev,
 	ECIDSignalMeasurementInformation,
 } from './types/coioteShadow'
+import { configuration, tempShadow } from './types/temp'
 
 /**
  * transform shadow from 'coiote' type to 'nrf asset tracker' type
  */
 export const converter = (
-	coiote: Static<typeof coioteShadow>,
+	coiote: Static<typeof tempShadow>,
 ): assetTrackerShadow => {
 	// TODO: discover this values
 	// Asset Config
-	const act = true
-	const actwt = 1
-	const mvres = 1
-	const mvt = 1
-	const gnsst = 1
-	const accath = 1
-	const accith = 1
-	const accito = 1
-	const nod: any[] = []
-	const cfg = generateAssetConfig(
-		act,
-		actwt,
-		mvres,
-		mvt,
-		gnsst,
-		accath,
-		accith,
-		accito,
-		nod,
-	)
+
+	const configuration = coiote.state.reported.Configuration['0']
+	const cfg = generateAssetConfig(configuration)
 
 	// Asset Info
 	const device = coiote.state.reported.Device['0']
@@ -162,16 +145,18 @@ export const generateAssetInfo = (
 }
 
 export const generateAssetConfig = (
-	act: boolean,
-	actwt: number,
-	mvres: number,
-	mvt: number,
-	gnsst: number,
-	accath: number,
-	accith: number,
-	accito: number,
-	nod: any[],
+	config: Static<typeof configuration>,
 ): Static<typeof AssetConfig> => {
+	const act = true // TODO: find value
+	const actwt = Number(config['Accelerometer inactivity threshold'])
+	const mvres = Number(config['Movement resolution'])
+	const mvt = Number(config['Movement timeout'])
+	const gnsst = Number(config['GNSS timeout'])
+	const accath = Number(config['Accelerometer activity threshold'])
+	const accith = Number(config['Accelerometer inactivity threshold'])
+	const accito = Number(config['Accelerometer inactivity timeout'])
+	const nod: any[] = []
+
 	return {
 		act,
 		actwt,
