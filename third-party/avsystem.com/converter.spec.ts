@@ -59,6 +59,7 @@ const assetTracker: assetTrackerShadow = {
 	},
 }
 
+// FIXME: add proper json
 const avSystemShadow: Static<typeof tempShadow> = {
 	state: {
 		reported: {
