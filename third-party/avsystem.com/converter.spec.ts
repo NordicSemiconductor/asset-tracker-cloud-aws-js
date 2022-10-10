@@ -365,6 +365,24 @@ const avSystemShadow: Static<typeof coioteShadow> = {
 	},
 }
 
+/**
+ *
+ * Check if object sending by params is an instance of assetTrackerShadow
+ * https://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards
+ * Other option could be make this custom Jest function https://dev.to/andyhaskell/making-custom-jest-assertion-matchers-in-javascript-and-typescript-15ij
+ */
+const isAssetTrackerType = (x: any): x is assetTrackerShadow => {
+	return (
+		(x as assetTrackerShadow).state !== undefined &&
+		(x as assetTrackerShadow).state.reported !== undefined &&
+		(x as assetTrackerShadow).state.reported.cfg !== undefined &&
+		(x as assetTrackerShadow).state.reported.dev !== undefined &&
+		(x as assetTrackerShadow).state.reported.roam !== undefined &&
+		(x as assetTrackerShadow).state.reported.env !== undefined &&
+		(x as assetTrackerShadow).state.reported.bat !== undefined
+	)
+}
+
 describe('AV System', () => {
 	it("should transform the received object in 'nRF Asset Tracker' shadow type", () => {
 		const coioteShadow = avSystemShadow
@@ -373,6 +391,6 @@ describe('AV System', () => {
 		const shadow = converter(coioteShadow)
 
 		expect(shadow).toEqual(nrfAssetTrackerShadow)
-		expect(typeof shadow).toEqual(typeof coioteShadow) // TODO: make it better
+		expect(isAssetTrackerType(shadow)).toBe(true) // TODO: check this
 	})
 })
