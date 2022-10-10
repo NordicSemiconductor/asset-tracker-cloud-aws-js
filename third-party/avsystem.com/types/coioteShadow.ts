@@ -81,6 +81,7 @@ const minMeasuredValue = Type.String({
 
 /**
  * Connectivity Monitoring
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/4.xml
  */
 export const connectivityMonitoring = Type.Object({
 	APN: Type.Object({
@@ -146,6 +147,7 @@ export const connectivityMonitoring = Type.Object({
 
 /**
  * ECID-Signal Measurement Information
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/10256.xml
  */
 export const ECIDSignalMeasurementInformation = Type.Object({
 	ECGI: Type.String({
@@ -182,6 +184,7 @@ export const ECIDSignalMeasurementInformation = Type.Object({
 
 /**
  * Location Assistance
+ * TODO: add link documentation
  */
 const locationAssistance = Type.Object({
 	'A-GPS assistance mask': Type.String({
@@ -236,6 +239,7 @@ const locationAssistance = Type.Object({
 
 /**
  * Configuration
+ * TODO: add link documentation
  */
 export const configuration = Type.Object({
 	'Accelerometer activity threshold': Type.String({
@@ -297,6 +301,7 @@ export const configuration = Type.Object({
 
 /**
  * Device
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/3.xml
  */
 export const device = Type.Object({
 	'Available Power Sources': Type.Union([
@@ -429,6 +434,7 @@ export const device = Type.Object({
 
 /**
  * Firmware Update
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/5.xml
  */
 const firmwareUpdate = Type.Object({
 	'Firmware Update Protocol Support': Type.Object({}),
@@ -499,6 +505,7 @@ const timestamp = Type.String({
 
 /**
  * Humidity
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/3304.xml
  */
 export const humidity = Type.Object({
 	'Application Type': applicationType,
@@ -520,6 +527,7 @@ export const humidity = Type.Object({
 
 /**
  * Location
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/6.xml
  */
 const location = Type.Object({
 	Altitude: Type.String({
@@ -557,6 +565,7 @@ const location = Type.Object({
 
 /**
  * LwM2M Server
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/1.xml
  */
 const LwM2MServer = Type.Object({
 	'APN Link': noValue,
@@ -623,6 +632,7 @@ const LwM2MServer = Type.Object({
 
 /**
  * Pressure
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/3323.xml
  */
 export const pressure = Type.Object({
 	'Application Type': applicationType,
@@ -645,6 +655,7 @@ export const pressure = Type.Object({
 
 /**
  * Push Button
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/3347.xml
  */
 const pushButton = Type.Object({
 	'Application Type': applicationType,
@@ -664,6 +675,7 @@ const pushButton = Type.Object({
 
 /**
  * Temperature
+ * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/3303.xml
  */
 export const temperature = Type.Object({
 	'Application Type': applicationType,
