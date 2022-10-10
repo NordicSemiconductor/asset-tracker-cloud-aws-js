@@ -275,15 +275,3 @@ export type assetTrackerShadow = {
 		reported: ReportedState
 	}
 }
-
-/*
-state: {
-	reported: {
-		gnss: {},
-		bat: {},
-		dev: {},
-		roam: {},
-		env: {},
-	}
-}
-*/
