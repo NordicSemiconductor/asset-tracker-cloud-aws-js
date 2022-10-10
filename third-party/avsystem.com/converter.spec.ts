@@ -59,57 +59,9 @@ const assetTracker: assetTrackerShadow = {
 	},
 }
 
-// FIXME: add proper json
 const avSystemShadow: Static<typeof tempShadow> = {
 	state: {
 		reported: {
-			Accelerometer: {
-				'0': {
-					'Application Type': 'Simulated Accelerometer',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					'Max Range Value': '19.6133',
-					'Measurement Quality Indicator': '0',
-					'Measurement Quality Level': {
-						noValue: true,
-					},
-					'Min Range Value': '-19.6133',
-					'Sensor Units': 'm/s^2',
-					Timestamp: '2022-10-03T12:18:41Z',
-					'X Value': '6.132514',
-					'Y Value': '6.144473',
-					'Z Value': '6.156431',
-				},
-			},
-			Colour: {
-				'0': {
-					'Application Type': 'Simulated Light Sensor',
-					Colour: '0x507146FF',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					'Measurement Quality Indicator': '0',
-					'Measurement Quality Level': {
-						noValue: true,
-					},
-					'Sensor Units': 'RGB-IR',
-					Timestamp: '2022-10-03T12:18:41Z',
-				},
-				'1': {
-					'Application Type': 'Simulated Colour Sensor',
-					Colour: '0xFF50FF44',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					'Measurement Quality Indicator': '0',
-					'Measurement Quality Level': {
-						noValue: true,
-					},
-					'Sensor Units': 'RGB-IR',
-					Timestamp: '2022-10-03T12:18:41Z',
-				},
-			},
 			'Connectivity Monitoring': {
 				'0': {
 					APN: {
@@ -224,29 +176,6 @@ const avSystemShadow: Static<typeof tempShadow> = {
 					'Update Result': '1',
 				},
 			},
-			'Generic Sensor': {
-				'0': {
-					'Application Type': 'Simulated Gas Resistance Sensor',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					'Max Measured Value': '10350.0',
-					'Max Range Value': '1000000.0',
-					'Measurement Quality Indicator': '0',
-					'Measurement Quality Level': {
-						noValue: true,
-					},
-					'Min Measured Value': '10350.0',
-					'Min Range Value': '0.0',
-					'Reset Min and Max Measured Values': {
-						noValue: true,
-					},
-					'Sensor Type': 'Gas resistance sensor',
-					'Sensor Units': 'Ω',
-					'Sensor Value': '10350.0',
-					Timestamp: '2022-10-03T12:18:40Z',
-				},
-			},
 			Humidity: {
 				'0': {
 					'Application Type': 'Simulated Humidity Sensor',
@@ -267,48 +196,6 @@ const avSystemShadow: Static<typeof tempShadow> = {
 					'Sensor Units': '%',
 					'Sensor Value': '51.197021',
 					Timestamp: '2022-10-03T12:18:41Z',
-				},
-			},
-			'Light Control': {
-				'0': {
-					'Application Type': 'GPIO LED controller',
-					Colour: '',
-					'Cumulative active power': '0.0',
-					Dimmer: '100',
-					'On time': '0',
-					'On/Off': 'false',
-					'Power factor': '0.0',
-					'Sensor Units': '',
-				},
-				'1': {
-					'Application Type': 'GPIO LED controller',
-					Colour: '',
-					'Cumulative active power': '0.0',
-					Dimmer: '100',
-					'On time': '0',
-					'On/Off': 'false',
-					'Power factor': '0.0',
-					'Sensor Units': '',
-				},
-				'2': {
-					'Application Type': 'GPIO LED controller',
-					Colour: '',
-					'Cumulative active power': '0.0',
-					Dimmer: '100',
-					'On time': '0',
-					'On/Off': 'false',
-					'Power factor': '0.0',
-					'Sensor Units': '',
-				},
-				'3': {
-					'Application Type': 'GPIO LED controller',
-					Colour: '',
-					'Cumulative active power': '0.0',
-					Dimmer: '100',
-					'On time': '0',
-					'On/Off': 'false',
-					'Power factor': '0.0',
-					'Sensor Units': '',
 				},
 			},
 			Location: {
@@ -402,30 +289,6 @@ const avSystemShadow: Static<typeof tempShadow> = {
 					},
 				},
 			},
-			'On/Off switch': {
-				'0': {
-					'Application Type': 'On/Off Switch 1',
-					'Digital Input Counter': '0',
-					'Digital Input State': 'false',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					'Off Time': '20',
-					'On time': '0',
-					Timestamp: '1970-01-01T00:00:00Z',
-				},
-				'1': {
-					'Application Type': 'On/Off Switch 2',
-					'Digital Input Counter': '0',
-					'Digital Input State': 'false',
-					'Fractional Timestamp': {
-						noValue: true,
-					},
-					'Off Time': '20',
-					'On time': '0',
-					Timestamp: '1970-01-01T00:00:00Z',
-				},
-			},
 			Pressure: {
 				'0': {
 					'Application Type': 'Simulated Pressure Sensor',
@@ -482,23 +345,6 @@ const avSystemShadow: Static<typeof tempShadow> = {
 					'Sensor Units': '°C',
 					'Sensor Value': '21.107585',
 					Timestamp: '2022-10-03T12:18:41Z',
-				},
-			},
-			Portfolio: {
-				'0': {
-					AuthData: {},
-					Identity: {
-						'0': 'Host Device ID #1',
-						'1': 'Host Develce Manufacturer #1',
-						'2': 'Host Device Model #1',
-						'3': 'Host Device Software Version #1',
-					},
-					AuthStatus: {
-						noValue: true,
-					},
-					GetAuthData: {
-						noValue: true,
-					},
 				},
 			},
 			Configuration: {
