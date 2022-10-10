@@ -8,17 +8,18 @@ import {
 	Roaming,
 } from './types/assetTrackerShadow'
 import {
+	coioteShadow,
+	configuration,
 	connectivityMonitoring,
 	device as dev,
 	ECIDSignalMeasurementInformation,
 } from './types/coioteShadow'
-import { configuration, tempShadow } from './types/temp'
 
 /**
  * transform shadow from 'coiote' type to 'nrf asset tracker' type
  */
 export const converter = (
-	coiote: Static<typeof tempShadow>,
+	coiote: Static<typeof coioteShadow>,
 ): assetTrackerShadow => {
 	// TODO: discover this values
 	// Asset Config

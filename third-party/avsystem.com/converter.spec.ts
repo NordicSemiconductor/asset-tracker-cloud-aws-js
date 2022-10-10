@@ -1,7 +1,7 @@
 import { Static } from '@sinclair/typebox'
 import { converter } from './converter'
 import { assetTrackerShadow } from './types/assetTrackerShadow'
-import { tempShadow } from './types/temp'
+import { coioteShadow } from './types/coioteShadow'
 
 const assetTracker: assetTrackerShadow = {
 	state: {
@@ -59,7 +59,7 @@ const assetTracker: assetTrackerShadow = {
 	},
 }
 
-const avSystemShadow: Static<typeof tempShadow> = {
+const avSystemShadow: Static<typeof coioteShadow> = {
 	state: {
 		reported: {
 			'Connectivity Monitoring': {
@@ -373,6 +373,6 @@ describe('AV System', () => {
 		const shadow = converter(coioteShadow)
 
 		expect(shadow).toEqual(nrfAssetTrackerShadow)
-		expect(typeof shadow).toEqual(typeof tempShadow) // TODO: make it better
+		expect(typeof shadow).toEqual(typeof coioteShadow) // TODO: make it better
 	})
 })
