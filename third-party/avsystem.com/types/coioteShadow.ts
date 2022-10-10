@@ -500,7 +500,7 @@ const timestamp = Type.String({
 /**
  * Humidity
  */
-const humidity = Type.Object({
+export const humidity = Type.Object({
 	'Application Type': applicationType,
 	'Fractional Timestamp': Type.Union([fractionalTimestamp, noValue]),
 	'Max Measured Value': maxMeasuredValue,
@@ -624,7 +624,7 @@ const LwM2MServer = Type.Object({
 /**
  * Pressure
  */
-const pressure = Type.Object({
+export const pressure = Type.Object({
 	'Application Type': applicationType,
 	'Current Calibration': noValue,
 	'Fractional Timestamp': Type.Union([fractionalTimestamp, noValue]),
@@ -665,7 +665,7 @@ const pushButton = Type.Object({
 /**
  * Temperature
  */
-const temperature = Type.Object({
+export const temperature = Type.Object({
 	'Application Type': applicationType,
 	'Fractional Timestamp': Type.Union([fractionalTimestamp, noValue]),
 	'Max Measured Value': maxMeasuredValue,

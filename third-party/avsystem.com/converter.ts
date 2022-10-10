@@ -8,52 +8,53 @@ import {
 	Roaming,
 } from './types/assetTrackerShadow'
 import {
-	coioteShadow,
+	coioteShadow as coioteShadowType,
 	configuration,
 	connectivityMonitoring,
 	device as dev,
 	ECIDSignalMeasurementInformation,
+	humidity as humidityType,
+	pressure as pressureType,
+	temperature as temperatureType,
 } from './types/coioteShadow'
 
 /**
- * transform shadow from 'coiote' type to 'nrf asset tracker' type
+ * Receving a Coiote data type shadow, find the equivalent values between Coiote's shadow and nRF Asset Tracker's shadow,
+ * and returns a new shadow with the nRF Asset Tracker data type
+ * @param coioteShadow
+ * @returns nrfSahdow
  */
 export const converter = (
-	coiote: Static<typeof coioteShadow>,
+	coioteShadow: Static<typeof coioteShadowType>,
 ): assetTrackerShadow => {
-	// TODO: discover this values
 	// Asset Config
-
-	const configuration = coiote.state.reported.Configuration['0']
+	const configuration = coioteShadow.state.reported.Configuration['0']
 	const cfg = generateAssetConfig(configuration)
 
 	// Asset Info
-	const device = coiote.state.reported.Device['0']
+	const device = coioteShadow.state.reported.Device['0']
 	const assetInfo = generateAssetInfo(device)
 
 	// Roaming
 	const ecidSignal =
-		coiote.state.reported['ECID-Signal Measurement Information']['0']
+		coioteShadow.state.reported['ECID-Signal Measurement Information']['0']
 	const connectivityMonitoring =
-		coiote.state.reported['Connectivity Monitoring']['0']
+		coioteShadow.state.reported['Connectivity Monitoring']['0']
 	const roam = generateRoaming(ecidSignal, connectivityMonitoring)
 
 	// Enviroment
-	const temperature = coiote.state.reported.Temperature['0']
-	const humidity = coiote.state.reported.Humidity['0']
-	const pressure = coiote.state.reported.Pressure['0']
-	const temp = Number(temperature['Sensor Value'])
-	const hum = Number(humidity['Sensor Value'])
-	const atmp = Number(pressure['Sensor Value'])
+	const temperature = coioteShadow.state.reported.Temperature['0']
+	const humidity = coioteShadow.state.reported.Humidity['0']
+	const pressure = coioteShadow.state.reported.Pressure['0']
 	const tsEnviroment = 1
-	const env = generateEnviroment(temp, hum, atmp, tsEnviroment)
+	const env = generateEnviroment(temperature, humidity, pressure, tsEnviroment)
 
 	// Batery
 	const v = 1
 	const tsBatery = 1
 	const bat = generateBatery(v, tsBatery)
 
-	const result = {
+	const nrfSahdow = {
 		state: {
 			reported: {
 				cfg,
@@ -65,17 +66,28 @@ export const converter = (
 		},
 	}
 
-	return result
+	return nrfSahdow
 }
 
-//
+/**
+ * Find equivalent values from Coiote's shadow to generate the enviroment section (env) in nRF Asset Tracker shadow
+ * @param temperature
+ * @param humidity
+ * @param pressure
+ * @param ts
+ * @returns env
+ */
 export const generateEnviroment = (
-	temp: number,
-	hum: number,
-	atmp: number,
+	temperature: Static<typeof temperatureType>,
+	humidity: Static<typeof humidityType>,
+	pressure: Static<typeof pressureType>,
 	ts: number,
 ): Static<typeof Environment> => {
-	return {
+	const temp = Number(temperature['Sensor Value'])
+	const hum = Number(humidity['Sensor Value'])
+	const atmp = Number(pressure['Sensor Value'])
+
+	const env = {
 		v: {
 			temp,
 			hum,
@@ -83,18 +95,32 @@ export const generateEnviroment = (
 		},
 		ts,
 	}
+	return env
 }
 
+/**
+ * *Find equivalent values from Coiote's shadow to generate the batery section (bat) in nRF Asset Tracker shadow
+ * @param v
+ * @param ts
+ * @returns bat
+ */
 export const generateBatery = (
 	v: number,
 	ts: number,
 ): Static<typeof Battery> => {
-	return {
+	const bat = {
 		v,
 		ts,
 	}
+	return bat
 }
 
+/**
+ * Find equivalent values from Coiote's shadow to generate the roaming section (roam) in nRF Asset Tracker shadow
+ * @param ecidSignal
+ * @param connectivityMonitoringParam
+ * @returns roam
+ */
 export const generateRoaming = (
 	ecidSignal: Static<typeof ECIDSignalMeasurementInformation>,
 	connectivityMonitoringParam: Static<typeof connectivityMonitoring>,
@@ -110,7 +136,7 @@ export const generateRoaming = (
 	const ip = connectivityMonitoringParam['IP Addresses']['0']
 	const ts = 1
 
-	return {
+	const roam = {
 		v: {
 			band,
 			nw,
@@ -122,8 +148,14 @@ export const generateRoaming = (
 		},
 		ts,
 	}
+	return roam
 }
 
+/**
+ * Find equivalent values from Coiote's shadow to generate the asset info section (dev) in nRF Asset Tracker shadow
+ * @param devideParam
+ * @returns dev
+ */
 export const generateAssetInfo = (
 	devideParam: Static<typeof dev>,
 ): Static<typeof AssetInfo> => {
@@ -133,7 +165,7 @@ export const generateAssetInfo = (
 	const brdV = devideParam['Hardware Version']
 	const appV = devideParam['Software Version']
 	const ts = 1
-	return {
+	const dev = {
 		v: {
 			imei,
 			iccid,
@@ -143,8 +175,14 @@ export const generateAssetInfo = (
 		},
 		ts,
 	}
+	return dev
 }
 
+/**
+ * Find equivalent values from Coiote's shadow to generate the configuration section (cfg) in nRF Asset Tracker shadow
+ * @param config
+ * @returns cfg
+ */
 export const generateAssetConfig = (
 	config: Static<typeof configuration>,
 ): Static<typeof AssetConfig> => {
@@ -158,7 +196,7 @@ export const generateAssetConfig = (
 	const accito = Number(config['Accelerometer inactivity timeout'])
 	const nod: any[] = []
 
-	return {
+	const cfg = {
 		act,
 		actwt,
 		mvres,
@@ -169,4 +207,5 @@ export const generateAssetConfig = (
 		accito,
 		nod,
 	}
+	return cfg
 }
