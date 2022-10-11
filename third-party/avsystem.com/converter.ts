@@ -19,8 +19,10 @@ import {
 } from './types/coioteShadow'
 
 /**
- * Receving a Coiote data type shadow, find the equivalent values between Coiote's shadow and nRF Asset Tracker's shadow,
- * and returns a new shadow with the nRF Asset Tracker data type
+ * Receving a Coiote data type shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
+ * find the equivalent values between Coiote's shadow and nRF Asset Tracker's shadow,
+ * and returns a new shadow with the nRF Asset Tracker data type (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json)
+ *
  * @param coioteShadow
  * @returns nrfSahdow
  */
