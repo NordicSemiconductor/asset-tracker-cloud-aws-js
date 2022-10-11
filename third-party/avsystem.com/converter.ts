@@ -103,7 +103,8 @@ export const generateEnviroment = (
 }
 
 /**
- * *Find equivalent values from Coiote's shadow to generate the batery section (bat) in nRF Asset Tracker shadow
+ * Find equivalent values from Coiote's shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
+ * to generate the batery section (bat) in nRF Asset Tracker shadow (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json#L11)
  * @param v
  * @param ts
  * @returns bat
