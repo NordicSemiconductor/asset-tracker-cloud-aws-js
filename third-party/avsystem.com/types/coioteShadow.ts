@@ -364,12 +364,13 @@ export const device = Type.Object({
 	}),
 	'Firmware Version': Type.String({
 		minLength: 1,
-		description: 'Firmware Version',
+		description:
+			'Current firmware version of the Device.The Firmware Management function could rely on this resource.',
 		examples: 'mfw_nrf9160_1.3.1',
 	}),
 	'Hardware Version': Type.String({
 		minLength: 1,
-		description: 'Hardware Version',
+		description: 'Current hardware version of the device',
 		examples: 'nRF9160_SICA',
 	}),
 	Manufacturer: Type.String({
@@ -412,7 +413,8 @@ export const device = Type.Object({
 	}),
 	'Software Version': Type.String({
 		minLength: 1,
-		description: 'Software Version',
+		description:
+			'Current software version of the device (manufacturer specified string).',
 		examples: '2.0.2',
 	}),
 	'Supported Binding and Modes': Type.String({
