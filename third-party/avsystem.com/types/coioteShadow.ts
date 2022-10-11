@@ -172,7 +172,8 @@ export const ECIDSignalMeasurementInformation = Type.Object({
 	}),
 	'rsrq-Result': Type.String({
 		minLength: 1,
-		description: 'rsrq-Result',
+		description:
+			'This field specifies the reference signal received power (RSRP) measurement.',
 		examples: ['-14', '-13', '0'],
 	}),
 	'ue-RxTxTimeDiff': Type.String({
