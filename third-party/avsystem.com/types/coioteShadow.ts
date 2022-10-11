@@ -378,7 +378,7 @@ export const device = Type.Object({
 	]),
 	'Current Time': Type.String({
 		minLength: 1,
-		description: 'Current Time',
+		description: 'Current UNIX time of the LwM2M Client.',
 		examples: '2022-10-03T12:18:40Z',
 	}),
 	'Device Type': Type.String({

@@ -154,7 +154,8 @@ export const generateRoaming = (
 }
 
 /**
- * Find equivalent values from Coiote's shadow to generate the asset info section (dev) in nRF Asset Tracker shadow
+ * Find equivalent values from Coiote's shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
+ * to generate the asset info section (dev) in nRF Asset Tracker shadow (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json#L108)
  * @param devideParam
  * @returns dev
  */
@@ -166,7 +167,7 @@ export const generateAssetInfo = (
 	const modV = devideParam['Firmware Version']
 	const brdV = devideParam['Hardware Version']
 	const appV = devideParam['Software Version']
-	const ts = 1 // TODO: find value
+	const ts = Math.floor(new Date(devideParam['Current Time']).getTime() / 1000)
 	const dev = {
 		v: {
 			imei,

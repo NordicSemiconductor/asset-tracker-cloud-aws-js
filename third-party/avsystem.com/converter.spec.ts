@@ -25,7 +25,7 @@ const assetTracker: assetTrackerShadow = {
 					brdV: 'nRF9160_SICA', //'thingy91_nrf9160', // device.Hardware Version
 					appV: '2.0.2', //'0.0.0-development', // device.Software Version
 				},
-				ts: 1, //1655296483610,
+				ts: 1664799520,
 			},
 			roam: {
 				v: {
