@@ -98,14 +98,16 @@ export const connectivityMonitoring = Type.Object({
 	'IP Addresses': Type.Object({
 		'0': Type.String({
 			minLength: 1,
-			description: 'IP Addresses',
+			description:
+				'The IP address of the next-hop IP router, on each of the interfaces specified in resource 4 (IP Addresses). Note: This IP Address doesnt indicate the Server IP address.',
 			examples: '10.160.116.16t',
 		}),
 	}),
 	'Router IP Addresses': Type.Object({}),
 	'Cell ID': Type.String({
 		minLength: 1,
-		description: 'Cell ID',
+		description:
+			'Serving Cell ID in case Network Bearer Resource is a Cellular Network.',
 		examples: '33703712',
 	}),
 	LAC: Type.String({
@@ -130,17 +132,20 @@ export const connectivityMonitoring = Type.Object({
 	}),
 	SMCC: Type.String({
 		minLength: 1,
-		description: 'SMCC',
+		description:
+			'Serving Mobile Country Code. This is applicable when the Network Bearer Resource value is referring to a cellular network.',
 		examples: '242',
 	}),
 	SMNC: Type.String({
 		minLength: 1,
-		description: 'SMNC',
+		description:
+			'Serving Mobile Network Code. This is applicable when the Network Bearer Resource value is referring to a cellular network.',
 		examples: '2',
 	}),
 	SignalSNR: Type.String({
 		minLength: 1,
-		description: 'SignalSNR',
+		description:
+			'SINR: Signal to Interference plus Noise Ratio SINR is the ratio of the strength of the received signal to the strength of the received interference signal (noise and interference).',
 		examples: '0',
 	}),
 })
