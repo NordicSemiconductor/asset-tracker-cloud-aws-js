@@ -76,7 +76,6 @@ export const converter = (
  * @param temperature
  * @param humidity
  * @param pressure
- * @param ts
  * @returns env
  */
 export const generateEnviroment = (
@@ -167,7 +166,7 @@ export const generateAssetInfo = (
 	devideParam: Static<typeof dev>,
 ): Static<typeof AssetInfo> => {
 	const imei = devideParam['Serial Number']
-	const iccid = '' //TODO: find value
+	const iccid = '' //TODO: find value  --> SIM ICCID
 	const modV = devideParam['Firmware Version']
 	const brdV = devideParam['Hardware Version']
 	const appV = devideParam['Software Version']
