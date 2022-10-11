@@ -162,11 +162,11 @@ export const generateAssetInfo = (
 	devideParam: Static<typeof dev>,
 ): Static<typeof AssetInfo> => {
 	const imei = devideParam['Serial Number']
-	const iccid = ''
+	const iccid = '' //TODO: find value
 	const modV = devideParam['Firmware Version']
 	const brdV = devideParam['Hardware Version']
 	const appV = devideParam['Software Version']
-	const ts = 1
+	const ts = 1 // TODO: find value
 	const dev = {
 		v: {
 			imei,
