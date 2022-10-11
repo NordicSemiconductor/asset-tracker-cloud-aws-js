@@ -8,43 +8,39 @@ const assetTracker: assetTrackerShadow = {
 		reported: {
 			cfg: {
 				act: false,
-				gnsst: 30, //30,
-				actwt: 5, //120,
-				mvres: 120, //120,
-				mvt: 3600, //3600,
-				accath: 10, //10,
-				accith: 5, //10,
-				accito: 60, //10,
+				gnsst: 30,
+				actwt: 5,
+				mvres: 120,
+				mvt: 3600,
+				accath: 10,
+				accith: 5,
+				accito: 60,
 				nod: [],
 			},
 			dev: {
 				v: {
-					imei: '351358811128922', // '351358815340515', // device.Serial Number
-					iccid: '', // '8931080620054260217',
-					modV: 'mfw_nrf9160_1.3.1', //'mfw_nrf9160_1.3.1', // device.Firmware Version
-					brdV: 'nRF9160_SICA', //'thingy91_nrf9160', // device.Hardware Version
-					appV: '2.0.2', //'0.0.0-development', // device.Software Version
+					imei: '351358811128922',
+					iccid: '',
+					modV: 'mfw_nrf9160_1.3.1',
+					brdV: 'nRF9160_SICA',
+					appV: '2.0.2',
 				},
 				ts: 1664799520,
 			},
 			roam: {
 				v: {
-					band: 1, //20,
-					nw: '1', //'LTE-M',
-					rsrp: -98, // -90, // ECID-Signal Measurement Information.rsrp-Result
-					area: 1, //30401,
-					mccmnc: 24202, //24201, // Connectivity Monitoring + SMCC + SignalSNR + SMNC
-					cell: 33703712, // 21679616, // Connectivity Monitoring. Cell ID
-					ip: '10.160.116.16', //'10.160.103.45', // Connectivity Monitoring. IP Addresses
+					band: 1,
+					nw: '1',
+					rsrp: -98,
+					area: 1,
+					mccmnc: 24202,
+					cell: 33703712,
+					ip: '10.160.116.16',
 				},
-				ts: 1, //1655296797625,
+				ts: 1,
 			},
 			env: {
 				v: {
-					/*
-					temp: 26.71, // Temperature.Sensor Value
-					hum: 33.593, // Humidity.Sensor Value
-					atmp: 100.694, // pressure.Sensor Value*/
 					atmp: 97.453212,
 					hum: 51.197021,
 					temp: 21.107585,
@@ -52,8 +48,8 @@ const assetTracker: assetTrackerShadow = {
 				ts: 1664799521,
 			},
 			bat: {
-				v: 1, //4398, // device.batery level
-				ts: 1, //1655296798188,
+				v: 0,
+				ts: 1664799520,
 			},
 		},
 	},

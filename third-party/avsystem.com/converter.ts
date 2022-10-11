@@ -51,9 +51,7 @@ export const converter = (
 	const env = generateEnviroment(temperature, humidity, pressure)
 
 	// Batery
-	const v = 1 //TODO: find value
-	const tsBatery = 1 //TODO: find value
-	const bat = generateBatery(v, tsBatery)
+	const bat = generateBatery(device)
 
 	const nrfSahdow = {
 		state: {
@@ -104,14 +102,17 @@ export const generateEnviroment = (
 /**
  * Find equivalent values from Coiote's shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
  * to generate the batery section (bat) in nRF Asset Tracker shadow (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json#L11)
- * @param v
- * @param ts
+ * @param deviceParam
  * @returns bat
  */
 export const generateBatery = (
-	v: number,
-	ts: number,
+	deviceParam: Static<typeof dev>,
 ): Static<typeof Battery> => {
+	const v =
+		typeof deviceParam['Battery Level'] === 'string'
+			? Number(deviceParam['Battery Level'])
+			: 0
+	const ts = Math.floor(new Date(deviceParam['Current Time']).getTime() / 1000)
 	const bat = {
 		v,
 		ts,
@@ -159,18 +160,18 @@ export const generateRoaming = (
 /**
  * Find equivalent values from Coiote's shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
  * to generate the asset info section (dev) in nRF Asset Tracker shadow (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json#L108)
- * @param devideParam
+ * @param deviceParam
  * @returns dev
  */
 export const generateAssetInfo = (
-	devideParam: Static<typeof dev>,
+	deviceParam: Static<typeof dev>,
 ): Static<typeof AssetInfo> => {
-	const imei = devideParam['Serial Number']
+	const imei = deviceParam['Serial Number']
 	const iccid = '' //TODO: find value  --> SIM ICCID
-	const modV = devideParam['Firmware Version']
-	const brdV = devideParam['Hardware Version']
-	const appV = devideParam['Software Version']
-	const ts = Math.floor(new Date(devideParam['Current Time']).getTime() / 1000)
+	const modV = deviceParam['Firmware Version']
+	const brdV = deviceParam['Hardware Version']
+	const appV = deviceParam['Software Version']
+	const ts = Math.floor(new Date(deviceParam['Current Time']).getTime() / 1000)
 	const dev = {
 		v: {
 			imei,

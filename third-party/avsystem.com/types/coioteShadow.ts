@@ -363,11 +363,19 @@ export const device = Type.Object({
 	}),
 	// NOTE: options to describe { key: {} | something}
 	// Recomended is option 1: https://github.com/sinclairzx81/typebox/issues/29
-	'Battery Level': Type.Object({
-		noValue: Type.Boolean({
-			description: 'noValue',
+	'Battery Level': Type.Union([
+		Type.Object({
+			noValue: Type.Boolean({
+				description: 'noValue',
+			}),
 		}),
-	}),
+		Type.String({
+			minLength: 1,
+			description:
+				'Contains the current battery level as a percentage (with a range from 0 to 100).',
+			examples: '20',
+		}),
+	]),
 	'Battery Status': Type.Union([
 		Type.String({
 			minLength: 1,
