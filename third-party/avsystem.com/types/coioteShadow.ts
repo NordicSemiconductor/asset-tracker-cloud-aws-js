@@ -79,6 +79,29 @@ const minMeasuredValue = Type.String({
 	examples: ['10350.0', '51.197021'],
 })
 
+const minRangeValue = Type.String({
+	minLength: 1,
+	examples: ['-19.6133', '0.0'],
+})
+
+const sensorUnits = Type.String({
+	minLength: 1,
+	description: 'Sensor Units',
+	examples: ['m/s^2', 'RGB-IR', 'Ω', '', 'kPa', '°C'],
+})
+
+const sensorValue = Type.String({
+	minLength: 1,
+	description: 'Last or Current Measured Value from the Sensor.',
+	examples: ['10350.0'],
+})
+
+const timestamp = Type.String({
+	minLength: 1,
+	description: 'Timestamp',
+	examples: ['2022-10-03T12:18:41Z', '1970-01-01T00:00:00Z'],
+})
+
 /**
  * Connectivity Monitoring
  * @see https://github.com/OpenMobileAlliance/lwm2m-registry/blob/prod/4.xml
@@ -486,29 +509,6 @@ const firmwareUpdate = Type.Object({
 		description: 'Update Result',
 		examples: ['1'],
 	}),
-})
-
-const minRangeValue = Type.String({
-	minLength: 1,
-	examples: ['-19.6133', '0.0'],
-})
-
-const sensorUnits = Type.String({
-	minLength: 1,
-	description: 'Sensor Units',
-	examples: ['m/s^2', 'RGB-IR', 'Ω', '', 'kPa', '°C'],
-})
-
-const sensorValue = Type.String({
-	minLength: 1,
-	description: 'Last or Current Measured Value from the Sensor.',
-	examples: ['10350.0'],
-})
-
-const timestamp = Type.String({
-	minLength: 1,
-	description: 'Timestamp',
-	examples: ['2022-10-03T12:18:41Z', '1970-01-01T00:00:00Z'],
 })
 
 /**
