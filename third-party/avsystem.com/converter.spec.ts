@@ -49,7 +49,7 @@ const assetTracker: assetTrackerShadow = {
 					hum: 51.197021,
 					temp: 21.107585,
 				},
-				ts: 1, //1655296797600,
+				ts: 1664799521,
 			},
 			bat: {
 				v: 1, //4398, // device.batery level

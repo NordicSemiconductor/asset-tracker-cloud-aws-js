@@ -48,8 +48,7 @@ export const converter = (
 	const temperature = coioteShadow.state.reported.Temperature['0']
 	const humidity = coioteShadow.state.reported.Humidity['0']
 	const pressure = coioteShadow.state.reported.Pressure['0']
-	const tsEnviroment = 1
-	const env = generateEnviroment(temperature, humidity, pressure, tsEnviroment)
+	const env = generateEnviroment(temperature, humidity, pressure)
 
 	// Batery
 	const v = 1 //TODO: find value
@@ -72,7 +71,8 @@ export const converter = (
 }
 
 /**
- * Find equivalent values from Coiote's shadow to generate the enviroment section (env) in nRF Asset Tracker shadow
+ * Find equivalent values from Coiote's shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
+ * to generate the enviroment section (env) in nRF Asset Tracker shadow (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json#L28)
  * @param temperature
  * @param humidity
  * @param pressure
@@ -83,11 +83,13 @@ export const generateEnviroment = (
 	temperature: Static<typeof temperatureType>,
 	humidity: Static<typeof humidityType>,
 	pressure: Static<typeof pressureType>,
-	ts: number,
 ): Static<typeof Environment> => {
 	const temp = Number(temperature['Sensor Value'])
 	const hum = Number(humidity['Sensor Value'])
 	const atmp = Number(pressure['Sensor Value'])
+
+	//TODO: resolve this question: The 3 objects contains a time stamp key. Should I use one in specific? Should I take the higer? lower? any one?
+	const ts = Math.floor(new Date(temperature['Timestamp']).getTime() / 1000)
 
 	const env = {
 		v: {
@@ -95,7 +97,7 @@ export const generateEnviroment = (
 			hum,
 			atmp,
 		},
-		ts, // TODO: find value
+		ts,
 	}
 	return env
 }
