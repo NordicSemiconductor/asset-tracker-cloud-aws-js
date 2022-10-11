@@ -188,7 +188,7 @@ export const generateAssetInfo = (
 export const generateAssetConfig = (
 	config: Static<typeof configuration>,
 ): Static<typeof AssetConfig> => {
-	const act = true // TODO: find value
+	const act = config['Passive mode'] === 'true'
 	const actwt = Number(config['Accelerometer inactivity threshold'])
 	const mvres = Number(config['Movement resolution'])
 	const mvt = Number(config['Movement timeout'])

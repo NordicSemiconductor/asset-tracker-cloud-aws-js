@@ -7,7 +7,7 @@ const assetTracker: assetTrackerShadow = {
 	state: {
 		reported: {
 			cfg: {
-				act: true,
+				act: false,
 				gnsst: 30, //30,
 				actwt: 5, //120,
 				mvres: 120, //120,
