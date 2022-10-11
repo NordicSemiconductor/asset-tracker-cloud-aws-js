@@ -118,7 +118,8 @@ export const generateBatery = (
 }
 
 /**
- * Find equivalent values from Coiote's shadow to generate the roaming section (roam) in nRF Asset Tracker shadow
+ * Find equivalent values from Coiote's shadow (@see https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.0.0/nrf/applications/asset_tracker_v2/doc/cloud_wrapper.html#lwm2m-objects)
+ * to generate the roaming section (roam) in nRF Asset Tracker shadow (@see https://github.com/NordicSemiconductor/asset-tracker-cloud-docs/blob/eb5e212ecb15ad52ae891162085af02f7b244d9a/docs/cloud-protocol/state.reported.schema.json#L152)
  * @param ecidSignal
  * @param connectivityMonitoringParam
  * @returns roam
@@ -128,15 +129,15 @@ export const generateRoaming = (
 	connectivityMonitoringParam: Static<typeof connectivityMonitoring>,
 ): Static<typeof Roaming> => {
 	const band = 1 // TODO: find value
-	const nw = '1' // TODO: find value
+	const nw = '1' // TODO: find value -> Network mode
 	const rsrp = Number(ecidSignal['rsrp-Result'])
-	const area = 1 // TODO: find value
+	const area = 1 // TODO: find value -> Area code.
 	const mccmnc = Number(
 		`${connectivityMonitoringParam.SMCC}${connectivityMonitoringParam.SignalSNR}${connectivityMonitoringParam.SMNC}`,
 	)
 	const cell = Number(connectivityMonitoringParam['Cell ID'])
 	const ip = connectivityMonitoringParam['IP Addresses']['0']
-	const ts = 1 // TODO: find value
+	const ts = 1 // TODO: find value -> not sure from where this time stamp is comming from
 
 	const roam = {
 		v: {
