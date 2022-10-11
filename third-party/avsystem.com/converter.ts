@@ -127,16 +127,16 @@ export const generateRoaming = (
 	ecidSignal: Static<typeof ECIDSignalMeasurementInformation>,
 	connectivityMonitoringParam: Static<typeof connectivityMonitoring>,
 ): Static<typeof Roaming> => {
-	const band = 1
-	const nw = '1'
+	const band = 1 // TODO: find value
+	const nw = '1' // TODO: find value
 	const rsrp = Number(ecidSignal['rsrp-Result'])
-	const area = 1
+	const area = 1 // TODO: find value
 	const mccmnc = Number(
 		`${connectivityMonitoringParam.SMCC}${connectivityMonitoringParam.SignalSNR}${connectivityMonitoringParam.SMNC}`,
 	)
 	const cell = Number(connectivityMonitoringParam['Cell ID'])
 	const ip = connectivityMonitoringParam['IP Addresses']['0']
-	const ts = 1
+	const ts = 1 // TODO: find value
 
 	const roam = {
 		v: {
