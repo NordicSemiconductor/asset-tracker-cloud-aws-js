@@ -501,7 +501,7 @@ const sensorUnits = Type.String({
 
 const sensorValue = Type.String({
 	minLength: 1,
-	description: 'Sensor Value',
+	description: 'Last or Current Measured Value from the Sensor.',
 	examples: ['10350.0'],
 })
 
