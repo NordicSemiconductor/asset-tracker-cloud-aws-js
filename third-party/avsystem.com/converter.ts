@@ -52,8 +52,8 @@ export const converter = (
 	const env = generateEnviroment(temperature, humidity, pressure, tsEnviroment)
 
 	// Batery
-	const v = 1
-	const tsBatery = 1
+	const v = 1 //TODO: find value
+	const tsBatery = 1 //TODO: find value
 	const bat = generateBatery(v, tsBatery)
 
 	const nrfSahdow = {
@@ -95,7 +95,7 @@ export const generateEnviroment = (
 			hum,
 			atmp,
 		},
-		ts,
+		ts, // TODO: find value
 	}
 	return env
 }
