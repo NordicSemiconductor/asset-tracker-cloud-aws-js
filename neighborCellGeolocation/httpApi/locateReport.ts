@@ -5,7 +5,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as E from 'fp-ts/lib/Either'
 import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
 import { Location } from '../../geolocation/Location'
 import { queueJob } from '../../geolocation/queueJob'
 import { fromEnv } from '../../util/fromEnv'
@@ -34,7 +34,7 @@ const inputSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithJSONSchema(inputSchema)
+const validateInput = validateWithJSONSchemaFP(inputSchema)
 
 export const handler = async (
 	event: APIGatewayProxyEvent,

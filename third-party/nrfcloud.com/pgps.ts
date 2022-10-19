@@ -1,6 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { Static, Type } from '@sinclair/typebox'
-import { isLeft } from 'fp-ts/lib/Either'
 import { URL } from 'url'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import {
@@ -71,9 +70,9 @@ export const handler = async (
 	pgps: Static<typeof pgpsRequestSchema>,
 ): Promise<{ resolved: boolean; url?: URL }> => {
 	console.log(JSON.stringify(pgps))
-	const valid = validateInput(pgps)
-	if (isLeft(valid)) {
-		console.error(JSON.stringify(valid.left))
+	const maybeValidInput = validateInput(pgps)
+	if ('error' in maybeValidInput) {
+		console.error(JSON.stringify(maybeValidInput))
 		return {
 			resolved: false,
 		}
@@ -82,7 +81,7 @@ export const handler = async (
 	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const { n, int, day, time } = valid.right
+	const { n, int, day, time } = maybeValidInput
 
 	const result = await c.get({
 		resource: 'location/pgps',
@@ -94,15 +93,15 @@ export const handler = async (
 		},
 		requestSchema: apiRequestSchema,
 		responseSchema: apiResponseSchema,
-	})()
+	})
 
-	if (isLeft(result)) {
-		console.error(JSON.stringify(result.left))
+	if ('error' in result) {
+		console.error(JSON.stringify(result))
 		return { resolved: false }
 	}
 
 	return {
 		resolved: true,
-		url: new URL(`https://${result.right.host}/${result.right.path}`),
+		url: new URL(`https://${result.host}/${result.path}`),
 	}
 }

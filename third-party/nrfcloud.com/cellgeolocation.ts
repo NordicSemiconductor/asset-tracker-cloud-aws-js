@@ -1,7 +1,6 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { TObject, TProperties } from '@sinclair/typebox'
-import { isLeft } from 'fp-ts/lib/Either'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { Cell } from '../../geolocation/Cell'
@@ -47,14 +46,14 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 		},
 		requestSchema: locateRequestSchema as unknown as TObject<TProperties>,
 		responseSchema: locateResultSchema,
-	})()
-	if (isLeft(maybeCellGeolocation)) {
-		console.error(JSON.stringify(maybeCellGeolocation.left))
+	})
+	if ('error' in maybeCellGeolocation) {
+		console.error(JSON.stringify(maybeCellGeolocation))
 		return {
 			located: false,
 		}
 	}
-	const { lat, lon, uncertainty } = maybeCellGeolocation.right
+	const { lat, lon, uncertainty } = maybeCellGeolocation
 	console.debug(
 		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
 	)

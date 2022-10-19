@@ -1,12 +1,9 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { verify } from '@nordicsemiconductor/nrfcloud-location-services-tests'
 import { Static, Type } from '@sinclair/typebox'
-import { pipe } from 'fp-ts/function'
-import { isLeft } from 'fp-ts/lib/Either'
-import * as TE from 'fp-ts/lib/TaskEither'
 import { URL } from 'url'
 import { agpsRequestSchema, AGPSType } from '../../agps/types'
-import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
+import { ErrorInfo } from '../../api/ErrorInfo'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
@@ -41,9 +38,9 @@ export const handler = async (
 	agps: Static<typeof agpsRequestSchema>,
 ): Promise<{ resolved: boolean; dataHex?: readonly string[] }> => {
 	console.log(JSON.stringify({ event: agps }))
-	const valid = validateInput(agps)
-	if (isLeft(valid)) {
-		console.error(JSON.stringify(valid.left))
+	const maybeValidInput = validateInput(agps)
+	if ('error' in maybeValidInput) {
+		console.error(JSON.stringify(maybeValidInput))
 		return {
 			resolved: false,
 		}
@@ -52,7 +49,7 @@ export const handler = async (
 	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const { mcc, mnc, cell, area, types } = valid.right
+	const { mcc, mnc, cell, area, types } = maybeValidInput
 
 	// Split requests, so that request for Ephemerides is a separate one
 	const otherTypesInRequest = types.filter((t) => t !== AGPSType.Ephemerides)
@@ -61,11 +58,10 @@ export const handler = async (
 		requestTypes.push([AGPSType.Ephemerides])
 	if (otherTypesInRequest.length > 0) requestTypes.push(otherTypesInRequest)
 
-	const res = await pipe(
-		requestTypes,
-		TE.traverseArray((types) =>
-			pipe(
-				TE.right({
+	try {
+		const res = await Promise.all(
+			requestTypes.map(async (types) => {
+				const request = {
 					resource: 'location/agps',
 					payload: {
 						eci: cell,
@@ -78,67 +74,63 @@ export const handler = async (
 					headers: {
 						'Content-Type': 'application/octet-stream',
 					},
-				}),
-				TE.chain((request) =>
-					pipe(
-						c.head({
-							...request,
-							method: 'GET',
-							requestSchema: apiRequestSchema,
-						}),
-						TE.chain((headers) =>
-							c.getBinary({
-								...request,
-								headers: {
-									...request.headers,
-									Range: `bytes=0-${headers['content-length']}`,
-								},
-								requestSchema: apiRequestSchema,
-							}),
-						),
-						TE.chain((agpsData) =>
-							pipe(
-								agpsData,
-								verify,
-								TE.fromEither,
-								TE.mapLeft(
-									(error) =>
-										({
-											type: ErrorType.BadGateway,
-											message: `Could not verify A-GPS payload: ${error.message}!`,
-										} as ErrorInfo),
-								),
-								TE.map((agpsDataInfo) => {
-									console.log(JSON.stringify({ agpsData: agpsDataInfo }))
-									return agpsData.toString('hex')
-								}),
-							),
-						),
-					),
-				),
-			),
-		),
-	)()
+				}
 
-	if (isLeft(res)) {
-		console.error(JSON.stringify(res.left))
-		return {
-			resolved: false,
-		}
-	}
+				const headers = await c.head({
+					...request,
+					method: 'GET',
+					requestSchema: apiRequestSchema,
+				})
 
-	// If any request fails, mark operation as failed
-	if (res.right.length !== requestTypes.length) {
-		console.error(
-			`Resolved ${res.right.length}, expected ${requestTypes.length}!`,
+				if ('error' in headers) {
+					throw new Error(
+						`Failed the request A-GPS data info: ${
+							(headers.error as ErrorInfo).message
+						}`,
+					)
+				}
+
+				const agpsData = await c.getBinary({
+					...request,
+					headers: {
+						...request.headers,
+						Range: `bytes=0-${headers['content-length']}`,
+					},
+					requestSchema: apiRequestSchema,
+				})
+
+				if ('error' in agpsData) {
+					throw new Error(
+						`Failed the request A-GPS data: ${agpsData.error.message}`,
+					)
+				}
+
+				const agpsDataInfo = verify(agpsData)
+
+				if ('error' in agpsDataInfo) {
+					throw new Error(
+						`Failed the request A-GPS data: ${agpsDataInfo.error.message}`,
+					)
+				}
+				console.log(JSON.stringify({ agpsData: agpsDataInfo }))
+				return agpsData.toString('hex')
+			}),
 		)
+		// If any request fails, mark operation as failed
+		if (res.length !== requestTypes.length) {
+			console.error(`Resolved ${res.length}, expected ${requestTypes.length}!`)
+			return {
+				resolved: false,
+			}
+		}
+		return {
+			resolved: true,
+			dataHex: res,
+		}
+	} catch (err) {
+		console.error(JSON.stringify(err))
 		return {
 			resolved: false,
 		}
-	}
-
-	return {
-		resolved: true,
-		dataHex: res.right,
 	}
 }

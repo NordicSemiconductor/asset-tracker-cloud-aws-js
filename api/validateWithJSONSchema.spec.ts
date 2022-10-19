@@ -1,6 +1,4 @@
 import { Static, Type } from '@sinclair/typebox'
-import { isRight, Right } from 'fp-ts/lib/Either'
-import { isLeft } from 'fp-ts/lib/These'
 import { validateWithJSONSchema } from './validateWithJSONSchema'
 
 const typedInputSchema = Type.Object(
@@ -17,14 +15,12 @@ describe('validateWithJSONSchema', () => {
 		const v = validateWithJSONSchema(typedInputSchema)
 		it('valid input', () => {
 			const isValid = v({ cell: 42 })
-			expect(isRight(isValid)).toEqual(true)
-			expect(
-				(isValid as Right<Static<typeof typedInputSchema>>).right.cell,
-			).toEqual(42)
+			expect('error' in isValid).toEqual(false)
+			expect((isValid as Static<typeof typedInputSchema>).cell).toEqual(42)
 		})
 		it('invalid input', () => {
 			const isInvalid = v({ cell: -42 })
-			expect(isLeft(isInvalid)).toEqual(true)
+			expect('error' in isInvalid).toEqual(true)
 		})
 	})
 })

@@ -1,6 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { Static, TObject, TProperties } from '@sinclair/typebox'
-import { isLeft } from 'fp-ts/lib/Either'
 import { URL } from 'url'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
@@ -26,14 +25,14 @@ export const handler = async (
 	ncellmeas: Static<typeof ncellMeasLocateInputSchema>,
 ): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(ncellmeas))
-	const valid = validateInput(ncellmeas)
-	if (isLeft(valid)) {
-		console.error(JSON.stringify(valid.left))
+	const maybeValidInput = validateInput(ncellmeas)
+	if ('error' in maybeValidInput) {
+		console.error(JSON.stringify(maybeValidInput))
 		return {
 			located: false,
 		}
 	}
-	const { nw, report } = valid.right
+	const { nw, report } = maybeValidInput
 
 	if (nw.includes('NB-IoT')) {
 		console.error(`Resolution of NB-IoT cells not yet supported.`)
@@ -45,7 +44,7 @@ export const handler = async (
 	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const maybeCeollGeolocation = await c.post({
+	const maybeCellGeolocation = await c.post({
 		resource: 'location/cell',
 		payload: {
 			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [
@@ -68,14 +67,15 @@ export const handler = async (
 		requestSchema:
 			ncellMeasLocateRequestSchema as unknown as TObject<TProperties>,
 		responseSchema: locateResultSchema,
-	})()
-	if (isLeft(maybeCeollGeolocation)) {
-		console.error(JSON.stringify(maybeCeollGeolocation.left))
+	})
+	if ('error' in maybeCellGeolocation) {
+		console.log(maybeCellGeolocation)
+		console.error(JSON.stringify(maybeCellGeolocation))
 		return {
 			located: false,
 		}
 	}
-	const { lat, lon, uncertainty } = maybeCeollGeolocation.right
+	const { lat, lon, uncertainty } = maybeCellGeolocation
 	console.debug(
 		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
 	)
