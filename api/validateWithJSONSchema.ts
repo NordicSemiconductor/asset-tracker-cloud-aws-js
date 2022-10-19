@@ -1,11 +1,10 @@
 import { Static, TSchema } from '@sinclair/typebox'
 import Ajv from 'ajv'
-import * as E from 'fp-ts/lib/Either'
 import { ErrorInfo, ErrorType } from './ErrorInfo'
 
 export const validateWithJSONSchema = <T extends TSchema>(
 	schema: T,
-): ((value: unknown) => E.Either<ErrorInfo, Static<typeof schema>>) => {
+): ((value: unknown) => { error: ErrorInfo } | Static<typeof schema>) => {
 	const ajv = new Ajv()
 	// see @https://github.com/sinclairzx81/typebox/issues/51
 	ajv.addKeyword('kind')
@@ -14,15 +13,17 @@ export const validateWithJSONSchema = <T extends TSchema>(
 	return (value: unknown) => {
 		const valid = v(value)
 		if (valid !== true) {
-			return E.left({
-				type: ErrorType.BadRequest,
-				message: 'Validation failed!',
-				detail: {
-					errors: v.errors,
-					input: value,
+			return {
+				error: {
+					type: ErrorType.BadRequest,
+					message: 'Validation failed!',
+					detail: {
+						errors: v.errors,
+						input: value,
+					},
 				},
-			})
+			}
 		}
-		return E.right(value as Static<typeof schema>)
+		return value as Static<typeof schema>
 	}
 }

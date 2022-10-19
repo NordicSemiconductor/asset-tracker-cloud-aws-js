@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
 import { queueJob } from '../../geolocation/queueJob'
 import { getOrElse } from '../../util/fp-ts'
 import { fromEnv } from '../../util/fromEnv'
@@ -55,7 +55,7 @@ const cellInputSchema = Type.Object(
 
 console.log(JSON.stringify(cellInputSchema, null, 2))
 
-const validateInput = validateWithJSONSchema(cellInputSchema)
+const validateInput = validateWithJSONSchemaFP(cellInputSchema)
 
 const allMembersToInt = (o: Record<string, any>): Record<string, number> =>
 	Object.entries(o).reduce(

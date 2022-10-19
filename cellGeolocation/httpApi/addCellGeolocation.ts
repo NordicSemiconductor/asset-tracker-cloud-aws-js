@@ -9,7 +9,7 @@ import * as JSON from 'fp-ts/lib/Json'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
+import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
 import { Cell } from '../../geolocation/Cell'
 import { Location } from '../../geolocation/Location'
 import { fromEnv } from '../../util/fromEnv'
@@ -61,7 +61,7 @@ const cellGeolocationInputSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithJSONSchema(cellGeolocationInputSchema)
+const validateInput = validateWithJSONSchemaFP(cellGeolocationInputSchema)
 
 const toIntOr0 = (v?: any) => parseInt(v ?? '0', 10)
 const toFloatOr0 = (v?: any) => parseFloat(v ?? '0')
