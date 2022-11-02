@@ -33,7 +33,7 @@
     "@aws-sdk/util-dynamodb": "3.200.0",
     "@nordicsemiconductor/cell-geolocation-helpers": "5.0.1",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "3.0.0",
-    "@nordicsemiconductor/timestream-helpers": "4.1.2",
+    "@nordicsemiconductor/timestream-helpers": "4.1.3",
     "@sinclair/typebox": "0.25.2",
     "ajv": "8.11.0",
     "entities": "4.4.0",
