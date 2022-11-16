@@ -79,7 +79,7 @@
     "change-case": "4.1.2",
     "check-node-version": "4.2.1",
     "commander": "9.4.1",
-    "constructs": "10.1.160",
+    "constructs": "10.1.161",
     "date-fns": "2.29.3",
     "jest": "29.3.1",
     "nock": "13.2.9",
