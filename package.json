@@ -37,7 +37,7 @@
     "@sinclair/typebox": "0.25.9",
     "ajv": "8.11.2",
     "entities": "4.4.0",
-    "fast-xml-parser": "4.0.11",
+    "fast-xml-parser": "4.0.12",
     "fp-ts": "2.13.1",
     "jsonwebtoken": "8.5.1",
     "uuid": "9.0.0"
