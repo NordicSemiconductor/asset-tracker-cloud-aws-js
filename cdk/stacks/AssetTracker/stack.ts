@@ -89,7 +89,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					sourceCodeBucket,
 					packedLambdas.layerZipFileName,
 				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X],
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
 			},
 		)
 
@@ -101,7 +101,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 					sourceCodeBucket,
 					packedCDKLambdas.layerZipFileName,
 				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X],
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
 			},
 		)
 
