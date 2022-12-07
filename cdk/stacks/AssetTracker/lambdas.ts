@@ -177,7 +177,6 @@ export const prepareCDKLambdas = async ({
 				packageJsonFile: path.resolve(rootDir, 'package.json'),
 				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
 				requiredDependencies: [
-					'@aws-sdk/client-iot',
 					'@nordicsemiconductor/cloudformation-helpers',
 					'uuid',
 					'fast-xml-parser',

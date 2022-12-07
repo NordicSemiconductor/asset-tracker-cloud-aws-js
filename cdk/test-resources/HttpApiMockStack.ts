@@ -72,7 +72,7 @@ export class HttpApiMockStack extends CDK.Stack {
 					sourceCodeBucket,
 					packedHTTPAPIMockLambdas.layerZipFileName,
 				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_14_X],
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
 			},
 		)
 
@@ -89,7 +89,7 @@ export class HttpApiMockStack extends CDK.Stack {
 			layers: httpAPIMockLambdas.layers,
 			handler: 'index.handler',
 			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_14_X,
+			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CDK.Duration.seconds(5),
 			initialPolicy: [logToCloudWatch],
 			environment: {
