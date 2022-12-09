@@ -44,7 +44,7 @@
     "@aws-sdk/client-timestream-write": "3.226.0",
     "@aws-sdk/client-apigatewayv2": "3.226.0",
     "@aws-sdk/client-cloudformation": "3.226.0",
-    "@aws-sdk/client-cloudwatch-logs": "3.226.0",
+    "@aws-sdk/client-cloudwatch-logs": "3.228.0",
     "@aws-sdk/client-codepipeline": "3.226.0",
     "@aws-sdk/client-iot": "3.226.0",
     "@aws-sdk/client-s3": "3.226.0",
