@@ -44,6 +44,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 					? CloudFormation.RemovalPolicy.DESTROY
 					: CloudFormation.RemovalPolicy.RETAIN,
 			timeToLiveAttribute: 'ttl',
+			stream: DynamoDB.StreamViewType.NEW_IMAGE,
 		})
 
 		const fromCache = new Lambda.Function(this, 'fromCache', {

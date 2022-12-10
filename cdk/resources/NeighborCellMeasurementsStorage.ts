@@ -31,6 +31,8 @@ export class NeighborCellMeasurementsStorage extends CloudFormation.Resource {
 				this.node.tryGetContext('isTest') === true
 					? CloudFormation.RemovalPolicy.DESTROY
 					: CloudFormation.RemovalPolicy.RETAIN,
+			stream: DynamoDB.StreamViewType.NEW_IMAGE,
+			timeToLiveAttribute: 'ttl',
 		})
 
 		this.reportsTable.addGlobalSecondaryIndex({
