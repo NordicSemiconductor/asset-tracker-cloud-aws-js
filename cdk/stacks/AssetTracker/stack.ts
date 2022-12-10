@@ -50,10 +50,12 @@ export const StackOutputs = {
 	geolocationApiId: `${CORE_STACK_NAME}:geolocationApiId`,
 	cellGeolocationCacheTableName: `${CORE_STACK_NAME}:cellGeolocationCacheTableName`,
 	cellGeolocationCacheTableArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableArn`,
+	cellGeolocationCacheTableStreamArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableStreamArn`,
 	neighborCellGeolocationApiUrl: `${CORE_STACK_NAME}:neighborCellGeolocationApiUrl`,
 	neighborCellGeolocationApiId: `${CORE_STACK_NAME}:neighborCellGeolocationApiId`,
 	ncellmeasStorageTableName: `${CORE_STACK_NAME}:ncellmeasStorageTableName`,
 	ncellmeasStorageTableArn: `${CORE_STACK_NAME}:ncellmeasStorageTableArn`,
+	ncellmeasStorageTableStreamArn: `${CORE_STACK_NAME}:ncellmeasStorageTableStreamArn`,
 	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
 } as const
 
@@ -485,10 +487,13 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			value: cellgeo.cacheTable.tableName,
 			exportName: StackOutputs.cellGeolocationCacheTableName,
 		})
-
 		new CloudFormation.CfnOutput(this, 'cellGeolocationCacheTableArn', {
 			value: cellgeo.cacheTable.tableArn,
 			exportName: StackOutputs.cellGeolocationCacheTableArn,
+		})
+		new CloudFormation.CfnOutput(this, 'cellGeolocationCacheTableStreamArn', {
+			value: cellgeo.cacheTable.tableStreamArn as string,
+			exportName: StackOutputs.cellGeolocationCacheTableStreamArn,
 		})
 
 		const cellGeoApi = new CellGeolocationApi(this, 'cellGeolocationApi', {
@@ -519,6 +524,10 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableArn', {
 			value: ncellmeasStorage.reportsTable.tableArn,
 			exportName: StackOutputs.ncellmeasStorageTableArn,
+		})
+		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableStreamArn', {
+			value: ncellmeasStorage.reportsTable.tableStreamArn as string,
+			exportName: StackOutputs.ncellmeasStorageTableStreamArn,
 		})
 		ncellmeasStorage.reportsTable.grantReadData(userRole)
 
