@@ -1,6 +1,7 @@
 Feature: Device: Messages
 
-  Devices can publish arbitrary messages on the /messages topic
+  Devices can publish arbitrary messages on the /messages topic and that
+  the messages can then be queried in Timestream.
 
   Background:
 
