@@ -92,9 +92,6 @@ jobs:
           ./cli.sh configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' deploy '*' --require-approval never
           ./cli.sh create-ca --tags ci,repository=${{ github.repository }}
-      - run:
-          node --loader tsx --unhandled-rejections=strict
-          cdk/helper/addFakeRoute.ts
       - name: Run End-to-End Tests
         run: npm run test:e2e
       - name: Get logs
