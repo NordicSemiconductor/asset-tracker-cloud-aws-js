@@ -51,7 +51,7 @@
     "@aws-sdk/client-sts": "3.229.0",
     "@aws-sdk/client-timestream-query": "3.229.0",
     "@aws-sdk/util-dynamodb": "3.229.0",
-    "@nordicsemiconductor/asset-tracker-cloud-code-style": "11.0.156",
+    "@nordicsemiconductor/asset-tracker-cloud-code-style": "11.0.157",
     "@nordicsemiconductor/cloudformation-helpers": "7.0.7",
     "@nordicsemiconductor/e2e-bdd-test-runner": "15.1.182",
     "@nordicsemiconductor/firmware-ci-device-helpers": "13.2.63",
