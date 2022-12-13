@@ -25,6 +25,7 @@ import { PGPSStorage } from '../../resources/PGPSStorage'
 import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
 import { ThingGroup } from '../../resources/ThingGroup'
 import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
+import { WiFiSiteSurveysStorage } from '../../resources/WiFiSiteSurveysStorage'
 import { CORE_STACK_NAME } from '../stackName'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 
@@ -57,6 +58,9 @@ export const StackOutputs = {
 	ncellmeasStorageTableArn: `${CORE_STACK_NAME}:ncellmeasStorageTableArn`,
 	ncellmeasStorageTableStreamArn: `${CORE_STACK_NAME}:ncellmeasStorageTableStreamArn`,
 	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
+	wifiSiteSurveyStorageTableName: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableName`,
+	wifiSiteSurveyStorageTableArn: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableArn`,
+	wifiSiteSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableStreamArn`,
 } as const
 
 export class AssetTrackerStack extends CloudFormation.Stack {
@@ -583,5 +587,25 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			storage: pgpsStorage,
 			resolver: pgpsResolver,
 		})
+
+		// WiFi Site Surveys Storage
+
+		const wifiSiteSurveysStorage = new WiFiSiteSurveysStorage(
+			this,
+			'wifiSiteSurveyStorage',
+		)
+		new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableName', {
+			value: wifiSiteSurveysStorage.surveysTable.tableName,
+			exportName: StackOutputs.wifiSiteSurveyStorageTableName,
+		})
+		new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableArn', {
+			value: wifiSiteSurveysStorage.surveysTable.tableArn,
+			exportName: StackOutputs.wifiSiteSurveyStorageTableArn,
+		})
+		new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableStreamArn', {
+			value: wifiSiteSurveysStorage.surveysTable.tableStreamArn as string,
+			exportName: StackOutputs.wifiSiteSurveyStorageTableStreamArn,
+		})
+		wifiSiteSurveysStorage.surveysTable.grantReadData(userRole)
 	}
 }
