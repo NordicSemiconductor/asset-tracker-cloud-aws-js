@@ -7,6 +7,7 @@ import {
 	defaultDeviceCertificateValidityInDays,
 } from '../jitp/createDeviceCertificate'
 import { createSimulatorKeyAndCSR } from '../jitp/createSimulatorKeyAndCSR'
+import { getCurrentCA } from '../jitp/currentCA'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { CommandDefinition } from './CommandDefinition'
 
@@ -27,13 +28,19 @@ export const createSimulatorCertCommand = ({
 			flags: '-e, --expires <expires>',
 			description: `Validity of device certificate in days. Defaults to ${defaultDeviceCertificateValidityInDays} days.`,
 		},
+		{
+			flags: '-c, --ca <caId>',
+			description: `ID of the CA certificate to use. Defaults to the last created one.`,
+		},
 	],
 	action: async ({
 		deviceId,
 		expires,
+		caId,
 	}: {
 		deviceId?: string
 		expires?: string
+		caId?: string
 	}) => {
 		const id = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
 
@@ -56,6 +63,7 @@ export const createSimulatorCertCommand = ({
 		await createDeviceCertificate({
 			deviceId: id,
 			certsDir,
+			caId: caId ?? getCurrentCA({ certsDir }),
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},

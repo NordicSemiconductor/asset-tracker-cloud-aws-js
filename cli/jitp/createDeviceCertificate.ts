@@ -14,12 +14,14 @@ export const defaultDeviceCertificateValidityInDays = 10950
  */
 export const createDeviceCertificate = async ({
 	certsDir,
+	caId,
 	log,
 	debug,
 	deviceId,
 	daysValid,
 }: {
 	certsDir: string
+	caId: string
 	deviceId: string
 	log?: (...message: any[]) => void
 	debug?: (...message: any[]) => void
@@ -32,7 +34,7 @@ export const createDeviceCertificate = async ({
 	}
 
 	log?.(`Generating certificate for device ${deviceId}`)
-	const caFiles = caFileLocations(certsDir)
+	const caFiles = caFileLocations({ certsDir, id: caId })
 	const deviceFiles = deviceFileLocations({
 		certsDir,
 		deviceId,

@@ -9,6 +9,7 @@ import { expect } from 'chai'
 import { promises as fs } from 'fs'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
 import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR'
+import { getCurrentCA } from '../../cli/jitp/currentCA'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
 import {
 	awsIotDeviceConnection,
@@ -53,6 +54,7 @@ export const assetTrackerStepRunners = ({
 				await createDeviceCertificate({
 					deviceId: catId,
 					certsDir,
+					caId: getCurrentCA({ certsDir }),
 					log: (...message: any[]) => {
 						void runner.progress('IoT (cert)', ...message)
 					},
