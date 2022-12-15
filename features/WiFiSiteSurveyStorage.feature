@@ -1,3 +1,4 @@
+@Only
 Feature: Store WiFI site surveys
 
     WiFI site surveys are too big to be stored in the AWS
@@ -7,7 +8,7 @@ Feature: Store WiFI site surveys
 
         Given I am run after the "Connect a tracker" feature
         And I am authenticated with Cognito
-    
+
     Scenario: Device publishes WiFi site survey
 
         Given I store "$millis()" into "ts"

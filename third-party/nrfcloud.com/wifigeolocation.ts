@@ -7,53 +7,45 @@ import { Cell } from '../../geolocation/Cell'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { locateResultSchema } from './locate'
-import { locateRequestSchema } from './locateRequestSchema'
-import { getCellLocationApiSettings } from './settings'
+import { groundfixRequestSchema } from './groundfixRequestSchema'
+import { getWifiLocationApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getCellLocationApiSettings({
+const fetchSettings = getWifiLocationApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
 
-export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
-	console.log(JSON.stringify(cell))
+export const handler = async (accessPoints: Cell): Promise<MaybeCellGeoLocation> => {
+	console.log(JSON.stringify(accessPoints))
 
-	if (cell.nw === NetworkMode.NBIoT) {
-		console.error(`Resolution of NB-IoT cells not yet supported.`)
-		return {
-			located: false,
-		}
-	}
+	// if (cell.nw === NetworkMode.NBIoT) {
+	// 	console.error(`Resolution of NB-IoT cells not yet supported.`)
+	// 	return {
+	// 		located: false,
+	// 	}
+	// }
 
 	const { serviceKey, teamId, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const mccmnc = cell.mccmnc.toFixed(0)
-	const maybeCellGeolocation = await c.post({
+	// const mccmnc = cell.mccmnc.toFixed(0)
+	const maybeWifiGeolocation = await c.post({
 		resource: 'location/ground-fix',
 		payload: {
-			// FIXME: enable check once NB-IoT is supported: [cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
-			lte: [
-				{
-					eci: cell.cell,
-					mcc: parseInt(mccmnc.slice(0, mccmnc.length - 2), 10),
-					mnc: parseInt(mccmnc.slice(-2), 10),
-					tac: cell.area,
-				},
-			],
+			wifi: accessPoints,
 		},
-		requestSchema: locateRequestSchema as unknown as TObject<TProperties>,
+		requestSchema: groundfixRequestSchema as unknown as TObject<TProperties>,
 		responseSchema: locateResultSchema,
 	})
-	if ('error' in maybeCellGeolocation) {
-		console.error(JSON.stringify(maybeCellGeolocation))
+	if ('error' in maybeWifiGeolocation) {
+		console.error(JSON.stringify(maybeWifiGeolocation))
 		return {
 			located: false,
 		}
 	}
-	const { lat, lon, uncertainty } = maybeCellGeolocation
+	const { lat, lon, uncertainty } = maybeWifiGeolocation
 	console.debug(
 		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
 	)
