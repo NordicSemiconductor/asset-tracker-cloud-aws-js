@@ -31,8 +31,8 @@ export class HistoricalData extends CloudFormation.Resource {
 		this.table = new Timestream.CfnTable(this, 'table', {
 			databaseName: db.ref,
 			retentionProperties: {
-				MemoryStoreRetentionPeriodInHours: '24',
-				MagneticStoreRetentionPeriodInDays: '365',
+				memoryStoreRetentionPeriodInHours: '24',
+				magneticStoreRetentionPeriodInDays: '365',
 			},
 		})
 
