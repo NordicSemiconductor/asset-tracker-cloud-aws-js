@@ -9,9 +9,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
-import { res } from '../../api/res'
+import { resFP } from '../../api/resFP'
 import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
-import { queueJob } from '../../geolocation/queueJob'
+import { queueJobFP } from '../../geolocation/queueJobFP'
 import { getOrElse } from '../../util/fp-ts'
 import { fromEnv } from '../../util/fromEnv'
 import { geolocateFromCache } from '../geolocateFromCache'
@@ -26,7 +26,7 @@ const locator = geolocateFromCache({
 	TableName: cacheTable,
 })
 
-const q = queueJob({
+const q = queueJobFP({
 	QueueUrl: cellGeolocationResolutionJobsQueue,
 	sqs: new SQSClient({}),
 })
@@ -94,19 +94,19 @@ export const handler = async (
 		),
 		TE.fold(
 			(error) =>
-				res(toStatusCode[error.type], {
+				resFP(toStatusCode[error.type], {
 					expires: 60,
 				})(error),
 			(cell) => {
 				if (cell.unresolved) {
-					return res(toStatusCode[ErrorType.EntityNotFound], {
+					return resFP(toStatusCode[ErrorType.EntityNotFound], {
 						expires: 86400,
 					})({
 						type: ErrorType.EntityNotFound,
 						message: `cell geolocation not found!`,
 					})
 				}
-				return res(200, {
+				return resFP(200, {
 					expires: 86400,
 				})({
 					lat: cell.lat,
