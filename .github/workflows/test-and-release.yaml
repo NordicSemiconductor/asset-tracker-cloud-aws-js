@@ -110,7 +110,7 @@ jobs:
           ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud endpoint -X
           ./cli.sh purge-iot-user-policy-principals
-          ./cli.sh purge-cas -i `cat certificates/**/rootCA.id`
+          ./cli.sh purge-cas -c
           # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
           ./cli.sh purge-buckets
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' destroy -f '*'

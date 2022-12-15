@@ -3,6 +3,7 @@ import { IoTClient } from '@aws-sdk/client-iot'
 import * as chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { createCA, defaultCAValidityInDays } from '../jitp/createCA'
+import { setCurrentCA } from '../jitp/currentCA'
 import { CommandDefinition } from './CommandDefinition'
 
 export const createCACommand = ({
@@ -50,6 +51,7 @@ export const createCACommand = ({
 			chalk.green('You can now generate device certificates.'),
 			chalk.greenBright('./cli.sh create-and-provision-device-cert'),
 		)
+		setCurrentCA({ certsDir, caId: certificateId })
 	},
 	help: 'Creates a CA certificate and registers it for Just-in-time provisioning.',
 })

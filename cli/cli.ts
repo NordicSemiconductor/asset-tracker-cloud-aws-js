@@ -100,7 +100,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 
 	if (isCI) {
 		console.error('Running on CI...')
-		commands.push(purgeBucketsCommand(), purgeCAsCommand())
+		commands.push(purgeBucketsCommand(), purgeCAsCommand({ certsDir }))
 	} else {
 		commands.push(
 			createAndProvisionDeviceCertCommand({ certsDir }),
@@ -112,7 +112,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 			),
 			confirm(
 				'Do you really want to purge all nRF Asset Tracker CAs?',
-				purgeCAsCommand(),
+				purgeCAsCommand({ certsDir }),
 			),
 			firmwareCICommand({
 				endpoint,

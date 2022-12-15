@@ -10,7 +10,10 @@ import {
 	UpdateEventConfigurationsCommand,
 } from '@aws-sdk/client-iot'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
+import { randomUUID } from 'crypto'
 import { promises as fs } from 'fs'
+import { copyFile, unlink, writeFile } from 'fs/promises'
+import path from 'path'
 import { run } from '../process/run'
 import { caFileLocations } from './caFileLocations'
 
@@ -33,23 +36,11 @@ export const createCA = async (args: {
 	tags?: Tag[]
 }): Promise<{ certificateId: string }> => {
 	const { certsDir, log, debug, iot, cf } = args
-	const caFiles = caFileLocations(certsDir)
 	try {
 		await fs.stat(certsDir)
 	} catch {
 		await fs.mkdir(certsDir)
 		log(`Created ${certsDir}`)
-	}
-
-	let certExists = false
-	try {
-		await fs.stat(caFiles.cert)
-		certExists = true
-	} catch {
-		// pass
-	}
-	if (certExists) {
-		throw new Error(`CA Certificate exists: ${caFiles.cert}!`)
 	}
 
 	const [stackOutput, registrationCode] = await Promise.all([
@@ -71,20 +62,25 @@ export const createCA = async (args: {
 	log('CA Registration code', registrationCode)
 
 	// Now generate the CA
-
+	const verificationKey = path.join(
+		certsDir,
+		`${randomUUID()}.verification.key`,
+	)
+	const key = path.join(certsDir, `${randomUUID()}.key`)
 	await Promise.all([
 		run({
 			command: 'openssl',
-			args: ['genrsa', '-out', caFiles.verificationKey, '2048'],
+			args: ['genrsa', '-out', verificationKey, '2048'],
 			log: debug,
 		}),
 		run({
 			command: 'openssl',
-			args: ['genrsa', '-out', caFiles.key, '2048'],
+			args: ['genrsa', '-out', key, '2048'],
 			log: debug,
 		}),
 	])
 
+	const cert = path.join(certsDir, `${randomUUID()}.pem`)
 	await run({
 		command: 'openssl',
 		args: [
@@ -93,47 +89,52 @@ export const createCA = async (args: {
 			'-new',
 			'-nodes',
 			'-key',
-			caFiles.key,
+			key,
 			'-sha256',
 			'-days',
 			`${args.daysValid ?? defaultCAValidityInDays}`,
 			'-out',
-			caFiles.cert,
+			cert,
 			'-subj',
 			`/OU=${args.subject ?? args.stack}`,
 		],
 		log: debug,
 	})
 
+	const csr = path.join(certsDir, `${randomUUID()}.csr`)
 	await run({
 		command: 'openssl',
 		args: [
 			'req',
 			'-new',
 			'-key',
-			caFiles.verificationKey,
+			verificationKey,
 			'-out',
-			caFiles.csr,
+			csr,
 			'-subj',
 			`/CN=${registrationCode}`,
 		],
 		log: debug,
 	})
 
+	const verificationCert = path.join(
+		certsDir,
+		`${randomUUID()}.verificationCert.pem`,
+	)
 	await run({
 		command: 'openssl',
 		args: [
 			'x509',
 			'-req',
 			'-in',
-			caFiles.csr,
+			csr,
 			'-CA',
-			caFiles.cert,
+			cert,
 			'-CAkey',
-			caFiles.key,
+			key,
 			'-CAcreateserial',
 			'-out',
-			caFiles.verificationCert,
+			verificationCert,
 			'-days',
 			`${args.daysValid ?? defaultCAValidityInDays}`,
 			'-sha256',
@@ -141,11 +142,9 @@ export const createCA = async (args: {
 		log: debug,
 	})
 
-	log(`Created CA certificate in ${caFiles.cert}`)
-
 	const [caCertificate, verificationCertificate] = await Promise.all([
-		fs.readFile(caFiles.cert, 'utf-8'),
-		fs.readFile(caFiles.verificationCert, 'utf-8'),
+		fs.readFile(cert, 'utf-8'),
+		fs.readFile(verificationCert, 'utf-8'),
 	])
 
 	await iot.send(
@@ -214,10 +213,22 @@ export const createCA = async (args: {
 		throw new Error('Failed to register CA!')
 	}
 
-	await fs.writeFile(caFiles.id, res.certificateId, 'utf-8')
-
 	log(
 		`Registered CA and enabled auto-registration to group ${stackOutput?.thingGroupName}`,
+	)
+
+	const files = caFileLocations({ certsDir, id: res.certificateId })
+
+	await Promise.all([
+		writeFile(files.cert, caCertificate, 'utf-8'),
+		copyFile(key, files.key),
+	])
+	log(`Created CA certificate in ${files.cert}`)
+
+	await Promise.all(
+		[verificationKey, key, cert, csr, verificationCert].map(async (f) =>
+			unlink(f),
+		),
 	)
 
 	return {

@@ -14,6 +14,7 @@ import {
 	createDeviceCertificate,
 	defaultDeviceCertificateValidityInDays,
 } from '../jitp/createDeviceCertificate'
+import { getCurrentCA } from '../jitp/currentCA'
 import { deviceFileLocations } from '../jitp/deviceFileLocations'
 import { readlineDevice } from '../jitp/readlineDevice'
 import { run } from '../process/run'
@@ -61,6 +62,10 @@ export const createAndProvisionDeviceCertCommand = ({
 			flags: '-S, --simulated-device',
 			description: `Use a simulated (soft) device. Useful if you do not have physical access to the device. Will print the AT commands sent to the device allows to provide responses on the command line.`,
 		},
+		{
+			flags: '-c, --ca <caId>',
+			description: `ID of the CA certificate to use. Defaults to the last created one.`,
+		},
 	],
 	action: async ({
 		dk,
@@ -71,6 +76,7 @@ export const createAndProvisionDeviceCertCommand = ({
 		debug,
 		deletePrivateKey,
 		simulatedDevice,
+		caId,
 	}) => {
 		let connection: Connection
 
@@ -133,6 +139,7 @@ export const createAndProvisionDeviceCertCommand = ({
 		await createDeviceCertificate({
 			deviceId,
 			certsDir,
+			caId: caId ?? getCurrentCA({ certsDir }),
 			log: (...message: any[]) => {
 				console.log(...message.map((m) => chalk.magenta(m)))
 			},
