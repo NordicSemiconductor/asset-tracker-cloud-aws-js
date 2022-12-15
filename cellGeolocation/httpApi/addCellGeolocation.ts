@@ -8,7 +8,7 @@ import { pipe } from 'fp-ts/lib/function'
 import * as JSON from 'fp-ts/lib/Json'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { ErrorInfo, ErrorType, toStatusCode } from '../../api/ErrorInfo'
-import { res } from '../../api/res'
+import { resFP } from '../../api/resFP'
 import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
 import { Cell } from '../../geolocation/Cell'
 import { Location } from '../../geolocation/Location'
@@ -113,8 +113,8 @@ export const handler = async (
 		TE.flatten,
 		TE.map(([id]) => id),
 		TE.fold(
-			(error) => res(toStatusCode[(error as ErrorInfo).type])(error),
-			res(202),
+			(error) => resFP(toStatusCode[(error as ErrorInfo).type])(error),
+			resFP(202),
 		),
 	)()
 }
