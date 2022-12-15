@@ -1,5 +1,4 @@
 import { Type } from '@sinclair/typebox'
-import { access } from 'fs'
 
 const cells = Type.Array(
 	Type.Object(
@@ -36,9 +35,11 @@ const accessPoints = Type.Object({
 	),
 })
 
-export const groundfixRequestSchema = Type.Object(
-	{
+export const groundfixRequestSchema = Type.Union([
+	Type.Object({
 		lte: cells,
-		wifi: accessPoints
-	}
-)
+	}),
+	Type.Object({
+		wifi: accessPoints,
+	}),
+])
