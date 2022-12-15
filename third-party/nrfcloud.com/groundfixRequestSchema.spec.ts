@@ -8,18 +8,9 @@ ajv.addKeyword('kind')
 ajv.addKeyword('modifier')
 
 describe('groundfixRequestSchema', () => {
-	//TOFIX: Should be either lte or wifi
-	it('should throw error if wifi access point has only 1', () => {
+	it('should throw error if a request with only 1 wifi access point', () => {
 		const v = ajv.compile(groundfixRequestSchema)
 		const request: Static<typeof groundfixRequestSchema> = {
-			lte: [
-				{
-					eci: 92987688,
-					mcc: 242,
-					mnc: 1,
-					tac: 30401,
-				},
-			],
 			wifi: {
 				accessPoints: [
 					{
@@ -33,17 +24,9 @@ describe('groundfixRequestSchema', () => {
 		expect(valid).toEqual(false)
 	})
 
-	it('should validate a request with minimum access points', () => {
+	it('should validate a request with 2 wifi access points as minimum requirements', () => {
 		const v = ajv.compile(groundfixRequestSchema)
 		const request: Static<typeof groundfixRequestSchema> = {
-			lte: [
-				{
-					eci: 92987688,
-					mcc: 242,
-					mnc: 1,
-					tac: 30401,
-				},
-			],
 			wifi: {
 				accessPoints: [
 					{
@@ -61,17 +44,9 @@ describe('groundfixRequestSchema', () => {
 		expect(valid).toEqual(true)
 	})
 
-	it('should validate a request with a lot of access points', () => {
+	it('should validate a request with full details of wifi access points', () => {
 		const v = ajv.compile(groundfixRequestSchema)
 		const request: Static<typeof groundfixRequestSchema> = {
-			lte: [
-				{
-					eci: 92987688,
-					mcc: 242,
-					mnc: 1,
-					tac: 30401,
-				},
-			],
 			wifi: {
 				accessPoints: [
 					{
