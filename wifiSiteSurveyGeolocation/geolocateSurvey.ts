@@ -9,6 +9,9 @@ type Survey = {
 	surveyId: string
 	survey: Record<string, any>
 	unresolved: boolean
+	attempt?: number
+	attemptTimestamp?: number
+	inProgress?: boolean
 }
 
 export const geolocateSurvey =
@@ -44,6 +47,9 @@ export const geolocateSurvey =
 				deviceId: entry.deviceId,
 				timestamp: new Date(entry.timestamp),
 				unresolved: entry.unresolved,
+				attempt: entry.attempt,
+				attemptTimestamp: entry.attemptTimestamp,
+				inProgress: entry.inProgress,
 				survey: entry.survey as Record<string, any>,
 			}
 			if ('lat' in entry) {
