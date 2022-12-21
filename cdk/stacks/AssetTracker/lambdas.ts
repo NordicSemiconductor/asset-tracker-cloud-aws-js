@@ -192,7 +192,6 @@ export const prepareCDKLambdas = async ({
 				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
 				requiredDependencies: [
 					'@nordicsemiconductor/cloudformation-helpers',
-					'uuid',
 					'fast-xml-parser',
 				],
 				dir: cloudFormationLayerDir,
