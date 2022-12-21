@@ -32,8 +32,7 @@
     "entities": "4.4.0",
     "fast-xml-parser": "4.0.12",
     "fp-ts": "2.13.1",
-    "jsonwebtoken": "8.5.1",
-    "uuid": "9.0.0"
+    "jsonwebtoken": "8.5.1"
   },
   "devDependencies": {
     "@aws-sdk/client-apigatewayv2": "3.235.0",
@@ -70,7 +69,6 @@
     "@types/jest": "29.2.4",
     "@types/jsonwebtoken": "8.5.9",
     "@types/node": "18.11.17",
-    "@types/uuid": "9.0.0",
     "aws-cdk-lib": "2.55.1",
     "aws-iot-device-sdk": "2.2.12",
     "backoff": "2.5.0",

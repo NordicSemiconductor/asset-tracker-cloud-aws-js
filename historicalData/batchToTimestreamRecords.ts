@@ -1,6 +1,6 @@
 import { _Record } from '@aws-sdk/client-timestream-write'
 import { toRecord } from '@nordicsemiconductor/timestream-helpers'
-import { v4 } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
 
 export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
@@ -15,7 +15,7 @@ export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 			)
 				?.map((m) => {
 					const ts = m.ts
-					const measureGroup = v4()
+					const measureGroup = randomUUID()
 					if (typeof m.v === 'number') {
 						return toRecord({
 							name: name,

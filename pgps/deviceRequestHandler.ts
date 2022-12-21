@@ -12,9 +12,9 @@ import {
 import { Static } from '@sinclair/typebox'
 import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
+import { randomUUID } from 'node:crypto'
 import { URL } from 'url'
 import { TextEncoder } from 'util'
-import { v4 } from 'uuid'
 import { fromEnv } from '../util/fromEnv'
 import {
 	cacheKey,
@@ -278,7 +278,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 							),
 						)
 						return {
-							Id: v4(),
+							Id: randomUUID(),
 							MessageBody: JSON.stringify(deviceRequest.request),
 							DelaySeconds,
 							MessageAttributes: {

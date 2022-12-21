@@ -5,8 +5,8 @@ import {
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb'
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
+import { randomUUID } from 'node:crypto'
 import * as querystring from 'querystring'
-import { v4 } from 'uuid'
 import { splitMockResponse } from './splitMockResponse'
 
 const db = new DynamoDBClient({})
@@ -31,7 +31,7 @@ export const handler = async (
 					S: `${event.httpMethod} ${pathWithQuery}`,
 				},
 				requestId: {
-					S: v4(),
+					S: randomUUID(),
 				},
 				method: {
 					S: event.httpMethod,
