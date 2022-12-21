@@ -84,9 +84,9 @@ jobs:
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' deploy '*' --require-approval never
           ./cli.sh configure thirdParty unwiredlabs apiKey my-secret
           ./cli.sh configure thirdParty nrfcloud teamId `uuidgen`
-          openssl ecparam -name secp256k1 -genkey | ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey
-          openssl ecparam -name secp256k1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
-          openssl ecparam -name secp256k1 -genkey | ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey
+          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey
+          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
+          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey
           MOCK_HTTP_API_ENDPOINT=`aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue' | sed -E 's/\/$//g'`
           ./cli.sh configure thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
           ./cli.sh configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com

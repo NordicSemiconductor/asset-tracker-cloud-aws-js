@@ -2,9 +2,9 @@ import { Static, TObject, TProperties } from '@sinclair/typebox'
 import Ajv from 'ajv'
 import { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
 import { request as nodeRequest, RequestOptions } from 'https'
-import * as jwt from 'jsonwebtoken'
 import { URL } from 'url'
 import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
+import { createToken } from './createToken'
 
 const ajv = new Ajv()
 // see @https://github.com/sinclairzx81/typebox/issues/51
@@ -439,9 +439,7 @@ const jsonRequestOptions = ({
 	method,
 	agent: false,
 	headers: {
-		Authorization: `Bearer ${jwt.sign({ aud: teamId }, serviceKey, {
-			algorithm: 'ES256',
-		})}`,
+		Authorization: `Bearer ${createToken(teamId, serviceKey)}`,
 		...headers,
 	},
 })
