@@ -1,7 +1,7 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { v4 } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
 import { Cell } from '../geolocation/Cell'
 import { Location } from '../geolocation/Location'
@@ -17,7 +17,7 @@ export const addDeviceCellGeolocation =
 	}): TE.TaskEither<ErrorInfo, string> =>
 		TE.tryCatch<ErrorInfo, string>(
 			async () => {
-				const id = v4()
+				const id = randomUUID()
 				await dynamodb.send(
 					new PutItemCommand({
 						TableName,
