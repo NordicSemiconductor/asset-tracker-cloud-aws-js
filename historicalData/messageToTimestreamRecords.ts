@@ -1,6 +1,6 @@
 import { _Record } from '@aws-sdk/client-timestream-write'
 import { toRecord } from '@nordicsemiconductor/timestream-helpers'
-import { v4 } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
 
 export const messageToTimestreamRecords = (event: DeviceMessage): _Record[] => {
@@ -11,7 +11,7 @@ export const messageToTimestreamRecords = (event: DeviceMessage): _Record[] => {
 				name: 'btn',
 				ts: event.message.btn.ts,
 				v: event.message.btn.v,
-				dimensions: { measureGroup: v4() },
+				dimensions: { measureGroup: randomUUID() },
 			}),
 		)
 	}
@@ -22,7 +22,7 @@ export const messageToTimestreamRecords = (event: DeviceMessage): _Record[] => {
 				name: 'impact',
 				ts: event.message.impact.ts,
 				v: event.message.impact.v,
-				dimensions: { measureGroup: v4() },
+				dimensions: { measureGroup: randomUUID() },
 			}),
 		)
 	}
