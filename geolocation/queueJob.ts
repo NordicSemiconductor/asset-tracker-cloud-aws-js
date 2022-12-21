@@ -6,9 +6,11 @@ export const queueJob =
 	async ({
 		payload,
 		deduplicationId,
+		delay,
 	}: {
 		payload: unknown
-		deduplicationId: string
+		deduplicationId?: string
+		delay?: number
 	}): Promise<{ error: ErrorInfo } | void> => {
 		try {
 			console.debug(
@@ -24,6 +26,7 @@ export const queueJob =
 					MessageBody: JSON.stringify(payload),
 					MessageGroupId: deduplicationId,
 					MessageDeduplicationId: deduplicationId,
+					DelaySeconds: delay,
 				}),
 			)
 			console.debug(

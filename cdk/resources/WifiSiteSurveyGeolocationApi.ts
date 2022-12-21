@@ -1,9 +1,12 @@
 import * as CloudFormation from 'aws-cdk-lib'
+import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as SQS from 'aws-cdk-lib/aws-sqs'
 import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
+import { CORE_STACK_NAME } from '../stacks/stackName'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
+import { logToCloudWatch } from './logToCloudWatch'
 import { WiFiSiteSurveysStorage } from './WiFiSiteSurveysStorage'
 
 /**
@@ -28,10 +31,12 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
+		// ISSUE: when passing 'false' to fifo property, https://github.com/aws/aws-cdk/issues/8550
 		const resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
-			fifo: true,
-			queueName: `${`${id}-${this.stack.stackName}`.slice(0, 75)}.fifo`,
+			fifo: undefined,
+			queueName: `${`${id}-${this.stack.stackName}`.slice(0, 75)}`,
 			visibilityTimeout: CloudFormation.Duration.seconds(60),
+			retentionPeriod: CloudFormation.Duration.seconds(600),
 		})
 
 		const getSurveyLocation = new Lambda.Function(this, 'getSurveyLocation', {
@@ -52,10 +57,58 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 			},
 		})
 
+		const resolveSurveyLocation = new Lambda.Function(
+			this,
+			'resolveSurveyLocation',
+			{
+				handler: 'index.handler',
+				architecture: Lambda.Architecture.ARM_64,
+				runtime: Lambda.Runtime.NODEJS_18_X,
+				timeout: CloudFormation.Duration.seconds(10),
+				memorySize: 1792,
+				code: lambdas.lambdas.wifiSiteSurveyGeolocateResolverFromSQS,
+				layers: lambdas.layers,
+				description:
+					'Invoke the wifi site surveys geolocation resolution for SQS messages',
+				initialPolicy: [
+					logToCloudWatch,
+					new IAM.PolicyStatement({
+						actions: ['ssm:GetParametersByPath'],
+						resources: [
+							`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfcloud`,
+						],
+					}),
+				],
+				environment: {
+					SURVEYS_TABLE: storage.surveysTable.tableName,
+					WIFI_SITESURVEY_GEOLOCATION_RESOLUTION_JOBS_QUEUE:
+						resolutionJobsQueue.queueUrl,
+					VERSION: this.node.tryGetContext('version'),
+					STACK_NAME: this.stack.stackName,
+				},
+			},
+		)
+
+		resolveSurveyLocation.addPermission('invokeBySQS', {
+			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
+			sourceArn: resolutionJobsQueue.queueArn,
+		})
+
+		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
+			eventSourceArn: resolutionJobsQueue.queueArn,
+			target: resolveSurveyLocation,
+			batchSize: 1,
+		})
+
 		storage.surveysTable.grantFullAccess(getSurveyLocation)
+		storage.surveysTable.grantFullAccess(resolveSurveyLocation)
+
 		resolutionJobsQueue.grantSendMessages(getSurveyLocation)
+		resolutionJobsQueue.grantSendMessages(resolveSurveyLocation)
+		resolutionJobsQueue.grantConsumeMessages(resolveSurveyLocation)
 
 		new LambdaLogGroup(this, 'getSurveyLocationLogs', getSurveyLocation)
+		new LambdaLogGroup(this, 'resolveSurveyLocationLogs', resolveSurveyLocation)
 
 		this.url = getSurveyLocation.addFunctionUrl({
 			authType: Lambda.FunctionUrlAuthType.NONE,

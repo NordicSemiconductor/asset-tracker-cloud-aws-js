@@ -1,11 +1,11 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
 import { SQSClient } from '@aws-sdk/client-sqs'
 import { Type } from '@sinclair/typebox'
 import type {
 	APIGatewayProxyEventV2,
 	APIGatewayProxyResultV2,
 } from 'aws-lambda'
-import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
+import { ErrorInfo, ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { queueJob } from '../../geolocation/queueJob'
@@ -27,14 +27,85 @@ const { surveysTable, wifiSiteSurveyGeolocationResolutionJobsQueue } = fromEnv({
 		'WIFI_SITESURVEY_GEOLOCATION_RESOLUTION_JOBS_QUEUE',
 })(process.env)
 
+const dynamodb = new DynamoDBClient({})
 const locator = geolocateSurvey({
-	dynamodb: new DynamoDBClient({}),
+	dynamodb,
 	TableName: surveysTable,
 })
 
 const q = queueJob({
 	QueueUrl: wifiSiteSurveyGeolocationResolutionJobsQueue,
 	sqs: new SQSClient({}),
+})
+
+type QFunction = ({
+	payload,
+	deduplicationId,
+	delay,
+}: {
+	payload: unknown
+	deduplicationId?: string
+	delay?: number
+}) => Promise<void | { error: ErrorInfo }>
+
+const getWifiSurveyResolver =
+	({
+		dynamodb,
+		tableName,
+		q,
+	}: {
+		dynamodb: DynamoDBClient
+		tableName: string
+		q: QFunction
+	}) =>
+	async ({
+		surveyId,
+		payload,
+	}: {
+		surveyId: string
+		payload: unknown
+	}): Promise<void> => {
+		// Update status in DB
+		const Key = {
+			surveyId: {
+				S: surveyId,
+			},
+		}
+		await dynamodb.send(
+			new UpdateItemCommand({
+				TableName: tableName,
+				Key,
+				UpdateExpression:
+					'SET #inProgress = :inProgress, #attempt = :attempt, #attemptTimestamp = :attemptTimestamp',
+				ExpressionAttributeNames: {
+					'#inProgress': 'inProgress',
+					'#attempt': 'attempt',
+					'#attemptTimestamp': 'attemptTimestamp',
+				},
+				ExpressionAttributeValues: {
+					':inProgress': {
+						BOOL: true,
+					},
+					':attempt': {
+						NULL: true,
+					},
+					':attemptTimestamp': {
+						NULL: true,
+					},
+				},
+			}),
+		)
+
+		// Send to queue
+		await q({
+			payload: payload,
+		})
+	}
+
+const resolveWifiSurvey = getWifiSurveyResolver({
+	dynamodb,
+	tableName: surveysTable,
+	q,
 })
 
 export const handler = async (
@@ -63,15 +134,15 @@ export const handler = async (
 		})(maybeSurvey.error)
 	}
 
-	console.log(JSON.stringify({ survey: maybeSurvey }))
+	console.log(JSON.stringify(maybeSurvey))
 
-	if ('location' in maybeSurvey) {
+	if ('location' in maybeSurvey.survey) {
 		return res(200, {
 			expires: 86400,
-		})(maybeSurvey.location)
+		})(maybeSurvey.survey.location)
 	}
 
-	if (maybeSurvey.survey.unresolved) {
+	if (maybeSurvey.survey.unresolved === true) {
 		return res(toStatusCode[ErrorType.EntityNotFound], {
 			expires: 86400,
 		})({
@@ -80,10 +151,22 @@ export const handler = async (
 		})
 	}
 
-	await q({
-		deduplicationId: maybeValidRequest.id,
-		payload: maybeSurvey.survey,
-	})
+	// We will retry to resolve the location again if
+	// 1. unresolved = undefined
+	// 2. attempt timestamp is older than 24hr
+	const attemptTimestamp = maybeSurvey.survey.attemptTimestamp ?? Date.now()
+	const over24hrFromLastRetry = Date.now() - attemptTimestamp > 86400000
+	const shouldResolveWifiSurvey =
+		maybeSurvey.survey.inProgress === undefined ||
+		(maybeSurvey.survey.unresolved === undefined && over24hrFromLastRetry)
+
+	// We flag status into DB. Then we can have only one job per survey id to get resolved
+	if (shouldResolveWifiSurvey) {
+		await resolveWifiSurvey({
+			surveyId: maybeSurvey.survey.surveyId,
+			payload: maybeSurvey.survey,
+		})
+	}
 
 	return res(toStatusCode[ErrorType.Conflict], { expires: 60 })({
 		type: ErrorType.Conflict,

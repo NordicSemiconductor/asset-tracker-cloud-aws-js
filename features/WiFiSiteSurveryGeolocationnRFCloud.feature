@@ -57,8 +57,7 @@ Feature: nRF Cloud WiFi Site Survey Geolocation
             {
             "accuracy": {accuracy},
             "lat": {lat},
-            "lng": {lng},
-            "fulfilledWith": "WIFI"
+            "lng": {lng}
             }
             """
 
@@ -72,64 +71,64 @@ Feature: nRF Cloud WiFi Site Survey Geolocation
             "wifi": {
                 "accessPoints": [
                     {
-                    "mac": "80:e0:1d:09:8f:62",
+                    "macAddress": "80:e0:1d:09:8f:62",
                     "ssid": "TnGroup",
-                    "rssi": -69,
-                    "chan": 6
+                    "signalStrength": -69,
+                    "channel": 6
                     },
                     {
-                    "mac": "80:e0:1d:09:8f:65",
+                    "macAddress": "80:e0:1d:09:8f:65",
                     "ssid": "TnNorge",
-                    "rssi": -69,
-                    "chan": 6
+                    "signalStrength": -69,
+                    "channel": 6
                     },
                     {
-                    "mac": "80:e0:1d:30:bb:07",
+                    "macAddress": "80:e0:1d:30:bb:07",
                     "ssid": "TnNorgeMacOS",
-                    "rssi": -75,
-                    "chan": 11
+                    "signalStrength": -75,
+                    "channel": 11
                     },
                     {
-                    "mac": "7c:10:c9:02:b8:6c",
+                    "macAddress": "7c:10:c9:02:b8:6c",
                     "ssid": "PTU_TEST_5G",
-                    "rssi": -85,
-                    "chan": 36
+                    "signalStrength": -85,
+                    "channel": 36
                     },
                     {
-                    "mac": "80:e0:1d:30:bb:0c",
+                    "macAddress": "80:e0:1d:30:bb:0c",
                     "ssid": "Telenor_Skunk_Works",
-                    "rssi": -82,
-                    "chan": 52
+                    "signalStrength": -82,
+                    "channel": 52
                     },
                     {
-                    "mac": "80:e0:1d:09:8f:6e",
+                    "macAddress": "80:e0:1d:09:8f:6e",
                     "ssid": "Telenor_Guest",
-                    "rssi": -80,
-                    "chan": 60
+                    "signalStrength": -80,
+                    "channel": 60
                     },
                     {
-                    "mac": "4c:e1:75:80:5e:6f",
+                    "macAddress": "4c:e1:75:80:5e:6f",
                     "ssid": "NORDIC-GUEST",
-                    "rssi": -53,
-                    "chan": 100
+                    "signalStrength": -53,
+                    "channel": 100
                     },
                     {
-                    "mac": "4c:e1:75:80:5e:6e",
+                    "macAddress": "4c:e1:75:80:5e:6e",
                     "ssid": "NORDIC-INTERNAL",
-                    "rssi": -53,
-                    "chan": 100
+                    "signalStrength": -53,
+                    "channel": 100
                     },
                     {
-                    "mac": "4c:e1:75:bf:09:2f",
+                    "macAddress": "4c:e1:75:bf:09:2f",
                     "ssid": "NORDIC-GUEST",
-                    "rssi": -57,
-                    "chan": 116
+                    "signalStrength": -57,
+                    "channel": 116
                     },
                     {
-                    "mac": "4c:e1:75:bf:09:2e",
+                    "macAddress": "4c:e1:75:bf:09:2e",
                     "ssid": "NORDIC-INTERNAL",
-                    "rssi": -58,
-                    "chan": 116
+                    "signalStrength": -58,
+                    "channel": 116
                     }
                 ]
             }
