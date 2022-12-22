@@ -32,7 +32,8 @@
     "entities": "4.4.0",
     "fast-xml-parser": "4.0.12",
     "fp-ts": "2.13.1",
-    "jsonwebtoken": "9.0.0"
+    "jsonwebtoken": "9.0.0",
+    "uuid": "9.0.0"
   },
   "devDependencies": {
     "@aws-sdk/client-apigatewayv2": "3.236.0",

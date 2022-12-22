@@ -193,6 +193,8 @@ export const prepareCDKLambdas = async ({
 				requiredDependencies: [
 					'@nordicsemiconductor/cloudformation-helpers',
 					'fast-xml-parser',
+					// uuid is still needed for the ThingGroup Custom Resource lambda
+					'uuid',
 				],
 				dir: cloudFormationLayerDir,
 				reporter,
