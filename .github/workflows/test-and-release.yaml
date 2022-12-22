@@ -87,7 +87,7 @@ jobs:
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey
-          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud groundfixLocationServiceKey
+          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud groundFixServiceKey
           MOCK_HTTP_API_ENDPOINT=`aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue' | sed -E 's/\/$//g'`
           ./cli.sh configure thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
           ./cli.sh configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com

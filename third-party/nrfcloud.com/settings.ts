@@ -5,7 +5,7 @@ type nRFCloudLocationService =
 	| 'agpsLocation'
 	| 'pgpsLocation'
 	| 'cellLocation'
-	| 'groundfixLocation'
+	| 'groundFix'
 
 export const serviceKeyProperty = (service: nRFCloudLocationService): string =>
 	`${service}ServiceKey`
@@ -70,11 +70,11 @@ export const getCellLocationApiSettings = ({
 }): ReturnType<typeof getApiSettings> =>
 	getApiSettings({ ssm, stackName, service: 'cellLocation' })
 
-export const getGroundfixLocationApiSettings = ({
+export const getGroundFixApiSettings = ({
 	ssm,
 	stackName,
 }: {
 	ssm: SSMClient
 	stackName: string
 }): ReturnType<typeof getApiSettings> =>
-	getApiSettings({ ssm, stackName, service: 'groundfixLocation' })
+	getApiSettings({ ssm, stackName, service: 'groundFix' })

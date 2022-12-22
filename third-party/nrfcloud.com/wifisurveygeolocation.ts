@@ -10,7 +10,7 @@ import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { groundfixRequestSchema } from './groundfixRequestSchema'
 import { locateResultSchema } from './locate'
-import { getGroundfixLocationApiSettings } from './settings'
+import { getGroundFixApiSettings } from './settings'
 
 function removeUndefinedProperties<T extends object>(obj: T): T {
 	const result: Partial<T> = {}
@@ -34,7 +34,7 @@ const {
 	stackName: 'STACK_NAME',
 })(process.env)
 
-const settingsPromise = getGroundfixLocationApiSettings({
+const settingsPromise = getGroundFixApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
