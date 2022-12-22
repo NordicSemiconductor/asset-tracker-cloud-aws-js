@@ -10,7 +10,7 @@ type Survey = {
 	survey: Record<string, any>
 	unresolved: boolean
 	attempt?: number
-	attemptTimestamp?: number
+	attemptTimestamp?: Date
 	inProgress?: boolean
 }
 
@@ -48,7 +48,7 @@ export const geolocateSurvey =
 				timestamp: new Date(entry.timestamp),
 				unresolved: entry.unresolved,
 				attempt: entry.attempt,
-				attemptTimestamp: entry.attemptTimestamp,
+				attemptTimestamp: new Date(entry.attemptTimestamp),
 				inProgress: entry.inProgress,
 				survey: entry.survey as Record<string, any>,
 			}

@@ -154,8 +154,12 @@ export const handler = async (
 	// We will retry to resolve the location again if
 	// 1. unresolved = undefined
 	// 2. attempt timestamp is older than 24hr
-	const attemptTimestamp = maybeSurvey.survey.attemptTimestamp ?? Date.now()
-	const over24hrFromLastRetry = Date.now() - attemptTimestamp > 86400000
+	const attemptTimestamp =
+		maybeSurvey.survey.attemptTimestamp !== undefined
+			? new Date(maybeSurvey.survey.attemptTimestamp)
+			: new Date()
+	const over24hrFromLastRetry =
+		Date.now() - attemptTimestamp.getTime() > 86400000
 	const shouldResolveWifiSurvey =
 		maybeSurvey.survey.inProgress === undefined ||
 		(maybeSurvey.survey.unresolved === undefined && over24hrFromLastRetry)

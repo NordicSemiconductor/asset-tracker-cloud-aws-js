@@ -32,7 +32,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 
 	const mccmnc = cell.mccmnc.toFixed(0)
 	const maybeCellGeolocation = await c.post({
-		resource: 'location/ground-fix',
+		resource: 'location/cell',
 		payload: {
 			// FIXME: enable check once NB-IoT is supported: [cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
 			lte: [

@@ -4,7 +4,7 @@ Feature: nRF Cloud WiFi Site Survey Geolocation
 
     Background:
 
-        This enques a mock response on the mock HTTP API the stack is configure
+        This enqueues a mock response on the mock HTTP API the stack is configure
         to use for the nRF Cloud integration
 
         Given I am run after the "Store WiFi site surveys" feature

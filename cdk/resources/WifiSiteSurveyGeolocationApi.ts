@@ -31,10 +31,7 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		// ISSUE: when passing 'false' to fifo property, https://github.com/aws/aws-cdk/issues/8550
 		const resolutionJobsQueue = new SQS.Queue(this, 'resolutionJobsQueue', {
-			fifo: undefined,
-			queueName: `${`${id}-${this.stack.stackName}`.slice(0, 75)}`,
 			visibilityTimeout: CloudFormation.Duration.seconds(60),
 			retentionPeriod: CloudFormation.Duration.seconds(600),
 		})
@@ -56,6 +53,7 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 				STACK_NAME: this.stack.stackName,
 			},
 		})
+		new LambdaLogGroup(this, 'getSurveyLocationLogs', getSurveyLocation)
 
 		const resolveSurveyLocation = new Lambda.Function(
 			this,
@@ -68,8 +66,7 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 				memorySize: 1792,
 				code: lambdas.lambdas.wifiSiteSurveyGeolocateResolverFromSQS,
 				layers: lambdas.layers,
-				description:
-					'Invoke the wifi site surveys geolocation resolution for SQS messages',
+				description: `Invoke the WiFi site survey's geolocation resolution for SQS messages`,
 				initialPolicy: [
 					logToCloudWatch,
 					new IAM.PolicyStatement({
@@ -88,6 +85,7 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 				},
 			},
 		)
+		new LambdaLogGroup(this, 'resolveSurveyLocationLogs', resolveSurveyLocation)
 
 		resolveSurveyLocation.addPermission('invokeBySQS', {
 			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
@@ -106,9 +104,6 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 		resolutionJobsQueue.grantSendMessages(getSurveyLocation)
 		resolutionJobsQueue.grantSendMessages(resolveSurveyLocation)
 		resolutionJobsQueue.grantConsumeMessages(resolveSurveyLocation)
-
-		new LambdaLogGroup(this, 'getSurveyLocationLogs', getSurveyLocation)
-		new LambdaLogGroup(this, 'resolveSurveyLocationLogs', resolveSurveyLocation)
 
 		this.url = getSurveyLocation.addFunctionUrl({
 			authType: Lambda.FunctionUrlAuthType.NONE,
