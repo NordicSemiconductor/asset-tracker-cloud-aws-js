@@ -45,7 +45,7 @@ type WiFiInput = {
 	unresolved?: boolean
 	inProgress?: boolean
 	survey: {
-		wmr: {
+		v: {
 			chan?: number
 			mac: string
 			rssi?: number

@@ -15,7 +15,7 @@ Feature: Store WiFi site surveys
         """
         {
             "ts": {ts},
-            "wmr": [
+            "v": [
                 {
                 "mac": "80:e0:1d:09:8f:62",
                 "ssid": "TnGroup",
@@ -120,7 +120,7 @@ Feature: Store WiFi site surveys
             "survey": {
                 "M": {
                 "ts": { "N": "{ts}" },
-                "wmr": {
+                "v": {
                     "L": [
                     {
                         "M": {
