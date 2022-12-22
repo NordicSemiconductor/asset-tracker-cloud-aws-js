@@ -4,6 +4,7 @@ import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Iot from 'aws-cdk-lib/aws-iot'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as S3 from 'aws-cdk-lib/aws-s3'
+import { enabledInContext } from '../../helper/enabledInContext'
 import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
 import { warn } from '../../helper/note'
 import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
@@ -25,6 +26,7 @@ import { PGPSStorage } from '../../resources/PGPSStorage'
 import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
 import { ThingGroup } from '../../resources/ThingGroup'
 import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
+import { WifiSiteSurveyGeolocationApi } from '../../resources/WifiSiteSurveyGeolocationApi'
 import { WiFiSiteSurveysStorage } from '../../resources/WiFiSiteSurveysStorage'
 import { CORE_STACK_NAME } from '../stackName'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
@@ -58,6 +60,7 @@ export const StackOutputs = {
 	ncellmeasStorageTableArn: `${CORE_STACK_NAME}:ncellmeasStorageTableArn`,
 	ncellmeasStorageTableStreamArn: `${CORE_STACK_NAME}:ncellmeasStorageTableStreamArn`,
 	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
+	wifiSiteSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:wifiSiteSurveyGeolocationApiUrl`,
 	wifiSiteSurveyStorageTableName: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableName`,
 	wifiSiteSurveyStorageTableArn: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableArn`,
 	wifiSiteSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableStreamArn`,
@@ -589,23 +592,47 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 
 		// WiFi Site Surveys Storage
+		enabledInContext(this.node)({
+			key: 'nrfCloudGroundFix',
+			component: 'nRF Cloud API (Ground Fix services)',
+			onUndefined: 'disabled',
+			onEnabled: () => {
+				const wifiSiteSurveysStorage = new WiFiSiteSurveysStorage(
+					this,
+					'wifiSiteSurveyStorage',
+				)
+				new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableName', {
+					value: wifiSiteSurveysStorage.surveysTable.tableName,
+					exportName: StackOutputs.wifiSiteSurveyStorageTableName,
+				})
+				new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableArn', {
+					value: wifiSiteSurveysStorage.surveysTable.tableArn,
+					exportName: StackOutputs.wifiSiteSurveyStorageTableArn,
+				})
+				new CloudFormation.CfnOutput(
+					this,
+					'wifiSiteSurveyStorageTableStreamArn',
+					{
+						value: wifiSiteSurveysStorage.surveysTable.tableStreamArn as string,
+						exportName: StackOutputs.wifiSiteSurveyStorageTableStreamArn,
+					},
+				)
+				wifiSiteSurveysStorage.surveysTable.grantReadData(userRole)
 
-		const wifiSiteSurveysStorage = new WiFiSiteSurveysStorage(
-			this,
-			'wifiSiteSurveyStorage',
-		)
-		new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableName', {
-			value: wifiSiteSurveysStorage.surveysTable.tableName,
-			exportName: StackOutputs.wifiSiteSurveyStorageTableName,
+				const wifiSiteSurveysGeolocationApi = new WifiSiteSurveyGeolocationApi(
+					this,
+					'wifiSiteSurveysGeolocationApi',
+					{
+						lambdas,
+						storage: wifiSiteSurveysStorage,
+					},
+				)
+
+				new CloudFormation.CfnOutput(this, 'wifiSiteSurveyGeolocationApiUrl', {
+					value: wifiSiteSurveysGeolocationApi.url,
+					exportName: StackOutputs.wifiSiteSurveyGeolocationApiUrl,
+				})
+			},
 		})
-		new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableArn', {
-			value: wifiSiteSurveysStorage.surveysTable.tableArn,
-			exportName: StackOutputs.wifiSiteSurveyStorageTableArn,
-		})
-		new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableStreamArn', {
-			value: wifiSiteSurveysStorage.surveysTable.tableStreamArn as string,
-			exportName: StackOutputs.wifiSiteSurveyStorageTableStreamArn,
-		})
-		wifiSiteSurveysStorage.surveysTable.grantReadData(userRole)
 	}
 }

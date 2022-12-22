@@ -1,13 +1,13 @@
-Feature: Store WiFI site surveys
+Feature: Store WiFi site surveys
 
-    WiFI site surveys are too big to be stored in the AWS
+    WiFi site surveys are too big to be stored in the AWS
     shadow, so they are stored in a DynamoDB.
 
     Background:
 
         Given I am run after the "Connect a tracker" feature
         And I am authenticated with Cognito
-    
+
     Scenario: Device publishes WiFi site survey
 
         Given I store "$millis()" into "ts"

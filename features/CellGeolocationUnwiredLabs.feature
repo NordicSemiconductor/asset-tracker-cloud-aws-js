@@ -10,7 +10,7 @@ Feature: Unwired Labs Cell Geolocation
 
     Background:
 
-        This enques a mock response on the mock HTTP API the stack is configure
+        This enqueues a mock response on the mock HTTP API the stack is configure
         to use for the Unwired Labs integration
 
         Given I am run after the "Cell Geolocation API" feature

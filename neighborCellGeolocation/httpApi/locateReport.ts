@@ -4,10 +4,10 @@ import { Type } from '@sinclair/typebox'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as E from 'fp-ts/lib/Either'
 import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
-import { res } from '../../api/res'
+import { resFP } from '../../api/resFP'
 import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
 import { Location } from '../../geolocation/Location'
-import { queueJob } from '../../geolocation/queueJob'
+import { queueJobFP } from '../../geolocation/queueJobFP'
 import { fromEnv } from '../../util/fromEnv'
 import { geolocateReport } from '../geolocateReport'
 
@@ -22,7 +22,7 @@ const locator = geolocateReport({
 	TableName: reportsTable,
 })
 
-const q = queueJob({
+const q = queueJobFP({
 	QueueUrl: neighborCellGeolocationResolutionJobsQueue,
 	sqs: new SQSClient({}),
 })
@@ -43,19 +43,19 @@ export const handler = async (
 
 	const valid = validateInput(event.pathParameters ?? {})
 	if (E.isLeft(valid))
-		return res(toStatusCode[ErrorType.BadRequest])(valid.left)()
+		return resFP(toStatusCode[ErrorType.BadRequest])(valid.left)()
 
 	const report = await locator(valid.right.id)()
 	if (E.isLeft(report)) {
 		if (report.left.type === ErrorType.EntityNotFound) {
-			return res(toStatusCode[report.left.type], {
+			return resFP(toStatusCode[report.left.type], {
 				expires: 86400,
 			})({
 				type: ErrorType.EntityNotFound,
 				message: `neighbor cell geolocation not found!`,
 			})()
 		}
-		return res(toStatusCode[report.left.type], {
+		return resFP(toStatusCode[report.left.type], {
 			expires: 60,
 		})(report.left)()
 	}
@@ -64,13 +64,13 @@ export const handler = async (
 
 	if ('location' in report.right) {
 		const l = report.right.location as Location
-		return res(200, {
+		return resFP(200, {
 			expires: 86400,
 		})(l)()
 	}
 
 	if (report.right?.unresolved === true) {
-		return res(toStatusCode[ErrorType.EntityNotFound], {
+		return resFP(toStatusCode[ErrorType.EntityNotFound], {
 			expires: 86400,
 		})({
 			type: ErrorType.EntityNotFound,
@@ -83,7 +83,7 @@ export const handler = async (
 		payload: report.right,
 	})()
 
-	return res(toStatusCode[ErrorType.Conflict], { expires: 60 })({
+	return resFP(toStatusCode[ErrorType.Conflict], { expires: 60 })({
 		type: ErrorType.Conflict,
 		message: 'Calculation for neighbor cell geolocation in process',
 	})()
