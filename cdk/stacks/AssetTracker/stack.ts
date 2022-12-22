@@ -593,7 +593,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		// WiFi Site Surveys Storage
 		enabledInContext(this.node)({
-			key: 'nrfcloudGroundFix',
+			key: 'nrfCloudGroundFix',
 			component: 'nRF Cloud API (Ground Fix services)',
 			onUndefined: 'disabled',
 			onEnabled: () => {
