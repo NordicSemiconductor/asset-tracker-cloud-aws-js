@@ -35,7 +35,7 @@ const accessPoints = Type.Object({
 	),
 })
 
-export const groundfixRequestSchema = Type.Union([
+export const groundFixRequestSchema = Type.Union([
 	Type.Object({
 		lte: cells,
 	}),

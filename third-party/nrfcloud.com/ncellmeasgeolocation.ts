@@ -45,7 +45,7 @@ export const handler = async (
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const maybeCellGeolocation = await c.post({
-		resource: 'location/ground-fix',
+		resource: 'location/cell',
 		payload: {
 			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [
 				{

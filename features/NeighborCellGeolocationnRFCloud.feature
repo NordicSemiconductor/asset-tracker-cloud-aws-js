@@ -10,7 +10,7 @@ Feature: nRF Cloud Neighbor Cell Geolocation
 
     Background:
 
-        This enques a mock response on the mock HTTP API the stack is configure
+        This enqueues a mock response on the mock HTTP API the stack is configure
         to use for the nRF Cloud integration
 
         Given I am run after the "Store neighboring cell measurement reports" feature

@@ -1,16 +1,16 @@
 import { Static } from '@sinclair/typebox'
 import Ajv from 'ajv'
-import { groundfixRequestSchema } from './groundfixRequestSchema'
+import { groundFixRequestSchema } from './groundFixRequestSchema'
 
 const ajv = new Ajv()
 // see @https://github.com/sinclairzx81/typebox/issues/51
 ajv.addKeyword('kind')
 ajv.addKeyword('modifier')
 
-describe('groundfixRequestSchema', () => {
+describe('groundFixRequestSchema', () => {
 	it('should throw error if a request with only 1 wifi access point', () => {
-		const v = ajv.compile(groundfixRequestSchema)
-		const request: Static<typeof groundfixRequestSchema> = {
+		const v = ajv.compile(groundFixRequestSchema)
+		const request: Static<typeof groundFixRequestSchema> = {
 			wifi: {
 				accessPoints: [
 					{
@@ -25,8 +25,8 @@ describe('groundfixRequestSchema', () => {
 	})
 
 	it('should validate a request with 2 wifi access points as minimum requirements', () => {
-		const v = ajv.compile(groundfixRequestSchema)
-		const request: Static<typeof groundfixRequestSchema> = {
+		const v = ajv.compile(groundFixRequestSchema)
+		const request: Static<typeof groundFixRequestSchema> = {
 			wifi: {
 				accessPoints: [
 					{
@@ -45,8 +45,8 @@ describe('groundfixRequestSchema', () => {
 	})
 
 	it('should validate a request with full details of wifi access points', () => {
-		const v = ajv.compile(groundfixRequestSchema)
-		const request: Static<typeof groundfixRequestSchema> = {
+		const v = ajv.compile(groundFixRequestSchema)
+		const request: Static<typeof groundFixRequestSchema> = {
 			wifi: {
 				accessPoints: [
 					{

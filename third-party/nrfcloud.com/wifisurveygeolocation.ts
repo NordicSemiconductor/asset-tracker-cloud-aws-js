@@ -1,4 +1,8 @@
-import { DynamoDBClient, UpdateItemCommand } from '@aws-sdk/client-dynamodb'
+import {
+	AttributeValue,
+	DynamoDBClient,
+	UpdateItemCommand,
+} from '@aws-sdk/client-dynamodb'
 import { SQSClient } from '@aws-sdk/client-sqs'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { Static, TObject, TProperties } from '@sinclair/typebox'
@@ -8,7 +12,7 @@ import { ErrorType } from '../../api/ErrorInfo'
 import { queueJob } from '../../geolocation/queueJob'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
-import { groundfixRequestSchema } from './groundfixRequestSchema'
+import { groundFixRequestSchema } from './groundFixRequestSchema'
 import { locateResultSchema } from './locate'
 import { getGroundFixApiSettings } from './settings'
 
@@ -54,7 +58,7 @@ type WiFiInput = {
 	timestamp: Date
 	unresolved?: boolean
 	attempt?: number
-	attemptTimestamp?: number
+	attemptTimestamp?: Date
 	inProgress?: boolean
 	survey: {
 		wmr: {
@@ -76,7 +80,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		const maybeValidInput = JSON.parse(ev.body) as WiFiInput
 		const attempt = maybeValidInput.attempt ?? 1
 
-		const Key = {
+		const Key: Record<string, AttributeValue> = {
 			surveyId: {
 				S: maybeValidInput.surveyId,
 			},
@@ -97,14 +101,14 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						N: `${attempt}`,
 					},
 					':attemptTimestamp': {
-						N: `${Date.now()}`,
+						S: `${new Date().toISOString()}`,
 					},
 				},
 			}),
 		)
 
 		// Request to nRFCloud
-		const payload: Static<typeof groundfixRequestSchema> = {
+		const payload: Static<typeof groundFixRequestSchema> = {
 			wifi: {
 				accessPoints: maybeValidInput.survey.wmr.map((item) => {
 					const accessPoint = {
@@ -120,7 +124,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		const maybeWifiGeolocation = await c.post({
 			resource: 'location/ground-fix',
 			payload,
-			requestSchema: groundfixRequestSchema as unknown as TObject<TProperties>,
+			requestSchema: groundFixRequestSchema as unknown as TObject<TProperties>,
 			responseSchema: locateResultSchema,
 		})
 
