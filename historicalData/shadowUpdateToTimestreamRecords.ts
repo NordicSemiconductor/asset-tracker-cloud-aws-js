@@ -1,12 +1,12 @@
 import { _Record } from '@aws-sdk/client-timestream-write'
 import { toRecord } from '@nordicsemiconductor/timestream-helpers'
-import { v4 } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import { isNotNullOrUndefined } from '../util/isNullOrUndefined'
 
 export const shadowUpdateToTimestreamRecords = (
 	event: UpdatedDeviceState,
 ): _Record[] => {
-	const measureGroup = v4()
+	const measureGroup = randomUUID()
 
 	const Records: (_Record | undefined)[] = []
 	if (event.reported.bat !== undefined) {

@@ -34,8 +34,9 @@ export const prepareHTTPAPIMockLambdas = async ({
 				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
 				requiredDependencies: [
 					'@aws-sdk/client-dynamodb',
-					'uuid',
 					'fast-xml-parser',
+					// Needed by old AWS SDK
+					'uuid',
 				],
 				dir: httpApiMockLayerDir,
 				reporter,

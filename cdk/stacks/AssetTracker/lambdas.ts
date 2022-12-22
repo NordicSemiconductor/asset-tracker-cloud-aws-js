@@ -192,8 +192,9 @@ export const prepareCDKLambdas = async ({
 				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
 				requiredDependencies: [
 					'@nordicsemiconductor/cloudformation-helpers',
-					'uuid',
 					'fast-xml-parser',
+					// uuid is still needed for the ThingGroup Custom Resource lambda
+					'uuid',
 				],
 				dir: cloudFormationLayerDir,
 				reporter,

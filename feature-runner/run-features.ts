@@ -17,8 +17,8 @@ import { queryClient } from '@nordicsemiconductor/timestream-helpers'
 import * as chalk from 'chalk'
 import { program } from 'commander'
 import { promises as fs } from 'fs'
+import { randomUUID } from 'node:crypto'
 import * as path from 'path'
-import { v4 } from 'uuid'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
 import { StackOutputs } from '../cdk/stacks/AssetTracker/stack'
 import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
@@ -169,7 +169,7 @@ program
 					.addStepRunners(
 						randomStepRunners({
 							generators: {
-								email: () => `${v4()}@example.com`,
+								email: () => `${randomUUID()}@example.com`,
 								password: () =>
 									((pw) =>
 										`${pw[0].toUpperCase()}${pw.slice(1)}${Math.round(
@@ -179,7 +179,7 @@ program
 											.toString(36)
 											.replace(/[^a-z]+/g, ''),
 									),
-								UUID: (): string => v4(),
+								UUID: (): string => randomUUID(),
 							},
 						}),
 					)

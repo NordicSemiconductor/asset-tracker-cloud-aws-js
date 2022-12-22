@@ -3,9 +3,9 @@ import { Octokit } from '@octokit/rest'
 import * as chalk from 'chalk'
 import * as fs from 'fs'
 import * as https from 'https'
+import { randomUUID } from 'node:crypto'
 import * as os from 'os'
 import * as path from 'path'
-import { v4 } from 'uuid'
 import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
 import { CommandDefinition } from './CommandDefinition'
 
@@ -65,7 +65,7 @@ const getLatestFirmware = async ({
 
 	if (hexfile === undefined) throw new Error(`Failed to detect latest release.`)
 
-	const downloadTarget = path.join(os.tmpdir(), `${v4()}.hex`)
+	const downloadTarget = path.join(os.tmpdir(), `${randomUUID()}.hex`)
 	console.log(chalk.magenta(`Downloading`), chalk.blue(hexfile.name))
 
 	await new Promise((resolve) => {
