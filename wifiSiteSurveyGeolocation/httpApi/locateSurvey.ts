@@ -48,7 +48,7 @@ type QFunction = ({
 	delay?: number
 }) => Promise<void | { error: ErrorInfo }>
 
-const getWifiSurveyResolver =
+const wifiSurveyResolver =
 	({
 		dynamodb,
 		tableName,
@@ -66,33 +66,33 @@ const getWifiSurveyResolver =
 		payload: unknown
 	}): Promise<void> => {
 		// Update status in DB
-		const Key = {
-			surveyId: {
-				S: surveyId,
-			},
-		}
 		await dynamodb.send(
 			new UpdateItemCommand({
 				TableName: tableName,
-				Key,
+				Key: {
+					surveyId: {
+						S: surveyId,
+					},
+				},
 				UpdateExpression:
-					'SET #inProgress = :inProgress, #attempt = :attempt, #attemptTimestamp = :attemptTimestamp',
+					'SET #inProgress = :inProgress, #attemptTimestamp = :attemptTimestamp',
 				ExpressionAttributeNames: {
 					'#inProgress': 'inProgress',
-					'#attempt': 'attempt',
 					'#attemptTimestamp': 'attemptTimestamp',
 				},
 				ExpressionAttributeValues: {
 					':inProgress': {
 						BOOL: true,
 					},
-					':attempt': {
-						NULL: true,
+					':notInProgress': {
+						BOOL: false,
 					},
 					':attemptTimestamp': {
-						NULL: true,
+						S: `${new Date().toISOString()}`,
 					},
 				},
+				ConditionExpression:
+					'attribute_not_exists(#inProgress) or #inProgress = :notInProgress',
 			}),
 		)
 
@@ -102,10 +102,25 @@ const getWifiSurveyResolver =
 		})
 	}
 
-const resolveWifiSurvey = getWifiSurveyResolver({
+const resolveWifiSurvey = wifiSurveyResolver({
 	dynamodb,
 	tableName: surveysTable,
 	q,
+})
+
+// We will retry to resolve the location again if attempt timestamp is older than 24hr
+const attemptOlderThan24Hours = (attemptTimestamp: Date): boolean => {
+	const over24hrFromLastRetry =
+		Date.now() - new Date(attemptTimestamp).getTime() > 24 * 60 * 60 * 1000
+	if (over24hrFromLastRetry) return true
+	return false
+}
+
+const inProgressResponse = res(toStatusCode[ErrorType.Conflict], {
+	expires: 60,
+})({
+	type: ErrorType.Conflict,
+	message: 'Calculation for WiFi site survey geolocation in process',
 })
 
 export const handler = async (
@@ -136,13 +151,19 @@ export const handler = async (
 
 	console.log(JSON.stringify(maybeSurvey))
 
-	if ('location' in maybeSurvey.survey) {
+	const {
+		survey: { surveyId, location, unresolved, inProgress, attemptTimestamp },
+	} = maybeSurvey
+
+	// survey was located
+	if (location !== undefined) {
 		return res(200, {
 			expires: 86400,
-		})(maybeSurvey.survey.location)
+		})(location)
 	}
 
-	if (maybeSurvey.survey.unresolved === true) {
+	// survey was not resolved
+	if (unresolved === true) {
 		return res(toStatusCode[ErrorType.EntityNotFound], {
 			expires: 86400,
 		})({
@@ -151,27 +172,30 @@ export const handler = async (
 		})
 	}
 
-	// We will retry to resolve the location again if
-	// 1. unresolved = undefined
-	// 2. attempt timestamp is older than 24hr
-	const attemptTimestamp =
-		maybeSurvey.survey.attemptTimestamp !== undefined
-			? new Date(maybeSurvey.survey.attemptTimestamp)
-			: new Date()
-	const over24hrFromLastRetry =
-		Date.now() - attemptTimestamp.getTime() > 86400000
-	const shouldResolveWifiSurvey =
-		maybeSurvey.survey.inProgress === undefined ||
-		(maybeSurvey.survey.unresolved === undefined && over24hrFromLastRetry)
-
-	// We flag status into DB. Then we can have only one job per survey id to get resolved
-	if (shouldResolveWifiSurvey) {
-		await resolveWifiSurvey({
-			surveyId: maybeSurvey.survey.surveyId,
-			payload: maybeSurvey.survey,
-		})
+	// Resolution is in progress
+	if (inProgress === true) {
+		console.log(`Resolution of ${surveyId} already in progress.`)
+		return inProgressResponse
 	}
 
+	// It was previously attempted to resolve the survey, which failed.
+	// Try again after 24 hours
+	if (
+		attemptTimestamp !== undefined &&
+		attemptOlderThan24Hours(attemptTimestamp)
+	) {
+		await resolveWifiSurvey({
+			surveyId: surveyId,
+			payload: maybeSurvey.survey,
+		})
+		return inProgressResponse
+	}
+
+	// Survey was never attempted to be resolved
+	await resolveWifiSurvey({
+		surveyId: surveyId,
+		payload: maybeSurvey.survey,
+	})
 	return res(toStatusCode[ErrorType.Conflict], { expires: 60 })({
 		type: ErrorType.Conflict,
 		message: 'Calculation for WiFi site survey geolocation in process',
