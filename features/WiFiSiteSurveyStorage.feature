@@ -1,4 +1,3 @@
-@Only
 Feature: Store WiFi site surveys
 
     WiFi site surveys are too big to be stored in the AWS

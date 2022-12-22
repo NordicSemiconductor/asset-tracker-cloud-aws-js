@@ -1,4 +1,3 @@
-@Only
 Feature: Connect a tracker
   As a user
   I can Connect a tracker
