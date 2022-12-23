@@ -25,7 +25,9 @@ export type AssetTrackerLambdas = {
 	pgpsDeviceRequestHandler: string
 	pgpsNrfCloudStepFunction: string
 	wifiSiteSurveyGeolocateSurveyHttpApi: string
-	wifiSiteSurveyGeolocateResolverFromSQS: string
+	wifiSiteSurveyGeolocateFromNrfCloudStepFunction: string
+	wifiSiteSurveyGeolocateFromResolvedStepFunction: string
+	persistWifiSiteSurveyGeolocateStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -156,11 +158,23 @@ export const prepareAssetTrackerLambdas = async ({
 					'httpApi',
 					'locateSurvey.ts',
 				),
-				wifiSiteSurveyGeolocateResolverFromSQS: path.resolve(
+				wifiSiteSurveyGeolocateFromNrfCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
 					'nrfcloud.com',
 					'wifisurveygeolocation.ts',
+				),
+				wifiSiteSurveyGeolocateFromResolvedStepFunction: path.resolve(
+					rootDir,
+					'wifiSiteSurveyGeolocation',
+					'stepFunction',
+					'fromResolved.ts',
+				),
+				persistWifiSiteSurveyGeolocateStepFunction: path.resolve(
+					rootDir,
+					'wifiSiteSurveyGeolocation',
+					'stepFunction',
+					'persist.ts',
 				),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),

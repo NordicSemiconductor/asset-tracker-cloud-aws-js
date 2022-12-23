@@ -46,8 +46,6 @@ export const geolocateSurvey =
 				deviceId: entry.deviceId,
 				timestamp: new Date(entry.timestamp),
 				unresolved: entry.unresolved,
-				attemptTimestamp: new Date(entry.attemptTimestamp),
-				inProgress: entry.inProgress,
 				survey: entry.survey as Record<string, any>,
 			}
 			if ('lat' in entry) {
