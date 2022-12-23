@@ -3,13 +3,10 @@ import {
 	DynamoDBClient,
 	UpdateItemCommand,
 } from '@aws-sdk/client-dynamodb'
-import { SQSClient } from '@aws-sdk/client-sqs'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { Static, TObject, TProperties } from '@sinclair/typebox'
 import { SQSEvent } from 'aws-lambda'
 import { URL } from 'url'
-import { ErrorType } from '../../api/ErrorInfo'
-import { queueJob } from '../../geolocation/queueJob'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { groundFixRequestSchema } from './groundFixRequestSchema'
@@ -27,14 +24,8 @@ function removeUndefinedProperties<T extends object>(obj: T): T {
 	return result as T
 }
 
-const {
-	surveysTable,
-	wifiSiteSurveyGeolocationResolutionJobsQueue,
-	stackName,
-} = fromEnv({
+const { surveysTable, stackName } = fromEnv({
 	surveysTable: 'SURVEYS_TABLE',
-	wifiSiteSurveyGeolocationResolutionJobsQueue:
-		'WIFI_SITESURVEY_GEOLOCATION_RESOLUTION_JOBS_QUEUE',
 	stackName: 'STACK_NAME',
 })(process.env)
 
@@ -42,11 +33,6 @@ const settingsPromise = getGroundFixApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
-
-const q = queueJob({
-	QueueUrl: wifiSiteSurveyGeolocationResolutionJobsQueue,
-	sqs: new SQSClient({}),
-})
 
 const dynamodb = new DynamoDBClient({})
 
@@ -57,11 +43,9 @@ type WiFiInput = {
 	deviceId: string
 	timestamp: Date
 	unresolved?: boolean
-	attempt?: number
-	attemptTimestamp?: Date
 	inProgress?: boolean
 	survey: {
-		wmr: {
+		v: {
 			chan?: number
 			mac: string
 			rssi?: number
@@ -78,39 +62,17 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 	for (const ev of event.Records) {
 		const maybeValidInput = JSON.parse(ev.body) as WiFiInput
-		const attempt = maybeValidInput.attempt ?? 1
 
 		const Key: Record<string, AttributeValue> = {
 			surveyId: {
 				S: maybeValidInput.surveyId,
 			},
 		}
-		// Updated attempt and attempt timestamp into DB
-		await dynamodb.send(
-			new UpdateItemCommand({
-				TableName: surveysTable,
-				Key,
-				UpdateExpression:
-					'SET #attempt = :attempt, #attemptTimestamp = :attemptTimestamp',
-				ExpressionAttributeNames: {
-					'#attempt': 'attempt',
-					'#attemptTimestamp': 'attemptTimestamp',
-				},
-				ExpressionAttributeValues: {
-					':attempt': {
-						N: `${attempt}`,
-					},
-					':attemptTimestamp': {
-						S: `${new Date().toISOString()}`,
-					},
-				},
-			}),
-		)
 
 		// Request to nRFCloud
 		const payload: Static<typeof groundFixRequestSchema> = {
 			wifi: {
-				accessPoints: maybeValidInput.survey.wmr.map((item) => {
+				accessPoints: maybeValidInput.survey.v.map((item) => {
 					const accessPoint = {
 						macAddress: item.mac,
 						channel: item.chan,
@@ -131,63 +93,52 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		if ('error' in maybeWifiGeolocation) {
 			console.error(JSON.stringify(maybeWifiGeolocation))
 
-			if (
-				attempt <= 3 &&
-				maybeWifiGeolocation.error.type === ErrorType.BadGateway
-			) {
-				const delay = 2 ** (attempt - 1)
-				console.log(`Attempt for ${maybeValidInput.surveyId} on ${attempt}`)
-				await q({
-					payload: Object.assign(maybeValidInput, { attempt: attempt + 1 }),
-					delay,
-				})
-				return
-			}
-
-			// Other error, we can assume it is unresolved. Then, save the result back into DB and exit
+			// Other error, stop progress save the result back into DB and exit
 			await dynamodb.send(
 				new UpdateItemCommand({
 					TableName: surveysTable,
 					Key,
 					UpdateExpression:
-						'SET #unresolved = :unresolved, #inProgress = :inProgress',
+						'SET #unresolved = :unresolved, #inProgress = :notInProgress',
 					ExpressionAttributeNames: {
-						'#unresolved': 'unresolved',
 						'#inProgress': 'inProgress',
+						'#unresolved': 'unresolved',
 					},
 					ExpressionAttributeValues: {
+						':inProgress': {
+							BOOL: true,
+						},
+						':notInProgress': {
+							BOOL: false,
+						},
+						// FIXME: distinguish between location not found and server error
 						':unresolved': {
 							BOOL: true,
 						},
-						':inProgress': {
-							BOOL: false,
-						},
 					},
+					ConditionExpression: '#inProgress = :inProgress',
 				}),
 			)
 			return
 		}
 
 		const { lat, lon, uncertainty } = maybeWifiGeolocation
-		console.debug(
-			JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
-		)
+		console.debug(JSON.stringify({ lat, lng: lon, accuracy: uncertainty }))
 		await dynamodb.send(
 			new UpdateItemCommand({
 				TableName: surveysTable,
 				Key,
 				UpdateExpression:
-					'SET #unresolved = :unresolved, #lat = :lat, #lng = :lng, #accuracy = :accuracy, #located = :located, #inProgress = :inProgress',
+					'SET #unresolved = :notUnresolved, #lat = :lat, #lng = :lng, #accuracy = :accuracy, #inProgress = :notInProgress',
 				ExpressionAttributeNames: {
 					'#unresolved': 'unresolved',
 					'#lat': 'lat',
 					'#lng': 'lng',
 					'#accuracy': 'accuracy',
-					'#located': 'located',
 					'#inProgress': 'inProgress',
 				},
 				ExpressionAttributeValues: {
-					':unresolved': {
+					':notUnresolved': {
 						BOOL: false,
 					},
 					':lat': {
@@ -199,13 +150,14 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					':accuracy': {
 						N: `${uncertainty}`,
 					},
-					':located': {
+					':inProgress': {
 						BOOL: true,
 					},
-					':inProgress': {
+					':notInProgress': {
 						BOOL: false,
 					},
 				},
+				ConditionExpression: '#inProgress = :inProgress',
 			}),
 		)
 		return

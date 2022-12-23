@@ -78,8 +78,6 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 				],
 				environment: {
 					SURVEYS_TABLE: storage.surveysTable.tableName,
-					WIFI_SITESURVEY_GEOLOCATION_RESOLUTION_JOBS_QUEUE:
-						resolutionJobsQueue.queueUrl,
 					VERSION: this.node.tryGetContext('version'),
 					STACK_NAME: this.stack.stackName,
 				},
@@ -102,7 +100,6 @@ export class WifiSiteSurveyGeolocationApi extends CloudFormation.Resource {
 		storage.surveysTable.grantFullAccess(resolveSurveyLocation)
 
 		resolutionJobsQueue.grantSendMessages(getSurveyLocation)
-		resolutionJobsQueue.grantSendMessages(resolveSurveyLocation)
 		resolutionJobsQueue.grantConsumeMessages(resolveSurveyLocation)
 
 		this.url = getSurveyLocation.addFunctionUrl({

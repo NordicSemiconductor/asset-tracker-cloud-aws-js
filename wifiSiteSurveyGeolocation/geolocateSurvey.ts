@@ -3,13 +3,12 @@ import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
 import { Location } from '../geolocation/Location'
 
-type Survey = {
+export type Survey = {
 	deviceId: string
 	timestamp: Date
 	surveyId: string
 	survey: Record<string, any>
 	unresolved: boolean
-	attempt?: number
 	attemptTimestamp?: Date
 	inProgress?: boolean
 }
@@ -47,7 +46,6 @@ export const geolocateSurvey =
 				deviceId: entry.deviceId,
 				timestamp: new Date(entry.timestamp),
 				unresolved: entry.unresolved,
-				attempt: entry.attempt,
 				attemptTimestamp: new Date(entry.attemptTimestamp),
 				inProgress: entry.inProgress,
 				survey: entry.survey as Record<string, any>,
