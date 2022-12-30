@@ -113,51 +113,105 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 		 * This is a STANDARD StepFunction because we want the user to be able to execute it and query it for the result.
 		 * This is not possible with EXPRESS StepFunctions.
 		 */
-		const done = new StepFunctions.Succeed(this, `Done`)
-
-		// TODO:: We can skip this step if we can pass in the wifi survey rather than survey id
-		const querySurvey = new StepFunctionTasks.LambdaInvoke(
-			this,
-			'Query wifi survey from DB',
-			{
-				lambdaFunction: fromResolved,
-				resultPath: '$.wifisurveygeo',
-				payloadResponseOnly: true,
-			},
-		)
-
 		const resolveWifiSurvey = new StepFunctionTasks.LambdaInvoke(
 			this,
 			'Resolve wifi survey geolocation',
 			{
 				lambdaFunction: fromNrfCloud,
-				inputPath: '$.wifisurveygeo.survey',
 				resultPath: '$.wifisurveygeo',
 				payloadResponseOnly: true,
 			},
 		)
 
-		const persistResult = new StepFunctionTasks.LambdaInvoke(
+		const persistResult = new StepFunctionTasks.DynamoUpdateItem(
 			this,
-			'Persist result from API',
+			'Update location from nRF cloud',
 			{
-				lambdaFunction: persist,
-				resultPath: '$.persisted',
-				payloadResponseOnly: true,
+				table: storage.surveysTable,
+				key: {
+					surveyId: StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.surveyId'),
+					),
+				},
+				updateExpression:
+					'SET #unresolved = :unresolved, #lat= :lat, #lng = :lng, #accuracy = :accuracy, #updatedAt = :updatedAt',
+				expressionAttributeNames: {
+					'#unresolved': 'unresolved',
+					'#lat': 'lat',
+					'#lng': 'lng',
+					'#accuracy': 'accuracy',
+					'#updatedAt': 'updatedAt',
+				},
+				expressionAttributeValues: {
+					':unresolved':
+						StepFunctionTasks.DynamoAttributeValue.fromBoolean(false),
+					':lat': StepFunctionTasks.DynamoAttributeValue.numberFromString(
+						// It seems it is a bug from CDK, https://github.com/aws/aws-cdk/issues/12456
+						StepFunctions.JsonPath.stringAt(
+							`States.Format('{}', $.wifisurveygeo.lat)`,
+						),
+					),
+					':lng': StepFunctionTasks.DynamoAttributeValue.numberFromString(
+						StepFunctions.JsonPath.stringAt(
+							`States.Format('{}', $.wifisurveygeo.lng)`,
+						),
+					),
+					':accuracy': StepFunctionTasks.DynamoAttributeValue.numberFromString(
+						StepFunctions.JsonPath.stringAt(
+							`States.Format('{}', $.wifisurveygeo.accuracy)`,
+						),
+					),
+					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$$.State.EnteredTime'),
+					),
+				},
 			},
+		).next(
+			new StepFunctions.Succeed(this, 'Done (resolved using nRF Cloud API)'),
 		)
 
-		const definition = querySurvey.next(
-			new StepFunctions.Choice(this, 'Already resolved?')
-				.when(
-					StepFunctions.Condition.booleanEquals(
-						'$.wifisurveygeo.located',
-						true,
+		const persistFailure = new StepFunctionTasks.DynamoUpdateItem(
+			this,
+			'Update resolution failure',
+			{
+				table: storage.surveysTable,
+				key: {
+					surveyId: StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$.surveyId'),
 					),
-					done,
-				)
-				.otherwise(resolveWifiSurvey.next(persistResult).next(done)),
+				},
+				updateExpression:
+					'SET #unresolved = :unresolved, #updatedAt = :updatedAt',
+				expressionAttributeNames: {
+					'#unresolved': 'unresolved',
+					'#updatedAt': 'updatedAt',
+				},
+				expressionAttributeValues: {
+					':unresolved':
+						StepFunctionTasks.DynamoAttributeValue.fromBoolean(true),
+					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt('$$.State.EnteredTime'),
+					),
+				},
+			},
+		).next(
+			new StepFunctions.Fail(this, 'Failed (no resolution)', {
+				error: 'FAILED',
+				cause: 'The Wifi survey request could not be resolved',
+			}),
 		)
+
+		const checkAPIResult = new StepFunctions.Choice(
+			this,
+			'Resolved from nRF Cloud API?',
+		)
+			.when(
+				StepFunctions.Condition.booleanEquals(`$.wifisurveygeo.located`, true),
+				persistResult,
+			)
+			.otherwise(persistFailure)
+
+		const definition = resolveWifiSurvey.next(checkAPIResult)
 
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-wifiSurveyGeo`,

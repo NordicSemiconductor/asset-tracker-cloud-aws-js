@@ -9,7 +9,7 @@ import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { fromEnv } from '../../util/fromEnv'
-import { geolocateSurvey } from '../geolocateSurvey'
+import { geolocateSurvey, Survey } from '../geolocateSurvey'
 
 const inputSchema = Type.Object(
 	{
@@ -35,18 +35,18 @@ const locator = geolocateSurvey({
 
 const wifiSurveyResolver =
 	({ sf, stateMachineArn }: { sf: SFNClient; stateMachineArn: string }) =>
-	async ({ surveyId }: { surveyId: string }): Promise<void> => {
+	async (survey: Survey): Promise<void> => {
 		// We specify name when executing step function because we want to run exactly once.
 		// In case there are concurrency requests for the same survey id, there will be only one to get executed.
 		// https://docs.aws.amazon.com/step-functions/latest/apireference/API_StartExecution.html
 		// Send to step function
 		try {
-			console.log(`StepFunction: Start execution name: ${surveyId}`)
+			console.log(`StepFunction: Start execution name: ${survey.surveyId}`)
 			await sf.send(
 				new StartExecutionCommand({
 					stateMachineArn,
-					input: JSON.stringify({ surveyId }),
-					name: surveyId,
+					input: JSON.stringify(survey),
+					name: survey.surveyId,
 				}),
 			)
 		} catch (error: unknown) {
@@ -88,7 +88,7 @@ export const handler = async (
 	console.log(JSON.stringify(maybeSurvey))
 
 	const {
-		survey: { surveyId, location, unresolved },
+		survey: { location, unresolved },
 	} = maybeSurvey
 
 	// survey was located
@@ -109,9 +109,7 @@ export const handler = async (
 	}
 
 	// Start step function execution
-	await resolveWifiSurvey({
-		surveyId: surveyId,
-	})
+	await resolveWifiSurvey(maybeSurvey.survey)
 
 	return res(toStatusCode[ErrorType.Conflict], { expires: 60 })({
 		type: ErrorType.Conflict,

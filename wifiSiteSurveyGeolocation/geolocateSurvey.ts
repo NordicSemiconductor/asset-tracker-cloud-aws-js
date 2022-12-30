@@ -9,8 +9,6 @@ export type Survey = {
 	surveyId: string
 	survey: Record<string, any>
 	unresolved: boolean
-	attemptTimestamp?: Date
-	inProgress?: boolean
 }
 
 export const geolocateSurvey =
