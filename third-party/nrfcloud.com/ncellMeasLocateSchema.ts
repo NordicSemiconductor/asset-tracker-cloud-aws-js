@@ -13,7 +13,7 @@ export const cells = Type.Array(
 	Type.Object(
 		{
 			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-			mnc: Type.Integer({ minimum: 0, maximum: 99 }),
+			mnc: Type.Integer({ minimum: 0, maximum: 999 }),
 			eci: PositiveInteger,
 			tac: PositiveInteger,
 			earfcn: PositiveInteger,
@@ -53,7 +53,7 @@ export const ncellMeasLocateInputSchema = Type.Object({
 	nw: Type.String({ minLength: 1 }),
 	report: Type.Object({
 		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-		mnc: Type.Integer({ minimum: 0, maximum: 99 }),
+		mnc: Type.Integer({ minimum: 0, maximum: 999 }),
 		cell: PositiveInteger,
 		area: PositiveInteger,
 		earfcn: PositiveInteger,

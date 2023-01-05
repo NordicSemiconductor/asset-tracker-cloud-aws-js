@@ -4,6 +4,7 @@ import { TObject, TProperties } from '@sinclair/typebox'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { Cell } from '../../geolocation/Cell'
+import { parseMCCMNC } from '../../geolocation/parseMCCMNC'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { locateResultSchema } from './locate'
@@ -30,7 +31,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	const { serviceKey, teamId, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const mccmnc = cell.mccmnc.toFixed(0)
+	const [mcc, mnc] = parseMCCMNC(cell.mccmnc)
 	const maybeCellGeolocation = await c.post({
 		resource: 'location/cell',
 		payload: {
@@ -38,8 +39,8 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			lte: [
 				{
 					eci: cell.cell,
-					mcc: parseInt(mccmnc.slice(0, mccmnc.length - 2), 10),
-					mnc: parseInt(mccmnc.slice(-2), 10),
+					mcc,
+					mnc,
 					tac: cell.area,
 				},
 			],

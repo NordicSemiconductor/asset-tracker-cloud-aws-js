@@ -4,6 +4,7 @@ import { request as nodeRequest } from 'https'
 import { URL } from 'url'
 import { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types'
 import { Cell } from '../../geolocation/Cell'
+import { parseMCCMNC } from '../../geolocation/parseMCCMNC'
 import { fromEnv } from '../../util/fromEnv'
 import { getApiSettings } from './unwiredlabs'
 
@@ -79,11 +80,12 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 				reject(new Error(e.message))
 			})
 
+			const [mcc, mnc] = parseMCCMNC(cell.mccmnc)
 			const payload = JSON.stringify({
 				token: apiKey,
 				radio: cell.nw === NetworkMode.NBIoT ? 'nbiot' : 'lte',
-				mcc: Math.floor(cell.mccmnc / 100),
-				mnc: cell.mccmnc % 100,
+				mcc,
+				mnc,
 				cells: [
 					{
 						lac: cell.area,

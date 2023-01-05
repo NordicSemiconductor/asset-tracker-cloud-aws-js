@@ -5,7 +5,7 @@ const cells = Type.Array(
 		{
 			eci: Type.Integer({ minimum: 1 }),
 			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-			mnc: Type.Integer({ minimum: 1, maximum: 99 }),
+			mnc: Type.Integer({ minimum: 1, maximum: 999 }),
 			tac: Type.Integer({ minimum: 1 }),
 		},
 		{ additionalProperties: false },

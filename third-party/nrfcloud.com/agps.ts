@@ -26,7 +26,7 @@ const apiRequestSchema = Type.Object(
 		tac: PositiveInteger,
 		requestType: Type.RegEx(/^custom$/),
 		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-		mnc: Type.Integer({ minimum: 0, maximum: 99 }),
+		mnc: Type.Integer({ minimum: 0, maximum: 999 }),
 		customTypes: Type.Array(Type.Enum(AGPSType), { minItems: 1 }),
 	},
 	{ additionalProperties: false },
