@@ -28,57 +28,6 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		const fromResolved = new Lambda.Function(this, 'fromResolved', {
-			layers: lambdas.layers,
-			handler: 'index.handler',
-			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_18_X,
-			timeout: CloudFormation.Duration.seconds(10),
-			memorySize: 1792,
-			code: lambdas.lambdas.wifiSiteSurveyGeolocateFromResolvedStepFunction,
-			description: 'Checks if wifi survey is already resolved',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: ['dynamodb:GetItem', 'dynamodb:Query'],
-					resources: [
-						storage.surveysTable.tableArn,
-						`${storage.surveysTable.tableArn}/*`,
-					],
-				}),
-			],
-			environment: {
-				SURVEYS_TABLE: storage.surveysTable.tableName,
-				VERSION: this.node.tryGetContext('version'),
-				STACK_NAME: this.stack.stackName,
-			},
-		})
-		new LambdaLogGroup(this, 'fromResolvedLogs', fromResolved)
-
-		const persist = new Lambda.Function(this, 'persist', {
-			layers: lambdas.layers,
-			handler: 'index.handler',
-			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_18_X,
-			timeout: CloudFormation.Duration.minutes(1),
-			memorySize: 1792,
-			code: lambdas.lambdas.persistWifiSiteSurveyGeolocateStepFunction,
-			description: 'Persists wifi survey resolution',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: ['dynamodb:UpdateItem'],
-					resources: [storage.surveysTable.tableArn],
-				}),
-			],
-			environment: {
-				SURVEYS_TABLE: storage.surveysTable.tableName,
-				VERSION: this.node.tryGetContext('version'),
-				STACK_NAME: this.stack.stackName,
-			},
-		})
-		new LambdaLogGroup(this, 'persistLogs', persist)
-
 		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 			layers: lambdas.layers,
 			handler: 'index.handler',
