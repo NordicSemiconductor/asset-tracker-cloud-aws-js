@@ -26,8 +26,9 @@ import { PGPSStorage } from '../../resources/PGPSStorage'
 import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
 import { ThingGroup } from '../../resources/ThingGroup'
 import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
+import { WifiSiteSurveyGeolocation } from '../../resources/WifiSiteSurveyGeolocation'
 import { WifiSiteSurveyGeolocationApi } from '../../resources/WifiSiteSurveyGeolocationApi'
-import { WiFiSiteSurveysStorage } from '../../resources/WiFiSiteSurveysStorage'
+import { WifiSiteSurveysStorage } from '../../resources/WifiSiteSurveysStorage'
 import { CORE_STACK_NAME } from '../stackName'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 
@@ -597,7 +598,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			component: 'nRF Cloud API (Ground Fix services)',
 			onUndefined: 'disabled',
 			onEnabled: () => {
-				const wifiSiteSurveysStorage = new WiFiSiteSurveysStorage(
+				const wifiSiteSurveysStorage = new WifiSiteSurveysStorage(
 					this,
 					'wifiSiteSurveyStorage',
 				)
@@ -619,12 +620,22 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 				)
 				wifiSiteSurveysStorage.surveysTable.grantReadData(userRole)
 
+				const wifiSiteSurveyGeolocation = new WifiSiteSurveyGeolocation(
+					this,
+					'wifiSiteSurveyGeolocation',
+					{
+						lambdas,
+						storage: wifiSiteSurveysStorage,
+					},
+				)
+
 				const wifiSiteSurveysGeolocationApi = new WifiSiteSurveyGeolocationApi(
 					this,
 					'wifiSiteSurveysGeolocationApi',
 					{
 						lambdas,
 						storage: wifiSiteSurveysStorage,
+						geolocation: wifiSiteSurveyGeolocation,
 					},
 				)
 

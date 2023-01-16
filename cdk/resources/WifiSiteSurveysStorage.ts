@@ -12,7 +12,7 @@ import * as IoT from 'aws-cdk-lib/aws-iot'
  *
  * These survey are then stored in DynamoDB for retrieval by the app.
  */
-export class WiFiSiteSurveysStorage extends CloudFormation.Resource {
+export class WifiSiteSurveysStorage extends CloudFormation.Resource {
 	public readonly surveysTable: DynamoDB.Table
 
 	public constructor(parent: CloudFormation.Stack, id: string) {
