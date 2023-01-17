@@ -20,7 +20,7 @@ Feature: Update Device Configuration
                 "actwt": 60,
                 "mvres": 60,
                 "mvt": 3600,
-                "gnsst": 1000,
+                "loct": 1000,
                 "accath": 10.5,
                 "accith": 5.2,
                 "accito": 1.7

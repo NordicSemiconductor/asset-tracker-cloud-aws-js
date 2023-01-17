@@ -17,7 +17,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 					actwt: 60,
 					mvres: 300,
 					mvt: 3600,
-					gnsst: 60,
+					loct: 60,
 					accath: 10.5,
 					accith: 5.2,
 					accito: 1.7,
