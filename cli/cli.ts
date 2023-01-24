@@ -21,6 +21,7 @@ import { logsCommand } from './commands/logs'
 import { purgeBucketsCommand } from './commands/purge-buckets'
 import { purgeCAsCommand } from './commands/purge-cas'
 import { purgeIotUserPolicyPrincipals } from './commands/purge-iot-user-policy-principals'
+import { registerCACommand } from './commands/register-ca'
 import { showAPIConfigurationCommand } from './commands/show-api-configuration'
 import { webappCICommand } from './commands/web-app-ci'
 import { webAppConfigCommand } from './commands/web-app-config'
@@ -88,6 +89,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 
 	const commands = [
 		createCACommand({ certsDir }),
+		registerCACommand({ certsDir }),
 		createSimulatorCertCommand({ certsDir, endpoint }),
 		webAppConfigCommand(),
 		infoCommand(),

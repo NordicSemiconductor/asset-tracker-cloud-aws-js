@@ -92,7 +92,8 @@ jobs:
           ./cli.sh configure thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
           ./cli.sh configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' deploy '*' --require-approval never
-          ./cli.sh create-ca --tags ci,repository=${{ github.repository }}
+      - name: Create CA
+        run: ./cli.sh create-ca --tags ci,repository=${{ github.repository }}
       - name: Run End-to-End Tests
         run: npm run test:e2e
       - name: Get logs
