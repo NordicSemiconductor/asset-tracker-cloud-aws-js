@@ -2,10 +2,10 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 16
     commands:
-      # Next will install Node.js 16
-      - n 16
+      # Next will install Node.js 18
+      - n 18
       - npm install --global npm
       - npm ci --no-audit
   build:
