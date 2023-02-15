@@ -2,9 +2,11 @@ import { IoTClient } from '@aws-sdk/client-iot'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { objectToEnv } from '@nordicsemiconductor/object-to-env'
 import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint'
-import { WEBAPP_STACK_NAME } from '../../cdk/stacks/stackName'
+import { CORE_STACK_NAME, WEBAPP_STACK_NAME } from '../../cdk/stacks/stackName'
 import { getSettings } from '../../util/settings'
 import { CommandDefinition } from './CommandDefinition'
+
+const ssm = new SSMClient({})
 
 export const webAppConfigCommand = (): CommandDefinition => ({
 	command: 'web-app-config',
@@ -23,10 +25,16 @@ export const webAppConfigCommand = (): CommandDefinition => ({
 			objectToEnv(
 				{
 					...(await getSettings<Record<string, string>>({
-						ssm: new SSMClient({}),
+						ssm,
 						system: 'stack',
 						scope: 'config',
 						stackName: WEBAPP_STACK_NAME,
+					})()),
+					...(await getSettings<Record<string, string>>({
+						ssm,
+						system: 'sentry',
+						scope: 'thirdParty',
+						stackName: CORE_STACK_NAME,
 					})()),
 					region: process.env.AWS_REGION,
 					mqttEndpoint: await getIotEndpoint(new IoTClient({})),
