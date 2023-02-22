@@ -46,7 +46,7 @@
     "@aws-sdk/client-s3": "3.276.0",
     "@aws-sdk/client-sfn": "3.276.0",
     "@aws-sdk/client-sqs": "3.276.0",
-    "@aws-sdk/client-ssm": "3.276.0",
+    "@aws-sdk/client-ssm": "3.277.0",
     "@aws-sdk/client-sts": "3.276.0",
     "@aws-sdk/client-timestream-query": "3.276.0",
     "@aws-sdk/client-timestream-write": "3.276.0",
