@@ -52,7 +52,7 @@
     "@aws-sdk/client-timestream-write": "3.282.0",
     "@aws-sdk/util-dynamodb": "3.284.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "12.0.1",
-    "@nordicsemiconductor/cloudformation-helpers": "7.0.7",
+    "@nordicsemiconductor/cloudformation-helpers": "8.0.0",
     "@nordicsemiconductor/e2e-bdd-test-runner": "16.0.0",
     "@nordicsemiconductor/firmware-ci-device-helpers": "14.0.0",
     "@nordicsemiconductor/object-to-env": "4.1.2",
