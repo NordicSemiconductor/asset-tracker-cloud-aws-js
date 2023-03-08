@@ -13,7 +13,6 @@ export type AssetTrackerLambdas = {
 	invokeStepFunctionFromSQS: string
 	geolocateFromCacheStepFunction: string
 	geolocateCellFromDeviceLocationsStepFunction: string
-	geolocateCellFromUnwiredLabsStepFunction: string
 	geolocateCellFromNrfCloudStepFunction: string
 	neighborCellGeolocationFromNrfCloudStepFunction: string
 	cacheCellGeolocationStepFunction: string
@@ -79,12 +78,6 @@ export const prepareAssetTrackerLambdas = async ({
 					'cellGeolocation',
 					'stepFunction',
 					'fromDeviceLocations.ts',
-				),
-				geolocateCellFromUnwiredLabsStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'unwiredlabs.com',
-					'cellgeolocation.ts',
 				),
 				geolocateCellFromNrfCloudStepFunction: path.resolve(
 					rootDir,
