@@ -2,7 +2,6 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import { getSettings } from '../../util/settings'
 
 type StackContexts = {
-	unwiredlabs: '0' | '1'
 	nrfcloudAGPS: '0' | '1'
 	nrfcloudPGPS: '0' | '1'
 	nrfcloudGroundFix: '0' | '1'
@@ -12,7 +11,6 @@ type StackContexts = {
 }
 
 const defaults: StackContexts = {
-	unwiredlabs: '0',
 	nrfcloudAGPS: '0',
 	nrfcloudPGPS: '0',
 	nrfcloudGroundFix: '0',

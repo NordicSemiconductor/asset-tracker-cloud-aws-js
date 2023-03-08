@@ -33,7 +33,6 @@ Promise.all([
 			context: {
 				version: process.env.VERSION ?? '0.0.0-development',
 				isTest: true,
-				unwiredlabs: '1',
 				nrfcloudAGPS: '1',
 				nrfcloudPGPS: '1',
 				nrfCloudGroundFix: '1',

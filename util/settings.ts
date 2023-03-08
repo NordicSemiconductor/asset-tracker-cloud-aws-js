@@ -8,7 +8,7 @@ import {
 import { paginate } from './paginate'
 
 type Scopes = 'context' | 'config' | 'thirdParty' | 'codebuild'
-type Systems = 'stack' | 'unwiredlabs' | 'github' | 'nrfcloud' | 'sentry'
+type Systems = 'stack' | 'github' | 'nrfcloud' | 'sentry'
 
 export const settingsPath = ({
 	stackName,

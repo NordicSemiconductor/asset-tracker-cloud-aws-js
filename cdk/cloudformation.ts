@@ -6,7 +6,6 @@ import {
 	getPGPSLocationApiSettings,
 	serviceKeyProperty,
 } from '../third-party/nrfcloud.com/settings'
-import { getApiSettings } from '../third-party/unwiredlabs.com/unwiredlabs'
 import { getSettings } from '../util/settings'
 import { AssetTrackerApp } from './apps/AssetTracker'
 import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
@@ -20,10 +19,6 @@ import {
 import { CORE_STACK_NAME } from './stacks/stackName'
 
 const ssm = new SSMClient({})
-const fetchUnwiredLabsApiSettings = getApiSettings({
-	ssm,
-	stackName: CORE_STACK_NAME,
-})
 const fetchNrfCloudAGPSLocationApiSettings = getAGPSLocationApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
@@ -62,7 +57,6 @@ Promise.all([
 			sourceCodeBucketName,
 		}),
 	})),
-	fetchUnwiredLabsApiSettings().catch(() => ({})),
 	fetchNrfCloudAGPSLocationApiSettings().catch(() => ({})),
 	fetchNrfCloudPGPSLocationApiSettings().catch(() => ({})),
 	fetchNrfCloudGroundFixApiSettings().catch(() => ({})),
@@ -77,7 +71,6 @@ Promise.all([
 	.then(
 		([
 			lambdaResources,
-			unwiredLabsApiSettings,
 			nrfCloudAGPSLocationApiSettings,
 			nrfCloudPGPSLocationApiSettings,
 			nrfCloudGroundFixApiSettings,
@@ -88,21 +81,6 @@ Promise.all([
 				version: process.env.VERSION ?? '0.0.0-development',
 				...context,
 			} as Record<string, any>
-
-			const enableUnwiredApi = 'apiKey' in unwiredLabsApiSettings
-			if (!enableUnwiredApi) {
-				warn(
-					'Location Services',
-					'No UnwiredLabs API key configured. Feature will be disabled.',
-				)
-				warn(
-					'Location Services',
-					`Use ${chalk.greenBright(
-						`./cli.sh configure thirdParty unwiredlabs apiKey <API key>`,
-					)} to set the API key`,
-				)
-				ctx.unwiredlabs = '0'
-			}
 
 			for (const { name, context, configProperty, settings } of [
 				{
