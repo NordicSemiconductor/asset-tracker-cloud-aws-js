@@ -24,7 +24,7 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@nordicsemiconductor/cell-geolocation-helpers": "5.0.2",
+    "@nordicsemiconductor/cell-geolocation-helpers": "6.0.0",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "3.0.4",
     "@nordicsemiconductor/timestream-helpers": "4.1.3",
     "@sinclair/typebox": "0.25.24",
