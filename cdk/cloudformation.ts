@@ -2,7 +2,7 @@ import { SSMClient } from '@aws-sdk/client-ssm'
 import * as chalk from 'chalk'
 import {
 	getAGPSLocationApiSettings,
-	getCellLocationApiSettings,
+	getGroundFixApiSettings,
 	getPGPSLocationApiSettings,
 	serviceKeyProperty,
 } from '../third-party/nrfcloud.com/settings'
@@ -32,7 +32,7 @@ const fetchNrfCloudPGPSLocationApiSettings = getPGPSLocationApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
-const fetchNrfCloudCellLocationApiSettings = getCellLocationApiSettings({
+const fetchNrfCloudGroundFixApiSettings = getGroundFixApiSettings({
 	ssm,
 	stackName: CORE_STACK_NAME,
 })
@@ -65,7 +65,7 @@ Promise.all([
 	fetchUnwiredLabsApiSettings().catch(() => ({})),
 	fetchNrfCloudAGPSLocationApiSettings().catch(() => ({})),
 	fetchNrfCloudPGPSLocationApiSettings().catch(() => ({})),
-	fetchNrfCloudCellLocationApiSettings().catch(() => ({})),
+	fetchNrfCloudGroundFixApiSettings().catch(() => ({})),
 	getSettings<{ token: string }>({
 		ssm,
 		stackName: CORE_STACK_NAME,
@@ -80,7 +80,7 @@ Promise.all([
 			unwiredLabsApiSettings,
 			nrfCloudAGPSLocationApiSettings,
 			nrfCloudPGPSLocationApiSettings,
-			nrfCloudCellLocationApiSettings,
+			nrfCloudGroundFixApiSettings,
 			codebuildSettings,
 			context,
 		]) => {
@@ -118,10 +118,10 @@ Promise.all([
 					settings: nrfCloudPGPSLocationApiSettings,
 				},
 				{
-					name: 'Cell Location',
-					context: 'nrfcloudCellLocation',
-					configProperty: serviceKeyProperty('cellLocation'),
-					settings: nrfCloudCellLocationApiSettings,
+					name: 'Ground Fix',
+					context: 'nrfcloudGroundFix',
+					configProperty: serviceKeyProperty('groundFix'),
+					settings: nrfCloudGroundFixApiSettings,
 				},
 			]) {
 				if (!('serviceKey' in settings)) {

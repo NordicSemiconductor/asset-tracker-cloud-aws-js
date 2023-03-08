@@ -167,8 +167,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 		// Optional step: resolve using nRF Cloud API
 		let fromNrfCloud: Lambda.IFunction | undefined = undefined
 		checkFlag({
-			key: 'nrfcloudCellLocation',
-			component: 'nRF Cloud API (single cell geolocation)',
+			key: 'nrfcloudGroundFix',
+			component: 'nRF Cloud API (ground fix)',
 			onUndefined: 'disabled',
 			onEnabled: () => {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
