@@ -10,11 +10,11 @@ import {
 	ncellMeasLocateInputSchema,
 	ncellMeasLocateRequestSchema,
 } from './ncellMeasLocateSchema'
-import { getCellLocationApiSettings } from './settings'
+import { getGroundFixApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const settingsPromise = getCellLocationApiSettings({
+const settingsPromise = getGroundFixApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
@@ -45,7 +45,7 @@ export const handler = async (
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const maybeCellGeolocation = await c.post({
-		resource: 'location/cell',
+		resource: 'location/ground-fix',
 		payload: {
 			[nw.includes('NB-IoT') ? 'nbiot' : `lte`]: [
 				{

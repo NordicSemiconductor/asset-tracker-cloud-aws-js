@@ -5,7 +5,7 @@ type StackContexts = {
 	unwiredlabs: '0' | '1'
 	nrfcloudAGPS: '0' | '1'
 	nrfcloudPGPS: '0' | '1'
-	nrfcloudCellLocation: '0' | '1'
+	nrfcloudGroundFix: '0' | '1'
 	cd: '0' | '1'
 	webapp: '0' | '1'
 	'firmware-ci': '0' | '1'
@@ -15,7 +15,7 @@ const defaults: StackContexts = {
 	unwiredlabs: '0',
 	nrfcloudAGPS: '0',
 	nrfcloudPGPS: '0',
-	nrfcloudCellLocation: '0',
+	nrfcloudGroundFix: '0',
 	cd: '0',
 	webapp: '1',
 	'firmware-ci': '0',

@@ -36,7 +36,6 @@ Promise.all([
 				unwiredlabs: '1',
 				nrfcloudAGPS: '1',
 				nrfcloudPGPS: '1',
-				nrfcloudCellLocation: '1',
 				nrfCloudGroundFix: '1',
 			},
 		}).synth(),

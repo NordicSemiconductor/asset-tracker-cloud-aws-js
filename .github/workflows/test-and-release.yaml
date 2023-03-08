@@ -84,7 +84,6 @@ jobs:
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' deploy '*' --require-approval never
           ./cli.sh configure thirdParty unwiredlabs apiKey my-secret
           ./cli.sh configure thirdParty nrfcloud teamId `uuidgen`
-          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud groundFixServiceKey
@@ -107,7 +106,6 @@ jobs:
           ./cli.sh configure thirdParty unwiredlabs apiKey -X
           ./cli.sh configure thirdParty unwiredlabs endpoint -X
           ./cli.sh configure thirdParty nrfcloud teamId -X
-          ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud groundFixServiceKey -X

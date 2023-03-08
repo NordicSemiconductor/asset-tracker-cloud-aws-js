@@ -1,11 +1,7 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { getSettings } from '../../util/settings'
 
-type nRFCloudLocationService =
-	| 'agpsLocation'
-	| 'pgpsLocation'
-	| 'cellLocation'
-	| 'groundFix'
+type nRFCloudLocationService = 'agpsLocation' | 'pgpsLocation' | 'groundFix'
 
 export const serviceKeyProperty = (service: nRFCloudLocationService): string =>
 	`${service}ServiceKey`
@@ -60,15 +56,6 @@ export const getPGPSLocationApiSettings = ({
 	stackName: string
 }): ReturnType<typeof getApiSettings> =>
 	getApiSettings({ ssm, stackName, service: 'pgpsLocation' })
-
-export const getCellLocationApiSettings = ({
-	ssm,
-	stackName,
-}: {
-	ssm: SSMClient
-	stackName: string
-}): ReturnType<typeof getApiSettings> =>
-	getApiSettings({ ssm, stackName, service: 'cellLocation' })
 
 export const getGroundFixApiSettings = ({
 	ssm,
