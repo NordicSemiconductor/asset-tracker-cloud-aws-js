@@ -3,11 +3,6 @@ Feature: nRF Cloud Neighbor Cell Geolocation
     Optionally, device locations can be resolved by the nRF Cloud API using the neighboring cell measurement reports
     Note: nRF Cloud's geolocation API does not distinguish between different network modes.
 
-    Contexts:
-
-    | nw    | apiNw |
-    | ltem  | lte   |
-
     Background:
 
         This enqueues a mock response on the mock HTTP API the stack is configure
@@ -15,7 +10,7 @@ Feature: nRF Cloud Neighbor Cell Geolocation
 
         Given I am run after the "Store neighboring cell measurement reports" feature
         And I am authenticated with Cognito
-        And the endpoint is "{neighborCellGeolocationApiUrl}"
+        And the endpoint is "{networkSurveyGeolocationApiUrl}"
         And I store a random number between 0 and 20000 into "accuracy"
         And I store a random float between -90 and 90 into "lat"
         And I store a random float between -180 and 180 into "lng"
@@ -34,8 +29,8 @@ Feature: nRF Cloud Neighbor Cell Geolocation
         When I execute "query" of the AWS DynamoDB SDK with
         """
         {
-            "TableName": "{ncellmeasStorageTableName}",
-            "IndexName": "reportByDevice",
+            "TableName": "{networkSurveyStorageTableName}",
+            "IndexName": "surveyByDevice",
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
                 "#deviceId": "deviceId"
@@ -48,12 +43,12 @@ Feature: nRF Cloud Neighbor Cell Geolocation
             "Limit": 1
         }
         """
-        Then I store "awsSdk.res.Items[0].reportId.S" into "<nw>-ncellmeasReportId"
+        Then I store "awsSdk.res.Items[0].surveyId.S" into "networkSurveyId"
     
     Scenario: Retrieve the location for the report
 
         Given I store "$millis()" into "ts"
-        When I GET /report/{<nw>-ncellmeasReportId}/location?ts={ts}
+        When I GET /{networkSurveyId}?ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
@@ -68,12 +63,12 @@ Feature: nRF Cloud Neighbor Cell Geolocation
 
     Scenario: The nRF Cloud API should have been called
 
-        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/cell
+        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/ground-fix
             """
             Content-Type: application/json
             
             {
-                "<apiNw>": [
+                "lte": [
                     {
                         "mcc": 242,
                         "mnc": 1,
