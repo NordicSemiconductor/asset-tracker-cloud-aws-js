@@ -3,11 +3,6 @@ Feature: nRF Cloud Cell Geolocation
     Optionally, cell locations can be resolved using the nRF Cloud API
     Note: nRF Cloud's geolocation API does not distinguish between different network modes.
 
-    Contexts:
-
-    | nw    | apiNw |
-    | ltem  | lte   |
-
     Background:
 
         This enqueues a mock response on the mock HTTP API the stack is configure
@@ -18,7 +13,7 @@ Feature: nRF Cloud Cell Geolocation
         And I store a random number between 0 and 20000 into "accuracy"
         And I store a random float between -90 and 90 into "lat"
         And I store a random float between -180 and 180 into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/cell
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/ground-fix
             """
             {
                 "uncertainty": {accuracy},
@@ -31,7 +26,7 @@ Feature: nRF Cloud Cell Geolocation
     Scenario: Query the cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=<nw>&ts={ts}
+        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=ltem&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
@@ -46,12 +41,12 @@ Feature: nRF Cloud Cell Geolocation
 
     Scenario: The nRF Cloud API should have been called
 
-        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/cell
+        Then the mock HTTP API should have been called with a POST request to api.nrfcloud.com/v1/location/ground-fix
             """
             Content-Type: application/json
 
             {
-                "<apiNw>": [
+                "lte": [
                     {
                         "mcc": 242,
                         "mnc": 1,
