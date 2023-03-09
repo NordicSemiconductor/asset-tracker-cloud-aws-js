@@ -11,12 +11,12 @@ export class WebAppCI extends CloudFormation.Resource {
 		id: string,
 		{
 			userPool,
-			ncellmeasStorageTable,
+			networksurveyStorageTable,
 			cellGeoLocationCacheTable,
 			historicalDataTableArn,
 		}: {
 			userPool: Cognito.IUserPool
-			ncellmeasStorageTable: DynamoDB.ITable
+			networksurveyStorageTable: DynamoDB.ITable
 			cellGeoLocationCacheTable: DynamoDB.ITable
 			historicalDataTableArn: string
 		},
@@ -98,8 +98,8 @@ export class WebAppCI extends CloudFormation.Resource {
 			}),
 		)
 
-		// Write to neighboring cell reports table
-		ncellmeasStorageTable.grantWriteData(ciUser)
+		// Write to network survey reports table
+		networksurveyStorageTable.grantWriteData(ciUser)
 
 		// Write to cell geolocation cache
 		cellGeoLocationCacheTable.grantWriteData(ciUser)

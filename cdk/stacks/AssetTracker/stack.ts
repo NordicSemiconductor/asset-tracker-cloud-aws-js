@@ -17,18 +17,15 @@ import { FOTAStorage } from '../../resources/FOTAStorage'
 import { HistoricalData } from '../../resources/HistoricalData'
 import { lambdasOnS3 } from '../../resources/lambdasOnS3'
 import { LambdasWithLayer } from '../../resources/LambdasWithLayer'
-import { NeighborCellGeolocation } from '../../resources/NeighborCellGeolocation'
-import { NeighborCellGeolocationApi } from '../../resources/NeighborCellGeolocationApi'
-import { NeighborCellMeasurementsStorage } from '../../resources/NeighborCellMeasurementsStorage'
+import { NetworkSurveyGeolocation } from '../../resources/NetworkSurveyGeolocation'
+import { NetworkSurveyGeolocationApi } from '../../resources/NetworkSurveyGeolocationApi'
+import { NetworkSurveysStorage } from '../../resources/NetworkSurveysStorage'
 import { PGPSDeviceRequestHandler } from '../../resources/PGPSDeviceRequestHandler'
 import { PGPSResolver } from '../../resources/PGPSResolver'
 import { PGPSStorage } from '../../resources/PGPSStorage'
 import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
 import { ThingGroup } from '../../resources/ThingGroup'
 import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
-import { WifiSiteSurveyGeolocation } from '../../resources/WifiSiteSurveyGeolocation'
-import { WifiSiteSurveyGeolocationApi } from '../../resources/WifiSiteSurveyGeolocationApi'
-import { WifiSiteSurveysStorage } from '../../resources/WifiSiteSurveysStorage'
 import { CORE_STACK_NAME } from '../stackName'
 import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
 
@@ -55,16 +52,14 @@ export const StackOutputs = {
 	cellGeolocationCacheTableName: `${CORE_STACK_NAME}:cellGeolocationCacheTableName`,
 	cellGeolocationCacheTableArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableArn`,
 	cellGeolocationCacheTableStreamArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableStreamArn`,
-	neighborCellGeolocationApiUrl: `${CORE_STACK_NAME}:neighborCellGeolocationApiUrl`,
-	neighborCellGeolocationApiId: `${CORE_STACK_NAME}:neighborCellGeolocationApiId`,
-	ncellmeasStorageTableName: `${CORE_STACK_NAME}:ncellmeasStorageTableName`,
-	ncellmeasStorageTableArn: `${CORE_STACK_NAME}:ncellmeasStorageTableArn`,
-	ncellmeasStorageTableStreamArn: `${CORE_STACK_NAME}:ncellmeasStorageTableStreamArn`,
+	networksurveyStorageTableName: `${CORE_STACK_NAME}:networksurveyStorageTableName`,
+	networksurveyStorageTableArn: `${CORE_STACK_NAME}:networksurveyStorageTableArn`,
+	networksurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networksurveyStorageTableStreamArn`,
 	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
-	wifiSiteSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:wifiSiteSurveyGeolocationApiUrl`,
-	wifiSiteSurveyStorageTableName: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableName`,
-	wifiSiteSurveyStorageTableArn: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableArn`,
-	wifiSiteSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:wifiSiteSurveyStorageTableStreamArn`,
+	networkSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:networkSurveyGeolocationApiUrl`,
+	networkSurveyStorageTableName: `${CORE_STACK_NAME}:networkSurveyStorageTableName`,
+	networkSurveyStorageTableArn: `${CORE_STACK_NAME}:networkSurveyStorageTableArn`,
+	networkSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networkSurveyStorageTableStreamArn`,
 } as const
 
 export class AssetTrackerStack extends CloudFormation.Stack {
@@ -519,55 +514,6 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: StackOutputs.geolocationApiId,
 		})
 
-		// Neighbor Cell Measurements
-
-		const ncellmeasStorage = new NeighborCellMeasurementsStorage(
-			this,
-			'ncellmeasStorage',
-		)
-		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableName', {
-			value: ncellmeasStorage.reportsTable.tableName,
-			exportName: StackOutputs.ncellmeasStorageTableName,
-		})
-		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableArn', {
-			value: ncellmeasStorage.reportsTable.tableArn,
-			exportName: StackOutputs.ncellmeasStorageTableArn,
-		})
-		new CloudFormation.CfnOutput(this, 'ncellmeasStorageTableStreamArn', {
-			value: ncellmeasStorage.reportsTable.tableStreamArn as string,
-			exportName: StackOutputs.ncellmeasStorageTableStreamArn,
-		})
-		ncellmeasStorage.reportsTable.grantReadData(userRole)
-
-		const ncellmeasGeolocation = new NeighborCellGeolocation(
-			this,
-			'neighborCellGeolocation',
-			{
-				lambdas,
-				storage: ncellmeasStorage,
-			},
-		)
-
-		const neighborCellGeolocationApi = new NeighborCellGeolocationApi(
-			this,
-			'neighborCellGeolocationApi',
-			{
-				geolocation: ncellmeasGeolocation,
-				lambdas,
-				storage: ncellmeasStorage,
-			},
-		)
-
-		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiUrl', {
-			value: `https://${neighborCellGeolocationApi.api.ref}.execute-api.${this.region}.amazonaws.com/${neighborCellGeolocationApi.stage.stageName}/`,
-			exportName: StackOutputs.neighborCellGeolocationApiUrl,
-		})
-
-		new CloudFormation.CfnOutput(this, 'neighborCellGeolocationApiId', {
-			value: neighborCellGeolocationApi.api.ref,
-			exportName: StackOutputs.neighborCellGeolocationApiId,
-		})
-
 		// A-GPS support
 		const agpsStorage = new AGPSStorage(this, 'agpsStorage')
 		const agpsResolver = new AGPSResolver(this, 'agpsResolver', {
@@ -592,56 +538,56 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			resolver: pgpsResolver,
 		})
 
-		// WiFi Site Surveys Storage
+		// Network Surveys Storage
 		enabledInContext(this.node)({
 			key: 'nrfCloudGroundFix',
 			component: 'nRF Cloud API (ground fix)',
 			onUndefined: 'disabled',
 			onEnabled: () => {
-				const wifiSiteSurveysStorage = new WifiSiteSurveysStorage(
+				const networkSurveysStorage = new NetworkSurveysStorage(
 					this,
-					'wifiSiteSurveyStorage',
+					'networkSurveyStorage',
 				)
-				new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableName', {
-					value: wifiSiteSurveysStorage.surveysTable.tableName,
-					exportName: StackOutputs.wifiSiteSurveyStorageTableName,
+				new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableName', {
+					value: networkSurveysStorage.surveysTable.tableName,
+					exportName: StackOutputs.networkSurveyStorageTableName,
 				})
-				new CloudFormation.CfnOutput(this, 'wifiSiteSurveyStorageTableArn', {
-					value: wifiSiteSurveysStorage.surveysTable.tableArn,
-					exportName: StackOutputs.wifiSiteSurveyStorageTableArn,
+				new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableArn', {
+					value: networkSurveysStorage.surveysTable.tableArn,
+					exportName: StackOutputs.networkSurveyStorageTableArn,
 				})
 				new CloudFormation.CfnOutput(
 					this,
-					'wifiSiteSurveyStorageTableStreamArn',
+					'networkSurveyStorageTableStreamArn',
 					{
-						value: wifiSiteSurveysStorage.surveysTable.tableStreamArn as string,
-						exportName: StackOutputs.wifiSiteSurveyStorageTableStreamArn,
+						value: networkSurveysStorage.surveysTable.tableStreamArn as string,
+						exportName: StackOutputs.networkSurveyStorageTableStreamArn,
 					},
 				)
-				wifiSiteSurveysStorage.surveysTable.grantReadData(userRole)
+				networkSurveysStorage.surveysTable.grantReadData(userRole)
 
-				const wifiSiteSurveyGeolocation = new WifiSiteSurveyGeolocation(
+				const networkSurveyGeolocation = new NetworkSurveyGeolocation(
 					this,
-					'wifiSiteSurveyGeolocation',
+					'networkSurveyGeolocation',
 					{
 						lambdas,
-						storage: wifiSiteSurveysStorage,
+						storage: networkSurveysStorage,
 					},
 				)
 
-				const wifiSiteSurveysGeolocationApi = new WifiSiteSurveyGeolocationApi(
+				const networkSurveysGeolocationApi = new NetworkSurveyGeolocationApi(
 					this,
-					'wifiSiteSurveysGeolocationApi',
+					'networkSurveysGeolocationApi',
 					{
 						lambdas,
-						storage: wifiSiteSurveysStorage,
-						geolocation: wifiSiteSurveyGeolocation,
+						storage: networkSurveysStorage,
+						geolocation: networkSurveyGeolocation,
 					},
 				)
 
-				new CloudFormation.CfnOutput(this, 'wifiSiteSurveyGeolocationApiUrl', {
-					value: wifiSiteSurveysGeolocationApi.url,
-					exportName: StackOutputs.wifiSiteSurveyGeolocationApiUrl,
+				new CloudFormation.CfnOutput(this, 'networkSurveyGeolocationApiUrl', {
+					value: networkSurveysGeolocationApi.url,
+					exportName: StackOutputs.networkSurveyGeolocationApiUrl,
 				})
 			},
 		})
