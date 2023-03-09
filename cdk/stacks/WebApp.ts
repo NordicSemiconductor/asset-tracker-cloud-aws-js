@@ -67,11 +67,8 @@ export class WebAppStack extends CloudFormation.Stack {
 			identityPoolId: CloudFormation.Fn.importValue(
 				CoreStackOutputs.identityPoolId,
 			),
-			ncellmeasStorageTableName: CloudFormation.Fn.importValue(
-				CoreStackOutputs.ncellmeasStorageTableName,
-			),
-			neighborCellGeolocationApiUrl: CloudFormation.Fn.importValue(
-				CoreStackOutputs.neighborCellGeolocationApiUrl,
+			networksurveyStorageTableName: CloudFormation.Fn.importValue(
+				CoreStackOutputs.networksurveyStorageTableName,
 			),
 			userIotPolicyName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.userIotPolicyName,

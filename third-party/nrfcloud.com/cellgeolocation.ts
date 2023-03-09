@@ -7,8 +7,8 @@ import { Cell } from '../../geolocation/Cell'
 import { parseMCCMNC } from '../../geolocation/parseMCCMNC'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
+import { groundFixRequestSchema } from './groundFixRequestSchema'
 import { locateResultSchema } from './locate'
-import { locateRequestSchema } from './locateRequestSchema'
 import { getGroundFixApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
@@ -45,7 +45,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 				},
 			],
 		},
-		requestSchema: locateRequestSchema as unknown as TObject<TProperties>,
+		requestSchema: groundFixRequestSchema as unknown as TObject<TProperties>,
 		responseSchema: locateResultSchema,
 	})
 	if ('error' in maybeCellGeolocation) {
