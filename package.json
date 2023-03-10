@@ -53,7 +53,7 @@
     "@aws-sdk/util-dynamodb": "3.288.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "12.0.1",
     "@nordicsemiconductor/cloudformation-helpers": "8.0.0",
-    "@nordicsemiconductor/e2e-bdd-test-runner": "16.0.1",
+    "@nordicsemiconductor/e2e-bdd-test-runner": "16.0.2",
     "@nordicsemiconductor/firmware-ci-device-helpers": "14.0.1",
     "@nordicsemiconductor/object-to-env": "5.0.0",
     "@nordicsemiconductor/package-layered-lambdas": "12.0.3",
