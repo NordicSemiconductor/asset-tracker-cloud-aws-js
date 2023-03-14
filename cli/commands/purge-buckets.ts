@@ -8,7 +8,7 @@ import {
 	ListObjectsCommand,
 	S3Client,
 } from '@aws-sdk/client-s3'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	CORE_STACK_NAME,

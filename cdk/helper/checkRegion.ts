@@ -1,4 +1,4 @@
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { supportedRegions } from '../regions'
 
 export const checkRegion = (): void => {

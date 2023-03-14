@@ -1,6 +1,6 @@
 import { flash } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import { Octokit } from '@octokit/rest'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import * as fs from 'fs'
 import * as https from 'https'
 import { randomUUID } from 'node:crypto'

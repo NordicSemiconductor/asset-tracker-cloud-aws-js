@@ -1,5 +1,5 @@
 import { randomWords } from '@nordicsemiconductor/random-words'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { promises as fs } from 'fs'
 import * as path from 'path'
 import {

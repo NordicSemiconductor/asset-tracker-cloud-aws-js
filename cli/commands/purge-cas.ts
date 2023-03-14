@@ -6,7 +6,7 @@ import {
 	UpdateCACertificateCommand,
 } from '@aws-sdk/client-iot'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { getCurrentCA } from '../jitp/currentCA'
 import { listRegisteredCAs } from '../jitp/listRegisteredCAs'

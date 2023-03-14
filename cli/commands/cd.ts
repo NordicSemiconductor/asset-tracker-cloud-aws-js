@@ -2,7 +2,7 @@ import {
 	CodePipelineClient,
 	ListPipelineExecutionsCommand,
 } from '@aws-sdk/client-codepipeline'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { formatDistanceToNow } from 'date-fns'
 import { listPipelines } from '../cd/listPipelines'
 import { CommandDefinition } from './CommandDefinition'

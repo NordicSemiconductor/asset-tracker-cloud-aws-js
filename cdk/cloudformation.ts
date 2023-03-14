@@ -1,5 +1,5 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {
 	getAGPSLocationApiSettings,
 	getCellLocationApiSettings,

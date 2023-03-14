@@ -1,6 +1,6 @@
 import { IoTClient } from '@aws-sdk/client-iot'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { program } from 'commander'
 import * as fs from 'fs'
 import * as path from 'path'

@@ -1,5 +1,5 @@
 import { Connection } from '@nordicsemiconductor/firmware-ci-device-helpers'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import * as readline from 'readline'
 import { defaultFirmwareRepository } from '../commands/flash-firmware'
 

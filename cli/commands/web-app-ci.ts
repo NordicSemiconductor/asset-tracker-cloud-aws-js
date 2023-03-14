@@ -1,6 +1,6 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import {
 	WEBAPP_CI_STACK_NAME,
 	WEBAPP_STACK_NAME,
