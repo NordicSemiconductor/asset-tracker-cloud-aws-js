@@ -3,6 +3,7 @@ import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
 import { URL } from 'url'
 import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { MaybeLocation } from '../../geolocation/types'
+import { expandMac } from '../../networkSurveyGeolocation/expandMac'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import {
@@ -35,10 +36,10 @@ const networkSurveyLocateInputSchema = Type.Object({
 			mnc: Type.Integer({ minimum: 0, maximum: 999 }),
 			cell: Type.Integer({ minimum: 1 }),
 			area: Type.Integer({ minimum: 1 }),
-			earfcn: EARFCN,
-			adv: TimingAdvance,
-			rsrp: RSRP,
-			rsrq: RSRQ,
+			earfcn: Type.Optional(EARFCN),
+			adv: Type.Optional(TimingAdvance),
+			rsrp: Type.Optional(RSRP),
+			rsrq: Type.Optional(RSRQ),
 			nmr: Type.Optional(
 				Type.Array(
 					Type.Object(
@@ -87,7 +88,7 @@ export const handler = async (
 	if (maybeValidInput.wifi !== undefined) {
 		payload.wifi = {
 			accessPoints: maybeValidInput.wifi.aps.map((macAddress) => ({
-				macAddress,
+				macAddress: expandMac(macAddress),
 			})),
 		}
 	}

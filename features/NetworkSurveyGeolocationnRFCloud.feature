@@ -30,6 +30,7 @@ Feature: nRF Cloud Network Survey Geolocation
             {
                 "TableName": "{networkSurveyStorageTableName}",
                 "IndexName": "surveyByDevice",
+                "ScanIndexForward": false, 
                 "KeyConditionExpression": "#deviceId = :deviceId",
                 "ExpressionAttributeNames": {
                     "#deviceId": "deviceId"
@@ -113,7 +114,7 @@ Feature: nRF Cloud Network Survey Geolocation
                             "rsrq": -18
                             },
                             {
-                            "earfcn": 262265,
+                            "earfcn": 262142,
                             "pci": 503,
                             "rsrp": -116,
                             "rsrq": -11

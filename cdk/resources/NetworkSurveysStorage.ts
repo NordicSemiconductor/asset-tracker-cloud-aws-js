@@ -78,8 +78,8 @@ export class NetworkSurveysStorage extends CloudFormation.Resource {
 					`clientid() as deviceId,`,
 					`parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp,`,
 					`lte,`,
+					`get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.roam.v.nw as nw,`,
 					`wifi,`,
-					`CASE isUndefined(lte) WHEN true THEN undefined ELSE get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.roam.v.nw END as nw,`,
 					// Delete survey after 30 days
 					`floor(timestamp() / 1000) + 2592000 as ttl`,
 					`FROM '+/ground-fix'`,

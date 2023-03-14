@@ -48,10 +48,10 @@ Feature: nRF Cloud Cell Geolocation
             {
                 "lte": [
                     {
+                        "eci": {cellId},
                         "mcc": 242,
                         "mnc": 1,
-                        "tac": 30401,
-                        "eci": {cellId}
+                        "tac": 30401
                     }
                 ]
             }

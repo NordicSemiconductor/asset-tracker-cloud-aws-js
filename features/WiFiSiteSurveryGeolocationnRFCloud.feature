@@ -30,6 +30,7 @@ Feature: nRF Cloud WiFi Site Survey Geolocation
             {
                 "TableName": "{networkSurveyStorageTableName}",
                 "IndexName": "surveyByDevice",
+                "ScanIndexForward": false, 
                 "KeyConditionExpression": "#deviceId = :deviceId",
                 "ExpressionAttributeNames": {
                     "#deviceId": "deviceId"

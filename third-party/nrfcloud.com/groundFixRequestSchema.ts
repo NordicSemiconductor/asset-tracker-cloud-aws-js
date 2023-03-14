@@ -37,10 +37,10 @@ const neighboringCellsSurvey = Type.Array(
 			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
 			mnc: Type.Integer({ minimum: 1, maximum: 999 }),
 			tac: Type.Integer({ minimum: 1 }),
-			earfcn: EARFCN,
-			adv: TimingAdvance,
-			rsrp: RSRP,
-			rsrq: RSRQ,
+			earfcn: Type.Optional(EARFCN),
+			adv: Type.Optional(TimingAdvance),
+			rsrp: Type.Optional(RSRP),
+			rsrq: Type.Optional(RSRQ),
 			nmr: Type.Optional(
 				Type.Array(
 					Type.Object(
@@ -65,7 +65,7 @@ const wifiSiteSurvey = Type.Object({
 	accessPoints: Type.Array(
 		Type.Object(
 			{
-				macAddress: Type.String(),
+				macAddress: Type.RegEx(/^([a-f0-9]{2}:){5}[a-f0-9]{2}$/i),
 				age: Type.Optional(Type.Integer()),
 				frequency: Type.Optional(Type.Number()),
 				channel: Type.Optional(Type.Integer()),

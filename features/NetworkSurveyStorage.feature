@@ -33,7 +33,7 @@ Feature: Store network surveys
                     "rsrq": -18
                     },
                     {
-                    "earfcn": 262265,
+                    "earfcn": 262142,
                     "cell": 503,
                     "rsrp": -116,
                     "rsrq": -11
@@ -80,6 +80,7 @@ Feature: Store network surveys
         {
             "TableName": "{networkSurveyStorageTableName}",
             "IndexName": "surveyByDevice",
+            "ScanIndexForward": false, 
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
                 "#deviceId": "deviceId"
@@ -126,7 +127,7 @@ Feature: Store network surveys
                         "M": {
                             "rsrp": { "N": "-116" },
                             "rsrq": { "N": "-11" },
-                            "earfcn": { "N": "262265" },
+                            "earfcn": { "N": "262142" },
                             "cell": { "N": "503" }
                         }
                         }

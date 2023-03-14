@@ -35,7 +35,7 @@ Promise.all([
 				isTest: true,
 				nrfcloudAGPS: '1',
 				nrfcloudPGPS: '1',
-				nrfCloudGroundFix: '1',
+				nrfcloudGroundFix: '1',
 			},
 		}).synth(),
 	)

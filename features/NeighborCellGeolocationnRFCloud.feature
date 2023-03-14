@@ -14,7 +14,7 @@ Feature: nRF Cloud Neighbor Cell Geolocation
         And I store a random number between 0 and 20000 into "accuracy"
         And I store a random float between -90 and 90 into "lat"
         And I store a random float between -180 and 180 into "lng"
-        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/cell
+        And I enqueue this mock HTTP API response with status code 200 for a POST request to api.nrfcloud.com/v1/location/ground-fix
             """
             {
                 "uncertainty": {accuracy},
@@ -31,6 +31,7 @@ Feature: nRF Cloud Neighbor Cell Geolocation
         {
             "TableName": "{networkSurveyStorageTableName}",
             "IndexName": "surveyByDevice",
+            "ScanIndexForward": false, 
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
                 "#deviceId": "deviceId"
@@ -86,7 +87,7 @@ Feature: nRF Cloud Neighbor Cell Geolocation
                             "rsrq": -18
                             },
                             {
-                            "earfcn": 262265,
+                            "earfcn": 262142,
                             "pci": 503,
                             "rsrp": -116,
                             "rsrq": -11

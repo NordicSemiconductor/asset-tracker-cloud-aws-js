@@ -5,7 +5,7 @@ Feature: Store WiFi site surveys
 
     Background:
 
-        Given I am run after the "Connect a tracker" feature
+        Given I am run after the "Device: Update Shadow" feature
         And I am authenticated with Cognito
 
     Scenario: Device publishes WiFi site survey
@@ -53,6 +53,7 @@ Feature: Store WiFi site surveys
         {
             "TableName": "{networkSurveyStorageTableName}",
             "IndexName": "surveyByDevice",
+            "ScanIndexForward": false, 
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
                 "#deviceId": "deviceId"
