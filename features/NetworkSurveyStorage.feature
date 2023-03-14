@@ -5,7 +5,7 @@ Feature: Store network surveys
 
     Background:
 
-        Given I am run after the "Connect a tracker" feature
+        Given I am run after the "Device: Update Shadow" feature
         And I am authenticated with Cognito
         And I store a random number between 1 and 100000000 into "lteNetworkCellId"
         And I store a random number between 1 and 100000000 into "lteNetworkAreaId"
@@ -78,7 +78,7 @@ Feature: Store network surveys
         When I execute "query" of the AWS DynamoDB SDK with
         """
         {
-            "TableName": "{networkSurveyStorageTable}",
+            "TableName": "{networkSurveyStorageTableName}",
             "IndexName": "surveyByDevice",
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
@@ -99,7 +99,7 @@ Feature: Store network surveys
         When I execute "getItem" of the AWS DynamoDB SDK with
         """
         {
-            "TableName": "{networkSurveyStorageTable}",
+            "TableName": "{networkSurveyStorageTableName}",
             "Key": {
                 "surveyId": {
                     "S": "{networkSurveyId}"
@@ -148,31 +148,31 @@ Feature: Store network surveys
                 "M": {
                 "ts": { "N": "{ts}" },
                 "aps": {
-                    "SS": [
-                       "4ce175805e6f",
-                       "4ce175805e6e",
-                       "743aef44b743",
-                       "743aef44b742",
-                       "4ce17501156e",
-                       "4ce17501156f",
-                       "4ce175bf092e",
-                       "4ce175bf092f",
-                       "743aef44b74a",
-                       "4ce175bf0921",
-                       "4ce175bf0920",
-                       "80e01d098f67",
-                       "80e01d098f65",
-                       "80e01d098f61",
-                       "80e01d098f68",
-                       "80e01d098f62",
-                       "80e01d098f69",
-                       "80e01d098f6d",
-                       "4ce175011560",
-                       "aa1544ac6c3a",
-                       "80e01d098f6a",
-                       "80e01d098f6e",
-                       "9a1544ac6c3a",
-                       "9e1544ac6c3a"
+                    "L": [
+                       {"S": "4ce175805e6f"},
+                       {"S": "4ce175805e6e"},
+                       {"S": "743aef44b743"},
+                       {"S": "743aef44b742"},
+                       {"S": "4ce17501156e"},
+                       {"S": "4ce17501156f"},
+                       {"S": "4ce175bf092e"},
+                       {"S": "4ce175bf092f"},
+                       {"S": "743aef44b74a"},
+                       {"S": "4ce175bf0921"},
+                       {"S": "4ce175bf0920"},
+                       {"S": "80e01d098f67"},
+                       {"S": "80e01d098f65"},
+                       {"S": "80e01d098f61"},
+                       {"S": "80e01d098f68"},
+                       {"S": "80e01d098f62"},
+                       {"S": "80e01d098f69"},
+                       {"S": "80e01d098f6d"},
+                       {"S": "4ce175011560"},
+                       {"S": "aa1544ac6c3a"},
+                       {"S": "80e01d098f6a"},
+                       {"S": "80e01d098f6e"},
+                       {"S": "9a1544ac6c3a"},
+                       {"S": "9e1544ac6c3a"}
                     ]
                 }
                 }
