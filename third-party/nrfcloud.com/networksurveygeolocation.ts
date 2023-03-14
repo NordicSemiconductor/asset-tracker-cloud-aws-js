@@ -27,7 +27,7 @@ const settingsPromise = getGroundFixApiSettings({
 const networkSurveyLocateInputSchema = Type.Object({
 	surveyId: Type.String(),
 	deviceId: Type.String(),
-	timestamp: Type.Date(),
+	timestamp: Type.String(),
 	nw: Type.String({ minLength: 1 }),
 	lte: Type.Optional(
 		Type.Object({
