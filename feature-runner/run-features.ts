@@ -14,7 +14,7 @@ import {
 	storageStepRunners,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { queryClient } from '@nordicsemiconductor/timestream-helpers'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { program } from 'commander'
 import { promises as fs } from 'fs'
 import { randomUUID } from 'node:crypto'

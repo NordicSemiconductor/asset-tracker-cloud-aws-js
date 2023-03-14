@@ -4,7 +4,7 @@ import {
 	UpdatePipelineCommand,
 } from '@aws-sdk/client-codepipeline'
 import { SSMClient } from '@aws-sdk/client-ssm'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { putSettings } from '../../util/settings'
 import { listPipelines } from '../cd/listPipelines'

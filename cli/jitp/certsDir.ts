@@ -1,4 +1,4 @@
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { promises as fs } from 'fs'
 import * as path from 'path'
 

@@ -7,7 +7,7 @@ import {
 	DescribeLogStreamsCommand,
 	GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { CommandDefinition } from './CommandDefinition'
 

@@ -1,6 +1,6 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { createCA, defaultCAValidityInDays } from '../jitp/createCA'
 import { setCurrentCA } from '../jitp/currentCA'

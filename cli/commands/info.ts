@@ -1,7 +1,7 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
 import { CommandDefinition } from './CommandDefinition'
