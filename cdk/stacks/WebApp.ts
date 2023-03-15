@@ -70,6 +70,9 @@ export class WebAppStack extends CloudFormation.Stack {
 			networksurveyStorageTableName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.networkSurveyStorageTableName,
 			),
+			networkSurveyGeolocationApiUrl: CloudFormation.Fn.importValue(
+				CoreStackOutputs.networkSurveyGeolocationApiUrl,
+			),
 			userIotPolicyName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.userIotPolicyName,
 			),
