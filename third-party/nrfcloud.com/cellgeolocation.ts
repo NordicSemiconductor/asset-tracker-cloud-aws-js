@@ -7,13 +7,13 @@ import { Cell } from '../../geolocation/Cell'
 import { parseMCCMNC } from '../../geolocation/parseMCCMNC'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
+import { groundFixRequestSchema } from './groundFixRequestSchema'
 import { locateResultSchema } from './locate'
-import { locateRequestSchema } from './locateRequestSchema'
-import { getCellLocationApiSettings } from './settings'
+import { getGroundFixApiSettings } from './settings'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const fetchSettings = getCellLocationApiSettings({
+const fetchSettings = getGroundFixApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })
@@ -33,7 +33,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 
 	const [mcc, mnc] = parseMCCMNC(cell.mccmnc)
 	const maybeCellGeolocation = await c.post({
-		resource: 'location/cell',
+		resource: 'location/ground-fix',
 		payload: {
 			// FIXME: enable check once NB-IoT is supported: [cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
 			lte: [
@@ -45,7 +45,7 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 				},
 			],
 		},
-		requestSchema: locateRequestSchema as unknown as TObject<TProperties>,
+		requestSchema: groundFixRequestSchema as unknown as TObject<TProperties>,
 		responseSchema: locateResultSchema,
 	})
 	if ('error' in maybeCellGeolocation) {

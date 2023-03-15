@@ -7,8 +7,10 @@ export type Survey = {
 	deviceId: string
 	timestamp: Date
 	surveyId: string
-	survey: Record<string, any>
 	unresolved: boolean
+	lte?: Record<string, any>
+	nw?: string
+	wifi?: Record<string, any>
 }
 
 export const geolocateSurvey =
@@ -44,7 +46,9 @@ export const geolocateSurvey =
 				deviceId: entry.deviceId,
 				timestamp: new Date(entry.timestamp),
 				unresolved: entry.unresolved,
-				survey: entry.survey as Record<string, any>,
+				lte: entry.lte as Record<string, any> | undefined,
+				nw: entry.nw as string | undefined,
+				wifi: entry.wifi as Record<string, any> | undefined,
 			}
 			if ('lat' in entry) {
 				survey.location = {

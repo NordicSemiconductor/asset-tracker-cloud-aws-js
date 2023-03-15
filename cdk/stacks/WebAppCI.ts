@@ -22,10 +22,12 @@ export class WebAppCIStack extends CloudFormation.Stack {
 					StackOutputs.cellGeolocationCacheTableArn,
 				),
 			),
-			ncellmeasStorageTable: DynamoDB.Table.fromTableArn(
+			networksurveyStorageTable: DynamoDB.Table.fromTableArn(
 				this,
-				'ncellmeasStorageTable',
-				CloudFormation.Fn.importValue(StackOutputs.ncellmeasStorageTableArn),
+				'networksurveyStorageTable',
+				CloudFormation.Fn.importValue(
+					StackOutputs.networksurveyStorageTableArn,
+				),
 			),
 			historicalDataTableArn: CloudFormation.Fn.importValue(
 				StackOutputs.historicaldataTableArn,

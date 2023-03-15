@@ -33,7 +33,7 @@ const locator = geolocateSurvey({
 	TableName: surveysTable,
 })
 
-const wifiSurveyResolver =
+const surveyResolver =
 	({ sf, stateMachineArn }: { sf: SFNClient; stateMachineArn: string }) =>
 	async (survey: Survey): Promise<void> => {
 		// We specify name when executing step function because we want to run exactly once.
@@ -54,7 +54,7 @@ const wifiSurveyResolver =
 		}
 	}
 
-const resolveWifiSurvey = wifiSurveyResolver({
+const resolveSurvey = surveyResolver({
 	sf,
 	stateMachineArn,
 })
@@ -77,7 +77,7 @@ export const handler = async (
 				expires: 86400,
 			})({
 				type: ErrorType.EntityNotFound,
-				message: `WiFi site survey not found!`,
+				message: `Network survey not found!`,
 			})
 		}
 		return res(toStatusCode[maybeSurvey.error.type], {
@@ -104,15 +104,15 @@ export const handler = async (
 			expires: 86400,
 		})({
 			type: ErrorType.EntityNotFound,
-			message: 'WiFi site survey geolocation could not be resolved',
+			message: 'Network survey geolocation could not be resolved',
 		})
 	}
 
 	// Start step function execution
-	await resolveWifiSurvey(maybeSurvey.survey)
+	await resolveSurvey(maybeSurvey.survey)
 
 	return res(toStatusCode[ErrorType.Conflict], { expires: 60 })({
 		type: ErrorType.Conflict,
-		message: 'Calculation for WiFi site survey geolocation in process',
+		message: 'Calculation for Network survey geolocation in process',
 	})
 }

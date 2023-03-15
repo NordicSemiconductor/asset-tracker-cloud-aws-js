@@ -129,46 +129,11 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		const checkFlag = enabledInContext(this.node)
 
-		// Optional step: resolve using Unwired Labs API
-		let fromUnwiredLabs: Lambda.IFunction | undefined = undefined
-		checkFlag({
-			key: 'unwiredlabs',
-			component: 'Unwired Labs API',
-			onUndefined: 'disabled',
-			onEnabled: () => {
-				fromUnwiredLabs = new Lambda.Function(this, 'fromUnwiredLabs', {
-					layers: lambdas.layers,
-					handler: 'index.handler',
-					architecture: Lambda.Architecture.ARM_64,
-					runtime: Lambda.Runtime.NODEJS_18_X,
-					timeout: CloudFormation.Duration.seconds(10),
-					memorySize: 1792,
-					code: lambdas.lambdas.geolocateCellFromUnwiredLabsStepFunction,
-					description: 'Resolve cell geolocation using the Unwired Labs API',
-					initialPolicy: [
-						logToCloudWatch,
-						new IAM.PolicyStatement({
-							actions: ['ssm:GetParametersByPath'],
-							resources: [
-								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/unwiredlabs`,
-							],
-						}),
-					],
-					environment: {
-						VERSION: this.node.tryGetContext('version'),
-						STACK_NAME: this.stack.stackName,
-					},
-				})
-
-				new LambdaLogGroup(this, 'fromUnwiredLabsLogs', fromUnwiredLabs)
-			},
-		})
-
 		// Optional step: resolve using nRF Cloud API
 		let fromNrfCloud: Lambda.IFunction | undefined = undefined
 		checkFlag({
-			key: 'nrfcloudCellLocation',
-			component: 'nRF Cloud API (single cell geolocation)',
+			key: 'nrfcloudGroundFix',
+			component: 'nRF Cloud API (ground fix)',
 			onUndefined: 'disabled',
 			onEnabled: () => {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
@@ -262,10 +227,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 								)
 								.otherwise(
 									(() => {
-										if (
-											fromUnwiredLabs === undefined &&
-											fromNrfCloud === undefined
-										) {
+										if (fromNrfCloud === undefined) {
 											return new StepFunctions.Fail(this, 'Failed (No API)', {
 												error: 'NO_API',
 												cause:
@@ -282,18 +244,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 												},
 											)
 										const branches: StepFunctions.IChainable[] = []
-										if (fromUnwiredLabs !== undefined) {
-											branches.push(
-												new StepFunctionTasks.LambdaInvoke(
-													this,
-													'Resolve using Unwired Labs API',
-													{
-														lambdaFunction: fromUnwiredLabs,
-														payloadResponseOnly: true,
-													},
-												).next(markSource('unwiredlabs')),
-											)
-										}
 										if (fromNrfCloud !== undefined) {
 											branches.push(
 												new StepFunctionTasks.LambdaInvoke(

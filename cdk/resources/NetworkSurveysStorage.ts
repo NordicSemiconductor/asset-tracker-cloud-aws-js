@@ -4,15 +4,15 @@ import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as IoT from 'aws-cdk-lib/aws-iot'
 
 /**
- * Provides storage for WiFi site surveys
+ * Provides storage for Network surveys
  *
- * The result of a WiFi site survey is too large to be put in the AWS shadow (which is limited to 4k).
+ * The result of a Network survey is too large to be put in the AWS shadow (which is limited to 4k).
  *
- * Therefore devices publish WiFi site surveys on the topic <deviceId>/wifiap.
+ * Therefore devices publish Network surveys on the topic <deviceId>/ground-fix.
  *
  * These survey are then stored in DynamoDB for retrieval by the app.
  */
-export class WifiSiteSurveysStorage extends CloudFormation.Resource {
+export class NetworkSurveysStorage extends CloudFormation.Resource {
 	public readonly surveysTable: DynamoDB.Table
 
 	public constructor(parent: CloudFormation.Stack, id: string) {
@@ -58,6 +58,10 @@ export class WifiSiteSurveysStorage extends CloudFormation.Resource {
 								`arn:aws:iot:${parent.region}:${parent.account}:topic/errors`,
 							],
 						}),
+						new IAM.PolicyStatement({
+							actions: ['iot:GetThingShadow'],
+							resources: ['*'],
+						}),
 					],
 				}),
 			},
@@ -67,16 +71,18 @@ export class WifiSiteSurveysStorage extends CloudFormation.Resource {
 		new IoT.CfnTopicRule(this, 'storeSurvey', {
 			topicRulePayload: {
 				awsIotSqlVersion: '2016-03-23',
-				description: 'Store all WiFi site surveys sent by devices in DynamoDB',
+				description: 'Store all network surveys sent by devices in DynamoDB',
 				ruleDisabled: false,
 				sql: [
 					`SELECT newuuid() as surveyId,`,
 					`clientid() as deviceId,`,
 					`parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp,`,
-					`* as survey,`,
+					`lte,`,
+					`get_thing_shadow(clientid(), "${topicRuleRole.roleArn}").state.reported.roam.v.nw as nw,`,
+					`wifi,`,
 					// Delete survey after 30 days
 					`floor(timestamp() / 1000) + 2592000 as ttl`,
-					`FROM '+/wifiap'`,
+					`FROM '+/ground-fix'`,
 				].join(' '),
 				actions: [
 					{

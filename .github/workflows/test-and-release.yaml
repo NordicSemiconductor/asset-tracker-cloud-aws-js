@@ -82,14 +82,11 @@ jobs:
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-sourcecode.ts' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-sourcecode.ts' deploy
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' deploy '*' --require-approval never
-          ./cli.sh configure thirdParty unwiredlabs apiKey my-secret
           ./cli.sh configure thirdParty nrfcloud teamId `uuidgen`
-          openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud groundFixServiceKey
           MOCK_HTTP_API_ENDPOINT=`aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue' | sed -E 's/\/$//g'`
-          ./cli.sh configure thirdParty unwiredlabs endpoint ${MOCK_HTTP_API_ENDPOINT}/eu1.unwiredlabs.com
           ./cli.sh configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' deploy '*' --require-approval never
       - name: Create CA
@@ -104,10 +101,7 @@ jobs:
           always() && !contains(toJSON(github.event.commits.*.message),
           '[skip-cleanup]') && github.event.inputs.skipCleanup != 'yes'
         run: |
-          ./cli.sh configure thirdParty unwiredlabs apiKey -X
-          ./cli.sh configure thirdParty unwiredlabs endpoint -X
           ./cli.sh configure thirdParty nrfcloud teamId -X
-          ./cli.sh configure thirdParty nrfcloud cellLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey -X
           ./cli.sh configure thirdParty nrfcloud groundFixServiceKey -X

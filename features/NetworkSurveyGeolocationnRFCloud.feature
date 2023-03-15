@@ -1,13 +1,13 @@
-Feature: nRF Cloud WiFi Site Survey Geolocation
+Feature: nRF Cloud Network Survey Geolocation
 
-    Optionally, device locations can be resolved by the nRF Cloud API using the WiFi site surveys
+    Optionally, device locations can be resolved by the nRF Cloud API using the network site surveys
 
     Background:
 
         This enqueues a mock response on the mock HTTP API the stack is configure
         to use for the nRF Cloud integration
 
-        Given I am run after the "Store WiFi site surveys" feature
+        Given I am run after the "Store network surveys" feature
         And I am authenticated with Cognito
         And the endpoint is "{networkSurveyGeolocationApiUrl}"
         And I store a random number between 0 and 20000 into "accuracy"
@@ -95,6 +95,32 @@ Feature: nRF Cloud WiFi Site Survey Geolocation
                         {"macAddress": "9a:15:44:ac:6c:3a"},
                         {"macAddress": "9e:15:44:ac:6c:3a"}
                     ]
-                }
+                },
+                "lte": [
+                    {
+                        "mcc": 242,
+                        "mnc": 1,
+                        "eci": {lteNetworkCellId},
+                        "tac": {lteNetworkAreaId},
+                        "earfcn": 6446,
+                        "adv": 80,
+                        "rsrp": -97,
+                        "rsrq": -9,
+                        "nmr": [
+                            {
+                            "earfcn": 262143,
+                            "pci": 501,
+                            "rsrp": -104,
+                            "rsrq": -18
+                            },
+                            {
+                            "earfcn": 262142,
+                            "pci": 503,
+                            "rsrp": -116,
+                            "rsrq": -11
+                            }
+                        ]
+                    }
+                ]
             }
             """

@@ -13,19 +13,14 @@ export type AssetTrackerLambdas = {
 	invokeStepFunctionFromSQS: string
 	geolocateFromCacheStepFunction: string
 	geolocateCellFromDeviceLocationsStepFunction: string
-	geolocateCellFromUnwiredLabsStepFunction: string
 	geolocateCellFromNrfCloudStepFunction: string
-	neighborCellGeolocationFromNrfCloudStepFunction: string
 	cacheCellGeolocationStepFunction: string
-	neighborCellGeolocateReportHttpApi: string
-	geolocateNeighborCellFromResolvedStepFunction: string
-	persistNeighborCellGeolocationStepFunction: string
 	agpsDeviceRequestHandler: string
 	agpsNrfCloudStepFunction: string
 	pgpsDeviceRequestHandler: string
 	pgpsNrfCloudStepFunction: string
-	wifiSiteSurveyGeolocateSurveyHttpApi: string
-	wifiSiteSurveyGeolocateFromNrfCloudStepFunction: string
+	geolocateNetworkSurveyHttpApi: string
+	networkSurveyGeolocateFromNrfCloudStepFunction: string
 }
 
 export type CDKLambdas = {
@@ -80,12 +75,6 @@ export const prepareAssetTrackerLambdas = async ({
 					'stepFunction',
 					'fromDeviceLocations.ts',
 				),
-				geolocateCellFromUnwiredLabsStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'unwiredlabs.com',
-					'cellgeolocation.ts',
-				),
 				geolocateCellFromNrfCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
@@ -103,30 +92,6 @@ export const prepareAssetTrackerLambdas = async ({
 					'cellGeolocation',
 					'httpApi',
 					'cell.ts',
-				),
-				neighborCellGeolocationFromNrfCloudStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'nrfcloud.com',
-					'ncellmeasgeolocation.ts',
-				),
-				neighborCellGeolocateReportHttpApi: path.resolve(
-					rootDir,
-					'neighborCellGeolocation',
-					'httpApi',
-					'locateReport.ts',
-				),
-				persistNeighborCellGeolocationStepFunction: path.resolve(
-					rootDir,
-					'neighborCellGeolocation',
-					'stepFunction',
-					'persist.ts',
-				),
-				geolocateNeighborCellFromResolvedStepFunction: path.resolve(
-					rootDir,
-					'neighborCellGeolocation',
-					'stepFunction',
-					'fromResolved.ts',
 				),
 				agpsDeviceRequestHandler: path.resolve(
 					rootDir,
@@ -150,17 +115,17 @@ export const prepareAssetTrackerLambdas = async ({
 					'nrfcloud.com',
 					'pgps.ts',
 				),
-				wifiSiteSurveyGeolocateSurveyHttpApi: path.resolve(
+				geolocateNetworkSurveyHttpApi: path.resolve(
 					rootDir,
-					'wifiSiteSurveyGeolocation',
+					'networkSurveyGeolocation',
 					'httpApi',
 					'locateSurvey.ts',
 				),
-				wifiSiteSurveyGeolocateFromNrfCloudStepFunction: path.resolve(
+				networkSurveyGeolocateFromNrfCloudStepFunction: path.resolve(
 					rootDir,
 					'third-party',
 					'nrfcloud.com',
-					'wifisurveygeolocation.ts',
+					'networksurveygeolocation.ts',
 				),
 			},
 			tsConfig: path.resolve(rootDir, 'tsconfig.json'),

@@ -32,32 +32,34 @@ Feature: Store neighboring cell measurement reports
     Scenario: Device publishes %NCELLMEAS report
 
         Given I store "$millis()" into "ts"
-        Then the tracker publishes this message to the topic {tracker:id}/ncellmeas
+        Then the tracker publishes this message to the topic {tracker:id}/ground-fix
         """
         {
-            "mcc": 242,
-            "mnc": 1,
-            "cell": {ncellmeasCellId},
-            "area": {ncellmeasAreaId},
-            "earfcn": 6446,
-            "adv": 80,
-            "rsrp": -97,
-            "rsrq": -9,
-            "nmr": [
-                {
-                "earfcn": 262143,
-                "cell": 501,
-                "rsrp": -104,
-                "rsrq": -18
-                },
-                {
-                "earfcn": 262265,
-                "cell": 503,
-                "rsrp": -116,
-                "rsrq": -11
-                }
-            ],
-            "ts": {ts}
+            "lte": {
+                "mcc": 242,
+                "mnc": 1,
+                "cell": {ncellmeasCellId},
+                "area": {ncellmeasAreaId},
+                "earfcn": 6446,
+                "adv": 80,
+                "rsrp": -97,
+                "rsrq": -9,
+                "nmr": [
+                    {
+                    "earfcn": 262143,
+                    "cell": 501,
+                    "rsrp": -104,
+                    "rsrq": -18
+                    },
+                    {
+                    "earfcn": 262142,
+                    "cell": 503,
+                    "rsrp": -116,
+                    "rsrq": -11
+                    }
+                ],
+                "ts": {ts}
+            }
         }
         """
 
@@ -66,8 +68,9 @@ Feature: Store neighboring cell measurement reports
         When I execute "query" of the AWS DynamoDB SDK with
         """
         {
-            "TableName": "{ncellmeasStorageTableName}",
-            "IndexName": "reportByDevice",
+            "TableName": "{networkSurveyStorageTableName}",
+            "IndexName": "surveyByDevice",
+            "ScanIndexForward": false, 
             "KeyConditionExpression": "#deviceId = :deviceId",
             "ExpressionAttributeNames": {
                 "#deviceId": "deviceId"
@@ -80,17 +83,17 @@ Feature: Store neighboring cell measurement reports
             "Limit": 1
         }
         """
-        Then I store "awsSdk.res.Items[0].reportId.S" into "ncellmeasReportId"
+        Then I store "awsSdk.res.Items[0].surveyId.S" into "ncellmeasSurveyId"
 
     Scenario: Get the latest report
 
         When I execute "getItem" of the AWS DynamoDB SDK with
         """
         {
-            "TableName": "{ncellmeasStorageTableName}",
+            "TableName": "{networkSurveyStorageTableName}",
             "Key": {
-                "reportId": {
-                    "S": "{ncellmeasReportId}"
+                "surveyId": {
+                    "S": "{ncellmeasSurveyId}"
                 }
             }
         }
@@ -98,38 +101,38 @@ Feature: Store neighboring cell measurement reports
         Then "awsSdk.res.Item" should match this JSON
         """
         {
-            "report": {
-            "M": {
-                "nmr": {
-                "L": [
-                    {
-                    "M": {
-                        "rsrp": { "N": "-104" },
-                        "rsrq": { "N": "-18" },
-                        "earfcn": { "N": "262143" },
-                        "cell": { "N": "501" }
-                    }
+            "lte": {
+                "M": {
+                    "nmr": {
+                    "L": [
+                        {
+                        "M": {
+                            "rsrp": { "N": "-104" },
+                            "rsrq": { "N": "-18" },
+                            "earfcn": { "N": "262143" },
+                            "cell": { "N": "501" }
+                        }
+                        },
+                        {
+                        "M": {
+                            "rsrp": { "N": "-116" },
+                            "rsrq": { "N": "-11" },
+                            "earfcn": { "N": "262142" },
+                            "cell": { "N": "503" }
+                        }
+                        }
+                    ]
                     },
-                    {
-                    "M": {
-                        "rsrp": { "N": "-116" },
-                        "rsrq": { "N": "-11" },
-                        "earfcn": { "N": "262265" },
-                        "cell": { "N": "503" }
-                    }
-                    }
-                ]
-                },
-                "rsrq": { "N": "-9" },
-                "area": { "N": "{ncellmeasAreaId}" },
-                "adv": { "N": "80" },
-                "rsrp": { "N": "-97" },
-                "mcc": { "N": "242" },
-                "mnc": { "N": "1" },
-                "earfcn": { "N": "6446" },
-                "cell": { "N": "{ncellmeasCellId}" },
-                "ts": { "N": "{ts}" }
-            }
+                    "rsrq": { "N": "-9" },
+                    "area": { "N": "{ncellmeasAreaId}" },
+                    "adv": { "N": "80" },
+                    "rsrp": { "N": "-97" },
+                    "mcc": { "N": "242" },
+                    "mnc": { "N": "1" },
+                    "earfcn": { "N": "6446" },
+                    "cell": { "N": "{ncellmeasCellId}" },
+                    "ts": { "N": "{ts}" }
+                }
             },
             "nw": { "S": "LTE-M" },
             "deviceId": { "S": "{tracker:id}" }

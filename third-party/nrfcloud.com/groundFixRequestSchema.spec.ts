@@ -235,4 +235,39 @@ describe('groundFixRequestSchema', () => {
 		expect(v.errors).toBeNull()
 		expect(valid).toEqual(true)
 	})
+
+	it('should validate a neighboring cell request', () => {
+		const v = ajv.compile(groundFixRequestSchema)
+		const request: Static<typeof groundFixRequestSchema> = {
+			lte: [
+				{
+					mcc: 242,
+					mnc: 1,
+					eci: 1234,
+					tac: 1234,
+					earfcn: 6446,
+					adv: 80,
+					rsrp: -97,
+					rsrq: -9,
+					nmr: [
+						{
+							earfcn: 262142,
+							pci: 501,
+							rsrp: -104,
+							rsrq: -18,
+						},
+						{
+							earfcn: 262141,
+							pci: 503,
+							rsrp: -116,
+							rsrq: -11,
+						},
+					],
+				},
+			],
+		}
+		const valid = v(request)
+		expect(v.errors).toBeNull()
+		expect(valid).toEqual(true)
+	})
 })

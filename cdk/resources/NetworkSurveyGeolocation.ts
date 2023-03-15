@@ -8,12 +8,12 @@ import { CORE_STACK_NAME } from '../stacks/stackName'
 import { LambdaLogGroup } from './LambdaLogGroup'
 import { LambdasWithLayer } from './LambdasWithLayer'
 import { logToCloudWatch } from './logToCloudWatch'
-import { WifiSiteSurveysStorage } from './WifiSiteSurveysStorage'
+import { NetworkSurveysStorage } from './NetworkSurveysStorage'
 
 /**
- * Describes the step functions which resolves the geolocation of wifi survey using nRF cloud location providers
+ * Describes the step functions which resolves the geolocation of network survey using nRF Cloud Location Services
  */
-export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
+export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 	public readonly stateMachine: StepFunctions.IStateMachine
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -23,7 +23,7 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 			storage,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas>
-			storage: WifiSiteSurveysStorage
+			storage: NetworkSurveysStorage
 		},
 	) {
 		super(parent, id)
@@ -35,9 +35,9 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.wifiSiteSurveyGeolocateFromNrfCloudStepFunction,
+			code: lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction,
 			description:
-				'Resolve device geolocation from wifi survey using the nRF Cloud API',
+				'Resolve device geolocation from network survey using the nRF Cloud API',
 			initialPolicy: [
 				logToCloudWatch,
 				new IAM.PolicyStatement({
@@ -62,12 +62,12 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 		 * This is a STANDARD StepFunction because we want the user to be able to execute it and query it for the result.
 		 * This is not possible with EXPRESS StepFunctions.
 		 */
-		const resolveWifiSurvey = new StepFunctionTasks.LambdaInvoke(
+		const resolveNetworkSurvey = new StepFunctionTasks.LambdaInvoke(
 			this,
-			'Resolve wifi survey geolocation',
+			'Resolve network survey geolocation',
 			{
 				lambdaFunction: fromNrfCloud,
-				resultPath: '$.wifisurveygeo',
+				resultPath: '$.networksurveygeo',
 				payloadResponseOnly: true,
 			},
 		)
@@ -97,17 +97,17 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 					':lat': StepFunctionTasks.DynamoAttributeValue.numberFromString(
 						// It seems it is a bug from CDK, https://github.com/aws/aws-cdk/issues/12456
 						StepFunctions.JsonPath.stringAt(
-							`States.Format('{}', $.wifisurveygeo.lat)`,
+							`States.Format('{}', $.networksurveygeo.lat)`,
 						),
 					),
 					':lng': StepFunctionTasks.DynamoAttributeValue.numberFromString(
 						StepFunctions.JsonPath.stringAt(
-							`States.Format('{}', $.wifisurveygeo.lng)`,
+							`States.Format('{}', $.networksurveygeo.lng)`,
 						),
 					),
 					':accuracy': StepFunctionTasks.DynamoAttributeValue.numberFromString(
 						StepFunctions.JsonPath.stringAt(
-							`States.Format('{}', $.wifisurveygeo.accuracy)`,
+							`States.Format('{}', $.networksurveygeo.accuracy)`,
 						),
 					),
 					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
@@ -146,7 +146,7 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 		).next(
 			new StepFunctions.Fail(this, 'Failed (no resolution)', {
 				error: 'FAILED',
-				cause: 'The Wifi survey request could not be resolved',
+				cause: 'The Network survey request could not be resolved',
 			}),
 		)
 
@@ -155,15 +155,18 @@ export class WifiSiteSurveyGeolocation extends CloudFormation.Resource {
 			'Resolved from nRF Cloud API?',
 		)
 			.when(
-				StepFunctions.Condition.booleanEquals(`$.wifisurveygeo.located`, true),
+				StepFunctions.Condition.booleanEquals(
+					`$.networksurveygeo.located`,
+					true,
+				),
 				persistResult,
 			)
 			.otherwise(persistFailure)
 
-		const definition = resolveWifiSurvey.next(checkAPIResult)
+		const definition = resolveNetworkSurvey.next(checkAPIResult)
 
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
-			stateMachineName: `${this.stack.stackName}-wifiSurveyGeo`,
+			stateMachineName: `${this.stack.stackName}-networkSurveyGeo`,
 			stateMachineType: StepFunctions.StateMachineType.STANDARD,
 			definition,
 			timeout: CloudFormation.Duration.minutes(5),
