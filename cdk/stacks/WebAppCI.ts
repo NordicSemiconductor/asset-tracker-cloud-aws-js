@@ -26,7 +26,7 @@ export class WebAppCIStack extends CloudFormation.Stack {
 				this,
 				'networksurveyStorageTable',
 				CloudFormation.Fn.importValue(
-					StackOutputs.networksurveyStorageTableArn,
+					StackOutputs.networkSurveyStorageTableArn,
 				),
 			),
 			historicalDataTableArn: CloudFormation.Fn.importValue(

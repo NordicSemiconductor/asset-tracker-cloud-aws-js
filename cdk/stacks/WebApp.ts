@@ -68,7 +68,7 @@ export class WebAppStack extends CloudFormation.Stack {
 				CoreStackOutputs.identityPoolId,
 			),
 			networksurveyStorageTableName: CloudFormation.Fn.importValue(
-				CoreStackOutputs.networksurveyStorageTableName,
+				CoreStackOutputs.networkSurveyStorageTableName,
 			),
 			userIotPolicyName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.userIotPolicyName,

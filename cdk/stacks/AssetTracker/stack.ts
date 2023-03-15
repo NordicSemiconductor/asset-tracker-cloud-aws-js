@@ -52,14 +52,11 @@ export const StackOutputs = {
 	cellGeolocationCacheTableName: `${CORE_STACK_NAME}:cellGeolocationCacheTableName`,
 	cellGeolocationCacheTableArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableArn`,
 	cellGeolocationCacheTableStreamArn: `${CORE_STACK_NAME}:cellGeolocationCacheTableStreamArn`,
-	networksurveyStorageTableName: `${CORE_STACK_NAME}:networksurveyStorageTableName`,
-	networksurveyStorageTableArn: `${CORE_STACK_NAME}:networksurveyStorageTableArn`,
-	networksurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networksurveyStorageTableStreamArn`,
-	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
-	networkSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:networkSurveyGeolocationApiUrl`,
 	networkSurveyStorageTableName: `${CORE_STACK_NAME}:networkSurveyStorageTableName`,
 	networkSurveyStorageTableArn: `${CORE_STACK_NAME}:networkSurveyStorageTableArn`,
 	networkSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networkSurveyStorageTableStreamArn`,
+	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
+	networkSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:networkSurveyGeolocationApiUrl`,
 } as const
 
 export class AssetTrackerStack extends CloudFormation.Stack {
