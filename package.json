@@ -56,7 +56,7 @@
     "@nordicsemiconductor/e2e-bdd-test-runner": "16.0.11",
     "@nordicsemiconductor/firmware-ci-device-helpers": "14.0.9",
     "@nordicsemiconductor/object-to-env": "5.0.0",
-    "@nordicsemiconductor/package-layered-lambdas": "12.0.8",
+    "@nordicsemiconductor/package-layered-lambdas": "12.0.9",
     "@nordicsemiconductor/random-words": "7.0.0",
     "@octokit/rest": "19.0.7",
     "@swc/cli": "0.1.62",
