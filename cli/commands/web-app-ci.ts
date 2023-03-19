@@ -4,10 +4,10 @@ import chalk from 'chalk'
 import {
 	WEBAPP_CI_STACK_NAME,
 	WEBAPP_STACK_NAME,
-} from '../../cdk/stacks/stackName'
-import { StackOutputs as WebAppCIStackOutputs } from '../../cdk/stacks/WebAppCI'
-import { fromEnv } from '../../util/fromEnv'
-import { CommandDefinition } from './CommandDefinition'
+} from '../../cdk/stacks/stackName.js'
+import type { StackOutputs as WebAppCIStackOutputs } from '../../cdk/stacks/WebAppCI.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 const { region } = fromEnv({ region: 'AWS_REGION' })(process.env)
 

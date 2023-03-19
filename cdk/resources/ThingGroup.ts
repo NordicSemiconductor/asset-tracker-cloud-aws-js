@@ -1,6 +1,6 @@
 import * as CloudFormation from 'aws-cdk-lib'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import { Construct } from 'constructs'
+import type * as Lambda from 'aws-cdk-lib/aws-lambda'
+import type { Construct } from 'constructs'
 
 export class ThingGroup extends CloudFormation.Resource {
 	public constructor(

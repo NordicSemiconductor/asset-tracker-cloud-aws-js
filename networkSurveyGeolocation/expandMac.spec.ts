@@ -1,4 +1,4 @@
-import { expandMac } from './expandMac'
+import { expandMac } from './expandMac.js'
 
 describe('expandMac()', () => {
 	it.each([

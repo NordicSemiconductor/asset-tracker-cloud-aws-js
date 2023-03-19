@@ -5,18 +5,18 @@ import {
 	getGroundFixApiSettings,
 	getPGPSLocationApiSettings,
 	serviceKeyProperty,
-} from '../third-party/nrfcloud.com/settings'
-import { getSettings } from '../util/settings'
-import { AssetTrackerApp } from './apps/AssetTracker'
-import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
-import { getStackContexts } from './helper/getStackContexts'
-import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
-import { warn } from './helper/note'
+} from '../third-party/nrfcloud.com/settings.js'
+import { getSettings } from '../util/settings.js'
+import { AssetTrackerApp } from './apps/AssetTracker.js'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName.js'
+import { getStackContexts } from './helper/getStackContexts.js'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir.js'
+import { warn } from './helper/note.js'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
-} from './stacks/AssetTracker/lambdas'
-import { CORE_STACK_NAME } from './stacks/stackName'
+} from './stacks/AssetTracker/lambdas.js'
+import { CORE_STACK_NAME } from './stacks/stackName.js'
 
 const ssm = new SSMClient({})
 const fetchNrfCloudAGPSLocationApiSettings = getAGPSLocationApiSettings({

@@ -6,12 +6,12 @@ import {
 	defaultInterval,
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
-} from '../../pgps/cacheKey'
-import { gpsDay, minimumGpsDay } from '../../pgps/gpsTime'
-import { pgpsRequestSchema } from '../../pgps/types'
-import { fromEnv } from '../../util/fromEnv'
-import { apiClient } from './apiclient'
-import { getPGPSLocationApiSettings } from './settings'
+} from '../../pgps/cacheKey.js'
+import { gpsDay, minimumGpsDay } from '../../pgps/gpsTime.js'
+import { pgpsRequestSchema } from '../../pgps/types.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { apiClient } from './apiclient.js'
+import { getPGPSLocationApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 

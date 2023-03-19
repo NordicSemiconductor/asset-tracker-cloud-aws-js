@@ -2,12 +2,19 @@
   "name": "@nordicsemiconductor/asset-tracker-cloud-aws",
   "version": "0.0.0-development",
   "description": "A reference implementation of a serverless backend for an IoT product developed using AWS CDK in TypeScript.",
-  "main": "./dist/export.js",
+  "types": "./export.d.ts",
+  "exports": {
+    ".": {
+      "import": "./export.js",
+      "node": "./export.js"
+    }
+  },
+  "type": "module",
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
     "test:e2e": "node --unhandled-rejections=strict --loader tsx feature-runner/run-features.ts ./features --print-results --progress",
     "prepare": "husky install && check-node-version --package",
-    "prepublishOnly": "npx tsc --noEmit false --outDir ./dist"
+    "prepublish": "npx swc -d dist ./cli npx swc -d dist ./features"
   },
   "repository": {
     "type": "git",
@@ -138,6 +145,10 @@
         "@swc/jest"
       ]
     },
-    "testRegex": ".+\\.spec\\.ts$"
-  }
+    "testRegex": ".+\\.spec\\.ts$",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
+  },
+  "prettier": "@nordicsemiconductor/asset-tracker-cloud-code-style/.prettierrc"
 }

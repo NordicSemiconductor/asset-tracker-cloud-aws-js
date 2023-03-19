@@ -1,6 +1,6 @@
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
-import { SQSEvent } from 'aws-lambda'
-import { fromEnv } from '../../util/fromEnv'
+import type { SQSEvent } from 'aws-lambda'
+import { fromEnv } from '../../util/fromEnv.js'
 
 const sf = new SFNClient({})
 const { stateMachineArn } = fromEnv({

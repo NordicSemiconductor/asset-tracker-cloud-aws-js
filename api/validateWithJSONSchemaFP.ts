@@ -1,7 +1,7 @@
-import { Static, TSchema } from '@sinclair/typebox'
+import type { Static, TSchema } from '@sinclair/typebox'
 import Ajv from 'ajv'
 import * as E from 'fp-ts/lib/Either'
-import { ErrorInfo, ErrorType } from './ErrorInfo'
+import { ErrorInfo, ErrorType } from './ErrorInfo.js'
 
 /**
  * @deprecated use validateWithJSONSchema() because fp-ts is getting gradually phased out from this code-base

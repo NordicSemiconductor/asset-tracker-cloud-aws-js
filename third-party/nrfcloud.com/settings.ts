@@ -1,5 +1,5 @@
-import { SSMClient } from '@aws-sdk/client-ssm'
-import { getSettings } from '../../util/settings'
+import type { SSMClient } from '@aws-sdk/client-ssm'
+import { getSettings } from '../../util/settings.js'
 
 type nRFCloudLocationService = 'agpsLocation' | 'pgpsLocation' | 'groundFix'
 
@@ -33,7 +33,7 @@ const getApiSettings =
 		if (p[serviceKeyProperty(service)] === undefined)
 			throw new Error(`No nRF Cloud service key configured for ${service}!`)
 		return {
-			serviceKey: p[serviceKeyProperty(service)],
+			serviceKey: p[serviceKeyProperty(service)] as nRFCloudLocationService,
 			endpoint: endpoint ?? 'https://api.nrfcloud.com/',
 			teamId,
 		}

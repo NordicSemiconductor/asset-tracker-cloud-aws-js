@@ -9,14 +9,14 @@ import {
 	SendMessageBatchRequestEntry,
 	SQSClient,
 } from '@aws-sdk/client-sqs'
-import { Static } from '@sinclair/typebox'
-import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
+import type { Static } from '@sinclair/typebox'
+import type { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
 import { randomUUID } from 'node:crypto'
-import { fromEnv } from '../util/fromEnv'
-import { cacheKey } from './cacheKey'
-import { AGPSDataCache, getCache } from './getCache'
-import { agpsRequestSchema } from './types'
+import { fromEnv } from '../util/fromEnv.js'
+import { cacheKey } from './cacheKey.js'
+import { AGPSDataCache, getCache } from './getCache.js'
+import type { agpsRequestSchema } from './types.js'
 
 const {
 	binHoursString,
@@ -84,7 +84,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (grouped[k] === undefined) {
 				grouped[k] = [deviceRequest]
 			} else {
-				grouped[k].push(deviceRequest)
+				grouped[k]?.push(deviceRequest)
 			}
 			return grouped
 		},
@@ -116,7 +116,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					} else {
 						console.debug(cacheKey, 'cache does not exist')
 						console.warn({ getCache: d.left })
-						const r = deviceRequests[0].request
+						const r = deviceRequests[0]?.request
 						await Promise.all([
 							// Create DB entry
 							await dynamodb
@@ -128,25 +128,25 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 												S: cacheKey,
 											},
 											mcc: {
-												N: `${r.mcc}`,
+												N: `${r?.mcc}`,
 											},
 											mnc: {
-												N: `${r.mnc}`,
+												N: `${r?.mnc}`,
 											},
 											cell: {
-												N: `${r.cell}`,
+												N: `${r?.cell}`,
 											},
 											area: {
-												N: `${r.area}`,
+												N: `${r?.area}`,
 											},
 											phycell:
-												r.phycell !== undefined
+												r?.phycell !== undefined
 													? {
 															N: `${r.phycell}`,
 													  }
 													: { NULL: true },
 											types: {
-												NS: r.types.map((t) => `${t}`),
+												NS: r?.types.map((t) => `${t}`) ?? [],
 											},
 											updatedAt: {
 												S: new Date().toISOString(),
@@ -195,7 +195,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				// The data for these requests is available
 				if (
 					resolvedRequests[cacheKey]?.unresolved !== undefined &&
-					resolvedRequests[cacheKey].unresolved === false
+					resolvedRequests[cacheKey]?.unresolved === false
 				) {
 					console.debug(cacheKey, 'data for these requests is available')
 					console.debug(

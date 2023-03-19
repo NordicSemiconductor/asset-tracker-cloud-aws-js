@@ -1,4 +1,4 @@
-import { APIGatewayProxyResult } from 'aws-lambda'
+import type { APIGatewayProxyResult } from 'aws-lambda'
 import * as T from 'fp-ts/lib/Task'
 
 /**

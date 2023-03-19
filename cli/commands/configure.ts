@@ -1,9 +1,9 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import chalk from 'chalk'
 import * as fs from 'fs'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { deleteSettings, putSettings } from '../../util/settings'
-import { CommandDefinition } from './CommandDefinition'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { deleteSettings, putSettings } from '../../util/settings.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const configureCommand = (): CommandDefinition => ({
 	command: 'configure <scope> <system> <property> [value]',

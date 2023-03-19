@@ -1,10 +1,10 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
 import chalk from 'chalk'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { createCA, defaultCAValidityInDays } from '../jitp/createCA'
-import { setCurrentCA } from '../jitp/currentCA'
-import { CommandDefinition } from './CommandDefinition'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { createCA, defaultCAValidityInDays } from '../jitp/createCA.js'
+import { setCurrentCA } from '../jitp/currentCA.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const createCACommand = ({
 	certsDir,
@@ -49,7 +49,7 @@ export const createCACommand = ({
 		)
 		console.log(
 			chalk.green('You can now generate device certificates.'),
-			chalk.greenBright('./cli.sh create-and-provision-device-cert'),
+			chalk.greenBright('./cli.sh create-and-provision-device-cert.js'),
 		)
 		setCurrentCA({ certsDir, caId: certificateId })
 	},

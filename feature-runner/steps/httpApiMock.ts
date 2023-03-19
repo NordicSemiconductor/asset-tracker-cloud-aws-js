@@ -1,4 +1,5 @@
 import {
+	AttributeValue,
 	DeleteItemCommand,
 	DynamoDBClient,
 	PutItemCommand,
@@ -11,8 +12,8 @@ import {
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import chai, { expect } from 'chai'
 import chaiSubset from 'chai-subset'
-import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse'
-import { AssetTrackerWorld } from '../run-features'
+import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse.js'
+import type { AssetTrackerWorld } from '../run-features.js'
 chai.use(chaiSubset)
 
 export const httpApiMockStepRunners = ({
@@ -37,7 +38,7 @@ export const httpApiMockStepRunners = ({
 							S: `${method} ${path}`,
 						},
 						statusCode: {
-							N: statusCode,
+							N: statusCode as string,
 						},
 						body: {
 							S: step.interpolatedArgument,
@@ -89,8 +90,8 @@ export const httpApiMockStepRunners = ({
 						new DeleteItemCommand({
 							TableName: runner.world['httpApiMock:requestsTableName'],
 							Key: {
-								methodPathQuery: request.methodPathQuery,
-								requestId: request.requestId,
+								methodPathQuery: request.methodPathQuery as AttributeValue,
+								requestId: request.requestId as AttributeValue,
 							},
 						}),
 					)

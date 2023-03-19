@@ -1,6 +1,6 @@
-import { Static } from '@sinclair/typebox'
-import { gpsDay } from './gpsTime'
-import { pgpsRequestSchema } from './types'
+import type { Static } from '@sinclair/typebox'
+import { gpsDay } from './gpsTime.js'
+import type { pgpsRequestSchema } from './types.js'
 
 // Default values, all properties for requests are optional
 export const defaultNumberOfPredictions = 42

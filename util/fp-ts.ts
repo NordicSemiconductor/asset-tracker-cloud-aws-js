@@ -1,4 +1,4 @@
-import { Option } from 'fp-ts/lib/Option'
+import type { Option } from 'fp-ts/lib/Option'
 import { getOptionM } from 'fp-ts/lib/OptionT'
 import { TaskEither, taskEither } from 'fp-ts/lib/TaskEither'
 

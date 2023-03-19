@@ -1,4 +1,4 @@
-import { extractRepoAndOwner } from './extract-repo-and-owner'
+import { extractRepoAndOwner } from './extract-repo-and-owner.js'
 
 describe('extractRepoAndOwner()', () => {
 	it('should parse a git repo', () => {

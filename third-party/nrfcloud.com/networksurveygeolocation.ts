@@ -6,13 +6,13 @@ import {
 } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
 import { URL } from 'url'
-import { MaybeLocation } from '../../geolocation/types'
-import { expandMac } from '../../networkSurveyGeolocation/expandMac'
-import { fromEnv } from '../../util/fromEnv'
-import { apiClient } from './apiclient'
-import { groundFixRequestSchema } from './groundFixRequestSchema'
-import { locateResultSchema } from './locate'
-import { getGroundFixApiSettings } from './settings'
+import type { MaybeLocation } from '../../geolocation/types.js'
+import { expandMac } from '../../networkSurveyGeolocation/expandMac.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { apiClient } from './apiclient.js'
+import { groundFixRequestSchema } from './groundFixRequestSchema.js'
+import { locateResultSchema } from './locate.js'
+import { getGroundFixApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',

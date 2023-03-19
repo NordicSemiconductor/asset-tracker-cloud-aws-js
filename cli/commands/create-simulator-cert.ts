@@ -5,11 +5,11 @@ import * as path from 'path'
 import {
 	createDeviceCertificate,
 	defaultDeviceCertificateValidityInDays,
-} from '../jitp/createDeviceCertificate'
-import { createSimulatorKeyAndCSR } from '../jitp/createSimulatorKeyAndCSR'
-import { getCurrentCA } from '../jitp/currentCA'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
-import { CommandDefinition } from './CommandDefinition'
+} from '../jitp/createDeviceCertificate.js'
+import { createSimulatorKeyAndCSR } from '../jitp/createSimulatorKeyAndCSR.js'
+import { getCurrentCA } from '../jitp/currentCA.js'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const createSimulatorCertCommand = ({
 	endpoint,

@@ -5,7 +5,7 @@ import {
 	PutParameterCommand,
 	SSMClient,
 } from '@aws-sdk/client-ssm'
-import { paginate } from './paginate'
+import { paginate } from './paginate.js'
 
 type Scopes = 'context' | 'config' | 'thirdParty' | 'codebuild'
 type Systems = 'stack' | 'github' | 'nrfcloud' | 'sentry'

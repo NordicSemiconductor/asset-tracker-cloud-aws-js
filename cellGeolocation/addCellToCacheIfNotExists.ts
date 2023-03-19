@@ -2,10 +2,10 @@ import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { pipe } from 'fp-ts/lib/function'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { Cell } from '../geolocation/Cell'
-import { Location } from '../geolocation/Location'
-import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { Cell } from '../geolocation/Cell.js'
+import type { Location } from '../geolocation/Location.js'
+import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations.js'
 
 export const addCellToCacheIfNotExists =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>

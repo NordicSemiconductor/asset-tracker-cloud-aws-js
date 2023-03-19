@@ -1,10 +1,10 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { NetworkSurveyGeolocation } from './NetworkSurveyGeolocation'
-import { NetworkSurveysStorage } from './NetworkSurveysStorage'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import type { NetworkSurveyGeolocation } from './NetworkSurveyGeolocation.js'
+import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
 
 /**
  * Provides geo-location for Network surveys from devices through a HTTP API

@@ -3,11 +3,11 @@ import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/
 import { verify } from '@nordicsemiconductor/nrfcloud-location-services-tests'
 import { Static, Type } from '@sinclair/typebox'
 import { URL } from 'url'
-import { agpsRequestSchema, AGPSType } from '../../agps/types'
-import { ErrorInfo } from '../../api/ErrorInfo'
-import { fromEnv } from '../../util/fromEnv'
-import { apiClient } from './apiclient'
-import { getAGPSLocationApiSettings } from './settings'
+import { agpsRequestSchema, AGPSType } from '../../agps/types.js'
+import type { ErrorInfo } from '../../api/ErrorInfo.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { apiClient } from './apiclient.js'
+import { getAGPSLocationApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',

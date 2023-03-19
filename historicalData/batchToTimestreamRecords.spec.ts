@@ -1,4 +1,4 @@
-import { batchToTimestreamRecords } from './batchToTimestreamRecords'
+import { batchToTimestreamRecords } from './batchToTimestreamRecords.js'
 
 describe('batchToTimestreamRecords', () => {
 	it('should convert a message to Timestream records', () => {
@@ -74,10 +74,18 @@ describe('batchToTimestreamRecords', () => {
 			},
 		])
 
-		const g1lng = r[0].Dimensions?.find(({ Name }) => Name === 'measureGroup')
-		const g1lat = r[1].Dimensions?.find(({ Name }) => Name === 'measureGroup')
-		const g2lng = r[2].Dimensions?.find(({ Name }) => Name === 'measureGroup')
-		const g2lat = r[3].Dimensions?.find(({ Name }) => Name === 'measureGroup')
+		const g1lng = r?.[0]?.Dimensions?.find(
+			({ Name }) => Name === 'measureGroup',
+		)
+		const g1lat = r?.[1]?.Dimensions?.find(
+			({ Name }) => Name === 'measureGroup',
+		)
+		const g2lng = r?.[2]?.Dimensions?.find(
+			({ Name }) => Name === 'measureGroup',
+		)
+		const g2lat = r?.[3]?.Dimensions?.find(
+			({ Name }) => Name === 'measureGroup',
+		)
 		// measureGroups should be equal for measures from the same object
 		expect(g1lng?.Value).toEqual(g1lat?.Value)
 		expect(g2lng?.Value).toEqual(g2lat?.Value)

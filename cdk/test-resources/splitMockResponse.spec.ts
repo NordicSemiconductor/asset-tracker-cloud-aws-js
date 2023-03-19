@@ -1,4 +1,4 @@
-import { splitMockResponse } from './splitMockResponse'
+import { splitMockResponse } from './splitMockResponse.js'
 
 describe('split mock response', () => {
 	it('should parse headers and body', () =>

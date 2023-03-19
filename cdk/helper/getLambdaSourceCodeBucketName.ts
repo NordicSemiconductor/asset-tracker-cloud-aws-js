@@ -2,7 +2,7 @@ import {
 	CloudFormationClient,
 	DescribeStacksCommand,
 } from '@aws-sdk/client-cloudformation'
-import { SOURCECODE_STACK_NAME } from '../stacks/stackName'
+import { SOURCECODE_STACK_NAME } from '../stacks/stackName.js'
 
 const cf = new CloudFormationClient({})
 
@@ -19,7 +19,7 @@ export const getLambdaSourceCodeBucketName = async (): Promise<string> => {
 				throw new Error(`${StackName} stack is not available.`)
 			} else {
 				const stack = Stacks[0]
-				const BucketOutput = stack.Outputs?.find(
+				const BucketOutput = stack?.Outputs?.find(
 					({ OutputKey }) => OutputKey === 'bucketName',
 				)
 				if (BucketOutput?.OutputValue === undefined) {

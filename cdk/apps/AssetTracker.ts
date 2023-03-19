@@ -1,15 +1,18 @@
 import { App } from 'aws-cdk-lib'
 import { readFileSync } from 'fs'
 import * as path from 'path'
-import { enabledInContext } from '../helper/enabledInContext'
-import { extractRepoAndOwner } from '../helper/extract-repo-and-owner'
-import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
-import { AssetTrackerLambdas, CDKLambdas } from '../stacks/AssetTracker/lambdas'
-import { AssetTrackerStack } from '../stacks/AssetTracker/stack'
-import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment'
-import { FirmwareCIStack } from '../stacks/FirmwareCI'
-import { WebAppStack } from '../stacks/WebApp'
-import { WebAppCIStack } from '../stacks/WebAppCI'
+import { enabledInContext } from '../helper/enabledInContext.js'
+import { extractRepoAndOwner } from '../helper/extract-repo-and-owner.js'
+import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
+import type {
+	AssetTrackerLambdas,
+	CDKLambdas,
+} from '../stacks/AssetTracker/lambdas.js'
+import { AssetTrackerStack } from '../stacks/AssetTracker/stack.js'
+import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment.js'
+import { FirmwareCIStack } from '../stacks/FirmwareCI.js'
+import { WebAppStack } from '../stacks/WebApp.js'
+import { WebAppCIStack } from '../stacks/WebAppCI.js'
 
 export class AssetTrackerApp extends App {
 	public constructor(args: {

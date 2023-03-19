@@ -1,7 +1,7 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { Location } from '../geolocation/Location'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { Location } from '../geolocation/Location.js'
 
 export type Survey = {
 	deviceId: string

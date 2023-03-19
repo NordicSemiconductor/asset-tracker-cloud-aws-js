@@ -5,9 +5,9 @@ import {
 	ListTargetsForPolicyCommand,
 } from '@aws-sdk/client-iot'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { paginate } from '../../util/paginate'
-import { CommandDefinition } from './CommandDefinition'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { paginate } from '../../util/paginate.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const purgeIotUserPolicyPrincipals = (): CommandDefinition => ({
 	command: 'purge-iot-user-policy-principals',

@@ -19,20 +19,20 @@ import { program } from 'commander'
 import { promises as fs } from 'fs'
 import { randomUUID } from 'node:crypto'
 import * as path from 'path'
-import { getIotEndpoint } from '../cdk/helper/getIotEndpoint'
-import { StackOutputs } from '../cdk/stacks/AssetTracker/stack'
-import { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI'
+import { getIotEndpoint } from '../cdk/helper/getIotEndpoint.js'
+import type { StackOutputs } from '../cdk/stacks/AssetTracker/stack.js'
+import type { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI.js'
 import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
 	HTTP_MOCK_HTTP_API_STACK_NAME,
-} from '../cdk/stacks/stackName'
-import { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack'
-import { certsDir } from '../cli/jitp/certsDir'
-import { gpsDay } from '../pgps/gpsTime'
-import { assetTrackerStepRunners } from './steps/asset-tracker'
-import { httpApiMockStepRunners } from './steps/httpApiMock'
-import { timestreamStepRunners } from './steps/timestream'
+} from '../cdk/stacks/stackName.js'
+import type { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
+import { certsDir } from '../cli/jitp/certsDir.js'
+import { gpsDay } from '../pgps/gpsTime.js'
+import { assetTrackerStepRunners } from './steps/asset-tracker.js'
+import { httpApiMockStepRunners } from './steps/httpApiMock.js'
+import { timestreamStepRunners } from './steps/timestream.js'
 
 let ran = false
 
@@ -100,7 +100,7 @@ program
 			)
 
 			const [historicaldataDatabaseName, historicaldataTableName] =
-				stackConfig.historicaldataTableInfo.split('|')
+				stackConfig.historicaldataTableInfo.split('|') as [string, string]
 
 			const world: AssetTrackerWorld = {
 				...stackConfig,
@@ -126,7 +126,7 @@ program
 				'httpApiMock:responsesTableName':
 					httpApiMockStackConfig.responsesTableName,
 				'httpApiMock:apiURL': httpApiMockStackConfig.apiURL,
-				region: mqttEndpoint.split('.')[2],
+				region: mqttEndpoint.split('.')[2] as string,
 				currentGpsDay: gpsDay(),
 			}
 
@@ -172,7 +172,7 @@ program
 								email: () => `${randomUUID()}@example.com`,
 								password: () =>
 									((pw) =>
-										`${pw[0].toUpperCase()}${pw.slice(1)}${Math.round(
+										`${pw[0]?.toUpperCase()}${pw.slice(1)}${Math.round(
 											Math.random() * 1000,
 										)}`)(
 										Math.random()
@@ -238,7 +238,6 @@ program
 					.run()
 				if (!success) {
 					process.exit(1)
-					return
 				}
 				process.exit()
 			} catch (error) {

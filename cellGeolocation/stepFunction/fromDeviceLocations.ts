@@ -1,9 +1,9 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { Cell } from '../../geolocation/Cell'
-import { fromEnv } from '../../util/fromEnv'
-import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations'
-import { MaybeCellGeoLocation } from './types'
+import type { Cell } from '../../geolocation/Cell.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { fromDeviceLocations } from '../cellGeolocationFromDeviceLocations.js'
+import type { MaybeCellGeoLocation } from './types.js'
 
 const { TableName, IndexName } = fromEnv({
 	TableName: 'LOCATIONS_TABLE',
@@ -29,8 +29,8 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	if (Items !== undefined && (Items?.length ?? 0) > 0) {
 		const location = fromDeviceLocations(
 			Items.map(({ lat, lng }) => ({
-				lat: parseFloat(lat.N as string),
-				lng: parseFloat(lng.N as string),
+				lat: parseFloat(lat?.N as string),
+				lng: parseFloat(lng?.N as string),
 			})),
 		)
 

@@ -2,9 +2,9 @@ import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { none, Option, some } from 'fp-ts/lib/Option'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { Cell } from '../geolocation/Cell'
-import { Location } from '../geolocation/Location'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { Cell } from '../geolocation/Cell.js'
+import type { Location } from '../geolocation/Location.js'
 
 export const geolocateFromCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
@@ -36,8 +36,8 @@ export const geolocateFromCache =
 					} else {
 						return some({
 							unresolved,
-							lat: parseFloat(Item.lat.N as string),
-							lng: parseFloat(Item.lng.N as string),
+							lat: parseFloat(Item?.lat?.N as string),
+							lng: parseFloat(Item?.lng?.N as string),
 							accuracy:
 								Item?.accuracy?.N !== undefined
 									? parseFloat(Item.accuracy.N)

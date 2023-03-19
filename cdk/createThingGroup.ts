@@ -15,8 +15,8 @@ import {
 	cfnResponse,
 	ResponseStatus,
 } from '@nordicsemiconductor/cloudformation-helpers'
-import { CloudFormationCustomResourceEvent } from 'aws-lambda'
-import { paginate } from '../util/paginate'
+import type { CloudFormationCustomResourceEvent } from 'aws-lambda'
+import { paginate } from '../util/paginate.js'
 
 const iot = new IoTClient({})
 

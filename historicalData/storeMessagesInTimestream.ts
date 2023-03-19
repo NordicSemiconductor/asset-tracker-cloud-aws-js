@@ -1,16 +1,16 @@
-import { Dimension, _Record } from '@aws-sdk/client-timestream-write'
+import type { Dimension, _Record } from '@aws-sdk/client-timestream-write'
 import { writeClient } from '@nordicsemiconductor/timestream-helpers'
-import { fromEnv } from '../util/fromEnv'
-import { batchToTimestreamRecords } from './batchToTimestreamRecords'
-import { messageToTimestreamRecords } from './messageToTimestreamRecords'
-import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
-import { storeRecordsInTimeseries } from './storeRecordsInTimeseries'
+import { fromEnv } from '../util/fromEnv.js'
+import { batchToTimestreamRecords } from './batchToTimestreamRecords.js'
+import { messageToTimestreamRecords } from './messageToTimestreamRecords.js'
+import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords.js'
+import { storeRecordsInTimeseries } from './storeRecordsInTimeseries.js'
 
 const { tableInfo } = fromEnv({
 	tableInfo: 'TABLE_INFO',
 })(process.env)
 
-const [DatabaseName, TableName] = tableInfo.split('|')
+const [DatabaseName, TableName] = tableInfo.split('|') as [string, string]
 const store = (async () =>
 	storeRecordsInTimeseries({
 		timestream: await writeClient(),

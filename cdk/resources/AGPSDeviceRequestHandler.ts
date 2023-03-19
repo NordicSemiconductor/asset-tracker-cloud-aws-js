@@ -4,12 +4,12 @@ import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as IoT from 'aws-cdk-lib/aws-iot'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as SQS from 'aws-cdk-lib/aws-sqs'
-import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { AGPSResolver } from './AGPSResolver'
-import { AGPSStorage } from './AGPSStorage'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
+import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined.js'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import type { AGPSResolver } from './AGPSResolver.js'
+import type { AGPSStorage } from './AGPSStorage.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
 
 export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
 

@@ -13,8 +13,8 @@ import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 import { randomUUID } from 'crypto'
 import { copyFile, readFile, unlink } from 'fs/promises'
 import path from 'path'
-import { run } from '../process/run'
-import { caFileLocations } from './caFileLocations'
+import { run } from '../process/run.js'
+import { caFileLocations } from './caFileLocations.js'
 
 export const registerCA = async ({
 	iot,
@@ -43,7 +43,7 @@ export const registerCA = async ({
 	const stackOutput = await cf
 		.send(new DescribeStacksCommand({ StackName: stack }))
 		.then(async ({ Stacks }) => {
-			if (Stacks?.length === 0 || Stacks?.[0].Outputs === undefined) {
+			if (Stacks?.length === 0 || Stacks?.[0]?.Outputs === undefined) {
 				throw new Error(`Stack ${stack} not found.`)
 			}
 			return toObject(Stacks[0].Outputs)

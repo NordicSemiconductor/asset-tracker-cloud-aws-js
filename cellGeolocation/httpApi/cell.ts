@@ -5,16 +5,16 @@ import {
 	NetworkMode,
 } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Type } from '@sinclair/typebox'
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { pipe } from 'fp-ts/lib/pipeable'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
-import { resFP } from '../../api/resFP'
-import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
-import { queueJobFP } from '../../geolocation/queueJobFP'
-import { getOrElse } from '../../util/fp-ts'
-import { fromEnv } from '../../util/fromEnv'
-import { geolocateFromCache } from '../geolocateFromCache'
+import { ErrorType, toStatusCode } from '../../api/ErrorInfo.js'
+import { resFP } from '../../api/resFP.js'
+import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP.js'
+import { queueJobFP } from '../../geolocation/queueJobFP.js'
+import { getOrElse } from '../../util/fp-ts.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { geolocateFromCache } from '../geolocateFromCache.js'
 
 const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
 	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',

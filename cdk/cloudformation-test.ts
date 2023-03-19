@@ -1,10 +1,10 @@
-import { TestApp } from './apps/Test'
-import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName'
-import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir'
+import { TestApp } from './apps/Test.js'
+import { getLambdaSourceCodeBucketName } from './helper/getLambdaSourceCodeBucketName.js'
+import { preparePackagedLambdaStorageDir } from './helper/lambdas/outDir.js'
 import {
 	prepareAssetTrackerLambdas,
 	prepareCDKLambdas,
-} from './stacks/AssetTracker/lambdas'
+} from './stacks/AssetTracker/lambdas.js'
 
 const rootDir = process.cwd()
 
