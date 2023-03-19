@@ -11,7 +11,6 @@ import {
 } from '@aws-sdk/client-sqs'
 import type { Static } from '@sinclair/typebox'
 import type { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
-import { isRight } from 'fp-ts/lib/These'
 import { randomUUID } from 'node:crypto'
 import { fromEnv } from '../util/fromEnv.js'
 import { cacheKey } from './cacheKey.js'
@@ -104,18 +103,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				if (resolvedRequests[cacheKey] === undefined) {
 					console.debug(cacheKey, 'Load from DB')
 					const d = await c(cacheKey)
-					if (isRight(d)) {
-						if (d.right?.unresolved !== undefined) {
-							console.debug(cacheKey, 'Processing of the request is finished')
-							resolvedRequests[cacheKey] = d.right
-							if (d.right.unresolved === true) {
-								console.error(cacheKey, `A-GPS request is unresolved.`)
-								return
-							}
-						}
-					} else {
+					if ('error' in d) {
 						console.debug(cacheKey, 'cache does not exist')
-						console.warn({ getCache: d.left })
+						console.warn({ getCache: d })
 						const r = deviceRequests[0]?.request
 						await Promise.all([
 							// Create DB entry
@@ -189,6 +179,15 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 									)
 								}),
 						])
+					} else {
+						if (d.unresolved !== undefined) {
+							console.debug(cacheKey, 'Processing of the request is finished')
+							resolvedRequests[cacheKey] = d
+							if (d.unresolved === true) {
+								console.error(cacheKey, `A-GPS request is unresolved.`)
+								return
+							}
+						}
 					}
 				}
 

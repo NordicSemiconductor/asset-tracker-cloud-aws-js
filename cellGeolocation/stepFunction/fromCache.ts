@@ -1,8 +1,4 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { isSome } from 'fp-ts/lib/Option'
-import { pipe } from 'fp-ts/lib/pipeable'
-import * as T from 'fp-ts/lib/Task'
-import * as TE from 'fp-ts/lib/TaskEither'
 import type { Cell } from '../../geolocation/Cell.js'
 import { fromEnv } from '../../util/fromEnv.js'
 import { geolocateFromCache } from '../geolocateFromCache.js'
@@ -17,21 +13,11 @@ const locator = geolocateFromCache({
 	TableName: cacheTable,
 })
 
-export const handler = async (input: Cell): Promise<MaybeCellGeoLocation> =>
-	pipe(
-		locator(input),
-		TE.map((optionalLocation) => {
-			if (isSome(optionalLocation)) {
-				return {
-					located: true,
-					...optionalLocation.value,
-				}
-			}
-			return { located: false }
-		}),
-		TE.getOrElse(() =>
-			T.of({
-				located: false,
-			}),
-		),
-	)()
+export const handler = async (input: Cell): Promise<MaybeCellGeoLocation> => {
+	const optionalLocation = await locator(input)
+	if ('error' in optionalLocation) return { located: false }
+	return {
+		located: true,
+		...optionalLocation,
+	}
+}
