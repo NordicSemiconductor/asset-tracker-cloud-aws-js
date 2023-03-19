@@ -1,5 +1,4 @@
 import { App } from 'aws-cdk-lib'
-import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 import type {
 	AssetTrackerLambdas,
 	CDKLambdas,
@@ -12,9 +11,8 @@ import { FirmwareCIStack } from '../stacks/FirmwareCI.js'
  */
 export class TestApp extends App {
 	public constructor(args: {
-		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<AssetTrackerLambdas>
-		packedCDKLambdas: PackedLambdas<CDKLambdas>
+		packedLambdas: AssetTrackerLambdas
+		packedCDKLambdas: CDKLambdas
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })

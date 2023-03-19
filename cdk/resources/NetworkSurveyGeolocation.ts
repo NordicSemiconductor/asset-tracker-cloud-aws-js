@@ -22,7 +22,7 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 			lambdas,
 			storage,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: NetworkSurveysStorage
 		},
 	) {
@@ -30,12 +30,15 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 
 		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler:
+				lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction.zipFile,
+			),
 			description:
 				'Resolve device geolocation from network survey using the nRF Cloud API',
 			initialPolicy: [

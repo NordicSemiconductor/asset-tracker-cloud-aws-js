@@ -14,17 +14,17 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 		{
 			cdkLambdas,
 		}: {
-			cdkLambdas: LambdasWithLayer<CDKLambdas>
+			cdkLambdas: LambdasWithLayer<CDKLambdas['lambdas']>
 		},
 	) {
 		super(parent, id)
 
 		this.function = new Lambda.Function(this, 'createThingGroup', {
-			code: cdkLambdas.lambdas.createThingGroup,
+			code: Lambda.Code.fromAsset(cdkLambdas.lambdas.createThingGroup.zipFile),
 			layers: cdkLambdas.layers,
 			description:
 				'Used in CloudFormation to create the thing group for the devices',
-			handler: 'index.handler',
+			handler: cdkLambdas.lambdas.createThingGroup.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.minutes(1),

@@ -1,64 +1,31 @@
-import {
-	ConsoleProgressReporter,
-	makeLayerFromPackageJSON,
-	packLayeredLambdas,
-} from '@nordicsemiconductor/package-layered-lambdas'
-import * as path from 'path'
-import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
+import type { PackedLambda } from '../helper/lambdas/packLambda'
+import { packLambdaFromPath } from '../helper/lambdas/packLambdaFromPath.js'
+import { packLayer } from '../helper/lambdas/packLayer.js'
 
 export type HTTPAPIMockLambdas = {
-	httpApiMock: string
+	layerZipFileName: string
+	lambdas: {
+		httpApiMock: PackedLambda
+	}
 }
 
-export const prepareHTTPAPIMockLambdas = async ({
-	rootDir,
-	outDir,
-	sourceCodeBucketName,
-}: {
-	rootDir: string
-	outDir: string
-	sourceCodeBucketName: string
-}): Promise<PackedLambdas<HTTPAPIMockLambdas>> => {
-	const reporter = ConsoleProgressReporter('HTTP API Mock Lambdas')
-	return {
-		layerZipFileName: await (async () => {
-			const httpApiMockLayerDir = path.resolve(
-				rootDir,
-				'dist',
-				'lambdas',
-				'httpApiMockLayer',
-			)
-			return makeLayerFromPackageJSON({
-				layerName: 'httpApiMock-layer',
-				packageJsonFile: path.resolve(rootDir, 'package.json'),
-				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
-				requiredDependencies: [
+export const prepareHTTPAPIMockLambdas =
+	async (): Promise<HTTPAPIMockLambdas> => ({
+		layerZipFileName: (
+			await packLayer({
+				dependencies: [
 					'@aws-sdk/client-dynamodb',
 					'fast-xml-parser',
 					// Needed by old AWS SDK
 					'uuid',
 				],
-				dir: httpApiMockLayerDir,
-				reporter,
-				sourceCodeBucketName,
-				outDir,
+				id: 'httpApiMock-layer',
 			})
-		})(),
-		lambdas: await packLayeredLambdas<HTTPAPIMockLambdas>({
-			reporter,
-			id: 'HTTPAPIMock',
-			srcDir: rootDir,
-			outDir,
-			Bucket: sourceCodeBucketName,
-			lambdas: {
-				httpApiMock: path.resolve(
-					rootDir,
-					'cdk',
-					'test-resources',
-					'api-mock-lambda.ts',
-				),
-			},
-			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
-		}),
-	}
-}
+		).layerZipFile,
+		lambdas: {
+			httpApiMock: await packLambdaFromPath(
+				'httpApiMock',
+				'cdk/test-resources/api-mock-lambda.ts',
+			),
+		},
+	})

@@ -3,9 +3,7 @@ import * as Cognito from 'aws-cdk-lib/aws-cognito'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Iot from 'aws-cdk-lib/aws-iot'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as S3 from 'aws-cdk-lib/aws-s3'
 import { enabledInContext } from '../../helper/enabledInContext.js'
-import type { PackedLambdas } from '../../helper/lambdas/PackedLambdas.js'
 import { warn } from '../../helper/note.js'
 import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler.js'
 import { AGPSResolver } from '../../resources/AGPSResolver.js'
@@ -15,7 +13,6 @@ import { CellGeolocationApi } from '../../resources/CellGeolocationApi.js'
 import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations.js'
 import { FOTAStorage } from '../../resources/FOTAStorage.js'
 import { HistoricalData } from '../../resources/HistoricalData.js'
-import { lambdasOnS3 } from '../../resources/lambdasOnS3.js'
 import type { LambdasWithLayer } from '../../resources/LambdasWithLayer.js'
 import { NetworkSurveyGeolocation } from '../../resources/NetworkSurveyGeolocation.js'
 import { NetworkSurveyGeolocationApi } from '../../resources/NetworkSurveyGeolocationApi.js'
@@ -55,7 +52,6 @@ export const StackOutputs = {
 	networkSurveyStorageTableName: `${CORE_STACK_NAME}:networkSurveyStorageTableName`,
 	networkSurveyStorageTableArn: `${CORE_STACK_NAME}:networkSurveyStorageTableArn`,
 	networkSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networkSurveyStorageTableStreamArn`,
-	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
 	networkSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:networkSurveyGeolocationApiUrl`,
 } as const
 
@@ -63,54 +59,14 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		{
-			sourceCodeBucketName,
 			packedLambdas,
 			packedCDKLambdas,
 		}: {
-			sourceCodeBucketName: string
-			packedLambdas: PackedLambdas<AssetTrackerLambdas>
-			packedCDKLambdas: PackedLambdas<CDKLambdas>
+			packedLambdas: AssetTrackerLambdas
+			packedCDKLambdas: CDKLambdas
 		},
 	) {
 		super(parent, CORE_STACK_NAME)
-
-		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
-			this,
-			'SourceCodeBucket',
-			{
-				bucketName: sourceCodeBucketName,
-			},
-		)
-		const lambasOnBucket = lambdasOnS3(sourceCodeBucket)
-
-		const baseLayer = new Lambda.LayerVersion(
-			this,
-			`${CORE_STACK_NAME}-layer`,
-			{
-				code: Lambda.Code.fromBucket(
-					sourceCodeBucket,
-					packedLambdas.layerZipFileName,
-				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
-			},
-		)
-
-		const cloudFormationLayer = new Lambda.LayerVersion(
-			this,
-			`${CORE_STACK_NAME}-cloudformation-layer`,
-			{
-				code: Lambda.Code.fromBucket(
-					sourceCodeBucket,
-					packedCDKLambdas.layerZipFileName,
-				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
-			},
-		)
-
-		new CloudFormation.CfnOutput(this, 'cloudformationLayerVersionArn', {
-			value: cloudFormationLayer.layerVersionArn,
-			exportName: StackOutputs.cloudformationLayerVersionArn,
-		})
 
 		const isTest = this.node.tryGetContext('isTest') === true
 
@@ -394,13 +350,20 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: StackOutputs.thingPolicyArn,
 		})
 
-		const cdkLambdas = {
-			lambdas: lambasOnBucket(packedCDKLambdas),
-			layers: [cloudFormationLayer],
-		}
-
 		const thingGroupLambda = new ThingGroupLambda(this, 'thingGroupLambda', {
-			cdkLambdas,
+			cdkLambdas: {
+				lambdas: packedCDKLambdas.lambdas,
+				layers: [
+					new Lambda.LayerVersion(
+						this,
+						`${CORE_STACK_NAME}-cloudformation-layer`,
+						{
+							code: Lambda.Code.fromAsset(packedCDKLambdas.layerZipFileName),
+							compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
+						},
+					),
+				],
+			},
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupLambdaArn', {
@@ -423,9 +386,14 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new RepublishDesiredConfig(this, 'republishDesiredConfig')
 
-		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
-			lambdas: lambasOnBucket(packedLambdas),
-			layers: [baseLayer],
+		const lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']> = {
+			lambdas: packedLambdas.lambdas,
+			layers: [
+				new Lambda.LayerVersion(this, `${CORE_STACK_NAME}-layer`, {
+					code: Lambda.Code.fromAsset(packedLambdas.layerZipFileName),
+					compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
+				}),
+			],
 		}
 
 		const hd = new HistoricalData(this, 'historicalData', {

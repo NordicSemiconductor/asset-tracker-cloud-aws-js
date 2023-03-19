@@ -79,8 +79,7 @@ jobs:
       - run: echo "VERSION=${{ github.sha }}" >> $GITHUB_ENV
       - name: Set up stack for End-to-End tests
         run: |
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-sourcecode.ts' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-sourcecode.ts' deploy
+          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' deploy '*' --require-approval never
           ./cli.sh configure thirdParty nrfcloud teamId `uuidgen`
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
@@ -112,11 +111,6 @@ jobs:
           ./cli.sh purge-buckets
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' destroy -f '*'
           npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' destroy -f '*'
-          # Delete sourcecode bucket
-          SOURCE_CODE_BUCKET=`aws cloudformation describe-stacks --stack-name $STACK_NAME-sourcecode | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "bucketName") | .OutputValue'`
-          aws s3 rb s3://$SOURCE_CODE_BUCKET --force
-          # Delete the sourceode stack
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-sourcecode.ts' destroy -f '*'
       - uses: actions/upload-artifact@v3
         if: always()
         with:

@@ -21,7 +21,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			lambdas,
 			userRole,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			userRole: IAM.IRole
 		},
 	) {
@@ -63,12 +63,14 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		const storeMessagesInTimestream = new Lambda.Function(this, 'lambda', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler: lambdas.lambdas.storeMessagesInTimestream.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,
-			code: lambdas.lambdas.storeMessagesInTimestream,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.storeMessagesInTimestream.zipFile,
+			),
 			description:
 				'Processes devices messages and updates and stores them in Timestream',
 			initialPolicy: [

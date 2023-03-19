@@ -39,7 +39,7 @@ export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 			storage,
 			resolver,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: PGPSStorage
 			resolver: PGPSResolver
 		},
@@ -100,12 +100,14 @@ export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 			'deviceRequestHandler',
 			{
 				layers: lambdas.layers,
-				handler: 'index.handler',
+				handler: lambdas.lambdas.pgpsDeviceRequestHandler.handler,
 				architecture: Lambda.Architecture.ARM_64,
 				runtime: Lambda.Runtime.NODEJS_18_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
-				code: lambdas.lambdas.pgpsDeviceRequestHandler,
+				code: Lambda.Code.fromAsset(
+					lambdas.lambdas.pgpsDeviceRequestHandler.zipFile,
+				),
 				description:
 					'Handles P-GPS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
 				environment: {

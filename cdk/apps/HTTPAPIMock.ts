@@ -1,5 +1,4 @@
 import { App } from 'aws-cdk-lib'
-import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 import { HttpApiMockStack } from '../test-resources/HttpApiMockStack.js'
 import type { HTTPAPIMockLambdas } from '../test-resources/prepare-test-resources.js'
 
@@ -9,10 +8,8 @@ import type { HTTPAPIMockLambdas } from '../test-resources/prepare-test-resource
 export class HTTPAPIMockApp extends App {
 	public constructor({
 		packedHTTPAPIMockLambdas,
-		sourceCodeBucketName,
 	}: {
-		sourceCodeBucketName: string
-		packedHTTPAPIMockLambdas: PackedLambdas<HTTPAPIMockLambdas>
+		packedHTTPAPIMockLambdas: HTTPAPIMockLambdas
 	}) {
 		super({
 			context: {
@@ -21,7 +18,6 @@ export class HTTPAPIMockApp extends App {
 		})
 		new HttpApiMockStack(this, {
 			packedHTTPAPIMockLambdas,
-			sourceCodeBucketName,
 		})
 	}
 }

@@ -23,7 +23,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 			lambdas,
 			storage,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: PGPSStorage
 		},
 	) {
@@ -40,12 +40,14 @@ export class PGPSResolver extends CloudFormation.Resource {
 			onEnabled: () => {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
-					handler: 'index.handler',
+					handler: lambdas.lambdas.pgpsNrfCloudStepFunction.handler,
 					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_18_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
-					code: lambdas.lambdas.pgpsNrfCloudStepFunction,
+					code: Lambda.Code.fromAsset(
+						lambdas.lambdas.pgpsNrfCloudStepFunction.zipFile,
+					),
 					description:
 						'Use the nRF Cloud API to provide P-GPS data for devices',
 					initialPolicy: [
