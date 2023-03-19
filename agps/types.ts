@@ -13,6 +13,9 @@ export enum AGPSType {
 
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
+/**
+ * @see https://api.nrfcloud.com/v1#tag/Assisted-GPS/operation/GetAssistanceData
+ */
 export const agpsRequestSchema = Type.Object({
 	mcc: Type.Integer({ minimum: 100, maximum: 999 }),
 	mnc: Type.Integer({ minimum: 0, maximum: 999 }),
