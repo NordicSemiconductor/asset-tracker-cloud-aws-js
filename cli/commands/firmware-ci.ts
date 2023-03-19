@@ -1,9 +1,9 @@
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import chalk from 'chalk'
-import { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI'
-import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName'
-import { CommandDefinition } from './CommandDefinition'
+import type { StackOutputs as FirmwareCIStackOutputs } from '../../cdk/stacks/FirmwareCI.js'
+import { FIRMWARE_CI_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const firmwareCICommand = ({
 	endpoint,

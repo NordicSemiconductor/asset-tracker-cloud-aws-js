@@ -1,5 +1,5 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
 
 export const queueJob =
 	({ sqs, QueueUrl }: { sqs: SQSClient; QueueUrl: string }) =>

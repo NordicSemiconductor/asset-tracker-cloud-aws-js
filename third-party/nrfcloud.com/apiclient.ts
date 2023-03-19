@@ -1,10 +1,10 @@
-import { Static, TObject, TProperties } from '@sinclair/typebox'
+import type { Static, TObject, TProperties } from '@sinclair/typebox'
 import Ajv from 'ajv'
-import { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
+import type { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
 import { request as nodeRequest, RequestOptions } from 'https'
-import { URL } from 'url'
-import { ErrorInfo, ErrorType } from '../../api/ErrorInfo'
-import { createToken } from './createToken'
+import type { URL } from 'url'
+import { ErrorInfo, ErrorType } from '../../api/ErrorInfo.js'
+import { createToken } from './createToken.js'
 
 const ajv = new Ajv()
 // see @https://github.com/sinclairzx81/typebox/issues/51

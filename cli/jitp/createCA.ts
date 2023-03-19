@@ -1,10 +1,10 @@
-import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
-import { IoTClient, Tag } from '@aws-sdk/client-iot'
+import type { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import type { IoTClient, Tag } from '@aws-sdk/client-iot'
 import { randomUUID } from 'crypto'
 import { mkdir, stat, unlink } from 'fs/promises'
-import { run } from '../process/run'
-import { caFileLocations } from './caFileLocations'
-import { registerCA } from './registerCA'
+import { run } from '../process/run.js'
+import { caFileLocations } from './caFileLocations.js'
+import { registerCA } from './registerCA.js'
 
 export const defaultCAValidityInDays = 356
 

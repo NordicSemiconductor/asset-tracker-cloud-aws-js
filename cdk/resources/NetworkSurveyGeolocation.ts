@@ -3,12 +3,12 @@ import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
 import * as StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { CORE_STACK_NAME } from '../stacks/stackName'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { logToCloudWatch } from './logToCloudWatch'
-import { NetworkSurveysStorage } from './NetworkSurveysStorage'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { CORE_STACK_NAME } from '../stacks/stackName.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
 
 /**
  * Describes the step functions which resolves the geolocation of network survey using nRF Cloud Location Services

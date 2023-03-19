@@ -1,4 +1,4 @@
-import { LayeredLambdas } from '@nordicsemiconductor/package-layered-lambdas'
+import type { LayeredLambdas } from '@nordicsemiconductor/package-layered-lambdas'
 
 export type PackedLambdas<
 	A extends {

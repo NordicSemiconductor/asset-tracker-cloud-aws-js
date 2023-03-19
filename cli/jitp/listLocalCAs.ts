@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'fs/promises'
 import path from 'path'
-import { fingerprint } from './fingerprint'
+import { fingerprint } from './fingerprint.js'
 
 export const listLocalCAs = async ({
 	certsDir,

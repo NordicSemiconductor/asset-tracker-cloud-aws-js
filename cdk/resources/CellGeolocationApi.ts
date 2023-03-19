@@ -4,11 +4,11 @@ import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
 import * as CloudWatchLogs from 'aws-cdk-lib/aws-logs'
 import * as SQS from 'aws-cdk-lib/aws-sqs'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { CellGeolocation } from './CellGeolocation'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { logToCloudWatch } from './logToCloudWatch'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import type { CellGeolocation } from './CellGeolocation.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API

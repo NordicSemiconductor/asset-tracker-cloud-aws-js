@@ -1,7 +1,7 @@
 import { execSync } from 'child_process'
 import { randomUUID } from 'crypto'
 import * as jwt from 'jsonwebtoken'
-import { createToken } from './createToken'
+import { createToken } from './createToken.js'
 
 describe('createToken', () => {
 	it('should create a token', () => {

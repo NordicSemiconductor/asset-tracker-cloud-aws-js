@@ -4,7 +4,7 @@ import {
 	packLayeredLambdas,
 } from '@nordicsemiconductor/package-layered-lambdas'
 import * as path from 'path'
-import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 
 export type HTTPAPIMockLambdas = {
 	httpApiMock: string

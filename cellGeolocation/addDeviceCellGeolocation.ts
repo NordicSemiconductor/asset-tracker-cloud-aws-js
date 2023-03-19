@@ -2,9 +2,9 @@ import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import * as TE from 'fp-ts/lib/TaskEither'
 import { randomUUID } from 'node:crypto'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { Cell } from '../geolocation/Cell'
-import { Location } from '../geolocation/Location'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { Cell } from '../geolocation/Cell.js'
+import type { Location } from '../geolocation/Location.js'
 
 export const addDeviceCellGeolocation =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>

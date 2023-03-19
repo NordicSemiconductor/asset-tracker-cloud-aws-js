@@ -4,8 +4,8 @@ import {
 } from '@aws-sdk/client-codepipeline'
 import chalk from 'chalk'
 import { formatDistanceToNow } from 'date-fns'
-import { listPipelines } from '../cd/listPipelines'
-import { CommandDefinition } from './CommandDefinition'
+import { listPipelines } from '../cd/listPipelines.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const cdCommand = (): CommandDefinition => ({
 	command: 'cd',

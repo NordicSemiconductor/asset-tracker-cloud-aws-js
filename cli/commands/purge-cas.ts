@@ -7,10 +7,10 @@ import {
 } from '@aws-sdk/client-iot'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import chalk from 'chalk'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { getCurrentCA } from '../jitp/currentCA'
-import { listRegisteredCAs } from '../jitp/listRegisteredCAs'
-import { CommandDefinition } from './CommandDefinition'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { getCurrentCA } from '../jitp/currentCA.js'
+import { listRegisteredCAs } from '../jitp/listRegisteredCAs.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 const purgeCACertificate =
 	({ iot, thingGroupName }: { iot: IoTClient; thingGroupName: string }) =>
@@ -70,7 +70,10 @@ export const purgeCAsCommand = ({
 			...(await stackOutput(new CloudFormationClient({}))(CORE_STACK_NAME)),
 		} as { [key: string]: string }
 
-		const purge = purgeCACertificate({ iot, thingGroupName })
+		const purge = purgeCACertificate({
+			iot,
+			thingGroupName: thingGroupName as string,
+		})
 
 		if (caId !== undefined) return purge(caId)
 		if (current === true) return purge(getCurrentCA({ certsDir }))

@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
-import { run } from '../process/run'
-import { deviceFileLocations } from './deviceFileLocations'
+import { run } from '../process/run.js'
+import { deviceFileLocations } from './deviceFileLocations.js'
 
 /**
  * Creates a private key and a CSR for a simulated device

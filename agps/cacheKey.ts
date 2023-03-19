@@ -1,5 +1,5 @@
-import { Static } from '@sinclair/typebox'
-import { agpsRequestSchema } from './types'
+import type { Static } from '@sinclair/typebox'
+import type { agpsRequestSchema } from './types.js'
 
 export const cacheKey = ({
 	request,

@@ -1,9 +1,9 @@
 import * as CloudFormation from 'aws-cdk-lib'
 import * as SSM from 'aws-cdk-lib/aws-ssm'
-import { settingsPath } from '../../util/settings'
-import { WebAppHosting } from '../resources/WebAppHosting'
-import { StackOutputs as CoreStackOutputs } from './AssetTracker/stack'
-import { WEBAPP_STACK_NAME } from './stackName'
+import { settingsPath } from '../../util/settings.js'
+import { WebAppHosting } from '../resources/WebAppHosting.js'
+import { StackOutputs as CoreStackOutputs } from './AssetTracker/stack.js'
+import { WEBAPP_STACK_NAME } from './stackName.js'
 
 /**
  * Defines the names use for stack outputs, which are used below to ensure
@@ -87,7 +87,7 @@ export class WebAppStack extends CloudFormation.Stack {
 
 		for (const k of Object.keys(SSMParameters)) {
 			new SSM.StringParameter(this, `${k}SSMParameter`, {
-				stringValue: SSMParameters[k],
+				stringValue: SSMParameters[k] as string,
 				parameterName: `${ssmPrefix}/${k}`,
 			})
 		}

@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { supportedRegions } from '../regions'
+import { supportedRegions } from '../regions.js'
 
 export const checkRegion = (): void => {
 	if (!supportedRegions.includes(process.env.AWS_REGION ?? 'us-east-1')) {

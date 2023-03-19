@@ -1,6 +1,6 @@
 import { App, CfnOutput, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import * as S3 from 'aws-cdk-lib/aws-s3'
-import { SOURCECODE_STACK_NAME } from './stackName'
+import { SOURCECODE_STACK_NAME } from './stackName.js'
 
 /**
  * This stack provides a bucket to store the source code for the lambda functions

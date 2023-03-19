@@ -1,9 +1,9 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { Static } from '@sinclair/typebox'
+import type { Static } from '@sinclair/typebox'
 import { Either, left, right } from 'fp-ts/lib/Either'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { agpsRequestSchema } from './types'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { agpsRequestSchema } from './types.js'
 
 export type AGPSDataCache = Static<typeof agpsRequestSchema> & {
 	source: string

@@ -6,10 +6,10 @@ import type {
 	APIGatewayProxyEventV2,
 	APIGatewayProxyResultV2,
 } from 'aws-lambda'
-import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
-import { res } from '../../api/res'
-import { fromEnv } from '../../util/fromEnv'
-import { geolocateSurvey, Survey } from '../geolocateSurvey'
+import { ErrorType, toStatusCode } from '../../api/ErrorInfo.js'
+import { res } from '../../api/res.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { geolocateSurvey, Survey } from '../geolocateSurvey.js'
 
 const inputSchema = Type.Object(
 	{

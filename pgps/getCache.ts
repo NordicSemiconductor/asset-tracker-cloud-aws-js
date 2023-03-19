@@ -1,10 +1,10 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { Static } from '@sinclair/typebox'
+import type { Static } from '@sinclair/typebox'
 import { Either, left, right } from 'fp-ts/lib/Either'
 import { URL } from 'url'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { pgpsRequestSchema } from './types'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { pgpsRequestSchema } from './types.js'
 
 export type PGPSDataCache = Static<typeof pgpsRequestSchema> & {
 	source: string

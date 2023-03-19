@@ -2,9 +2,9 @@ import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { IoTClient } from '@aws-sdk/client-iot'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import chalk from 'chalk'
-import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { CommandDefinition } from './CommandDefinition'
+import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint.js'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const infoCommand = (): CommandDefinition => ({
 	command: 'info',
@@ -23,7 +23,7 @@ export const infoCommand = (): CommandDefinition => ({
 			if (outputs[output] === undefined) {
 				throw new Error(`${output} is not defined.`)
 			}
-			process.stdout.write(outputs[output])
+			process.stdout.write(outputs[output] ?? '')
 			return
 		}
 		Object.entries(outputs).forEach(([k, v]) => {

@@ -1,10 +1,13 @@
 import { IoTClient } from '@aws-sdk/client-iot'
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { objectToEnv } from '@nordicsemiconductor/object-to-env'
-import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint'
-import { CORE_STACK_NAME, WEBAPP_STACK_NAME } from '../../cdk/stacks/stackName'
-import { getSettings } from '../../util/settings'
-import { CommandDefinition } from './CommandDefinition'
+import { getIotEndpoint } from '../../cdk/helper/getIotEndpoint.js'
+import {
+	CORE_STACK_NAME,
+	WEBAPP_STACK_NAME,
+} from '../../cdk/stacks/stackName.js'
+import { getSettings } from '../../util/settings.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 const ssm = new SSMClient({})
 

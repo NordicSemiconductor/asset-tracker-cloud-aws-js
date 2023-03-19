@@ -6,12 +6,12 @@ import * as https from 'https'
 import { randomUUID } from 'node:crypto'
 import * as os from 'os'
 import * as path from 'path'
-import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner'
-import { CommandDefinition } from './CommandDefinition'
+import { extractRepoAndOwner } from '../../cdk/helper/extract-repo-and-owner.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
-const netrclocation = path.resolve(os.homedir(), '.netrc')
+const netrclocation = path.resolve(os.homedir(), '.netrc.js')
 
 type FWVariant = 'memfault' | 'debug' | 'nodebug'
 
@@ -41,12 +41,12 @@ const getLatestFirmware = async ({
 		await octokit.repos.listReleaseAssets({
 			owner,
 			repo,
-			release_id: latestRelease.id,
+			release_id: latestRelease?.id as number,
 		})
 	).data
 
 	const hexfile = assets.find(({ name }) => {
-		if (!name.includes('.hex')) return false
+		if (!name.includes('.hex.js')) return false
 		if (name.includes('-signed')) return false
 		if (!name.includes(dk ? 'nRF9160DK' : 'Thingy91')) return false
 		switch (variant) {

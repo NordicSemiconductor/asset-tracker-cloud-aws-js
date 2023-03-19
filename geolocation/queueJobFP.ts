@@ -1,6 +1,6 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs'
 import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
 
 /**
  * @deprecated use queueJob() because fp-ts is getting gradually phased out from this code-base

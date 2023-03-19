@@ -9,22 +9,22 @@ import {
 	SendMessageBatchRequestEntry,
 	SQSClient,
 } from '@aws-sdk/client-sqs'
-import { Static } from '@sinclair/typebox'
-import { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
+import type { Static } from '@sinclair/typebox'
+import type { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { isRight } from 'fp-ts/lib/These'
 import { randomUUID } from 'node:crypto'
-import { URL } from 'url'
+import type { URL } from 'url'
 import { TextEncoder } from 'util'
-import { fromEnv } from '../util/fromEnv'
+import { fromEnv } from '../util/fromEnv.js'
 import {
 	cacheKey,
 	defaultInterval,
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
-} from './cacheKey'
-import { getCache, PGPSDataCache } from './getCache'
-import { gpsDay } from './gpsTime'
-import { pgpsRequestSchema } from './types'
+} from './cacheKey.js'
+import { getCache, PGPSDataCache } from './getCache.js'
+import { gpsDay } from './gpsTime.js'
+import type { pgpsRequestSchema } from './types.js'
 
 const {
 	binHoursString,
@@ -95,7 +95,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (grouped[k] === undefined) {
 				grouped[k] = [deviceRequest]
 			} else {
-				grouped[k].push(deviceRequest)
+				grouped[k]?.push(deviceRequest)
 			}
 			return grouped
 		},
@@ -127,7 +127,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					} else {
 						console.debug(cacheKey, 'cache does not exist')
 						console.warn({ getCache: d.left })
-						const r = deviceRequests[0].request
+						const r = deviceRequests[0]?.request
 						await Promise.all([
 							// Create DB entry
 							await dynamodb
@@ -139,16 +139,16 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 												S: cacheKey,
 											},
 											numPredictions: {
-												N: `${r.n ?? defaultNumberOfPredictions}`,
+												N: `${r?.n ?? defaultNumberOfPredictions}`,
 											},
 											interval: {
-												N: `${r.int ?? defaultInterval}`,
+												N: `${r?.int ?? defaultInterval}`,
 											},
 											gpsDay: {
-												N: `${r.day ?? gpsDay()}`,
+												N: `${r?.day ?? gpsDay()}`,
 											},
 											timeOfDay: {
-												N: `${r.time ?? defaultTimeOfDay}`,
+												N: `${r?.time ?? defaultTimeOfDay}`,
 											},
 											updatedAt: {
 												S: new Date().toISOString(),
@@ -197,7 +197,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				// The data for these requests is available
 				if (
 					resolvedRequests[cacheKey]?.unresolved !== undefined &&
-					resolvedRequests[cacheKey].unresolved === false
+					resolvedRequests[cacheKey]?.unresolved === false
 				) {
 					console.debug(cacheKey, 'data for these requests is available')
 					console.debug(
@@ -206,7 +206,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 							resolvedRequests,
 						}),
 					)
-					const url = resolvedRequests[cacheKey].url as URL
+					const url = resolvedRequests[cacheKey]?.url as URL
 					await Promise.all(
 						deviceRequests.map(async (deviceRequest) =>
 							iotData.send(

@@ -1,5 +1,5 @@
-import { cacheKey } from './cacheKey'
-import { gpsDay } from './gpsTime'
+import { cacheKey } from './cacheKey.js'
+import { gpsDay } from './gpsTime.js'
 
 describe('cacheKey', () => {
 	it('should create a cache key', () =>

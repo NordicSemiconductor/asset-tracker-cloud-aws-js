@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox'
 import { isRight, Right } from 'fp-ts/lib/Either'
 import { isLeft } from 'fp-ts/lib/These'
-import { validateWithJSONSchemaFP } from './validateWithJSONSchemaFP'
+import { validateWithJSONSchemaFP } from './validateWithJSONSchemaFP.js'
 
 const typedInputSchema = Type.Object(
 	{

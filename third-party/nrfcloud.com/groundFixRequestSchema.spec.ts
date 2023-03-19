@@ -1,6 +1,6 @@
-import { Static } from '@sinclair/typebox'
+import type { Static } from '@sinclair/typebox'
 import Ajv from 'ajv'
-import { groundFixRequestSchema } from './groundFixRequestSchema'
+import { groundFixRequestSchema } from './groundFixRequestSchema.js'
 
 const ajv = new Ajv()
 // see @https://github.com/sinclairzx81/typebox/issues/51

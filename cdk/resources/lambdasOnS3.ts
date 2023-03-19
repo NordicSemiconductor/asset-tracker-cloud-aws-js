@@ -1,6 +1,6 @@
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as S3 from 'aws-cdk-lib/aws-s3'
-import { PackedLambdas } from '../helper/lambdas/PackedLambdas'
+import type * as S3 from 'aws-cdk-lib/aws-s3'
+import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 
 export const lambdasOnS3 =
 	(sourceCodeBucket: S3.IBucket) =>

@@ -8,7 +8,7 @@ import {
 	StepRunnerFunc,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { parseResult } from '@nordicsemiconductor/timestream-helpers'
-import { AssetTrackerWorld } from '../run-features'
+import type { AssetTrackerWorld } from '../run-features.js'
 
 export const timestreamStepRunners = ({
 	timestream,
