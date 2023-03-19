@@ -1,30 +1,30 @@
 import { Type } from '@sinclair/typebox'
 
-export const RSRP = Type.Integer({
+const RSRP = Type.Integer({
 	minimum: -157,
 	maximum: -44,
 	title:
 		'RSRP: Reference Signal Received Power. Measured in dBm. See this page for more details. Range -157..-44',
 })
-export const RSRQ = Type.Number({
+const RSRQ = Type.Number({
 	minimum: -34.5,
 	maximum: 3.5,
 	title:
 		'RSRQ: Reference Signal Received Quality. Measured in dB. See this page for more details. Range -34.5..3.5',
 })
-export const TimingAdvance = Type.Integer({
+const TimingAdvance = Type.Integer({
 	minimum: -34.5,
 	maximum: 20512,
 	title:
 		'TimingAdvance: The length of time a signal takes to reach the base station from a mobile phone (half of rtt=round trip time). The units are symbols (Ts) as specified in 3GPP TS 36.211 (LTE). The expected resolution for nRF Cloud API is 1 Ts. Range 0..20512. ',
 })
-export const EARFCN = Type.Integer({
+const EARFCN = Type.Integer({
 	description:
 		'Evolved Absolute Radio Frequency Channel (E-ARFCN). Range: 0..262143',
 	minimum: 0,
 	maximum: 262143,
 })
-export const PCI = Type.Integer({
+const PCI = Type.Integer({
 	description: 'Physical Cell Identity (PCI). Range: 0..503',
 	minimum: 0,
 	maximum: 504,
@@ -83,6 +83,9 @@ const wifiSiteSurvey = Type.Object({
 	),
 })
 
+/**
+ * @see https://api.nrfcloud.com/v1#tag/Ground-Fix/operation/GetLocationFromCellTowersOrWifiNetworks
+ */
 export const groundFixRequestSchema = Type.Object(
 	{
 		lte: Type.Optional(neighboringCellsSurvey),

@@ -1,10 +1,10 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
+import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import { verify } from '@nordicsemiconductor/nrfcloud-location-services-tests'
 import { Static, Type } from '@sinclair/typebox'
 import { URL } from 'url'
 import { agpsRequestSchema, AGPSType } from '../../agps/types'
 import { ErrorInfo } from '../../api/ErrorInfo'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { fromEnv } from '../../util/fromEnv'
 import { apiClient } from './apiclient'
 import { getAGPSLocationApiSettings } from './settings'
@@ -20,6 +20,9 @@ const settingsPromise = getAGPSLocationApiSettings({
 
 const PositiveInteger = Type.Integer({ minimum: 1, title: 'positive integer' })
 
+/**
+ * @see https://api.nrfcloud.com/v1#tag/Assisted-GPS/operation/GetAssistanceData
+ */
 const apiRequestSchema = Type.Object(
 	{
 		eci: PositiveInteger,
@@ -32,14 +35,14 @@ const apiRequestSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithJSONSchema(agpsRequestSchema)
+const validateInput = validateWithType(agpsRequestSchema)
 
 export const handler = async (
 	agps: Static<typeof agpsRequestSchema>,
 ): Promise<{ resolved: boolean; dataHex?: readonly string[] }> => {
 	console.log(JSON.stringify({ event: agps }))
 	const maybeValidInput = validateInput(agps)
-	if ('error' in maybeValidInput) {
+	if ('errors' in maybeValidInput) {
 		console.error(JSON.stringify(maybeValidInput))
 		return {
 			resolved: false,

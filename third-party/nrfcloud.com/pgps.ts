@@ -1,7 +1,7 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
+import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import { Static, Type } from '@sinclair/typebox'
 import { URL } from 'url'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import {
 	defaultInterval,
 	defaultNumberOfPredictions,
@@ -26,6 +26,10 @@ enum Interval {
 	sixHours = 360,
 	eightHours = 480,
 }
+
+/**
+ * @see https://api.nrfcloud.com/v1#tag/Predicted-GPS/operation/GetPredictedAssistanceData
+ */
 const apiRequestSchema = Type.Object(
 	{
 		predictionCount: Type.Optional(
@@ -56,6 +60,9 @@ const apiRequestSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
+/**
+ * @see https://api.nrfcloud.com/v1#tag/Predicted-GPS/operation/GetPredictedAssistanceData
+ */
 const apiResponseSchema = Type.Object(
 	{
 		path: Type.String({ minLength: 1 }),
@@ -64,14 +71,14 @@ const apiResponseSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithJSONSchema(pgpsRequestSchema)
+const validateInput = validateWithType(pgpsRequestSchema)
 
 export const handler = async (
 	pgps: Static<typeof pgpsRequestSchema>,
 ): Promise<{ resolved: boolean; url?: URL }> => {
 	console.log(JSON.stringify(pgps))
 	const maybeValidInput = validateInput(pgps)
-	if ('error' in maybeValidInput) {
+	if ('errors' in maybeValidInput) {
 		console.error(JSON.stringify(maybeValidInput))
 		return {
 			resolved: false,

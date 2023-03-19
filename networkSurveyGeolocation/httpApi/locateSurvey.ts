@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
+import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import { Type } from '@sinclair/typebox'
 import type {
 	APIGatewayProxyEventV2,
@@ -7,7 +8,6 @@ import type {
 } from 'aws-lambda'
 import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
 import { res } from '../../api/res'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
 import { fromEnv } from '../../util/fromEnv'
 import { geolocateSurvey, Survey } from '../geolocateSurvey'
 
@@ -18,7 +18,7 @@ const inputSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithJSONSchema(inputSchema)
+const validateInput = validateWithType(inputSchema)
 
 const { surveysTable, stateMachineArn } = fromEnv({
 	surveysTable: 'SURVEYS_TABLE',
@@ -66,8 +66,8 @@ export const handler = async (
 
 	const id = event.requestContext.http.path.slice(1) // path: /3bf67b25-acd9-474c-b97a-3cb6083b7c44
 	const maybeValidRequest = validateInput({ id })
-	if ('error' in maybeValidRequest) {
-		return res(toStatusCode[ErrorType.BadRequest])(maybeValidRequest.error)
+	if ('errors' in maybeValidRequest) {
+		return res(toStatusCode[ErrorType.BadRequest])(maybeValidRequest.errors)
 	}
 
 	const maybeSurvey = await locator(maybeValidRequest.id)
