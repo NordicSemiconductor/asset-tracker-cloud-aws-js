@@ -1,182 +1,114 @@
-import {
-	ConsoleProgressReporter,
-	makeLayerFromPackageJSON,
-	packBaseLayer,
-	packLayeredLambdas,
-} from '@nordicsemiconductor/package-layered-lambdas'
-import * as path from 'path'
-import type { PackedLambdas } from '../../helper/lambdas/PackedLambdas.js'
+import pjson from '../../../package.json'
+import type { PackedLambda } from '../../helper/lambdas/packLambda.js'
+import { packLambdaFromPath } from '../../helper/lambdas/packLambdaFromPath.js'
+import { packLayer } from '../../helper/lambdas/packLayer.js'
 
 export type AssetTrackerLambdas = {
-	storeMessagesInTimestream: string
-	geolocateCellHttpApi: string
-	invokeStepFunctionFromSQS: string
-	geolocateFromCacheStepFunction: string
-	geolocateCellFromDeviceLocationsStepFunction: string
-	geolocateCellFromNrfCloudStepFunction: string
-	cacheCellGeolocationStepFunction: string
-	agpsDeviceRequestHandler: string
-	agpsNrfCloudStepFunction: string
-	pgpsDeviceRequestHandler: string
-	pgpsNrfCloudStepFunction: string
-	geolocateNetworkSurveyHttpApi: string
-	networkSurveyGeolocateFromNrfCloudStepFunction: string
+	layerZipFileName: string
+	lambdas: {
+		storeMessagesInTimestream: PackedLambda
+		geolocateCellHttpApi: PackedLambda
+		invokeStepFunctionFromSQS: PackedLambda
+		geolocateFromCacheStepFunction: PackedLambda
+		geolocateCellFromDeviceLocationsStepFunction: PackedLambda
+		geolocateCellFromNrfCloudStepFunction: PackedLambda
+		cacheCellGeolocationStepFunction: PackedLambda
+		agpsDeviceRequestHandler: PackedLambda
+		agpsNrfCloudStepFunction: PackedLambda
+		pgpsDeviceRequestHandler: PackedLambda
+		pgpsNrfCloudStepFunction: PackedLambda
+		geolocateNetworkSurveyHttpApi: PackedLambda
+		networkSurveyGeolocateFromNrfCloudStepFunction: PackedLambda
+	}
 }
 
 export type CDKLambdas = {
-	createThingGroup: string
-}
-
-export const prepareAssetTrackerLambdas = async ({
-	rootDir,
-	outDir,
-	sourceCodeBucketName,
-}: {
-	rootDir: string
-	outDir: string
-	sourceCodeBucketName: string
-}): Promise<PackedLambdas<AssetTrackerLambdas>> => {
-	const reporter = ConsoleProgressReporter('nRF Asset Tracker Lambdas')
-	return {
-		layerZipFileName: await packBaseLayer({
-			layerName: 'asset-tracker-layer',
-			reporter,
-			srcDir: rootDir,
-			outDir,
-			Bucket: sourceCodeBucketName,
-		}),
-		lambdas: await packLayeredLambdas<AssetTrackerLambdas>({
-			reporter,
-			id: 'asset-tracker',
-			srcDir: rootDir,
-			outDir,
-			Bucket: sourceCodeBucketName,
-			lambdas: {
-				storeMessagesInTimestream: path.resolve(
-					rootDir,
-					'historicalData',
-					'storeMessagesInTimestream.ts',
-				),
-				invokeStepFunctionFromSQS: path.resolve(
-					rootDir,
-					'cellGeolocation',
-					'lambda',
-					'invokeStepFunctionFromSQS.ts',
-				),
-				geolocateFromCacheStepFunction: path.resolve(
-					rootDir,
-					'cellGeolocation',
-					'stepFunction',
-					'fromCache.ts',
-				),
-				geolocateCellFromDeviceLocationsStepFunction: path.resolve(
-					rootDir,
-					'cellGeolocation',
-					'stepFunction',
-					'fromDeviceLocations.ts',
-				),
-				geolocateCellFromNrfCloudStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'nrfcloud.com',
-					'cellgeolocation.ts',
-				),
-				cacheCellGeolocationStepFunction: path.resolve(
-					rootDir,
-					'cellGeolocation',
-					'stepFunction',
-					'updateCache.ts',
-				),
-				geolocateCellHttpApi: path.resolve(
-					rootDir,
-					'cellGeolocation',
-					'httpApi',
-					'cell.ts',
-				),
-				agpsDeviceRequestHandler: path.resolve(
-					rootDir,
-					'agps',
-					'deviceRequestHandler.ts',
-				),
-				agpsNrfCloudStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'nrfcloud.com',
-					'agps.ts',
-				),
-				pgpsDeviceRequestHandler: path.resolve(
-					rootDir,
-					'pgps',
-					'deviceRequestHandler.ts',
-				),
-				pgpsNrfCloudStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'nrfcloud.com',
-					'pgps.ts',
-				),
-				geolocateNetworkSurveyHttpApi: path.resolve(
-					rootDir,
-					'networkSurveyGeolocation',
-					'httpApi',
-					'locateSurvey.ts',
-				),
-				networkSurveyGeolocateFromNrfCloudStepFunction: path.resolve(
-					rootDir,
-					'third-party',
-					'nrfcloud.com',
-					'networksurveygeolocation.ts',
-				),
-			},
-			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
-		}),
+	layerZipFileName: string
+	lambdas: {
+		createThingGroup: PackedLambda
 	}
 }
 
-export const prepareCDKLambdas = async ({
-	rootDir,
-	outDir,
-	sourceCodeBucketName,
-}: {
-	rootDir: string
-	outDir: string
-	sourceCodeBucketName: string
-}): Promise<PackedLambdas<CDKLambdas>> => {
-	const reporter = ConsoleProgressReporter('CDK Lambdas')
-	return {
-		layerZipFileName: await (async () => {
-			const cloudFormationLayerDir = path.resolve(
-				rootDir,
-				'dist',
-				'lambdas',
-				'cloudFormationLayer',
-			)
-			return makeLayerFromPackageJSON({
-				layerName: 'cdk-layer',
-				packageJsonFile: path.resolve(rootDir, 'package.json'),
-				packageLockJsonFile: path.resolve(rootDir, 'package-lock.json'),
-				requiredDependencies: [
-					'@nordicsemiconductor/cloudformation-helpers',
-					'fast-xml-parser',
-					// uuid is still needed for the ThingGroup Custom Resource lambda
-					'uuid',
-				],
-				dir: cloudFormationLayerDir,
-				reporter,
-				sourceCodeBucketName,
-				outDir,
+export const prepareAssetTrackerLambdas =
+	async (): Promise<AssetTrackerLambdas> => ({
+		layerZipFileName: (
+			await packLayer({
+				id: 'asset-tracker-layer',
+				dependencies: Object.keys(pjson.dependencies),
 			})
-		})(),
-		lambdas: await packLayeredLambdas<CDKLambdas>({
-			reporter,
-			id: 'CDK',
-			srcDir: rootDir,
-			outDir,
-			Bucket: sourceCodeBucketName,
-			lambdas: {
-				createThingGroup: path.resolve(rootDir, 'cdk', 'createThingGroup.ts'),
-			},
-			tsConfig: path.resolve(rootDir, 'tsconfig.json'),
-		}),
-	}
-}
+		).layerZipFile,
+		lambdas: {
+			storeMessagesInTimestream: await packLambdaFromPath(
+				'storeMessagesInTimestream',
+				'historicalData/storeMessagesInTimestream.ts',
+			),
+			invokeStepFunctionFromSQS: await packLambdaFromPath(
+				'invokeStepFunctionFromSQS',
+				'cellGeolocation/lambda/invokeStepFunctionFromSQS.ts',
+			),
+			geolocateFromCacheStepFunction: await packLambdaFromPath(
+				'geolocateFromCacheStepFunction',
+				'cellGeolocation/stepFunction/fromCache.ts',
+			),
+			geolocateCellFromDeviceLocationsStepFunction: await packLambdaFromPath(
+				'geolocateCellFromDeviceLocationsStepFunction',
+				'cellGeolocation/stepFunction/fromDeviceLocations.ts',
+			),
+			geolocateCellFromNrfCloudStepFunction: await packLambdaFromPath(
+				'geolocateCellFromNrfCloudStepFunction',
+				'third-party/nrfcloud.com/cellgeolocation.ts',
+			),
+			cacheCellGeolocationStepFunction: await packLambdaFromPath(
+				'cacheCellGeolocationStepFunction',
+				'cellGeolocation/stepFunction/updateCache.ts',
+			),
+			geolocateCellHttpApi: await packLambdaFromPath(
+				'geolocateCellHttpApi',
+				'cellGeolocation/httpApi/cell.ts',
+			),
+			agpsDeviceRequestHandler: await packLambdaFromPath(
+				'agpsDeviceRequestHandler',
+				'agps/deviceRequestHandler.ts',
+			),
+			agpsNrfCloudStepFunction: await packLambdaFromPath(
+				'agpsNrfCloudStepFunction',
+				'third-party/nrfcloud.com/agps.ts',
+			),
+			pgpsDeviceRequestHandler: await packLambdaFromPath(
+				'pgpsDeviceRequestHandler',
+				'pgps/deviceRequestHandler.ts',
+			),
+			pgpsNrfCloudStepFunction: await packLambdaFromPath(
+				'pgpsNrfCloudStepFunction',
+				'third-party/nrfcloud.com/pgps.ts',
+			),
+			geolocateNetworkSurveyHttpApi: await packLambdaFromPath(
+				'geolocateNetworkSurveyHttpApi',
+				'networkSurveyGeolocation/httpApi/locateSurvey.ts',
+			),
+			networkSurveyGeolocateFromNrfCloudStepFunction: await packLambdaFromPath(
+				'networkSurveyGeolocateFromNrfCloudStepFunction',
+				'third-party/nrfcloud.com/networksurveygeolocation.ts',
+			),
+		},
+	})
+
+export const prepareCDKLambdas = async (): Promise<CDKLambdas> => ({
+	layerZipFileName: (
+		await packLayer({
+			dependencies: [
+				'@nordicsemiconductor/cloudformation-helpers',
+				'fast-xml-parser',
+				// uuid is still needed for the ThingGroup Custom Resource lambda
+				'uuid',
+			],
+			id: 'cdk-layer',
+		})
+	).layerZipFile,
+	lambdas: {
+		createThingGroup: await packLambdaFromPath(
+			'createThingGroup',
+			'cdk/createThingGroup.ts',
+		),
+	},
+})

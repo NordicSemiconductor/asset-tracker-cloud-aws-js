@@ -3,7 +3,6 @@ import { readFileSync } from 'fs'
 import * as path from 'path'
 import { enabledInContext } from '../helper/enabledInContext.js'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner.js'
-import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 import type {
 	AssetTrackerLambdas,
 	CDKLambdas,
@@ -16,9 +15,8 @@ import { WebAppCIStack } from '../stacks/WebAppCI.js'
 
 export class AssetTrackerApp extends App {
 	public constructor(args: {
-		sourceCodeBucketName: string
-		packedLambdas: PackedLambdas<AssetTrackerLambdas>
-		packedCDKLambdas: PackedLambdas<CDKLambdas>
+		packedLambdas: AssetTrackerLambdas
+		packedCDKLambdas: CDKLambdas
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })

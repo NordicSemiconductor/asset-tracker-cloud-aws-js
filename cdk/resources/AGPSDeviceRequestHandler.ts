@@ -39,7 +39,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			storage,
 			resolver,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: AGPSStorage
 			resolver: AGPSResolver
 		},
@@ -104,12 +104,14 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			'deviceRequestHandler',
 			{
 				layers: lambdas.layers,
-				handler: 'index.handler',
+				handler: lambdas.lambdas.agpsDeviceRequestHandler.handler,
 				architecture: Lambda.Architecture.ARM_64,
 				runtime: Lambda.Runtime.NODEJS_18_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
-				code: lambdas.lambdas.agpsDeviceRequestHandler,
+				code: Lambda.Code.fromAsset(
+					lambdas.lambdas.agpsDeviceRequestHandler.zipFile,
+				),
 				description:
 					'Handles A-GPS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
 				environment: {

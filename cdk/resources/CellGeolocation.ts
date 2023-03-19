@@ -26,7 +26,7 @@ export class CellGeolocation extends CloudFormation.Resource {
 			lambdas,
 			deviceCellGeo,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			deviceCellGeo: DeviceCellGeolocations
 		},
 	) {
@@ -49,12 +49,14 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		const fromCache = new Lambda.Function(this, 'fromCache', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler: lambdas.lambdas.geolocateFromCacheStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateFromCacheStepFunction,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.geolocateFromCacheStepFunction.zipFile,
+			),
 			description: 'Geolocate cells from cache',
 			initialPolicy: [
 				logToCloudWatch,
@@ -74,12 +76,15 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		const fromDevices = new Lambda.Function(this, 'fromDevices', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler:
+				lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction.zipFile,
+			),
 			description: 'Geolocate cells from device locations',
 			initialPolicy: [
 				logToCloudWatch,
@@ -104,12 +109,14 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		const addToCache = new Lambda.Function(this, 'addToCache', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler: lambdas.lambdas.cacheCellGeolocationStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.minutes(1),
 			memorySize: 1792,
-			code: lambdas.lambdas.cacheCellGeolocationStepFunction,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.cacheCellGeolocationStepFunction.zipFile,
+			),
 			description: 'Caches cell geolocations',
 			initialPolicy: [
 				logToCloudWatch,
@@ -138,12 +145,15 @@ export class CellGeolocation extends CloudFormation.Resource {
 			onEnabled: () => {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
-					handler: 'index.handler',
+					handler:
+						lambdas.lambdas.geolocateCellFromNrfCloudStepFunction.handler,
 					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_18_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
-					code: lambdas.lambdas.geolocateCellFromNrfCloudStepFunction,
+					code: Lambda.Code.fromAsset(
+						lambdas.lambdas.geolocateCellFromNrfCloudStepFunction.zipFile,
+					),
 					description: 'Resolve cell geolocation using the nRF Cloud API',
 					initialPolicy: [
 						logToCloudWatch,

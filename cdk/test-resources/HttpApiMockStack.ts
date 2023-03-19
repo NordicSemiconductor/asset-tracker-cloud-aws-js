@@ -3,10 +3,7 @@ import * as ApiGateway from 'aws-cdk-lib/aws-apigateway'
 import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import * as IAM from 'aws-cdk-lib/aws-iam'
 import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as S3 from 'aws-cdk-lib/aws-s3'
-import type { PackedLambdas } from '../helper/lambdas/PackedLambdas.js'
 import { LambdaLogGroup } from '../resources/LambdaLogGroup.js'
-import { lambdasOnS3 } from '../resources/lambdasOnS3.js'
 import { logToCloudWatch } from '../resources/logToCloudWatch.js'
 import { HTTP_MOCK_HTTP_API_STACK_NAME } from '../stacks/stackName.js'
 import type { HTTPAPIMockLambdas } from './prepare-test-resources.js'
@@ -19,10 +16,8 @@ export class HttpApiMockStack extends CDK.Stack {
 		parent: CDK.App,
 		{
 			packedHTTPAPIMockLambdas,
-			sourceCodeBucketName,
 		}: {
-			sourceCodeBucketName: string
-			packedHTTPAPIMockLambdas: PackedLambdas<HTTPAPIMockLambdas>
+			packedHTTPAPIMockLambdas: HTTPAPIMockLambdas
 		},
 	) {
 		super(parent, HTTP_MOCK_HTTP_API_STACK_NAME)
@@ -55,39 +50,24 @@ export class HttpApiMockStack extends CDK.Stack {
 			timeToLiveAttribute: 'ttl',
 		})
 
-		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
-			this,
-			'SourceCodeBucket',
-			{
-				bucketName: sourceCodeBucketName,
-			},
-		)
-		const lambasOnBucket = lambdasOnS3(sourceCodeBucket)
-
 		const httpAPIMockLambdaLayer = new Lambda.LayerVersion(
 			this,
 			`${HTTP_MOCK_HTTP_API_STACK_NAME}-cloudformation-layer`,
 			{
-				code: Lambda.Code.fromBucket(
-					sourceCodeBucket,
-					packedHTTPAPIMockLambdas.layerZipFileName,
-				),
+				code: Lambda.Code.fromAsset(packedHTTPAPIMockLambdas.layerZipFileName),
 				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
 			},
 		)
-
-		const httpAPIMockLambdas = {
-			lambdas: lambasOnBucket(packedHTTPAPIMockLambdas),
-			layers: [httpAPIMockLambdaLayer],
-		}
 
 		// This lambda will publish all requests made to the API Gateway in the queue
 		const lambda = new Lambda.Function(this, 'Lambda', {
 			description:
 				'Mocks a HTTP API and stores all requests in SQS for inspection, and optionally replies with enqued responses',
-			code: httpAPIMockLambdas.lambdas.httpApiMock,
-			layers: httpAPIMockLambdas.layers,
-			handler: 'index.handler',
+			code: Lambda.Code.fromAsset(
+				packedHTTPAPIMockLambdas.lambdas.httpApiMock.zipFile,
+			),
+			layers: [httpAPIMockLambdaLayer],
+			handler: packedHTTPAPIMockLambdas.lambdas.httpApiMock.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CDK.Duration.seconds(5),
