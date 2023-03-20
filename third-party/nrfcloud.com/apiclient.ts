@@ -1,9 +1,9 @@
 import type { Static, TObject, TProperties } from '@sinclair/typebox'
 import Ajv from 'ajv'
 import type { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
-import { request as nodeRequest, RequestOptions } from 'https'
+import { request as nodeRequest, type RequestOptions } from 'https'
 import type { URL } from 'url'
-import { ErrorInfo, ErrorType } from '../../api/ErrorInfo.js'
+import { ErrorType, type ErrorInfo } from '../../api/ErrorInfo.js'
 import { createToken } from './createToken.js'
 
 const ajv = new Ajv()

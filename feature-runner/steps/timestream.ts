@@ -3,9 +3,9 @@ import {
 	TimestreamQueryClient,
 } from '@aws-sdk/client-timestream-query'
 import {
-	InterpolatedStep,
 	regexMatcher,
-	StepRunnerFunc,
+	type InterpolatedStep,
+	type StepRunnerFunc,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { parseResult } from '@nordicsemiconductor/timestream-helpers'
 import type { AssetTrackerWorld } from '../run-features.js'

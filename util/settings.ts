@@ -1,9 +1,9 @@
 import {
 	DeleteParameterCommand,
 	GetParametersByPathCommand,
-	Parameter,
 	PutParameterCommand,
 	SSMClient,
+	type Parameter,
 } from '@aws-sdk/client-ssm'
 import { paginate } from './paginate.js'
 

@@ -4,7 +4,12 @@ import {
 	validateWithType,
 	WiFiSiteSurvey,
 } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
-import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
+import {
+	Type,
+	type Static,
+	type TObject,
+	type TProperties,
+} from '@sinclair/typebox'
 import { URL } from 'url'
 import type { MaybeLocation } from '../../geolocation/types.js'
 import { expandMac } from '../../networkSurveyGeolocation/expandMac.js'

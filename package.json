@@ -14,7 +14,7 @@
     "test": "jest --detectOpenHandles --forceExit",
     "test:e2e": "node --unhandled-rejections=strict --loader tsx feature-runner/run-features.ts ./features --print-results --progress",
     "prepare": "husky install && check-node-version --package",
-    "prepublish": "npx swc -d dist ./cli npx swc -d dist ./features"
+    "prepublishOnly": "npx swc -d dist ./cli npx swc -d dist ./features"
   },
   "repository": {
     "type": "git",
@@ -92,6 +92,7 @@
     "nock": "13.3.0",
     "octokit-auth-netrc": "2.1.0",
     "tsx": "3.12.5",
+    "typescript": "5.0.2",
     "yazl": "2.5.1"
   },
   "lint-staged": {

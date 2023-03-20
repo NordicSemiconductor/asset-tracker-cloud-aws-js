@@ -1,6 +1,6 @@
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb'
 import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import { ErrorType, type ErrorInfo } from '../api/ErrorInfo.js'
 import type { Cell } from '../geolocation/Cell.js'
 import type { Location } from '../geolocation/Location.js'
 import { fromDeviceLocations } from './cellGeolocationFromDeviceLocations.js'

@@ -6,8 +6,8 @@ import {
 	GetRegistrationCodeCommand,
 	IoTClient,
 	RegisterCACertificateCommand,
-	Tag,
 	UpdateEventConfigurationsCommand,
+	type Tag,
 } from '@aws-sdk/client-iot'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 import { randomUUID } from 'crypto'
