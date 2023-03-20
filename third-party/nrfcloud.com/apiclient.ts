@@ -86,7 +86,7 @@ const doRequest =
 			})
 
 			console.debug(
-				JSON.stringify({ doRequest: { options, payload } }, null, 2),
+				JSON.stringify({ doRequest: { request: { options, payload } } }),
 			)
 
 			const req = nodeRequest(options, (res) => {
