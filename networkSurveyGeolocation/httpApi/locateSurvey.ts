@@ -9,7 +9,7 @@ import type {
 import { ErrorType, toStatusCode } from '../../api/ErrorInfo.js'
 import { res } from '../../api/res.js'
 import { fromEnv } from '../../util/fromEnv.js'
-import { geolocateSurvey, Survey } from '../geolocateSurvey.js'
+import { geolocateSurvey, type Survey } from '../geolocateSurvey.js'
 
 const inputSchema = Type.Object(
 	{

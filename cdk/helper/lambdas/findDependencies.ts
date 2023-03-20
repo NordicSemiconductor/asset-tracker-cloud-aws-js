@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
-import ts, { ImportDeclaration, StringLiteral } from 'typescript'
+import ts, { type ImportDeclaration, type StringLiteral } from 'typescript'
 
 /**
  * Resolve project-level dependencies for the given file using TypeScript compiler API

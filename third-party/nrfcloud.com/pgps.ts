@@ -1,6 +1,6 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
-import { Static, Type } from '@sinclair/typebox'
+import { Type, type Static } from '@sinclair/typebox'
 import { URL } from 'url'
 import {
 	defaultInterval,

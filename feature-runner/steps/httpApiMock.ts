@@ -6,9 +6,9 @@ import {
 	QueryCommand,
 } from '@aws-sdk/client-dynamodb'
 import {
-	InterpolatedStep,
 	regexGroupMatcher,
-	StepRunnerFunc,
+	type InterpolatedStep,
+	type StepRunnerFunc,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import chai, { expect } from 'chai'
 import chaiSubset from 'chai-subset'

@@ -1,8 +1,8 @@
 import {
-	InterpolatedStep,
 	regexGroupMatcher,
 	regexMatcher,
-	StepRunnerFunc,
+	type InterpolatedStep,
+	type StepRunnerFunc,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
 import { randomWords } from '@nordicsemiconductor/random-words'
 import { expect } from 'chai'
@@ -13,7 +13,7 @@ import { getCurrentCA } from '../../cli/jitp/currentCA.js'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import {
 	awsIotDeviceConnection,
-	ListenerWithPayload,
+	type ListenerWithPayload,
 } from './awsIotDeviceConnection.js'
 
 type World = {

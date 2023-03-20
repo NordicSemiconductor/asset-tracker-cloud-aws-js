@@ -5,16 +5,16 @@ import {
 } from '@aws-sdk/client-iot-data-plane'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import {
-	SendMessageBatchCommand,
-	SendMessageBatchRequestEntry,
 	SQSClient,
+	SendMessageBatchCommand,
+	type SendMessageBatchRequestEntry,
 } from '@aws-sdk/client-sqs'
 import type { Static } from '@sinclair/typebox'
 import type { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { randomUUID } from 'node:crypto'
 import { fromEnv } from '../util/fromEnv.js'
 import { cacheKey } from './cacheKey.js'
-import { AGPSDataCache, getCache } from './getCache.js'
+import { getCache, type AGPSDataCache } from './getCache.js'
 import type { agpsRequestSchema } from './types.js'
 
 const {

@@ -5,9 +5,9 @@ import {
 } from '@aws-sdk/client-iot-data-plane'
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn'
 import {
-	SendMessageBatchCommand,
-	SendMessageBatchRequestEntry,
 	SQSClient,
+	SendMessageBatchCommand,
+	type SendMessageBatchRequestEntry,
 } from '@aws-sdk/client-sqs'
 import type { Static } from '@sinclair/typebox'
 import type { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
@@ -21,7 +21,7 @@ import {
 	defaultNumberOfPredictions,
 	defaultTimeOfDay,
 } from './cacheKey.js'
-import { getCache, PGPSDataCache } from './getCache.js'
+import { getCache, type PGPSDataCache } from './getCache.js'
 import { gpsDay } from './gpsTime.js'
 import type { pgpsRequestSchema } from './types.js'
 
