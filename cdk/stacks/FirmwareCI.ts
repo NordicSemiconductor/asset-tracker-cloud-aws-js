@@ -1,6 +1,5 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import { Fn } from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
+import CloudFormation, { Fn } from 'aws-cdk-lib'
+import IAM from 'aws-cdk-lib/aws-iam'
 import { FirmwareCI } from '../resources/FirmwareCI.js'
 import { StackOutputs } from './AssetTracker/stack.js'
 import { FIRMWARE_CI_STACK_NAME } from './stackName.js'

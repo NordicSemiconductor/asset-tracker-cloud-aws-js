@@ -1,6 +1,6 @@
 import { App } from 'aws-cdk-lib'
 import { readFileSync } from 'fs'
-import * as path from 'path'
+import path from 'path'
 import { enabledInContext } from '../helper/enabledInContext.js'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner.js'
 import type {
