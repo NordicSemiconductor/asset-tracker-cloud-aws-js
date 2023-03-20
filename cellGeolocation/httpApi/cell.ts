@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { SQSClient } from '@aws-sdk/client-sqs'
-import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs'
+import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import {
 	cellId,
 	NetworkMode,
