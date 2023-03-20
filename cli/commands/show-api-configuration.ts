@@ -1,8 +1,8 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { setting } from '../../cdk/helper/note'
-import { CORE_STACK_NAME } from '../../cdk/stacks/stackName'
-import { getSettings } from '../../util/settings'
-import { CommandDefinition } from './CommandDefinition'
+import { setting } from '../../cdk/helper/note.js'
+import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
+import { getSettings } from '../../util/settings.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const showAPIConfigurationCommand = (): CommandDefinition => ({
 	command: 'show-api-configuration <scope> <api>',

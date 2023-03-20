@@ -1,9 +1,8 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { Static } from '@sinclair/typebox'
-import { Either, left, right } from 'fp-ts/lib/Either'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { agpsRequestSchema } from './types'
+import type { Static } from '@sinclair/typebox'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { agpsRequestSchema } from './types.js'
 
 export type AGPSDataCache = Static<typeof agpsRequestSchema> & {
 	source: string
@@ -14,7 +13,7 @@ export type AGPSDataCache = Static<typeof agpsRequestSchema> & {
 
 export const getCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
-	async (cacheKey: string): Promise<Either<ErrorInfo, AGPSDataCache>> => {
+	async (cacheKey: string): Promise<{ error: ErrorInfo } | AGPSDataCache> => {
 		try {
 			const { Item } = await dynamodb.send(
 				new GetItemCommand({
@@ -30,7 +29,7 @@ export const getCache =
 			if (Item === undefined) throw new Error('NOT_FOUND')
 
 			const entry = unmarshall(Item)
-			const i = {
+			return {
 				...entry,
 				updatedAt: new Date(entry.updatedAt as string),
 				types: [...(entry.types as Set<number>)],
@@ -39,17 +38,17 @@ export const getCache =
 						? [...(entry.dataHex as Set<string>)]
 						: undefined,
 			} as AGPSDataCache
-
-			return right(i)
 		} catch (err) {
 			if (
 				(err as Error).message === 'NOT_FOUND' ||
 				(err as Error).name === 'ResourceNotFoundException'
 			)
-				return left({
-					type: ErrorType.EntityNotFound,
-					message: `Report ${cacheKey} not found!`,
-				})
+				return {
+					error: {
+						type: ErrorType.EntityNotFound,
+						message: `Report ${cacheKey} not found!`,
+					},
+				}
 			console.error(
 				JSON.stringify({
 					getCache: {
@@ -60,9 +59,11 @@ export const getCache =
 					},
 				}),
 			)
-			return left({
-				type: ErrorType.InternalError,
-				message: (err as Error).message,
-			})
+			return {
+				error: {
+					type: ErrorType.InternalError,
+					message: (err as Error).message,
+				},
+			}
 		}
 	}

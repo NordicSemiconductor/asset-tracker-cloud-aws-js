@@ -1,6 +1,9 @@
 import { Type } from '@sinclair/typebox'
-import { minimumGpsDay } from './gpsTime'
+import { minimumGpsDay } from './gpsTime.js'
 
+/**
+ * @see https://api.nrfcloud.com/v1#tag/Predicted-GPS/operation/GetPredictedAssistanceData
+ */
 export const pgpsRequestSchema = Type.Object({
 	n: Type.Optional(
 		Type.Integer({ minimum: 1, title: 'number of predictions' }),

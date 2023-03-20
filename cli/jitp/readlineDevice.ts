@@ -1,7 +1,7 @@
-import { Connection } from '@nordicsemiconductor/firmware-ci-device-helpers'
+import type { Connection } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import chalk from 'chalk'
-import * as readline from 'readline'
-import { defaultFirmwareRepository } from '../commands/flash-firmware'
+import readline from 'readline'
+import { defaultFirmwareRepository } from '../commands/flash-firmware.js'
 
 /**
  * Provides a device that uses readline as the UART interface and requires a human to provide the input.

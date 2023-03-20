@@ -1,8 +1,21 @@
 {
-  "extends": "@nordicsemiconductor/asset-tracker-cloud-code-style/tsconfig.json",
-  "include": ["**/*.ts"],
   "compilerOptions": {
+    "target": "esnext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
     "noEmit": true,
-    "esModuleInterop": true
+    "importsNotUsedAsValues": "error",
+    "skipLibCheck": true
   }
 }

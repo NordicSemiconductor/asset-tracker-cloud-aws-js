@@ -1,4 +1,4 @@
-import { parseMCCMNC } from './parseMCCMNC'
+import { parseMCCMNC } from './parseMCCMNC.js'
 
 describe('parseMCCMNC()', () => {
 	it.each([

@@ -7,14 +7,14 @@ import {
 import { randomWords } from '@nordicsemiconductor/random-words'
 import { expect } from 'chai'
 import { promises as fs } from 'fs'
-import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate'
-import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR'
-import { getCurrentCA } from '../../cli/jitp/currentCA'
-import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
+import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate.js'
+import { createSimulatorKeyAndCSR } from '../../cli/jitp/createSimulatorKeyAndCSR.js'
+import { getCurrentCA } from '../../cli/jitp/currentCA.js'
+import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import {
 	awsIotDeviceConnection,
 	ListenerWithPayload,
-} from './awsIotDeviceConnection'
+} from './awsIotDeviceConnection.js'
 
 type World = {
 	accountId: string
@@ -155,7 +155,7 @@ export const assetTrackerStepRunners = ({
 			const publishPromise = new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
 				connection
-					.publish(topic, JSON.stringify(message))
+					.publish(topic as string, JSON.stringify(message))
 					.then(resolve)
 					.catch(reject)
 					.finally(() => {
@@ -172,7 +172,7 @@ export const assetTrackerStepRunners = ({
 			const isRaw = raw !== undefined
 
 			const expectedMessageCount =
-				messageCount === 'a' ? 1 : parseInt(messageCount, 10)
+				messageCount === 'a' ? 1 : parseInt(messageCount as string, 10)
 			const messages: (Record<string, any> | string)[] = []
 
 			return new Promise((resolve, reject) => {
@@ -223,9 +223,9 @@ export const assetTrackerStepRunners = ({
 
 						return resolve(result)
 					}
-					connection.onMessageOnce(topic, listener).catch(catchError)
+					connection.onMessageOnce(topic as string, listener).catch(catchError)
 				}
-				connection.onMessageOnce(topic, listener).catch(catchError)
+				connection.onMessageOnce(topic as string, listener).catch(catchError)
 			})
 		}),
 		regexGroupMatcher(
@@ -250,8 +250,10 @@ export const assetTrackerStepRunners = ({
 				connection
 					.onMessageOnce(successTopic, (message) => {
 						clearTimeout(timeout)
-						runner.store[storeName] = JSON.parse(message.toString()).execution
-						resolve(runner.store[storeName])
+						runner.store[storeName as string] = JSON.parse(
+							message.toString(),
+						).execution
+						resolve(runner.store[storeName as string])
 					})
 					.catch(catchError)
 
@@ -264,7 +266,7 @@ export const assetTrackerStepRunners = ({
 			const catId = deviceId ?? runner.store['tracker:id']
 			const connection = await connectToBroker(catId)
 
-			const job = runner.store[storeName]
+			const job = runner.store[storeName as string]
 			expect(job).to.not.be.an('undefined')
 
 			const updateJobTopic = `$aws/things/${catId}/jobs/${job.jobId}/update`
@@ -283,7 +285,7 @@ export const assetTrackerStepRunners = ({
 				connection
 					.onMessageOnce(successTopic, (message) => {
 						clearTimeout(timeout)
-						runner.store[storeName] = JSON.parse(message.toString())
+						runner.store[storeName as string] = JSON.parse(message.toString())
 						resolve(JSON.parse(message.toString()))
 					})
 					.then(async () =>

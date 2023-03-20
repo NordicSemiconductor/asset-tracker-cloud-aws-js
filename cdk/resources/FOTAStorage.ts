@@ -1,6 +1,6 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as S3 from 'aws-cdk-lib/aws-s3'
+import CloudFormation from 'aws-cdk-lib'
+import IAM from 'aws-cdk-lib/aws-iam'
+import S3 from 'aws-cdk-lib/aws-s3'
 
 /**
  * Storage firmware files

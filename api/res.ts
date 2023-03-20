@@ -1,4 +1,4 @@
-import { APIGatewayProxyResultV2 } from 'aws-lambda'
+import type { APIGatewayProxyResultV2 } from 'aws-lambda'
 
 export const res =
 	(statusCode: number, options?: { expires: number }) =>

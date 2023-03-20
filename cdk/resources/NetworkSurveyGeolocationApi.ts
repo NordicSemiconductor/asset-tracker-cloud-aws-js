@@ -1,10 +1,10 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { NetworkSurveyGeolocation } from './NetworkSurveyGeolocation'
-import { NetworkSurveysStorage } from './NetworkSurveysStorage'
+import CloudFormation from 'aws-cdk-lib'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import type { NetworkSurveyGeolocation } from './NetworkSurveyGeolocation.js'
+import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
 
 /**
  * Provides geo-location for Network surveys from devices through a HTTP API
@@ -24,7 +24,7 @@ export class NetworkSurveyGeolocationApi extends CloudFormation.Resource {
 			geolocation,
 		}: {
 			storage: NetworkSurveysStorage
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			geolocation: NetworkSurveyGeolocation
 		},
 	) {
@@ -32,12 +32,14 @@ export class NetworkSurveyGeolocationApi extends CloudFormation.Resource {
 
 		const getSurveyLocation = new Lambda.Function(this, 'lambda', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler: lambdas.lambdas.geolocateNetworkSurveyHttpApi.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(60),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateNetworkSurveyHttpApi,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.geolocateNetworkSurveyHttpApi.zipFile,
+			),
 			description: 'Geolocate Network survey',
 			environment: {
 				SURVEYS_TABLE: storage.surveysTable.tableName,

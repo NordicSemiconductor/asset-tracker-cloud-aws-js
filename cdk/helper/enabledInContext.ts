@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { Node } from 'constructs'
+import type { Node } from 'constructs'
 
 const ENABLED = 'enabled'
 const DISABLED = 'disabled'

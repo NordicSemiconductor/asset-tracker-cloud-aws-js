@@ -1,7 +1,7 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as IoT from 'aws-cdk-lib/aws-iot'
+import CloudFormation from 'aws-cdk-lib'
+import DynamoDB from 'aws-cdk-lib/aws-dynamodb'
+import IAM from 'aws-cdk-lib/aws-iam'
+import IoT from 'aws-cdk-lib/aws-iot'
 
 /**
  * Provides storage for Network surveys

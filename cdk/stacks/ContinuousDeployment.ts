@@ -1,14 +1,17 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as CodeBuild from 'aws-cdk-lib/aws-codebuild'
-import * as CodePipeline from 'aws-cdk-lib/aws-codepipeline'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as S3 from 'aws-cdk-lib/aws-s3'
-import * as SSM from 'aws-cdk-lib/aws-ssm'
+import CloudFormation from 'aws-cdk-lib'
+import CodeBuild from 'aws-cdk-lib/aws-codebuild'
+import CodePipeline from 'aws-cdk-lib/aws-codepipeline'
+import IAM from 'aws-cdk-lib/aws-iam'
+import S3 from 'aws-cdk-lib/aws-s3'
+import SSM from 'aws-cdk-lib/aws-ssm'
 import chalk from 'chalk'
-import { enabledInContext } from '../helper/enabledInContext'
-import { info } from '../helper/note'
-import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD'
-import { CONTINUOUS_DEPLOYMENT_STACK_NAME, CORE_STACK_NAME } from './stackName'
+import { enabledInContext } from '../helper/enabledInContext.js'
+import { info } from '../helper/note.js'
+import { BuildActionCodeBuild, WebAppCD } from '../resources/WebAppCD.js'
+import {
+	CONTINUOUS_DEPLOYMENT_STACK_NAME,
+	CORE_STACK_NAME,
+} from './stackName.js'
 
 /**
  * This is the CloudFormation stack sets up the continuous deployment of the project.

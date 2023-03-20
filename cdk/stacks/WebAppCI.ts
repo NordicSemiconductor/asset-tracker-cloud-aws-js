@@ -1,9 +1,9 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as Cognito from 'aws-cdk-lib/aws-cognito'
-import * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
-import { WebAppCI } from '../resources/WebAppCI'
-import { StackOutputs } from './AssetTracker/stack'
-import { WEBAPP_CI_STACK_NAME } from './stackName'
+import CloudFormation from 'aws-cdk-lib'
+import Cognito from 'aws-cdk-lib/aws-cognito'
+import DynamoDB from 'aws-cdk-lib/aws-dynamodb'
+import { WebAppCI } from '../resources/WebAppCI.js'
+import { StackOutputs } from './AssetTracker/stack.js'
+import { WEBAPP_CI_STACK_NAME } from './stackName.js'
 
 export class WebAppCIStack extends CloudFormation.Stack {
 	public constructor(parent: CloudFormation.App) {

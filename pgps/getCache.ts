@@ -1,10 +1,9 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
-import { Static } from '@sinclair/typebox'
-import { Either, left, right } from 'fp-ts/lib/Either'
+import type { Static } from '@sinclair/typebox'
 import { URL } from 'url'
-import { ErrorInfo, ErrorType } from '../api/ErrorInfo'
-import { pgpsRequestSchema } from './types'
+import { ErrorInfo, ErrorType } from '../api/ErrorInfo.js'
+import type { pgpsRequestSchema } from './types.js'
 
 export type PGPSDataCache = Static<typeof pgpsRequestSchema> & {
 	source: string
@@ -15,7 +14,7 @@ export type PGPSDataCache = Static<typeof pgpsRequestSchema> & {
 
 export const getCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
-	async (cacheKey: string): Promise<Either<ErrorInfo, PGPSDataCache>> => {
+	async (cacheKey: string): Promise<{ error: ErrorInfo } | PGPSDataCache> => {
 		try {
 			const { Item } = await dynamodb.send(
 				new GetItemCommand({
@@ -42,16 +41,18 @@ export const getCache =
 					getCache: { entry: i },
 				}),
 			)
-			return right(i)
+			return i
 		} catch (err) {
 			if (
 				(err as Error).message === 'NOT_FOUND' ||
 				(err as Error).name === 'ResourceNotFoundException'
 			)
-				return left({
-					type: ErrorType.EntityNotFound,
-					message: `Report ${cacheKey} not found!`,
-				})
+				return {
+					error: {
+						type: ErrorType.EntityNotFound,
+						message: `Report ${cacheKey} not found!`,
+					},
+				}
 			console.error(
 				JSON.stringify({
 					getCache: {
@@ -62,9 +63,11 @@ export const getCache =
 					},
 				}),
 			)
-			return left({
-				type: ErrorType.InternalError,
-				message: (err as Error).message,
-			})
+			return {
+				error: {
+					type: ErrorType.InternalError,
+					message: (err as Error).message,
+				},
+			}
 		}
 	}

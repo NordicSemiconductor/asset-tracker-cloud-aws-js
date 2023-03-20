@@ -1,4 +1,4 @@
-import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords'
+import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords.js'
 
 describe('shadowUpdateToTimestreamRecords', () => {
 	it('should convert a shadow update to Timestream records', () => {
@@ -145,8 +145,10 @@ describe('shadowUpdateToTimestreamRecords', () => {
 				TimeUnit: 'MILLISECONDS',
 			},
 		])
-		const first = r[0].Dimensions?.find(({ Name }) => Name === 'measureGroup')
-		const last = r[r.length - 1].Dimensions?.find(
+		const first = r?.[0]?.Dimensions?.find(
+			({ Name }) => Name === 'measureGroup',
+		)
+		const last = r?.[r.length - 1]?.Dimensions?.find(
 			({ Name }) => Name === 'measureGroup',
 		)
 		// measureGroups should be equal for measures

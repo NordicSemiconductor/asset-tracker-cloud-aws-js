@@ -1,4 +1,4 @@
-import { cacheKey } from './cacheKey'
+import { cacheKey } from './cacheKey.js'
 
 describe('cacheKey', () => {
 	it('should create a cache key', () =>

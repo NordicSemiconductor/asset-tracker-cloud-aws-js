@@ -4,10 +4,10 @@ import {
 	GetItemCommand,
 	PutItemCommand,
 } from '@aws-sdk/client-dynamodb'
-import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
+import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { randomUUID } from 'node:crypto'
-import * as querystring from 'querystring'
-import { splitMockResponse } from './splitMockResponse'
+import querystring from 'querystring'
+import { splitMockResponse } from './splitMockResponse.js'
 
 const db = new DynamoDBClient({})
 
@@ -79,12 +79,12 @@ export const handler = async (
 			}),
 		)
 
-		const { body, headers } = splitMockResponse(Item.body.S ?? '')
+		const { body, headers } = splitMockResponse(Item.body?.S ?? '')
 
 		// Send as binary, if mock response is HEX encoded. See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-payload-encodings.html
 		const isBinary = /^[0-9a-f]+$/.test(body)
 		const res = {
-			statusCode: parseInt(Item.statusCode.N ?? '200', 10),
+			statusCode: parseInt(Item.statusCode?.N ?? '200', 10),
 			headers: isBinary
 				? {
 						...headers,

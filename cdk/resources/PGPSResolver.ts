@@ -1,15 +1,15 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
-import * as StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import { enabledInContext } from '../helper/enabledInContext'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { CORE_STACK_NAME } from '../stacks/stackName'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { logToCloudWatch } from './logToCloudWatch'
-import { PGPSStorage } from './PGPSStorage'
+import CloudFormation from 'aws-cdk-lib'
+import IAM from 'aws-cdk-lib/aws-iam'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
+import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
+import { enabledInContext } from '../helper/enabledInContext.js'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { CORE_STACK_NAME } from '../stacks/stackName.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import type { PGPSStorage } from './PGPSStorage.js'
 
 /**
  * Provides a state machine that can resolve P-GPS requests
@@ -23,7 +23,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 			lambdas,
 			storage,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: PGPSStorage
 		},
 	) {
@@ -40,12 +40,14 @@ export class PGPSResolver extends CloudFormation.Resource {
 			onEnabled: () => {
 				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 					layers: lambdas.layers,
-					handler: 'index.handler',
+					handler: lambdas.lambdas.pgpsNrfCloudStepFunction.handler,
 					architecture: Lambda.Architecture.ARM_64,
 					runtime: Lambda.Runtime.NODEJS_18_X,
 					timeout: CloudFormation.Duration.seconds(10),
 					memorySize: 1792,
-					code: lambdas.lambdas.pgpsNrfCloudStepFunction,
+					code: Lambda.Code.fromAsset(
+						lambdas.lambdas.pgpsNrfCloudStepFunction.zipFile,
+					),
 					description:
 						'Use the nRF Cloud API to provide P-GPS data for devices',
 					initialPolicy: [

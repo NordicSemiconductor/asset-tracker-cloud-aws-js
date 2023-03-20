@@ -14,10 +14,10 @@ import {
 	CORE_STACK_NAME,
 	FIRMWARE_CI_STACK_NAME,
 	WEBAPP_STACK_NAME,
-} from '../../cdk/stacks/stackName'
-import { paginate } from '../../util/paginate'
-import { CommandDefinition } from './CommandDefinition'
-import { retry } from './retry'
+} from '../../cdk/stacks/stackName.js'
+import { paginate } from '../../util/paginate.js'
+import type { CommandDefinition } from './CommandDefinition.js'
+import { retry } from './retry.js'
 
 const cf = new CloudFormationClient({})
 

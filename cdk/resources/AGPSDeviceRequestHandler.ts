@@ -1,15 +1,14 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import { Duration } from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as IoT from 'aws-cdk-lib/aws-iot'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as SQS from 'aws-cdk-lib/aws-sqs'
-import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { AGPSResolver } from './AGPSResolver'
-import { AGPSStorage } from './AGPSStorage'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
+import CloudFormation, { Duration } from 'aws-cdk-lib'
+import IAM from 'aws-cdk-lib/aws-iam'
+import IoT from 'aws-cdk-lib/aws-iot'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import SQS from 'aws-cdk-lib/aws-sqs'
+import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined.js'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import type { AGPSResolver } from './AGPSResolver.js'
+import type { AGPSStorage } from './AGPSStorage.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
 
 export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
 
@@ -39,7 +38,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			storage,
 			resolver,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: AGPSStorage
 			resolver: AGPSResolver
 		},
@@ -104,12 +103,14 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			'deviceRequestHandler',
 			{
 				layers: lambdas.layers,
-				handler: 'index.handler',
+				handler: lambdas.lambdas.agpsDeviceRequestHandler.handler,
 				architecture: Lambda.Architecture.ARM_64,
 				runtime: Lambda.Runtime.NODEJS_18_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
-				code: lambdas.lambdas.agpsDeviceRequestHandler,
+				code: Lambda.Code.fromAsset(
+					lambdas.lambdas.agpsDeviceRequestHandler.zipFile,
+				),
 				description:
 					'Handles A-GPS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
 				environment: {

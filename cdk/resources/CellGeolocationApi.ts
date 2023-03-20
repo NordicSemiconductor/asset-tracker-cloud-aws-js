@@ -1,14 +1,14 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as HttpApi from 'aws-cdk-lib/aws-apigatewayv2'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as CloudWatchLogs from 'aws-cdk-lib/aws-logs'
-import * as SQS from 'aws-cdk-lib/aws-sqs'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { CellGeolocation } from './CellGeolocation'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { logToCloudWatch } from './logToCloudWatch'
+import CloudFormation from 'aws-cdk-lib'
+import HttpApi from 'aws-cdk-lib/aws-apigatewayv2'
+import IAM from 'aws-cdk-lib/aws-iam'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import CloudWatchLogs from 'aws-cdk-lib/aws-logs'
+import SQS from 'aws-cdk-lib/aws-sqs'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import type { CellGeolocation } from './CellGeolocation.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -28,7 +28,7 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			lambdas,
 		}: {
 			cellgeo: CellGeolocation
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 		},
 	) {
 		super(parent, id)
@@ -39,12 +39,14 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		})
 
 		const fromSQS = new Lambda.Function(this, 'fromSQS', {
-			handler: 'index.handler',
+			handler: lambdas.lambdas.invokeStepFunctionFromSQS.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.invokeStepFunctionFromSQS,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.invokeStepFunctionFromSQS.zipFile,
+			),
 			layers: lambdas.layers,
 			description:
 				'Invoke the cell geolocation resolution step function for SQS messages',
@@ -75,12 +77,12 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 
 		const getCell = new Lambda.Function(this, 'getCell', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler: lambdas.lambdas.geolocateCellHttpApi.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.geolocateCellHttpApi,
+			code: Lambda.Code.fromAsset(lambdas.lambdas.geolocateCellHttpApi.zipFile),
 			description: 'Geolocate cells',
 			initialPolicy: [
 				logToCloudWatch,

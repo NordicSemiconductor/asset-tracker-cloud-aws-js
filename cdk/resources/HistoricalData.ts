@@ -1,12 +1,12 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as IoT from 'aws-cdk-lib/aws-iot'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as Timestream from 'aws-cdk-lib/aws-timestream'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { logToCloudWatch } from './logToCloudWatch'
+import CloudFormation from 'aws-cdk-lib'
+import IAM from 'aws-cdk-lib/aws-iam'
+import IoT from 'aws-cdk-lib/aws-iot'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import Timestream from 'aws-cdk-lib/aws-timestream'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
 
 /**
  * Provides resources for historical data
@@ -21,7 +21,7 @@ export class HistoricalData extends CloudFormation.Resource {
 			lambdas,
 			userRole,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			userRole: IAM.IRole
 		},
 	) {
@@ -63,12 +63,14 @@ export class HistoricalData extends CloudFormation.Resource {
 
 		const storeMessagesInTimestream = new Lambda.Function(this, 'lambda', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler: lambdas.lambdas.storeMessagesInTimestream.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.minutes(2),
 			memorySize: 1792,
-			code: lambdas.lambdas.storeMessagesInTimestream,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.storeMessagesInTimestream.zipFile,
+			),
 			description:
 				'Processes devices messages and updates and stores them in Timestream',
 			initialPolicy: [

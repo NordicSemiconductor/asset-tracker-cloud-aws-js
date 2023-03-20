@@ -12,7 +12,7 @@ export const splitMockResponse = (
 			.slice(0, blankLineLocation)
 			.split('\n')
 			.map((s) => s.split(':', 2))
-			.reduce((headers, [k, v]) => ({ ...headers, [k]: v.trim() }), {}),
+			.reduce((headers, [k, v]) => ({ ...headers, [k ?? '']: v?.trim() }), {}),
 		body: r.slice(blankLineLocation + 2),
 	}
 }

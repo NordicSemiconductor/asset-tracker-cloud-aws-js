@@ -1,7 +1,7 @@
 import { device } from 'aws-iot-device-sdk'
 import { promises as fs } from 'fs'
-import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations'
-import { isNullOrUndefined } from '../../util/isNullOrUndefined'
+import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
+import { isNullOrUndefined } from '../../util/isNullOrUndefined.js'
 
 export type Listener = () => unknown
 export type ListenerWithPayload = (payload: Buffer) => unknown
@@ -39,7 +39,10 @@ export const awsIotDeviceConnection = ({
 					fs.readFile(deviceFiles.certWithCA, 'utf-8'),
 				])
 			}
-			const [privateKey, clientCert] = await credentials[clientId]
+			const [privateKey, clientCert] = (await credentials[clientId]) as [
+				string,
+				string,
+			]
 			const d = new device({
 				privateKey: Buffer.from(privateKey),
 				clientCert: Buffer.from(clientCert),
@@ -100,6 +103,6 @@ export const awsIotDeviceConnection = ({
 					}),
 			}
 		}
-		return connections[clientId]
+		return connections[clientId] as Connection
 	}
 }

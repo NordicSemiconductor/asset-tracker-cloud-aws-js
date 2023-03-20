@@ -1,4 +1,4 @@
-import { toQueryString } from './apiclient'
+import { toQueryString } from './apiclient.js'
 
 describe('nRF Cloud API client', () => {
 	it('should encode query strings', () =>

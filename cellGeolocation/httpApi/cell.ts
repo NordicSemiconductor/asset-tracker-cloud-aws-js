@@ -1,20 +1,20 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { SQSClient } from '@aws-sdk/client-sqs'
+import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import {
 	cellId,
 	NetworkMode,
 } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Type } from '@sinclair/typebox'
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-import { pipe } from 'fp-ts/lib/pipeable'
-import * as TE from 'fp-ts/lib/TaskEither'
-import { ErrorType, toStatusCode } from '../../api/ErrorInfo'
-import { resFP } from '../../api/resFP'
-import { validateWithJSONSchemaFP } from '../../api/validateWithJSONSchemaFP'
-import { queueJobFP } from '../../geolocation/queueJobFP'
-import { getOrElse } from '../../util/fp-ts'
-import { fromEnv } from '../../util/fromEnv'
-import { geolocateFromCache } from '../geolocateFromCache'
+import type {
+	APIGatewayProxyEventV2,
+	APIGatewayProxyResultV2,
+} from 'aws-lambda'
+import { ErrorType, toStatusCode } from '../../api/ErrorInfo.js'
+import { res } from '../../api/res.js'
+import { queueJob } from '../../geolocation/queueJob.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { geolocateFromCache } from '../geolocateFromCache.js'
 
 const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
 	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',
@@ -26,7 +26,7 @@ const locator = geolocateFromCache({
 	TableName: cacheTable,
 })
 
-const q = queueJobFP({
+const q = queueJob({
 	QueueUrl: cellGeolocationResolutionJobsQueue,
 	sqs: new SQSClient({}),
 })
@@ -55,7 +55,7 @@ const cellInputSchema = Type.Object(
 
 console.log(JSON.stringify(cellInputSchema, null, 2))
 
-const validateInput = validateWithJSONSchemaFP(cellInputSchema)
+const validateInput = validateWithType(cellInputSchema)
 
 const allMembersToInt = (o: Record<string, any>): Record<string, number> =>
 	Object.entries(o).reduce(
@@ -64,56 +64,49 @@ const allMembersToInt = (o: Record<string, any>): Record<string, number> =>
 	)
 
 export const handler = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
+	event: APIGatewayProxyEventV2,
+): Promise<APIGatewayProxyResultV2> => {
 	console.log(JSON.stringify(event))
 
-	return pipe(
-		validateInput({
-			...allMembersToInt(event.queryStringParameters ?? {}),
-			nw: event?.queryStringParameters?.nw ?? '',
-		}),
-		TE.fromEither,
-		TE.chain((cell) =>
-			pipe(
-				locator(cell),
-				getOrElse.TE(() =>
-					pipe(
-						q({ payload: cell, deduplicationId: cellId(cell) }),
-						TE.fold(
-							(err) => TE.left(err),
-							() =>
-								TE.left({
-									type: ErrorType.Conflict,
-									message: 'Calculation for cell geolocation in process',
-								}),
-						),
-					),
-				),
-			),
-		),
-		TE.fold(
-			(error) =>
-				resFP(toStatusCode[error.type], {
-					expires: 60,
-				})(error),
-			(cell) => {
-				if (cell.unresolved) {
-					return resFP(toStatusCode[ErrorType.EntityNotFound], {
-						expires: 86400,
-					})({
-						type: ErrorType.EntityNotFound,
-						message: `cell geolocation not found!`,
-					})
-				}
-				return resFP(200, {
-					expires: 86400,
-				})({
-					lat: cell.lat,
-					lng: cell.lng,
-					accuracy: cell.accuracy,
-				})
-			},
-		),
-	)()
+	const maybeValidInput = validateInput({
+		...allMembersToInt(event.queryStringParameters ?? {}),
+		nw: event?.queryStringParameters?.nw ?? '',
+	})
+	if ('errors' in maybeValidInput) {
+		return res(toStatusCode[ErrorType.BadRequest])(maybeValidInput.errors)
+	}
+	const cell = await locator(maybeValidInput)
+
+	if ('error' in cell) {
+		const scheduled = await q({
+			payload: maybeValidInput,
+			deduplicationId: cellId(maybeValidInput),
+		})
+		if (scheduled !== undefined && 'error' in scheduled) {
+			return res(toStatusCode[scheduled.error.type], {
+				expires: 60,
+			})(scheduled.error)
+		}
+		return res(toStatusCode[ErrorType.Conflict], {
+			expires: 60,
+		})({
+			type: ErrorType.Conflict,
+			message: 'Calculation for cell geolocation in process',
+		})
+	}
+	if (cell.unresolved) {
+		return res(toStatusCode[ErrorType.EntityNotFound], {
+			expires: 86400,
+		})({
+			type: ErrorType.EntityNotFound,
+			message: `cell geolocation not found!`,
+		})
+	}
+	return res(200, {
+		expires: 86400,
+	})({
+		lat: cell.lat,
+		lng: cell.lng,
+		accuracy: cell.accuracy,
+	})
 }

@@ -8,17 +8,17 @@ import {
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import chalk from 'chalk'
 import { promises as fs } from 'fs'
-import * as os from 'os'
-import * as path from 'path'
+import os from 'os'
+import path from 'path'
 import {
 	createDeviceCertificate,
 	defaultDeviceCertificateValidityInDays,
-} from '../jitp/createDeviceCertificate'
-import { getCurrentCA } from '../jitp/currentCA'
-import { deviceFileLocations } from '../jitp/deviceFileLocations'
-import { readlineDevice } from '../jitp/readlineDevice'
-import { run } from '../process/run'
-import { CommandDefinition } from './CommandDefinition'
+} from '../jitp/createDeviceCertificate.js'
+import { getCurrentCA } from '../jitp/currentCA.js'
+import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
+import { readlineDevice } from '../jitp/readlineDevice.js'
+import { run } from '../process/run.js'
+import type { CommandDefinition } from './CommandDefinition.js'
 
 export const defaultPort = '/dev/ttyACM0'
 export const defaultSecTag = 42

@@ -1,14 +1,14 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
-import * as StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas'
-import { CORE_STACK_NAME } from '../stacks/stackName'
-import { LambdaLogGroup } from './LambdaLogGroup'
-import { LambdasWithLayer } from './LambdasWithLayer'
-import { logToCloudWatch } from './logToCloudWatch'
-import { NetworkSurveysStorage } from './NetworkSurveysStorage'
+import CloudFormation from 'aws-cdk-lib'
+import IAM from 'aws-cdk-lib/aws-iam'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
+import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
+import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
+import { CORE_STACK_NAME } from '../stacks/stackName.js'
+import { LambdaLogGroup } from './LambdaLogGroup.js'
+import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
+import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
 
 /**
  * Describes the step functions which resolves the geolocation of network survey using nRF Cloud Location Services
@@ -22,7 +22,7 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 			lambdas,
 			storage,
 		}: {
-			lambdas: LambdasWithLayer<AssetTrackerLambdas>
+			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
 			storage: NetworkSurveysStorage
 		},
 	) {
@@ -30,12 +30,15 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 
 		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 			layers: lambdas.layers,
-			handler: 'index.handler',
+			handler:
+				lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
-			code: lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.networkSurveyGeolocateFromNrfCloudStepFunction.zipFile,
+			),
 			description:
 				'Resolve device geolocation from network survey using the nRF Cloud API',
 			initialPolicy: [

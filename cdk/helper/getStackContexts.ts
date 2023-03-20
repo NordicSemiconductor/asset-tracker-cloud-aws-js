@@ -1,5 +1,5 @@
-import { SSMClient } from '@aws-sdk/client-ssm'
-import { getSettings } from '../../util/settings'
+import type { SSMClient } from '@aws-sdk/client-ssm'
+import { getSettings } from '../../util/settings.js'
 
 type StackContexts = {
 	nrfcloudAGPS: '0' | '1'

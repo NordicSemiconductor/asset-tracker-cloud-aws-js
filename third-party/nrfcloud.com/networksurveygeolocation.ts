@@ -1,20 +1,18 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
+import {
+	NeighboringCellMeasurements,
+	validateWithType,
+	WiFiSiteSurvey,
+} from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
 import { Static, TObject, TProperties, Type } from '@sinclair/typebox'
 import { URL } from 'url'
-import { validateWithJSONSchema } from '../../api/validateWithJSONSchema'
-import { MaybeLocation } from '../../geolocation/types'
-import { expandMac } from '../../networkSurveyGeolocation/expandMac'
-import { fromEnv } from '../../util/fromEnv'
-import { apiClient } from './apiclient'
-import {
-	EARFCN,
-	groundFixRequestSchema,
-	RSRP,
-	RSRQ,
-	TimingAdvance,
-} from './groundFixRequestSchema'
-import { locateResultSchema } from './locate'
-import { getGroundFixApiSettings } from './settings'
+import type { MaybeLocation } from '../../geolocation/types.js'
+import { expandMac } from '../../networkSurveyGeolocation/expandMac.js'
+import { fromEnv } from '../../util/fromEnv.js'
+import { apiClient } from './apiclient.js'
+import { groundFixRequestSchema } from './groundFixRequestSchema.js'
+import { locateResultSchema } from './locate.js'
+import { getGroundFixApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',
@@ -30,42 +28,11 @@ const networkSurveyLocateInputSchema = Type.Object({
 	deviceId: Type.String(),
 	timestamp: Type.String(),
 	nw: Type.String({ minLength: 1 }),
-	lte: Type.Optional(
-		Type.Object({
-			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-			mnc: Type.Integer({ minimum: 0, maximum: 999 }),
-			cell: Type.Integer({ minimum: 1 }),
-			area: Type.Integer({ minimum: 1 }),
-			earfcn: Type.Optional(EARFCN),
-			adv: Type.Optional(TimingAdvance),
-			rsrp: Type.Optional(RSRP),
-			rsrq: Type.Optional(RSRQ),
-			nmr: Type.Optional(
-				Type.Array(
-					Type.Object(
-						{
-							cell: Type.Integer({ minimum: 1 }),
-							earfcn: Type.Integer({ minimum: 1 }),
-							rsrp: RSRP,
-							rsrq: RSRQ,
-						},
-						{ additionalProperties: false },
-					),
-					{ minItems: 1 },
-				),
-			),
-			ts: Type.Integer({ minimum: 1 }),
-		}),
-	),
-	wifi: Type.Optional(
-		Type.Object({
-			ts: Type.Integer({ minimum: 1 }),
-			aps: Type.Array(Type.String()),
-		}),
-	),
+	lte: Type.Optional(NeighboringCellMeasurements),
+	wifi: Type.Optional(WiFiSiteSurvey),
 })
 
-const validateInput = validateWithJSONSchema(networkSurveyLocateInputSchema)
+const validateInput = validateWithType(networkSurveyLocateInputSchema)
 
 export const handler = async (
 	event: Static<typeof networkSurveyLocateInputSchema>,
@@ -76,7 +43,7 @@ export const handler = async (
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
 	const maybeValidInput = validateInput(event)
-	if ('error' in maybeValidInput) {
+	if ('errors' in maybeValidInput) {
 		console.error(JSON.stringify(maybeValidInput))
 		return {
 			located: false,

@@ -4,8 +4,8 @@ import {
 	getIMEI,
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import chalk from 'chalk'
-import { CommandDefinition } from './CommandDefinition'
-import { defaultPort } from './create-and-provision-device-cert'
+import type { CommandDefinition } from './CommandDefinition.js'
+import { defaultPort } from './create-and-provision-device-cert.js'
 
 export const imeiCommand = (): CommandDefinition => ({
 	command: 'imei',

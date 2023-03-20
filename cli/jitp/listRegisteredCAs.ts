@@ -3,8 +3,8 @@ import {
 	IoTClient,
 	ListCACertificatesCommand,
 } from '@aws-sdk/client-iot'
-import { paginate } from '../../util/paginate'
-import { fingerprint } from './fingerprint'
+import { paginate } from '../../util/paginate.js'
+import { fingerprint } from './fingerprint.js'
 
 /**
  * Returns a map of the registered CA IDs and their fingerprints

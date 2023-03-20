@@ -1,33 +1,30 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as Cognito from 'aws-cdk-lib/aws-cognito'
-import * as IAM from 'aws-cdk-lib/aws-iam'
-import * as Iot from 'aws-cdk-lib/aws-iot'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
-import * as S3 from 'aws-cdk-lib/aws-s3'
-import { enabledInContext } from '../../helper/enabledInContext'
-import { PackedLambdas } from '../../helper/lambdas/PackedLambdas'
-import { warn } from '../../helper/note'
-import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler'
-import { AGPSResolver } from '../../resources/AGPSResolver'
-import { AGPSStorage } from '../../resources/AGPSStorage'
-import { CellGeolocation } from '../../resources/CellGeolocation'
-import { CellGeolocationApi } from '../../resources/CellGeolocationApi'
-import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations'
-import { FOTAStorage } from '../../resources/FOTAStorage'
-import { HistoricalData } from '../../resources/HistoricalData'
-import { lambdasOnS3 } from '../../resources/lambdasOnS3'
-import { LambdasWithLayer } from '../../resources/LambdasWithLayer'
-import { NetworkSurveyGeolocation } from '../../resources/NetworkSurveyGeolocation'
-import { NetworkSurveyGeolocationApi } from '../../resources/NetworkSurveyGeolocationApi'
-import { NetworkSurveysStorage } from '../../resources/NetworkSurveysStorage'
-import { PGPSDeviceRequestHandler } from '../../resources/PGPSDeviceRequestHandler'
-import { PGPSResolver } from '../../resources/PGPSResolver'
-import { PGPSStorage } from '../../resources/PGPSStorage'
-import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig'
-import { ThingGroup } from '../../resources/ThingGroup'
-import { ThingGroupLambda } from '../../resources/ThingGroupLambda'
-import { CORE_STACK_NAME } from '../stackName'
-import { AssetTrackerLambdas, CDKLambdas } from './lambdas'
+import CloudFormation from 'aws-cdk-lib'
+import Cognito from 'aws-cdk-lib/aws-cognito'
+import IAM from 'aws-cdk-lib/aws-iam'
+import Iot from 'aws-cdk-lib/aws-iot'
+import Lambda from 'aws-cdk-lib/aws-lambda'
+import { enabledInContext } from '../../helper/enabledInContext.js'
+import { warn } from '../../helper/note.js'
+import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler.js'
+import { AGPSResolver } from '../../resources/AGPSResolver.js'
+import { AGPSStorage } from '../../resources/AGPSStorage.js'
+import { CellGeolocation } from '../../resources/CellGeolocation.js'
+import { CellGeolocationApi } from '../../resources/CellGeolocationApi.js'
+import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations.js'
+import { FOTAStorage } from '../../resources/FOTAStorage.js'
+import { HistoricalData } from '../../resources/HistoricalData.js'
+import type { LambdasWithLayer } from '../../resources/LambdasWithLayer.js'
+import { NetworkSurveyGeolocation } from '../../resources/NetworkSurveyGeolocation.js'
+import { NetworkSurveyGeolocationApi } from '../../resources/NetworkSurveyGeolocationApi.js'
+import { NetworkSurveysStorage } from '../../resources/NetworkSurveysStorage.js'
+import { PGPSDeviceRequestHandler } from '../../resources/PGPSDeviceRequestHandler.js'
+import { PGPSResolver } from '../../resources/PGPSResolver.js'
+import { PGPSStorage } from '../../resources/PGPSStorage.js'
+import { RepublishDesiredConfig } from '../../resources/RepublishDesiredConfig.js'
+import { ThingGroup } from '../../resources/ThingGroup.js'
+import { ThingGroupLambda } from '../../resources/ThingGroupLambda.js'
+import { CORE_STACK_NAME } from '../stackName.js'
+import type { AssetTrackerLambdas, CDKLambdas } from './lambdas.js'
 
 /**
  * Defines the names use for stack outputs, which are used below to ensure
@@ -55,7 +52,6 @@ export const StackOutputs = {
 	networkSurveyStorageTableName: `${CORE_STACK_NAME}:networkSurveyStorageTableName`,
 	networkSurveyStorageTableArn: `${CORE_STACK_NAME}:networkSurveyStorageTableArn`,
 	networkSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networkSurveyStorageTableStreamArn`,
-	cloudformationLayerVersionArn: `${CORE_STACK_NAME}:cloudformationLayerVersionArn`,
 	networkSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:networkSurveyGeolocationApiUrl`,
 } as const
 
@@ -63,54 +59,14 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(
 		parent: CloudFormation.App,
 		{
-			sourceCodeBucketName,
 			packedLambdas,
 			packedCDKLambdas,
 		}: {
-			sourceCodeBucketName: string
-			packedLambdas: PackedLambdas<AssetTrackerLambdas>
-			packedCDKLambdas: PackedLambdas<CDKLambdas>
+			packedLambdas: AssetTrackerLambdas
+			packedCDKLambdas: CDKLambdas
 		},
 	) {
 		super(parent, CORE_STACK_NAME)
-
-		const sourceCodeBucket = S3.Bucket.fromBucketAttributes(
-			this,
-			'SourceCodeBucket',
-			{
-				bucketName: sourceCodeBucketName,
-			},
-		)
-		const lambasOnBucket = lambdasOnS3(sourceCodeBucket)
-
-		const baseLayer = new Lambda.LayerVersion(
-			this,
-			`${CORE_STACK_NAME}-layer`,
-			{
-				code: Lambda.Code.fromBucket(
-					sourceCodeBucket,
-					packedLambdas.layerZipFileName,
-				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
-			},
-		)
-
-		const cloudFormationLayer = new Lambda.LayerVersion(
-			this,
-			`${CORE_STACK_NAME}-cloudformation-layer`,
-			{
-				code: Lambda.Code.fromBucket(
-					sourceCodeBucket,
-					packedCDKLambdas.layerZipFileName,
-				),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
-			},
-		)
-
-		new CloudFormation.CfnOutput(this, 'cloudformationLayerVersionArn', {
-			value: cloudFormationLayer.layerVersionArn,
-			exportName: StackOutputs.cloudformationLayerVersionArn,
-		})
 
 		const isTest = this.node.tryGetContext('isTest') === true
 
@@ -394,13 +350,20 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: StackOutputs.thingPolicyArn,
 		})
 
-		const cdkLambdas = {
-			lambdas: lambasOnBucket(packedCDKLambdas),
-			layers: [cloudFormationLayer],
-		}
-
 		const thingGroupLambda = new ThingGroupLambda(this, 'thingGroupLambda', {
-			cdkLambdas,
+			cdkLambdas: {
+				lambdas: packedCDKLambdas.lambdas,
+				layers: [
+					new Lambda.LayerVersion(
+						this,
+						`${CORE_STACK_NAME}-cloudformation-layer`,
+						{
+							code: Lambda.Code.fromAsset(packedCDKLambdas.layerZipFileName),
+							compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
+						},
+					),
+				],
+			},
 		})
 
 		new CloudFormation.CfnOutput(this, 'thingGroupLambdaArn', {
@@ -423,9 +386,14 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		new RepublishDesiredConfig(this, 'republishDesiredConfig')
 
-		const lambdas: LambdasWithLayer<AssetTrackerLambdas> = {
-			lambdas: lambasOnBucket(packedLambdas),
-			layers: [baseLayer],
+		const lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']> = {
+			lambdas: packedLambdas.lambdas,
+			layers: [
+				new Lambda.LayerVersion(this, `${CORE_STACK_NAME}-layer`, {
+					code: Lambda.Code.fromAsset(packedLambdas.layerZipFileName),
+					compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
+				}),
+			],
 		}
 
 		const hd = new HistoricalData(this, 'historicalData', {
