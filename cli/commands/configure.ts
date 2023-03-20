@@ -1,6 +1,6 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import chalk from 'chalk'
-import * as fs from 'fs'
+import fs from 'fs'
 import { CORE_STACK_NAME } from '../../cdk/stacks/stackName.js'
 import { deleteSettings, putSettings } from '../../util/settings.js'
 import type { CommandDefinition } from './CommandDefinition.js'

@@ -1,5 +1,5 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as Lambda from 'aws-cdk-lib/aws-lambda'
+import CloudFormation from 'aws-cdk-lib'
+import Lambda from 'aws-cdk-lib/aws-lambda'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'

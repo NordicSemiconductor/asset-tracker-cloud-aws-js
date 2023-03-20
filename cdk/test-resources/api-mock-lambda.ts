@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-dynamodb'
 import type { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { randomUUID } from 'node:crypto'
-import * as querystring from 'querystring'
+import querystring from 'querystring'
 import { splitMockResponse } from './splitMockResponse.js'
 
 const db = new DynamoDBClient({})

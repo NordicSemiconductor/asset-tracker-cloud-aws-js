@@ -1,4 +1,4 @@
-import * as CloudFormation from 'aws-cdk-lib'
+import CloudFormation from 'aws-cdk-lib'
 import type * as Lambda from 'aws-cdk-lib/aws-lambda'
 import type { Construct } from 'constructs'
 

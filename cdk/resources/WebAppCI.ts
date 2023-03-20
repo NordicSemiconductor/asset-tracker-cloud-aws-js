@@ -1,7 +1,7 @@
-import * as CloudFormation from 'aws-cdk-lib'
+import CloudFormation from 'aws-cdk-lib'
 import type * as Cognito from 'aws-cdk-lib/aws-cognito'
 import type * as DynamoDB from 'aws-cdk-lib/aws-dynamodb'
-import * as IAM from 'aws-cdk-lib/aws-iam'
+import IAM from 'aws-cdk-lib/aws-iam'
 import { CORE_STACK_NAME, WEBAPP_STACK_NAME } from '../stacks/stackName.js'
 
 export class WebAppCI extends CloudFormation.Resource {

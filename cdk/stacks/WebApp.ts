@@ -1,5 +1,5 @@
-import * as CloudFormation from 'aws-cdk-lib'
-import * as SSM from 'aws-cdk-lib/aws-ssm'
+import CloudFormation from 'aws-cdk-lib'
+import SSM from 'aws-cdk-lib/aws-ssm'
 import { settingsPath } from '../../util/settings.js'
 import { WebAppHosting } from '../resources/WebAppHosting.js'
 import { StackOutputs as CoreStackOutputs } from './AssetTracker/stack.js'

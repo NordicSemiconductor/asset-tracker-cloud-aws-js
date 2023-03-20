@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import { promises as fs } from 'fs'
-import * as path from 'path'
+import path from 'path'
 
 /**
  * Ensures the directory for storing certificates is available

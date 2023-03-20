@@ -1,7 +1,7 @@
 import swc from '@swc/core'
 import { createWriteStream } from 'node:fs'
 import { parse } from 'path'
-import * as yazl from 'yazl'
+import yazl from 'yazl'
 import { commonParent } from './commonParent'
 import { findDependencies } from './findDependencies'
 

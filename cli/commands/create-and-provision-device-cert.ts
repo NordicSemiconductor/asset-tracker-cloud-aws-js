@@ -8,8 +8,8 @@ import {
 } from '@nordicsemiconductor/firmware-ci-device-helpers'
 import chalk from 'chalk'
 import { promises as fs } from 'fs'
-import * as os from 'os'
-import * as path from 'path'
+import os from 'os'
+import path from 'path'
 import {
 	createDeviceCertificate,
 	defaultDeviceCertificateValidityInDays,

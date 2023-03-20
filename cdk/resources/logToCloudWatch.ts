@@ -1,4 +1,4 @@
-import * as IAM from 'aws-cdk-lib/aws-iam'
+import IAM from 'aws-cdk-lib/aws-iam'
 
 export const logToCloudWatch = new IAM.PolicyStatement({
 	resources: ['*'],
