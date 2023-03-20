@@ -79,7 +79,7 @@ export const handler = async (
 
 	if ('error' in cell) {
 		const scheduled = await q({
-			payload: cell,
+			payload: maybeValidInput,
 			deduplicationId: cellId(maybeValidInput),
 		})
 		if (scheduled !== undefined && 'error' in scheduled) {
