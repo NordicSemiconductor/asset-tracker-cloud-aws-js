@@ -1,6 +1,5 @@
 import { App } from 'aws-cdk-lib'
-import { readFileSync } from 'fs'
-import path from 'path'
+import pjson from '../../package.json'
 import { enabledInContext } from '../helper/enabledInContext.js'
 import { extractRepoAndOwner } from '../helper/extract-repo-and-owner.js'
 import type {
@@ -45,7 +44,9 @@ export class AssetTrackerApp extends App {
 			key: 'web-app-ci',
 			component: 'Web App CI',
 			onEnabled: () => {
-				new WebAppCIStack(this)
+				new WebAppCIStack(this, {
+					repository: extractRepoAndOwner(pjson.deploy.webApp.repository),
+				})
 			},
 		})
 		// CD
@@ -53,9 +54,6 @@ export class AssetTrackerApp extends App {
 			key: 'cd',
 			component: 'Continuous Deployment',
 			onEnabled: () => {
-				const pjson = JSON.parse(
-					readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
-				)
 				new ContinuousDeploymentStack(this, {
 					core: {
 						...extractRepoAndOwner(pjson.repository.url),

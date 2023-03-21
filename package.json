@@ -133,9 +133,7 @@
     "README.md"
   ],
   "deploy": {
-    "branches": [
-      "saga"
-    ],
+    "branch": "saga",
     "webApp": {
       "repository": "https://github.com/NordicSemiconductor/asset-tracker-cloud-app-aws-js.git",
       "branch": "saga"

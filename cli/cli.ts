@@ -2,13 +2,12 @@ import { IoTClient } from '@aws-sdk/client-iot'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import chalk from 'chalk'
 import { program } from 'commander'
-import fs from 'fs'
-import path from 'path'
 import { createInterface } from 'readline'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint.js'
+import psjon from '../package.json'
+import type { CommandDefinition } from './commands/CommandDefinition.js'
 import { cdUpdateTokenCommand } from './commands/cd-update-token.js'
 import { cdCommand } from './commands/cd.js'
-import type { CommandDefinition } from './commands/CommandDefinition.js'
 import { configureCommand } from './commands/configure.js'
 import { createAndProvisionDeviceCertCommand } from './commands/create-and-provision-device-cert.js'
 import { createCACommand } from './commands/create-ca.js'
@@ -40,9 +39,6 @@ process.on('unhandledRejection', die)
 console.log('')
 
 const iot = new IoTClient({})
-const version = JSON.parse(
-	fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'),
-).version
 
 const config = async () => {
 	const [accessKeyInfo, endpoint] = await Promise.all([
@@ -84,8 +80,10 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 		accountId,
 	})
 
-	program.description(`nRF Asset Tracker ${version} Command Line Interface`)
-	program.version(version)
+	program.description(
+		`nRF Asset Tracker ${psjon.version} Command Line Interface`,
+	)
+	program.version(psjon.version)
 
 	const commands = [
 		createCACommand({ certsDir }),
@@ -119,7 +117,7 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 			firmwareCICommand({
 				endpoint,
 			}),
-			webappCICommand(),
+			webappCICommand({ accountId }),
 			imeiCommand(),
 		)
 	}

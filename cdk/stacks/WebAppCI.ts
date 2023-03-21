@@ -6,10 +6,18 @@ import { StackOutputs } from './AssetTracker/stack.js'
 import { WEBAPP_CI_STACK_NAME } from './stackName.js'
 
 export class WebAppCIStack extends CloudFormation.Stack {
-	public constructor(parent: CloudFormation.App) {
+	public constructor(
+		parent: CloudFormation.App,
+		props: {
+			repository: {
+				owner: string
+				repo: string
+			}
+		},
+	) {
 		super(parent, WEBAPP_CI_STACK_NAME)
 
-		const webappCI = new WebAppCI(this, 'webappCI', {
+		new WebAppCI(this, 'webappCI', {
 			userPool: Cognito.UserPool.fromUserPoolArn(
 				this,
 				'userPoolArn',
@@ -32,21 +40,7 @@ export class WebAppCIStack extends CloudFormation.Stack {
 			historicalDataTableArn: CloudFormation.Fn.importValue(
 				StackOutputs.historicaldataTableArn,
 			),
-		})
-
-		new CloudFormation.CfnOutput(this, 'userAccessKeyId', {
-			value: webappCI.userAccessKey.ref,
-			exportName: `${this.stackName}:userAccessKeyId`,
-		})
-
-		new CloudFormation.CfnOutput(this, 'userSecretAccessKey', {
-			value: webappCI.userAccessKey.attrSecretAccessKey,
-			exportName: `${this.stackName}:userSecretAccessKey`,
+			repository: props.repository,
 		})
 	}
-}
-
-export type StackOutputs = {
-	userAccessKeyId: string
-	userSecretAccessKey: string
 }
