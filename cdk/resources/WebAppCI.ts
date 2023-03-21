@@ -40,7 +40,7 @@ export class WebAppCI extends CloudFormation.Resource {
 				ghProvider.openIdConnectProviderArn,
 				{
 					StringEquals: {
-						[`${githubDomain}:sub`]: `repo:${r.owner}/${r.repo}:ref:refs/heads/saga`,
+						[`${githubDomain}:sub`]: `repo:${r.owner}/${r.repo}:environment:production`, // `repo:${r.owner}/${r.repo}:ref:refs/heads/*`,
 						'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
 					},
 				},
