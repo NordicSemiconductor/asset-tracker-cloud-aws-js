@@ -106,6 +106,14 @@ export const assetTrackerStepRunners = ({
 			if (step.interpolatedArgument === undefined) {
 				throw new Error('Must provide argument!')
 			}
+			try {
+				JSON.parse(step.interpolatedArgument)
+			} catch {
+				console.log(step)
+				throw new Error(
+					`Failed to parse step JSON: ${step.interpolatedArgument}!`,
+				)
+			}
 			const reported = JSON.parse(step.interpolatedArgument)
 			const catId = deviceId ?? runner.store['tracker:id']
 			const connection = await connectToBroker(catId)
