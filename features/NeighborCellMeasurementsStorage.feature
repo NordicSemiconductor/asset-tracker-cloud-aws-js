@@ -12,8 +12,11 @@ Feature: Store neighboring cell measurement reports
     Background:
 
         Given I am authenticated with Cognito
+        And I am run after the "Connect a tracker" feature
         And I store a random number between 1 and 100000000 into "<nw>-ncellmeasCellId"
         And I store a random number between 1 and 100000000 into "<nw>-ncellmeasAreaId"
+        And I store "{<nw>-ncellmeasCellId}" into "cellId"
+        And I store "{<nw>-ncellmeasAreaId}" into "areaId"
     
     Scenario: Device connects
 
@@ -25,9 +28,9 @@ Feature: Store neighboring cell measurement reports
                 "v": {
                     "nw": "<nw-modem>",
                     "rsrp": -97,
-                    "area": {<nw>-ncellmeasAreaId},
+                    "area": {cellId},
                     "mccmnc": 24201,
-                    "cell": {<nw>-ncellmeasCellId},
+                    "cell": {areaId},
                     "ip": "10.202.80.9"
                 },
                 "ts": {ts}
@@ -44,8 +47,8 @@ Feature: Store neighboring cell measurement reports
             "lte": {
                 "mcc": 242,
                 "mnc": 1,
-                "cell": {<nw>-ncellmeasCellId},
-                "area": {<nw>-ncellmeasAreaId},
+                "cell": {cellId},
+                "area": {areaId},
                 "earfcn": 6446,
                 "adv": 80,
                 "rsrp": -97,
@@ -83,13 +86,13 @@ Feature: Store neighboring cell measurement reports
             },
             "ExpressionAttributeValues": {
                 ":deviceId": {
-                "S": "{tracker:id}"
+                    "S": "{tracker:id}"
                 }
             },
             "Limit": 1
         }
         """
-        Then I store "awsSdk.res.Items[0].surveyId.S" into "ncellmeasSurveyId"
+        Then I store "awsSdk.res.Items[0].surveyId.S" into "<nw>-ncellmeasSurveyId"
 
     Scenario: Get the latest report
 
@@ -99,7 +102,7 @@ Feature: Store neighboring cell measurement reports
             "TableName": "{networkSurveyStorageTableName}",
             "Key": {
                 "surveyId": {
-                    "S": "{ncellmeasSurveyId}"
+                    "S": "{<nw>-ncellmeasSurveyId}"
                 }
             }
         }
@@ -130,13 +133,13 @@ Feature: Store neighboring cell measurement reports
                     ]
                     },
                     "rsrq": { "N": "-9" },
-                    "area": { "N": "{<nw>-ncellmeasAreaId}" },
+                    "area": { "N": "{areaId}" },
                     "adv": { "N": "80" },
                     "rsrp": { "N": "-97" },
                     "mcc": { "N": "242" },
                     "mnc": { "N": "1" },
                     "earfcn": { "N": "6446" },
-                    "cell": { "N": "{<nw>-ncellmeasCellId}" },
+                    "cell": { "N": "{cellId}" },
                     "ts": { "N": "{ts}" }
                 }
             },
