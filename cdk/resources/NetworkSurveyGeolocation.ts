@@ -7,8 +7,8 @@ import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
 import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
 import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
+import { logToCloudWatch } from './logToCloudWatch.js'
 
 /**
  * Describes the step functions which resolves the geolocation of network survey using nRF Cloud Location Services

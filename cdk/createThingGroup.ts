@@ -12,8 +12,8 @@ import {
 	UpdateCertificateCommand,
 } from '@aws-sdk/client-iot'
 import {
-	cfnResponse,
 	ResponseStatus,
+	cfnResponse,
 } from '@nordicsemiconductor/cloudformation-helpers'
 import type { CloudFormationCustomResourceEvent } from 'aws-lambda'
 import { paginate } from '../util/paginate.js'

@@ -4,12 +4,12 @@ import { IoTClient } from '@aws-sdk/client-iot'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
 import {
-	awsSdkStepRunners,
-	cognitoStepRunners,
 	ConsoleReporter,
 	FeatureRunner,
-	randomStepRunners,
 	RestClient,
+	awsSdkStepRunners,
+	cognitoStepRunners,
+	randomStepRunners,
 	restStepRunners,
 	storageStepRunners,
 } from '@nordicsemiconductor/e2e-bdd-test-runner'
