@@ -3,6 +3,12 @@ Feature: nRF Cloud Neighbor Cell Geolocation
     Optionally, device locations can be resolved by the nRF Cloud API using the neighboring cell measurement reports
     Note: nRF Cloud's geolocation API does not distinguish between different network modes.
 
+    Contexts:
+
+    | nw    |
+    | ltem  |
+    | nbiot |
+
     Background:
 
         This enqueues a mock response on the mock HTTP API the stack is configure
@@ -73,8 +79,8 @@ Feature: nRF Cloud Neighbor Cell Geolocation
                     {
                         "mcc": 242,
                         "mnc": 1,
-                        "eci": {ncellmeasCellId},
-                        "tac": {ncellmeasAreaId},
+                        "eci": {<nw>-ncellmeasCellId},
+                        "tac": {<nw>-ncellmeasAreaId},
                         "earfcn": 6446,
                         "adv": 80,
                         "rsrp": -97,

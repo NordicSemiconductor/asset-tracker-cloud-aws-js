@@ -3,11 +3,17 @@ Feature: Store neighboring cell measurement reports
     Neighboring cell measurement reports are too big to be stored in the AWS
     shadow, so they are stored in a DynamoDB
 
+    Contexts:
+
+    | nw    | nw-modem |
+    | ltem  | LTE-M    |
+    | nbiot | NB-IoT   |
+
     Background:
 
         Given I am authenticated with Cognito
-        And I store a random number between 1 and 100000000 into "ncellmeasCellId"
-        And I store a random number between 1 and 100000000 into "ncellmeasAreaId"
+        And I store a random number between 1 and 100000000 into "<nw>-ncellmeasCellId"
+        And I store a random number between 1 and 100000000 into "<nw>-ncellmeasAreaId"
     
     Scenario: Device connects
 
@@ -17,11 +23,11 @@ Feature: Store neighboring cell measurement reports
             {
             "roam": {
                 "v": {
-                    "nw": "LTE-M",
+                    "nw": "<nw-modem>",
                     "rsrp": -97,
-                    "area": {ncellmeasAreaId},
+                    "area": {<nw>-ncellmeasAreaId},
                     "mccmnc": 24201,
-                    "cell": {ncellmeasCellId},
+                    "cell": {<nw>-ncellmeasCellId},
                     "ip": "10.202.80.9"
                 },
                 "ts": {ts}
@@ -38,8 +44,8 @@ Feature: Store neighboring cell measurement reports
             "lte": {
                 "mcc": 242,
                 "mnc": 1,
-                "cell": {ncellmeasCellId},
-                "area": {ncellmeasAreaId},
+                "cell": {<nw>-ncellmeasCellId},
+                "area": {<nw>-ncellmeasAreaId},
                 "earfcn": 6446,
                 "adv": 80,
                 "rsrp": -97,
@@ -124,17 +130,17 @@ Feature: Store neighboring cell measurement reports
                     ]
                     },
                     "rsrq": { "N": "-9" },
-                    "area": { "N": "{ncellmeasAreaId}" },
+                    "area": { "N": "{<nw>-ncellmeasAreaId}" },
                     "adv": { "N": "80" },
                     "rsrp": { "N": "-97" },
                     "mcc": { "N": "242" },
                     "mnc": { "N": "1" },
                     "earfcn": { "N": "6446" },
-                    "cell": { "N": "{ncellmeasCellId}" },
+                    "cell": { "N": "{<nw>-ncellmeasCellId}" },
                     "ts": { "N": "{ts}" }
                 }
             },
-            "nw": { "S": "LTE-M" },
+            "nw": { "S": "<nw-modem>" },
             "deviceId": { "S": "{tracker:id}" }
         }
         """

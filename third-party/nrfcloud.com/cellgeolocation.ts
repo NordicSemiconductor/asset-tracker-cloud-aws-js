@@ -1,5 +1,4 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
-import { NetworkMode } from '@nordicsemiconductor/cell-geolocation-helpers'
 import type { TObject, TProperties } from '@sinclair/typebox'
 import { URL } from 'url'
 import type { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types.js'
@@ -21,13 +20,6 @@ const fetchSettings = getGroundFixApiSettings({
 export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	console.log(JSON.stringify(cell))
 
-	if (cell.nw === NetworkMode.NBIoT) {
-		console.error(`Resolution of NB-IoT cells not yet supported.`)
-		return {
-			located: false,
-		}
-	}
-
 	const { serviceKey, teamId, endpoint } = await fetchSettings()
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
@@ -35,7 +27,6 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 	const maybeCellGeolocation = await c.post({
 		resource: 'location/ground-fix',
 		payload: {
-			// FIXME: enable check once NB-IoT is supported: [cell.nw === NetworkMode.NBIoT ? 'nbiot' : `lte`]: [
 			lte: [
 				{
 					eci: cell.cell,
