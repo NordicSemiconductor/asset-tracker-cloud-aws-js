@@ -3,6 +3,12 @@ Feature: nRF Cloud Cell Geolocation
     Optionally, cell locations can be resolved using the nRF Cloud API
     Note: nRF Cloud's geolocation API does not distinguish between different network modes.
 
+    Contexts:
+
+    | nw    |
+    | ltem  |
+    | nbiot |
+
     Background:
 
         This enqueues a mock response on the mock HTTP API the stack is configure
@@ -26,7 +32,7 @@ Feature: nRF Cloud Cell Geolocation
     Scenario: Query the cell
 
         Given I store "$millis()" into "ts"
-        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=ltem&ts={ts}
+        When I GET /cell?cell={cellId}&area=30401&mccmnc=24201&nw=<nw>&ts={ts}
         Then the response status code should be 200
         And the response Access-Control-Allow-Origin should be "*"
         And the response Content-Type should be "application/json"
