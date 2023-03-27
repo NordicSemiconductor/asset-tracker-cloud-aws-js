@@ -11,11 +11,13 @@ import { getCurrentCA } from '../jitp/currentCA.js'
 import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import type { CommandDefinition } from './CommandDefinition.js'
 
+export const defaultSecTag = 42
+
 export const createSimulatorCertCommand = ({
-	endpoint,
+	mqttEndpoint,
 	certsDir,
 }: {
-	endpoint: string
+	mqttEndpoint: string
 	certsDir: string
 }): CommandDefinition => ({
 	command: 'create-simulator-cert',
@@ -32,17 +34,31 @@ export const createSimulatorCertCommand = ({
 			flags: '-c, --ca <caId>',
 			description: `ID of the CA certificate to use. Defaults to the last created one.`,
 		},
+		{
+			flags: '-s, --sec-tag <secTag>',
+			description: `Use this secTag, defaults to ${defaultSecTag}`,
+		},
+		{
+			flags: '-m, --mqtt-endpoint <mqttEndpoint>',
+			description: `Use this MQTT endpoint, defaults to ${mqttEndpoint}`,
+		},
 	],
 	action: async ({
 		deviceId,
 		expires,
 		caId,
+		secTag,
+		mqttEndpoint: customEndpoint,
 	}: {
 		deviceId?: string
 		expires?: string
 		caId?: string
+		secTag?: string
+		mqttEndpoint?: string
 	}) => {
 		const id = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
+		const effectiveSecTag = secTag ?? defaultSecTag
+		const effectiveMqttEndpoint = customEndpoint ?? mqttEndpoint
 
 		await createSimulatorKeyAndCSR({
 			deviceId: id,
@@ -83,7 +99,8 @@ export const createSimulatorCertCommand = ({
 					clientCert: await fs.readFile(deviceFiles.certWithCA, 'utf-8'),
 					privateKey: await fs.readFile(deviceFiles.key, 'utf-8'),
 					clientId: id,
-					brokerHostname: endpoint,
+					brokerHostname: effectiveMqttEndpoint,
+					secTag: effectiveSecTag,
 				},
 				null,
 				2,

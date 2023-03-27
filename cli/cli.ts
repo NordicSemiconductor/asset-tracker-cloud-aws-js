@@ -88,8 +88,8 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 	const commands = [
 		createCACommand({ certsDir }),
 		registerCACommand({ certsDir }),
-		createSimulatorCertCommand({ certsDir, endpoint }),
-		webAppConfigCommand(),
+		createSimulatorCertCommand({ certsDir, mqttEndpoint: endpoint }),
+		webAppConfigCommand({ mqttEndpoint: endpoint }),
 		infoCommand(),
 		cdCommand(),
 		purgeIotUserPolicyPrincipals(),
