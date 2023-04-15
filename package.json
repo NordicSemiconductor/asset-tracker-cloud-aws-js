@@ -84,7 +84,7 @@
     "chalk": "5.2.0",
     "change-case": "4.1.2",
     "check-node-version": "4.2.1",
-    "commander": "10.0.0",
+    "commander": "10.0.1",
     "constructs": "10.1.308",
     "date-fns": "2.29.3",
     "glob": "9.3.5",
