@@ -77,7 +77,7 @@
     "@types/jsonwebtoken": "9.0.1",
     "@types/node": "18.15.11",
     "@types/yazl": "2.4.2",
-    "aws-cdk-lib": "2.75.0",
+    "aws-cdk-lib": "2.75.1",
     "aws-iot-device-sdk": "2.2.12",
     "backoff": "2.5.0",
     "cdk": "2.72.1",
