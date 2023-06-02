@@ -1,4 +1,4 @@
-import { commonParent } from './commonParent'
+import { commonParent } from './commonParent.js'
 
 describe('commonParent()', () => {
 	it('should return the common parent directory', () =>

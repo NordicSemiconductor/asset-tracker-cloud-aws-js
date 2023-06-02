@@ -19,7 +19,7 @@ export const webappCICommand = ({
 		const info = {
 			AWS_REGION: region,
 			AWS_ROLE: `arn:aws:iam::${accountId}:role/${WEBAPP_CI_STACK_NAME}-github-actions`,
-			WEBAPP_STACK_NAME: WEBAPP_STACK_NAME,
+			WEBAPP_STACK_NAME,
 		}
 
 		console.log(chalk.white(`Configure these GitHub Actions secrets:`))

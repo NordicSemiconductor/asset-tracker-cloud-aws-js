@@ -18,7 +18,7 @@ export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 					const measureGroup = randomUUID()
 					if (typeof m.v === 'number') {
 						return toRecord({
-							name: name,
+							name,
 							v: m.v,
 							ts,
 							dimensions: { measureGroup },

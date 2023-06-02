@@ -31,7 +31,7 @@ export const cdUpdateTokenCommand = (): CommandDefinition => ({
 			pipelines.map(async (name) => {
 				const { pipeline } = await cp.send(
 					new GetPipelineCommand({
-						name: name,
+						name,
 					}),
 				)
 				if (pipeline !== undefined) {

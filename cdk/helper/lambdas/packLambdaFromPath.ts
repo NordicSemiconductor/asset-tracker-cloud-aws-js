@@ -22,7 +22,7 @@ export const packLambdaFromPath = async (
 		zipFile,
 	})
 	return {
-		zipFile: zipFile,
+		zipFile,
 		handler: handler.replace('.js', `.${handlerFunction}`),
 	}
 }

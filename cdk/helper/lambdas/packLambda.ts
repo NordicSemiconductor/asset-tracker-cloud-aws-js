@@ -2,8 +2,8 @@ import swc from '@swc/core'
 import { createWriteStream } from 'node:fs'
 import { parse } from 'path'
 import yazl from 'yazl'
-import { commonParent } from './commonParent'
-import { findDependencies } from './findDependencies'
+import { commonParent } from './commonParent.js'
+import { findDependencies } from './findDependencies.js'
 
 export type PackedLambda = { zipFile: string; handler: string }
 

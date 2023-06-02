@@ -107,7 +107,7 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 
 		const userPoolClient = new Cognito.UserPoolClient(this, 'userPoolClient', {
-			userPool: userPool,
+			userPool,
 			authFlows: {
 				userPassword: true,
 				userSrp: true,
