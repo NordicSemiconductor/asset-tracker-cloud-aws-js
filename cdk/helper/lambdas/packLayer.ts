@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 import { createWriteStream } from 'fs'
 import { copyFile, mkdir, readFile, rm, writeFile } from 'fs/promises'
-import glob from 'glob'
+import { glob } from 'glob'
 import path from 'path'
 import { ZipFile } from 'yazl'
 
