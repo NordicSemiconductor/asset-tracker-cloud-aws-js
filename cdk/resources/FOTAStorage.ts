@@ -30,6 +30,13 @@ export class FOTAStorage extends CloudFormation.Resource {
 				},
 			],
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+			blockPublicAccess: {
+				blockPublicAcls: false,
+				ignorePublicAcls: false,
+				restrictPublicBuckets: false,
+				blockPublicPolicy: false,
+			},
+			objectOwnership: S3.ObjectOwnership.OBJECT_WRITER,
 		})
 
 		userRole.addToPolicy(

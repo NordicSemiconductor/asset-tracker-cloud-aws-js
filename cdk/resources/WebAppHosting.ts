@@ -26,6 +26,13 @@ export class WebAppHosting extends CloudFormation.Resource {
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
 			websiteIndexDocument: 'index.html',
 			websiteErrorDocument: 'index.html',
+			blockPublicAccess: {
+				blockPublicAcls: false,
+				ignorePublicAcls: false,
+				restrictPublicBuckets: false,
+				blockPublicPolicy: false,
+			},
+			objectOwnership: S3.ObjectOwnership.OBJECT_WRITER,
 		})
 
 		this.distribution = new CloudFront.CfnDistribution(

@@ -16,6 +16,13 @@ export class FirmwareCI extends CloudFormation.Resource {
 		this.bucket = new S3.Bucket(this, 'bucket', {
 			publicReadAccess: true,
 			removalPolicy: CloudFormation.RemovalPolicy.DESTROY,
+			blockPublicAccess: {
+				blockPublicAcls: false,
+				ignorePublicAcls: false,
+				restrictPublicBuckets: false,
+				blockPublicPolicy: false,
+			},
+			objectOwnership: S3.ObjectOwnership.OBJECT_WRITER,
 		})
 
 		const ciUser = new IAM.User(this, 'ciUser')
