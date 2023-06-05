@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-apigatewayv2": "3.345.0",
-    "@aws-sdk/client-cloudformation": "3.345.0",
+    "@aws-sdk/client-cloudformation": "3.346.0",
     "@aws-sdk/client-cloudwatch-logs": "3.345.0",
     "@aws-sdk/client-codepipeline": "3.345.0",
     "@aws-sdk/client-dynamodb": "3.345.0",
