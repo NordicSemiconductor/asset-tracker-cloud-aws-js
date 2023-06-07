@@ -43,13 +43,13 @@
     "uuid": "9.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-apigatewayv2": "3.347.1",
+    "@aws-sdk/client-apigatewayv2": "3.348.0",
     "@aws-sdk/client-cloudformation": "3.347.1",
-    "@aws-sdk/client-cloudwatch-logs": "3.347.1",
-    "@aws-sdk/client-codepipeline": "3.347.1",
+    "@aws-sdk/client-cloudwatch-logs": "3.348.0",
+    "@aws-sdk/client-codepipeline": "3.348.0",
     "@aws-sdk/client-dynamodb": "3.347.1",
-    "@aws-sdk/client-iot": "3.347.1",
-    "@aws-sdk/client-iot-data-plane": "3.347.1",
+    "@aws-sdk/client-iot": "3.348.0",
+    "@aws-sdk/client-iot-data-plane": "3.348.0",
     "@aws-sdk/client-s3": "3.347.1",
     "@aws-sdk/client-sfn": "3.347.1",
     "@aws-sdk/client-sqs": "3.347.1",
