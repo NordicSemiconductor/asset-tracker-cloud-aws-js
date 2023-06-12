@@ -16,9 +16,9 @@ export class TestApp extends App {
 		context?: Record<string, any>
 	}) {
 		super({ context: args.context })
-		new AssetTrackerStack(this, {
+		const coreStack = new AssetTrackerStack(this, {
 			...args,
 		})
-		new FirmwareCIStack(this)
+		new FirmwareCIStack(this).addDependency(coreStack)
 	}
 }
