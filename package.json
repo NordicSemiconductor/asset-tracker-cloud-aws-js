@@ -35,7 +35,7 @@
     "@nordicsemiconductor/cell-geolocation-helpers": "6.0.0",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "4.0.1",
     "@nordicsemiconductor/timestream-helpers": "5.0.0",
-    "@sinclair/typebox": "0.28.14",
+    "@sinclair/typebox": "0.28.15",
     "ajv": "8.12.0",
     "entities": "4.5.0",
     "fast-xml-parser": "4.2.4",
