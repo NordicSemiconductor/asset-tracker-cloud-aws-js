@@ -20,7 +20,7 @@ export class AssetTrackerApp extends App {
 	}) {
 		super({ context: args.context })
 		// Core
-		new AssetTrackerStack(this, {
+		const coreStack = new AssetTrackerStack(this, {
 			...args,
 		})
 		const checkFlag = enabledInContext(this.node)
@@ -29,7 +29,7 @@ export class AssetTrackerApp extends App {
 			key: 'webapp',
 			component: 'Web App',
 			onUndefined: 'enabled',
-			onEnabled: () => new WebAppStack(this),
+			onEnabled: () => new WebAppStack(this).addDependency(coreStack),
 		})
 		// Firmware CI
 		checkFlag({
@@ -46,7 +46,7 @@ export class AssetTrackerApp extends App {
 			onEnabled: () => {
 				new WebAppCIStack(this, {
 					repository: extractRepoAndOwner(pjson.deploy.webApp.repository),
-				})
+				}).addDependency(coreStack)
 			},
 		})
 		// CD
