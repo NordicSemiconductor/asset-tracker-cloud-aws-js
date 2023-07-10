@@ -4,6 +4,7 @@ import { settingsPath } from '../../util/settings.js'
 import { WebAppHosting } from '../resources/WebAppHosting.js'
 import { StackOutputs as CoreStackOutputs } from './AssetTracker/stack.js'
 import { WEBAPP_STACK_NAME } from './stackName.js'
+import { enabledInContext } from '../helper/enabledInContext.js'
 
 /**
  * Defines the names use for stack outputs, which are used below to ensure
@@ -70,9 +71,6 @@ export class WebAppStack extends CloudFormation.Stack {
 			networksurveyStorageTableName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.networkSurveyStorageTableName,
 			),
-			networkSurveyGeolocationApiUrl: CloudFormation.Fn.importValue(
-				CoreStackOutputs.networkSurveyGeolocationApiUrl,
-			),
 			userIotPolicyName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.userIotPolicyName,
 			),
@@ -84,6 +82,18 @@ export class WebAppStack extends CloudFormation.Stack {
 				CoreStackOutputs.cellGeolocationCacheTableName,
 			),
 		}
+
+		enabledInContext(this.node)({
+			key: 'nrfcloudGroundFix',
+			component: 'nRF Cloud API (ground fix)',
+			onUndefined: 'disabled',
+			onEnabled: () => {
+				SSMParameters.networkSurveyGeolocationApiUrl =
+					CloudFormation.Fn.importValue(
+						CoreStackOutputs.networkSurveyGeolocationApiUrl,
+					)
+			},
+		})
 
 		for (const k of Object.keys(SSMParameters)) {
 			new SSM.StringParameter(this, `${k}SSMParameter`, {
