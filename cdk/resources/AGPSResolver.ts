@@ -1,7 +1,7 @@
 import CloudFormation from 'aws-cdk-lib'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
-import StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
+import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import { enabledInContext } from '../helper/enabledInContext.js'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
@@ -186,77 +186,79 @@ export class AGPSResolver extends CloudFormation.Resource {
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-agps`,
 			stateMachineType: StepFunctions.StateMachineType.STANDARD,
-			definition: fetchCache.next(
-				new StepFunctions.Choice(this, 'Already resolved?')
-					.when(
-						StepFunctions.Condition.and(
-							StepFunctions.Condition.isPresent(
-								`$.cached.Item.unresolved.BOOL`,
+			definitionBody: DefinitionBody.fromChainable(
+				fetchCache.next(
+					new StepFunctions.Choice(this, 'Already resolved?')
+						.when(
+							StepFunctions.Condition.and(
+								StepFunctions.Condition.isPresent(
+									`$.cached.Item.unresolved.BOOL`,
+								),
+								StepFunctions.Condition.booleanEquals(
+									`$.cached.Item.unresolved.BOOL`,
+									false,
+								),
 							),
-							StepFunctions.Condition.booleanEquals(
-								`$.cached.Item.unresolved.BOOL`,
-								false,
-							),
-						),
-						new StepFunctions.Succeed(this, 'Done (already resolved)'),
-					)
-					.otherwise(
-						(() => {
-							if (fromNrfCloud === undefined) {
-								return new StepFunctions.Fail(this, 'Failed (No API)', {
-									error: 'NO_API',
-									cause:
-										'No third party API is configured to resolve the A-GPS data',
-								})
-							}
-							const markSource = (source: string) =>
-								new StepFunctions.Pass(
+							new StepFunctions.Succeed(this, 'Done (already resolved)'),
+						)
+						.otherwise(
+							(() => {
+								if (fromNrfCloud === undefined) {
+									return new StepFunctions.Fail(this, 'Failed (No API)', {
+										error: 'NO_API',
+										cause:
+											'No third party API is configured to resolve the A-GPS data',
+									})
+								}
+								const markSource = (source: string) =>
+									new StepFunctions.Pass(
+										this,
+										`mark source in result as ${source}`,
+										{
+											resultPath: '$.source',
+											result: StepFunctions.Result.fromString(source),
+										},
+									)
+								const branches: StepFunctions.IChainable[] = []
+								if (fromNrfCloud !== undefined) {
+									branches.push(
+										new StepFunctionTasks.LambdaInvoke(
+											this,
+											'Resolve using nRF Cloud API',
+											{
+												lambdaFunction: fromNrfCloud,
+												payloadResponseOnly: true,
+											},
+										).next(markSource('nrfcloud')),
+									)
+								}
+
+								return new StepFunctions.Parallel(
 									this,
-									`mark source in result as ${source}`,
+									'Resolve using third party API',
 									{
-										resultPath: '$.source',
-										result: StepFunctions.Result.fromString(source),
+										resultPath: '$.agps',
 									},
 								)
-							const branches: StepFunctions.IChainable[] = []
-							if (fromNrfCloud !== undefined) {
-								branches.push(
-									new StepFunctionTasks.LambdaInvoke(
-										this,
-										'Resolve using nRF Cloud API',
-										{
-											lambdaFunction: fromNrfCloud,
-											payloadResponseOnly: true,
-										},
-									).next(markSource('nrfcloud')),
-								)
-							}
+									.branch(...branches)
+									.next(
+										(() => {
+											const choice = new StepFunctions.Choice(
+												this,
+												'Resolved from any third party API?',
+											)
 
-							return new StepFunctions.Parallel(
-								this,
-								'Resolve using third party API',
-								{
-									resultPath: '$.agps',
-								},
-							)
-								.branch(...branches)
-								.next(
-									(() => {
-										const choice = new StepFunctions.Choice(
-											this,
-											'Resolved from any third party API?',
-										)
+											for (let i = 0; i < branches.length; i++) {
+												choice.when(...checkApiResult(i))
+											}
 
-										for (let i = 0; i < branches.length; i++) {
-											choice.when(...checkApiResult(i))
-										}
-
-										choice.otherwise(noApiResult)
-										return choice
-									})(),
-								)
-						})(),
-					),
+											choice.otherwise(noApiResult)
+											return choice
+										})(),
+									)
+							})(),
+						),
+				),
 			),
 			timeout: CloudFormation.Duration.minutes(5),
 			role: stateMachineRole,
