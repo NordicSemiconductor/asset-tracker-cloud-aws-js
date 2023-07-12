@@ -68,9 +68,6 @@ export class WebAppStack extends CloudFormation.Stack {
 			identityPoolId: CloudFormation.Fn.importValue(
 				CoreStackOutputs.identityPoolId,
 			),
-			networksurveyStorageTableName: CloudFormation.Fn.importValue(
-				CoreStackOutputs.networkSurveyStorageTableName,
-			),
 			userIotPolicyName: CloudFormation.Fn.importValue(
 				CoreStackOutputs.userIotPolicyName,
 			),
@@ -91,6 +88,10 @@ export class WebAppStack extends CloudFormation.Stack {
 				SSMParameters.networkSurveyGeolocationApiUrl =
 					CloudFormation.Fn.importValue(
 						CoreStackOutputs.networkSurveyGeolocationApiUrl,
+					)
+				SSMParameters.networksurveyStorageTableName =
+					CloudFormation.Fn.importValue(
+						CoreStackOutputs.networkSurveyStorageTableName,
 					)
 			},
 		})
