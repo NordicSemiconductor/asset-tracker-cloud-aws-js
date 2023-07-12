@@ -13,7 +13,7 @@ import {
 import chai, { expect } from 'chai'
 import chaiSubset from 'chai-subset'
 import { splitMockResponse } from '../../cdk/test-resources/splitMockResponse.js'
-import type { AssetTrackerWorld } from '../run-features.js'
+import type { AssetTrackerWorld } from '../run-features-old.js'
 chai.use(chaiSubset)
 
 export const httpApiMockStepRunners = ({
