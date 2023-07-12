@@ -1,6 +1,6 @@
 ---
 needs:
-  - Device: Update Shadow
+  - Device Update Shadow
   - Attach Iot Policy to user
 ---
 

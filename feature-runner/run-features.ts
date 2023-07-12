@@ -33,15 +33,20 @@ export type World = typeof StackOutputs & {
 	userIotPolicyName: string
 	historicaldataTableName: string
 	historicaldataDatabaseName: string
-	'firmwareCI:userAccessKeyId': string
-	'firmwareCI:userSecretAccessKey': string
-	'firmwareCI:bucketName': string
+	firmwareCI: {
+		userAccessKeyId: string
+		userSecretAccessKey: string
+		bucketName: string
+	}
+
 	awsIotRootCA: string
 	certsDir: string
 	mqttEndpoint: string
-	'httpApiMock:requestsTableName': string
-	'httpApiMock:responsesTableName': string
-	'httpApiMock:apiURL': string
+	httpApiMock: {
+		requestsTableName: string
+		responsesTableName: string
+		apiURL: string
+	}
 	region: string
 	currentGpsDay: number
 }
@@ -62,9 +67,11 @@ const [historicaldataDatabaseName, historicaldataTableName] =
 	stackConfig.historicaldataTableInfo.split('|') as [string, string]
 const world: World = {
 	...stackConfig,
-	'firmwareCI:userAccessKeyId': firmwareCIStackConfig.userAccessKeyId,
-	'firmwareCI:userSecretAccessKey': firmwareCIStackConfig.userSecretAccessKey,
-	'firmwareCI:bucketName': firmwareCIStackConfig.bucketName,
+	firmwareCI: {
+		userAccessKeyId: firmwareCIStackConfig.userAccessKeyId,
+		userSecretAccessKey: firmwareCIStackConfig.userSecretAccessKey,
+		bucketName: firmwareCIStackConfig.bucketName,
+	},
 	userIotPolicyName: stackConfig.userIotPolicyName,
 	historicaldataTableName,
 	historicaldataDatabaseName,
@@ -78,17 +85,20 @@ const world: World = {
 		accountId: accountId as string,
 	}),
 	mqttEndpoint,
-	'httpApiMock:requestsTableName': httpApiMockStackConfig.requestsTableName,
-	'httpApiMock:responsesTableName': httpApiMockStackConfig.responsesTableName,
-	'httpApiMock:apiURL': httpApiMockStackConfig.apiURL,
+	httpApiMock: {
+		requestsTableName: httpApiMockStackConfig.requestsTableName,
+		responsesTableName: httpApiMockStackConfig.responsesTableName,
+		apiURL: httpApiMockStackConfig.apiURL,
+	},
+
 	region: mqttEndpoint.split('.')[2] as string,
 	currentGpsDay: gpsDay(),
 }
 
-console.log(chalk.yellow.bold(' World:'))
-console.log()
-console.log(world)
-console.log()
+console.error(chalk.yellow.bold(' World:'))
+console.error()
+console.error(world)
+console.error()
 
 const print = (arg: unknown) =>
 	typeof arg === 'object' ? JSON.stringify(arg) : arg

@@ -1,6 +1,6 @@
 ---
 needs:
-  - Device: Update Shadow
+  - Device Update Shadow
 ---
 
 # Store WiFi site surveys
@@ -10,7 +10,7 @@ needs:
 
 ## Background
 
-And I am authenticated with Cognito
+Given I am authenticated with Cognito
 
 ## Device publishes WiFi site survey
 

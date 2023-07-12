@@ -1,11 +1,11 @@
 ---
 variants:
- - nw: ltem
-   nw-modem: LTE-M
-- nw: nbiot
-  nw-modem: NB-IoT
+  - nw: ltem
+    nw-modem: LTE-M
+  - nw: nbiot
+    nw-modem: NB-IoT
 needs:
-- Connect a tracker
+  - Connect a tracker
 ---
 
 # Store neighboring cell measurement reports

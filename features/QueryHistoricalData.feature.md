@@ -1,13 +1,11 @@
 ---
 needs:
-  - Device: Update Shadow
+  - Device Update Shadow
 ---
 
 # Query Data
 
 > As a user I can query the historical data of a device
-
-## Background
 
 ## Query historical data
 

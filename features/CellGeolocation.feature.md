@@ -2,10 +2,10 @@
 needs:
   - Connect a tracker
 variants:
- - nw: ltem
-   nw-modem: LTE-M
-- nw: nbiot
-  nw-modem: NB-IoT
+  - nw: ltem
+    nw-modem: LTE-M
+  - nw: nbiot
+    nw-modem: NB-IoT
 ---
 
 # Cell Geolocation API
@@ -64,7 +64,7 @@ Then the tracker updates its reported state with
 }
 ```
 
-## Query a cell: first time
+## Query a cell (first time)
 
 > The first time the API is called, the cell geolocation will not be available
 > and has to be calculated, therefore the API will return 409 (Conflict)
@@ -76,7 +76,7 @@ When I
 
 Then the response status code should be `409`
 
-And the response header `Access-Control-Allow-Origin` should be `*`
+And the `Access-Control-Allow-Origin` response header should be `*`
 
 ## Query a cell
 
@@ -87,9 +87,9 @@ When I
 
 Then the response status code should be `200`
 
-And the response header `Access-Control-Allow-Origin` should be `*`
+And the `Access-Control-Allow-Origin` response header should be `*`
 
-And the response header `Content-Type` should be `application/json`
+And the `Content-Type` response header should be `application/json`
 
 And the response should equal
 
