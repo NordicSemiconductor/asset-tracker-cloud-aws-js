@@ -53,9 +53,9 @@ When I GET `${networkSurveyGeolocationApiUrl}/${surveyId}?ts=${ts}`
 
 Then the response status code should be `200`
 
-And the response header `Access-Control-Allow-Origin` should be `*`
+And the `Access-Control-Allow-Origin` response header should be `*`
 
-And the response header `Content-Type` should be `application/json`
+And the `Content-Type` response header should be `application/json`
 
 And the response should equal
 
@@ -72,35 +72,33 @@ And the response should equal
 Then the mock HTTP API should have been called with a `POST` request to
 `api.nrfcloud.com/v1/location/ground-fix`
 
-```
-Content-Type: application/json
-
+```json
 {
-    "lte": [
+  "lte": [
+    {
+      "mcc": 242,
+      "mnc": 1,
+      "eci": "$number{cellId}",
+      "tac": "$number{areaId}",
+      "earfcn": 6446,
+      "adv": 80,
+      "rsrp": -97,
+      "rsrq": -9,
+      "nmr": [
         {
-            "mcc": 242,
-            "mnc": 1,
-            "eci": ${cellId},
-            "tac": ${areaId},
-            "earfcn": 6446,
-            "adv": 80,
-            "rsrp": -97,
-            "rsrq": -9,
-            "nmr": [
-                {
-                "earfcn": 262143,
-                "pci": 501,
-                "rsrp": -104,
-                "rsrq": -18
-                },
-                {
-                "earfcn": 262142,
-                "pci": 503,
-                "rsrp": -116,
-                "rsrq": -11
-                }
-            ]
+          "earfcn": 262143,
+          "pci": 501,
+          "rsrp": -104,
+          "rsrq": -18
+        },
+        {
+          "earfcn": 262142,
+          "pci": 503,
+          "rsrp": -116,
+          "rsrq": -11
         }
-    ]
+      ]
+    }
+  ]
 }
 ```

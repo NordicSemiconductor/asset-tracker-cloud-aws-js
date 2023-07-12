@@ -1,9 +1,9 @@
 ---
 needs:
-  - Device: Update Shadow
+  - Device Update Shadow
 ---
 
-# Device: Batch Data
+# Device Batch Data
 
 > Devices can publish batch data
 

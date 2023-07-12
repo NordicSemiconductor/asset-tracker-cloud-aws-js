@@ -82,8 +82,8 @@ into `agpsData`
 
 And
 `$length($filter(agpsData, function($v) { $contains($v, '01010100f9fffffffeffffff0f7b12890612031f00017') })) > 0`
-should be true
+should be `true`
 
 And
 `$length($filter(agpsData, function($v) { $contains($v, '01021e0001006400c675009cff859f13000b0000c6753') })) > 0`
-should be true
+should be `true`

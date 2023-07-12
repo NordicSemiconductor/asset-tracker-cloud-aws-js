@@ -1,6 +1,6 @@
 ---
 needs:
-  - Device: Update Shadow
+  - Device Update Shadow
 ---
 
 # Store network surveys

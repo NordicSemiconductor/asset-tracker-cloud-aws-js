@@ -1,15 +1,12 @@
----
----
-
-# Schedula FOTA jobs during Firmware CI runs
+# Schedule FOTA jobs during Firmware CI runs
 
 > As a developer I can schedule FOTA jobs for firmware that runs on real devices
 > so I can continuously ensure that it works
 
 ## Background
 
-Given I am authenticated with AWS key `${firmwareCI:userAccessKeyId}` and secret
-`${firmwareCI:userSecretAccessKey}`
+Given I am authenticated with AWS key `${firmwareCI.userAccessKeyId}` and secret
+`${firmwareCI.userSecretAccessKey}`
 
 ## Create a CI job
 
@@ -21,8 +18,8 @@ Given I have a random UUID in `jobId`
 
 Given I have a random UUID in `ciDeviceId`
 
-<!-- Create a blank new IoT thing (a regular tracker with certificates generated locally) to be used for this specific test run. -->
-<!-- The firmware is then build specifically for this device. -->
+<!-- Create a blank new IoT thing (a regular tracker with certificates generated locally) to be used for this specific test run.
+     The firmware is then build specifically for this device. -->
 
 When I generate a certificate for the tracker `firmwaretest-${ciDeviceId}`
 

@@ -16,7 +16,7 @@ variants:
 > This enqueues a mock response on the mock HTTP API the stack is configure to
 > use for the nRF Cloud integration
 
-And I store a random number between `1` and `100000000` into `cellId`
+Given I store a random number between `1` and `100000000` into `cellId`
 
 And I store a random number between `0` and `20000` into `accuracy`
 
@@ -45,9 +45,9 @@ When I
 
 Then the response status code should be `200`
 
-And the response Access-Control-Allow-Origin should be "\*"
+And the response header Access-Control-Allow-Origin should be `*`
 
-And the response Content-Type should be "application/json"
+And the response header Content-Type should be `application/json`
 
 And the response should equal
 
@@ -64,17 +64,15 @@ And the response should equal
 Then the mock HTTP API should have been called with a `POST` request to
 `api.nrfcloud.com/v1/location/ground-fix`
 
-```
-Content-Type: application/json
-
+```json
 {
-    "lte": [
-        {
-            "eci": ${cellId},
-            "mcc": 242,
-            "mnc": 1,
-            "tac": 30401
-        }
-    ]
+  "lte": [
+    {
+      "eci": "$number{cellId}",
+      "mcc": 242,
+      "mnc": 1,
+      "tac": 30401
+    }
+  ]
 }
 ```

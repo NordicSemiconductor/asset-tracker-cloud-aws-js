@@ -1,12 +1,11 @@
-# Device Firmware Upgrade over the air As a user I can upgrade the
-
-firmware of my devices over the air
-
-## Background
-
+---
 needs:
+  - Connect a tracker
+---
 
-- Connect a tracker
+# Device Firmware Upgrade over the air
+
+> As a user I can upgrade the firmware of my devices over the air
 
 ## Create a new firmware upgrade as a user
 
@@ -14,7 +13,7 @@ Given I am authenticated with Cognito
 
 Given I have a random UUID in `jobId`
 
-When I execute "putObject" of the AWS S3 SDK with
+When I execute `putObject` of the AWS S3 SDK with
 
 ```json
 {
@@ -26,7 +25,7 @@ When I execute "putObject" of the AWS S3 SDK with
 }
 ```
 
-When I encode this payload into "jobDocument"
+When I encode this payload into `jobDocument`
 
 ```json
 {
@@ -42,7 +41,7 @@ When I encode this payload into "jobDocument"
 }
 ```
 
-And I execute "createJob" of the AWS Iot SDK with
+And I execute `createJob` of the AWS Iot SDK with
 
 ```json
 {
@@ -54,17 +53,17 @@ And I execute "createJob" of the AWS Iot SDK with
 }
 ```
 
-Then "awsSdk.res.jobId" should equal
+Then `awsSdk.res.jobId` should equal
 
-```json
-"${jobId}"
+```
+${jobId}
 ```
 
 ## Fetch the job as a device and mark as in progress
 
-When the tracker fetches the next job into "job"
+When the tracker fetches the next job into `job`
 
-Then "job" should match
+Then `job` should match
 
 ```json
 {
@@ -73,11 +72,11 @@ Then "job" should match
 }
 ```
 
-And the tracker marks the job in "job" as in progress
+And the tracker marks the job in `job` as in progress
 
 ## describe the job
 
-When I execute "describeJobExecution" of the AWS Iot SDK with
+When I execute `describeJobExecution` of the AWS Iot SDK with
 
 ```json
 {
@@ -86,7 +85,7 @@ When I execute "describeJobExecution" of the AWS Iot SDK with
 }
 ```
 
-Then "awsSdk.res.execution" should match
+Then `awsSdk.res.execution` should match
 
 ```json
 {
@@ -98,7 +97,7 @@ Then "awsSdk.res.execution" should match
 
 ## cancel the job
 
-When I execute "cancelJobExecution" of the AWS Iot SDK with
+When I execute `cancelJobExecution` of the AWS Iot SDK with
 
 ```json
 {
@@ -108,7 +107,7 @@ When I execute "cancelJobExecution" of the AWS Iot SDK with
 }
 ```
 
-When I execute "describeJobExecution" of the AWS Iot SDK with
+When I execute `describeJobExecution` of the AWS Iot SDK with
 
 ```json
 {
@@ -117,7 +116,7 @@ When I execute "describeJobExecution" of the AWS Iot SDK with
 }
 ```
 
-Then "awsSdk.res.execution" should match
+Then `awsSdk.res.execution` should match
 
 ```json
 {
@@ -128,7 +127,7 @@ Then "awsSdk.res.execution" should match
 
 ## delete the job
 
-Given I execute "deleteObject" of the AWS S3 SDK with
+Given I execute `deleteObject` of the AWS S3 SDK with
 
 ```json
 {
@@ -137,7 +136,7 @@ Given I execute "deleteObject" of the AWS S3 SDK with
 }
 ```
 
-And I execute "deleteJobExecution" of the AWS Iot SDK with
+And I execute `deleteJobExecution` of the AWS Iot SDK with
 
 ```json
 {

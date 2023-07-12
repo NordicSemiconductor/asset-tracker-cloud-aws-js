@@ -7,8 +7,6 @@ needs:
 
 > As a user I can read the device shadow
 
-## Background
-
 ## Read reported and desired state as user
 
 Given I am authenticated with Cognito

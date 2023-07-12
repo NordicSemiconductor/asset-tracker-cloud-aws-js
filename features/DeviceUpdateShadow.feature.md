@@ -3,7 +3,7 @@ needs:
   - Connect a tracker
 ---
 
-# Device: Update Shadow
+# Device Update Shadow
 
 > Devices can update their shadow
 

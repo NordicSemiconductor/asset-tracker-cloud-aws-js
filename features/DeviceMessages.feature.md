@@ -1,16 +1,16 @@
 ---
 needs:
-  - Device: Update Shadow
+  - Device Update Shadow
 ---
 
-# Device: Messages
+# Device Messages
 
 > Devices can publish arbitrary messages on the /messages topic and that the
 > messages can then be queried in Timestream.
 
 ## Background
 
-And I store a random number between `0` and `1024` into `button1`
+Given I store a random number between `0` and `1024` into `button1`
 
 And I store a random number between `0` and `1024` into `button2`
 
