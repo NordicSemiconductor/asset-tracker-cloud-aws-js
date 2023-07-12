@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit",
-    "test:e2e": "node --unhandled-rejections=strict --loader tsx feature-runner/run-features.ts ./features --print-results --progress",
+    "test:e2e": "npx tsx --no-warnings ./feature-runner/run-features.ts | npx tsx --no-warnings ./feature-runner/console-reporter.ts",
     "prepare": "husky install && check-node-version --package",
     "prepublishOnly": "npx swc -d dist ./cli npx swc -d dist ./features"
   },
