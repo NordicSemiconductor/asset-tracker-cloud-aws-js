@@ -17,11 +17,11 @@ variants:
 
 ## Device enters a cell
 
-Given I store a random number between `1` and `100000000` into `cellId`
+Given I have a random number between `$1` and `$2` in `cellId`
 
-And I store a random float between `-90` and `90` into `lat`
+And I have a random float between `-90` and `90` in `lat`
 
-And I store a random float between `-180` and `180` into `lng`
+And I have a random float between `-180` and `180` in `lng`
 
 And I store `$millis()` into `ts`
 

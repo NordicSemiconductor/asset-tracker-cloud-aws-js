@@ -19,10 +19,10 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-And I store a random number between `1` and `100000000` into
+And I have a random number between `$1` and `$2` in
 `${variant.nw}-ncellmeasCellId`
 
-And I store a random number between `1` and `100000000` into
+And I have a random number between `$1` and `$2` in
 `${variant.nw}-ncellmeasAreaId`
 
 And I store `${variant.nw}-ncellmeasCellId` into `cellId`
@@ -167,6 +167,6 @@ Then `awsSDK.res.Item` should match
     }
   },
   "nw": { "S": "${variant.nw-modem}" },
-  "deviceId": { "S": "{tracker.id}" }
+  "deviceId": { "S": "${tracker.id}" }
 }
 ```

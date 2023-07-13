@@ -17,13 +17,13 @@ variants:
 > This enqueues a mock response on the mock HTTP API the stack is configure to
 > use for the nRF Cloud integration
 
-Given I store a random number between `1` and `100000000` into `cellId`
+Given I have a random number between `1` and `100000000` in `cellId`
 
-And I store a random number between `0` and `20000` into `accuracy`
+And I have a random number between `0` and `20000` in `accuracy`
 
-And I store a random float between `-90` and `90` into `lat`
+And I have a random float between `-90` and `90` in `lat`
 
-And I store a random float between `-180` and `180` into `lng`
+And I have a random float between `-180` and `180` in `lng`
 
 And I enqueue this mock HTTP API response with status code 200 for a `POST`
 request to `api.nrfcloud.com/v1/location/ground-fix`

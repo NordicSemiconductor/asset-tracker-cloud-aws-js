@@ -12,6 +12,8 @@ import {
 	objectMatchingStrictly,
 	not,
 	undefinedValue,
+	arrayMatching,
+	arrayMatchingStrictly,
 } from 'tsmatchers'
 
 const steps: StepRunner<World & Record<string, any>>[] = [
@@ -51,9 +53,21 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			progress(value)
 
 			if (matchOrEqual === 'match') {
-				check(value).is(objectMatching(expected))
+				if (Array.isArray(expected)) {
+					check(value).is(arrayMatching(expected.map((o) => objectMatching(o))))
+				} else {
+					check(value).is(objectMatching(expected))
+				}
 			} else {
-				check(value).is(objectMatchingStrictly(expected))
+				if (Array.isArray(expected)) {
+					check(value).is(
+						arrayMatchingStrictly(
+							expected.map((o) => objectMatchingStrictly(o)),
+						),
+					)
+				} else {
+					check(value).is(objectMatchingStrictly(expected))
+				}
 			}
 		},
 	),
@@ -119,7 +133,46 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 
 			context[storageName] = value
 
-			return {result: value}
+			return { result: context[storageName] }
+		},
+	),
+	matchStep(
+		new RegExp(`^I have this JSON-encoded in ${matchString('storageName')}$`),
+		Type.Object({
+			storageName: Type.String(),
+		}),
+		async ({ storageName }, { step, context }) => {
+			context[storageName] = JSON.stringify(
+				JSON.stringify(JSON.parse(codeBlockOrThrow(step).code)),
+			).slice(1, -1)
+			return { result: context[storageName] }
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^I parse JSON-encoded ${matchString('expression')} into ${matchString(
+				'storageName',
+			)}$`,
+		),
+		Type.Object({
+			storageName: Type.String(),
+			expression: Type.String(),
+		}),
+		async ({ storageName, expression }, { step, context }) => {
+			let e: jsonata.Expression | undefined = undefined
+			try {
+				e = jsonata(expression)
+			} catch {
+				throw new Error(`The expression '${expression}' is not valid JSONata.`)
+			}
+
+			const value = await e.evaluate(context)
+
+			check(value).is(not(undefinedValue))
+
+			context[storageName] = JSON.parse(new TextDecoder().decode(value))
+
+			return { result: context[storageName] }
 		},
 	),
 ]

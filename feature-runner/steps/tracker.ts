@@ -239,5 +239,48 @@ const steps: ({
 			return { result: await updatePromise }
 		},
 	),
+	matchStep(
+		new RegExp(
+			`^the tracker(:? ${matchString(
+				'deviceId',
+			)})? publishes this message to the topic ${matchString('topic')}$`,
+		),
+		Type.Object({
+			deviceId: Type.Optional(Type.String()),
+			topic: Type.String(),
+		}),
+		async (
+			{ deviceId: maybeDeviceId, topic },
+			{
+				step,
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const trackerId = maybeDeviceId ?? '__default'
+			if (trackers[trackerId] === undefined) {
+				throw new Error(`No credentials available for tracker ${trackerId}`)
+			}
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const message = JSON.parse(codeBlockOrThrow(step).code)
+			progress(JSON.stringify(message))
+			const connection = connections[trackerId]!
+			await new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(reject, 10 * 1000)
+				connection
+					.publish(topic as string, JSON.stringify(message))
+					.then(resolve)
+					.catch(reject)
+					.finally(() => {
+						clearTimeout(timeout)
+					})
+			})
+		},
+	),
+	
 ]
 export default steps

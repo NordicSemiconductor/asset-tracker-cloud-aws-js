@@ -11,11 +11,11 @@ needs:
 
 ## Background
 
-Given I store a random number between `0` and `1024` into `button1`
+Given I have a random number between `$1` and `$2` in `button1`
 
-And I store a random number between `0` and `1024` into `button2`
+And I have a random number between `$1` and `$2` in `button2`
 
-And I store a random number between `1` and `300` into `magnitude`
+And I have a random number between `$1` and `$2` in `magnitude`
 
 ## Devices publishes that a button was pressed
 

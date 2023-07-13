@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Device Update Shadow
   - Attach Iot Policy to user
@@ -14,7 +13,7 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-And I encode this payload into `payload`
+And I have this JSON-encoded in `payload`
 
 ```json
 {
@@ -35,7 +34,7 @@ And I encode this payload into `payload`
 }
 ```
 
-When I execute `updateThingShadow` of `@aws-sdk/client-iotData` with
+When I execute `updateThingShadow` of `@aws-sdk/client-iot-data-plane` with
 
 ```json
 {

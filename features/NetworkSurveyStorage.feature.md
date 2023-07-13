@@ -14,9 +14,9 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-And I store a random number between `1` and `100000000` into `lteNetworkCellId`
+And I have a random number between `$1` and `$2` in `lteNetworkCellId`
 
-And I store a random number between `1` and `100000000` into `lteNetworkAreaId`
+And I have a random number between `$1` and `$2` in `lteNetworkAreaId`
 
 ## Device publishes a networks survey that has neighboring cells and Wi-Fi APs
 
@@ -193,6 +193,6 @@ Then `awsSDK.res.Item` should match
       }
     }
   },
-  "deviceId": { "S": "{tracker.id}" }
+  "deviceId": { "S": "${tracker.id}" }
 }
 ```
