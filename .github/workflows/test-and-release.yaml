@@ -79,15 +79,15 @@ jobs:
       - run: echo "VERSION=${{ github.sha }}" >> $GITHUB_ENV
       - name: Set up stack for End-to-End tests
         run: |
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' deploy '*' --require-approval never
+          npx cdk -a 'node --loader tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-test.ts' bootstrap aws://`aws sts get-caller-identity | jq -r '.Account' | tr -d '\n'`/${{ env.AWS_REGION }}
+          npx cdk -a 'node --loader tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' deploy '*' --require-approval never
           ./cli.sh configure thirdParty nrfcloud teamId `uuidgen`
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud agpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud pgpsLocationServiceKey
           openssl ecparam -name prime256v1 -genkey | ./cli.sh configure thirdParty nrfcloud groundFixServiceKey
           MOCK_HTTP_API_ENDPOINT=`aws cloudformation describe-stacks --stack-name ${STACK_NAME}-mock-http-api | jq -r '.Stacks[0].Outputs[] | select(.OutputKey == "apiURL") | .OutputValue' | sed -E 's/\/$//g'`
           ./cli.sh configure thirdParty nrfcloud endpoint ${MOCK_HTTP_API_ENDPOINT}/api.nrfcloud.com
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' deploy '*' --require-approval never
+          npx cdk -a 'node --loader tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-test.ts' deploy '*' --require-approval never
       - name: Create CA
         run: ./cli.sh create-ca --tags ci,repository=${{ github.repository }}
       - name: Run End-to-End Tests
@@ -109,8 +109,8 @@ jobs:
           ./cli.sh purge-cas -c
           # Purge Buckets does not remove the source-code bucket (because it will be populate again by the CDK command)
           ./cli.sh purge-buckets
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-test.ts' destroy -f '*'
-          npx cdk -a 'node --loader tsx --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' destroy -f '*'
+          npx cdk -a 'node --loader tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-test.ts' destroy -f '*'
+          npx cdk -a 'node --loader tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' destroy -f '*'
       - uses: actions/upload-artifact@v3
         if: always()
         with:
