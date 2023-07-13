@@ -6,6 +6,7 @@ import {
 } from '../../cdk/stacks/stackName.js'
 import { getSettings } from '../../util/settings.js'
 import type { CommandDefinition } from './CommandDefinition.js'
+import { getSentrySettings } from '../../third-party/sentry.io/settings.js'
 
 const ssm = new SSMClient({})
 
@@ -35,10 +36,8 @@ export const webAppConfigCommand = ({
 						scope: 'config',
 						stackName: WEBAPP_STACK_NAME,
 					})()),
-					...(await getSettings<Record<string, string>>({
+					...(await getSentrySettings({
 						ssm,
-						system: 'sentry',
-						scope: 'thirdParty',
 						stackName: CORE_STACK_NAME,
 					})()),
 					region: process.env.AWS_REGION,
