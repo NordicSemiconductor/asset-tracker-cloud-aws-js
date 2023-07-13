@@ -53,7 +53,7 @@ export const StackOutputs = {
 	networkSurveyStorageTableArn: `${CORE_STACK_NAME}:networkSurveyStorageTableArn`,
 	networkSurveyStorageTableStreamArn: `${CORE_STACK_NAME}:networkSurveyStorageTableStreamArn`,
 	networkSurveyGeolocationApiUrl: `${CORE_STACK_NAME}:networkSurveyGeolocationApiUrl`,
-} as const
+}
 
 export class AssetTrackerStack extends CloudFormation.Stack {
 	public constructor(

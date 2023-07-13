@@ -91,6 +91,7 @@ const world: World = {
 	},
 	region: mqttEndpoint.split('.')[2] as string,
 	currentGpsDay: gpsDay(),
+	geolocationApiUrl: stackConfig.geolocationApiUrl.replace(/\/$/g, ''),
 }
 
 console.error(chalk.yellow.bold(' World:'))
