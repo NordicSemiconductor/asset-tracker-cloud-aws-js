@@ -1,12 +1,11 @@
 ---
-run: never
 needs:
   - Connect a tracker
 variants:
   - nw: ltem
-    nw-modem: LTE-M
+    nwModem: LTE-M
   - nw: nbiot
-    nw-modem: NB-IoT
+    nwModem: NB-IoT
 ---
 
 # Cell Geolocation API
@@ -31,7 +30,7 @@ Then the tracker updates its reported state with
 {
   "roam": {
     "v": {
-      "nw": "${variant.nw-modem}",
+      "nw": "${variant.nwModem}",
       "rsrp": -97,
       "area": 211,
       "mccmnc": 26201,

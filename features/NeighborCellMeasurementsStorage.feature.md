@@ -2,9 +2,9 @@
 run: never
 variants:
   - nw: ltem
-    nw-modem: LTE-M
+    nwModem: LTE-M
   - nw: nbiot
-    nw-modem: NB-IoT
+    nwModem: NB-IoT
 needs:
   - Connect a tracker
 ---
@@ -39,7 +39,7 @@ Then the tracker updates its reported state with
 {
   "roam": {
     "v": {
-      "nw": "${variant.nw-modem}",
+      "nw": "${variant.nwModem}",
       "rsrp": -97,
       "area": "$number{cellId}",
       "mccmnc": 24201,
@@ -166,7 +166,7 @@ Then `awsSDK.res.Item` should match
       "ts": { "N": "${ts}" }
     }
   },
-  "nw": { "S": "${variant.nw-modem}" },
+  "nw": { "S": "${variant.nwModem}" },
   "deviceId": { "S": "${tracker.id}" }
 }
 ```

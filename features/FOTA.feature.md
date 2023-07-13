@@ -2,7 +2,6 @@
 needs:
   - Connect a tracker
   - Register a new account
-run: only
 ---
 
 # Device Firmware Upgrade over the air
