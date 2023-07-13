@@ -15,6 +15,7 @@ import {
 	awsIotDeviceConnection,
 	type Connection,
 } from './awsIotDeviceConnection.js'
+import { aNumber, aString, check, objectMatching } from 'tsmatchers'
 
 type TrackerInfo = {
 	privateKey: string
@@ -268,7 +269,7 @@ const steps: ({
 			}
 			const message = JSON.parse(codeBlockOrThrow(step).code)
 			progress(JSON.stringify(message))
-			const connection = connections[trackerId]!
+			const connection = connections[trackerId]
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(reject, 10 * 1000)
 				connection
@@ -281,6 +282,146 @@ const steps: ({
 			})
 		},
 	),
-	
+	matchStep(
+		new RegExp(
+			`^the tracker(:? ${matchString(
+				'deviceId',
+			)})? fetches the next job into ${matchString('storageName')}$`,
+		),
+		Type.Object({
+			deviceId: Type.Optional(Type.String()),
+			storageName: Type.String(),
+		}),
+		async (
+			{ deviceId: maybeDeviceId, storageName },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const trackerId = maybeDeviceId ?? '__default'
+			if (trackers[trackerId] === undefined) {
+				throw new Error(`No credentials available for tracker ${trackerId}`)
+			}
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const connection = connections[trackerId]
+
+			const deviceId = trackers[trackerId].id
+
+			const getNextJobTopic = `$aws/things/${deviceId}/jobs/$next/get`
+			const successTopic = `${getNextJobTopic}/accepted`
+
+			progress(getNextJobTopic)
+			progress(successTopic)
+
+			const res = await new Promise((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error(`Did not receive a next job!`))
+				}, 60 * 1000)
+
+				const catchError = (error: Error) => {
+					clearTimeout(timeout)
+					reject(error)
+				}
+
+				connection
+					.onMessageOnce(successTopic, (message) => {
+						progress(message.toString())
+						clearTimeout(timeout)
+						resolve(JSON.parse(message.toString()).execution)
+					})
+					.catch(catchError)
+
+				connection.publish(getNextJobTopic, '').catch(catchError)
+			})
+
+			progress(JSON.stringify(res))
+
+			check(res).is(
+				objectMatching({
+					jobId: aString,
+				}),
+			)
+
+			context[storageName] = res
+
+			return { result: res }
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^the tracker(:? ${matchString(
+				'deviceId',
+			)})? marks the job in ${matchString('storageName')} as in progress$`,
+		),
+		Type.Object({
+			deviceId: Type.Optional(Type.String()),
+			storageName: Type.String(),
+		}),
+		async (
+			{ deviceId: maybeDeviceId, storageName },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const trackerId = maybeDeviceId ?? '__default'
+			if (trackers[trackerId] === undefined) {
+				throw new Error(`No credentials available for tracker ${trackerId}`)
+			}
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const connection = connections[trackerId]
+
+			const deviceId = trackers[trackerId].id
+
+			const updateJobTopic = `$aws/things/${deviceId}/jobs/${context[storageName].jobId}/update`
+			const successTopic = `${updateJobTopic}/accepted`
+
+			progress(updateJobTopic)
+			progress(successTopic)
+
+			const res = await new Promise((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error(`Job not marked as in progress!`))
+				}, 60 * 1000)
+
+				const catchError = (error: Error) => {
+					clearTimeout(timeout)
+					reject(error)
+				}
+
+				connection
+					.onMessageOnce(successTopic, (message) => {
+						progress(message.toString())
+						clearTimeout(timeout)
+						resolve(JSON.parse(message.toString()))
+					})
+					.catch(catchError)
+
+				connection
+					.publish(
+						updateJobTopic,
+						JSON.stringify({
+							status: 'IN_PROGRESS',
+							expectedVersion: context[storageName].versionNumber,
+							executionNumber: context[storageName].executionNumber,
+						}),
+					)
+					.catch(catchError)
+			})
+
+			progress(JSON.stringify(res))
+
+			return { result: res }
+		},
+	),
 ]
 export default steps

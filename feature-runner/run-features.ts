@@ -150,6 +150,6 @@ runner
 
 const res = await runner.run(world)
 
-console.log(JSON.stringify(res, null, 2))
+// console.log(JSON.stringify(res, null, 2))
 
 if (!res.ok) process.exit(1)

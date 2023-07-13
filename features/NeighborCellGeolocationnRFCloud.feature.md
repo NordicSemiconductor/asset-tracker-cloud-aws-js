@@ -23,7 +23,7 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-And I have a random number between `$1` and `$2` in `accuracy`
+And I have a random number between `0` and `2000` in `accuracy`
 
 And I have a random float between `-90` and `90` in `lat`
 

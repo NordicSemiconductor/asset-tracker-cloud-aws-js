@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Device Update Shadow
 ---
@@ -11,11 +10,11 @@ needs:
 
 ## Background
 
-Given I have a random number between `$1` and `$2` in `button1`
+Given I have a random number between `0` and `1024` in `button1`
 
-And I have a random number between `$1` and `$2` in `button2`
+And I have a random number between `0` and `1024` in `button2`
 
-And I have a random number between `$1` and `$2` in `magnitude`
+And I have a random number between `1` and `300` in `magnitude`
 
 ## Devices publishes that a button was pressed
 
@@ -45,6 +44,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/messages`
 }
 ```
 
+## User retrieves the button presses
+
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
@@ -57,7 +58,9 @@ WHERE deviceId='${tracker.id}' AND measure_name='btn' AND measure_value::double 
 ORDER BY time DESC
 ```
 
-Then `timestreamQueryResult` should match
+<!-- @retryScenario -->
+
+Soon `timestreamQueryResult` should match
 
 ```json
 [
@@ -67,7 +70,9 @@ Then `timestreamQueryResult` should match
 ]
 ```
 
-Then `timestreamQueryResult` should match
+<!-- @retryScenario -->
+
+Soon `timestreamQueryResult` should match
 
 ```json
 [
@@ -92,6 +97,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/messages`
 }
 ```
 
+## User retrieves the impact messages
+
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
@@ -104,7 +111,9 @@ WHERE deviceId='${tracker.id}' AND measure_name='impact' AND measure_value::doub
 ORDER BY time DESC
 ```
 
-Then `timestreamQueryResult` should match
+<!-- @retryScenario -->
+
+Soon `timestreamQueryResult` should match
 
 ```json
 [

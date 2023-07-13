@@ -17,7 +17,7 @@ variants:
 
 ## Device enters a cell
 
-Given I have a random number between `$1` and `$2` in `cellId`
+Given I have a random number between `1` and `100000000` in `cellId`
 
 And I have a random float between `-90` and `90` in `lat`
 

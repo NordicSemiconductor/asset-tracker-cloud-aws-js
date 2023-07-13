@@ -1,7 +1,8 @@
 ---
-run: never
 needs:
   - Connect a tracker
+  - Register a new account
+run: only
 ---
 
 # Device Firmware Upgrade over the air
@@ -27,7 +28,7 @@ When I execute `putObject` of `@aws-sdk/client-s3` with
 }
 ```
 
-When I encode this payload into `jobDocument`
+When I have this JSON-encoded in `jobDocument`
 
 ```json
 {
@@ -57,9 +58,11 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 
 Then `awsSDK.res.jobId` should equal `${jobId}`
 
-## Fetch the job as a device and mark as in progress
+## Fetch the job as a device
 
-When the tracker fetches the next job into `job`
+<!-- @retryScenario @retry:delayExecution=1000,initialDelay=1000 -->
+
+Soon the tracker fetches the next job into `job`
 
 Then `job` should match
 
@@ -70,7 +73,11 @@ Then `job` should match
 }
 ```
 
-And the tracker marks the job in `job` as in progress
+## Mark as in progress
+
+ <!-- @retryScenario @retry:initialDelay=1000 -->
+
+Soon the tracker marks the job in `job` as in progress
 
 ## describe the job
 

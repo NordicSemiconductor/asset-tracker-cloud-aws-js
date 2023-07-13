@@ -12,9 +12,9 @@ needs:
 
 > Prepare the mock API responses.
 
-Given I have a random number between `$1` and `$2` in `predictionCount`
+Given I have a random number between `1` and `168` in `predictionCount`
 
-And I have a random number between `$1` and `$2` in `startGpsTimeOfDaySeconds`
+And I have a random number between `0` and `86399` in `startGpsTimeOfDaySeconds`
 
 And I enqueue this mock HTTP API response with status code `200` for a `GET`
 request to
