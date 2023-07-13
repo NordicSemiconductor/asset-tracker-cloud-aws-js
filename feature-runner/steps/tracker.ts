@@ -1,4 +1,7 @@
-import { type StepRunner } from '@nordicsemiconductor/bdd-markdown'
+import {
+	codeBlockOrThrow,
+	type StepRunner,
+} from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
 import { matchStep, matchString } from './util.js'
@@ -160,19 +163,80 @@ const steps: ({
 			},
 		) => {
 			const trackerId = maybeDeviceId ?? '__default'
-			if (trackers[trackerId] === undefined) {
-				throw new Error(`No certificate available for tracker ${trackerId}`)
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 
-			if (connections[trackerId] !== undefined) {
-				connections[trackerId].close()
-				delete connections[trackerId]
-				progress('Closed')
-			}
+			connections[trackerId]?.close()
+			delete connections[trackerId]
+			progress('Closed')
 
 			context.tracker = undefined
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^the tracker(:? ${matchString(
+				'deviceId',
+			)})? updates its reported state with$`,
+		),
+		Type.Object({
+			deviceId: Type.Optional(Type.String()),
+		}),
+		async (
+			{ deviceId: maybeDeviceId },
+			{
+				step,
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const trackerId = maybeDeviceId ?? '__default'
+			if (trackers[trackerId] === undefined) {
+				throw new Error(`No credentials available for tracker ${trackerId}`)
+			}
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
 
-			return { result: trackers[trackerId]?.id }
+			const reported = JSON.parse(codeBlockOrThrow(step).code)
+			const deviceId = trackers[trackerId].id
+			const connection = connections[trackerId]
+			const shadowBase = `$aws/things/${deviceId}/shadow`
+			const updateStatus = `${shadowBase}/update`
+			const updateStatusAccepted = `${updateStatus}/accepted`
+			const updateStatusRejected = `${updateStatus}/rejected`
+
+			const updatePromise = await new Promise((resolve, reject) => {
+				const timeout = setTimeout(reject, 10 * 1000)
+				Promise.all([
+					connection.onMessageOnce(updateStatusAccepted, (message) => {
+						progress('IoT < status', message.toString())
+						clearTimeout(timeout)
+						resolve(JSON.parse(message.toString()))
+					}),
+					connection.onMessageOnce(updateStatusRejected, (message) => {
+						progress('IoT < status', message.toString())
+						clearTimeout(timeout)
+						reject(new Error(`Update rejected!`))
+					}),
+				])
+					.then(async () => {
+						progress('IoT > reported', deviceId)
+						progress('IoT > reported', JSON.stringify(reported))
+						return connection.publish(
+							updateStatus,
+							JSON.stringify({ state: { reported } }),
+						)
+					})
+					.catch((err) => {
+						clearTimeout(timeout)
+						reject(err)
+					})
+			})
+			return { result: await updatePromise }
 		},
 	),
 ]

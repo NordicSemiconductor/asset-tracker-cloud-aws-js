@@ -119,7 +119,7 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 
 			context[storageName] = value
 
-			return { result: value }
+			return {result: value}
 		},
 	),
 ]
