@@ -9,15 +9,16 @@ needs:
 
 ## Read reported and desired state as user
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
-When I execute `getThingShadow` of the AWS IotData SDK with
+When I execute `getThingShadow` of `@aws-sdk/client-iotData` with
 
 ```json
 { "thingName": "{tracker:id}" }
 ```
 
-And I parse `awsSdk.res.payload` into `shadow`
+And I parse `awsSDK.res.payload` into `shadow`
 
 Then `shadow.state.reported` should match
 

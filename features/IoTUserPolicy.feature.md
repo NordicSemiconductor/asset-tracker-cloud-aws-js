@@ -5,19 +5,20 @@
 
 ## Background
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 ## Initially the user should not have policies
 
-When I execute `listAttachedPolicies` of the AWS Iot SDK with
+When I execute `listAttachedPolicies` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "target": "${cognito:IdentityId}"
+  "target": "${cognito.IdentityId}"
 }
 ```
 
-Then `awsSdk.res.policies` should match
+Then `awsSDK.res.policies` should match
 
 ```json
 []
@@ -25,24 +26,24 @@ Then `awsSdk.res.policies` should match
 
 ## Self-assign the policy
 
-When I execute `attachPolicy` of the AWS Iot SDK with
+When I execute `attachPolicy` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "target": "${cognito:IdentityId}",
+  "target": "${cognito.IdentityId}",
   "policyName": "${userIotPolicyName}"
 }
 ```
 
-And I execute `listAttachedPolicies` of the AWS Iot SDK with
+And I execute `listAttachedPolicies` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "target": "${cognito:IdentityId}"
+  "target": "${cognito.IdentityId}"
 }
 ```
 
-Then `awsSdk.res.policies` should match
+Then `awsSDK.res.policies` should match
 
 ```json
 [{ "policyName": "${userIotPolicyName}" }]

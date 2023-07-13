@@ -13,7 +13,8 @@ needs:
 > This enqueues a mock response on the mock HTTP API the stack is configure to
 > use for the nRF Cloud integration
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 And I store a random number between `0` and `20000` into `accuracy`
 
@@ -35,7 +36,7 @@ request to `api.nrfcloud.com/v1/location/ground-fix`
 
 ## Find the latest survey
 
-When I execute `query` of the AWS DynamoDB SDK with
+When I execute `query` of `@aws-sdk/client-dynamodb` with
 
 ```json
 {
@@ -55,7 +56,7 @@ When I execute `query` of the AWS DynamoDB SDK with
 }
 ```
 
-Then I store `awsSdk.res.Items[0].surveyId.S` into `networkSurveyId`
+Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
 ## Retrieve the location for the survey
 

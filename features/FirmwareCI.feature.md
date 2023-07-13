@@ -36,7 +36,7 @@ replaceNewLines
 
 Then I connect the tracker `firmwaretest-${ciDeviceId}`
 
-<!-- Create a job for the AWS IoT thing used to manage the firmware CI runs -->
+<!-- Create a job for the @aws-sdk/client-iot thing used to manage the firmware CI runs -->
 
 When I encode this payload into `jobDocument`
 
@@ -55,13 +55,13 @@ When I encode this payload into `jobDocument`
 }
 ```
 
-And I execute `createJob` of the AWS Iot SDK with
+And I execute `createJob` of `@aws-sdk/client-iot` with
 
 ```json
 {
   "jobId": "${jobId}",
   "targets": [
-    "arn:aws:iot:${region}:${accountId}:thing/firmwaretest-${ciDeviceId}"
+    "arn:@aws-sdk/client-iot:${region}:${accountId}:thing/firmwaretest-${ciDeviceId}"
   ],
   "document": "${jobDocument}",
   "description": "Upgrade firmwaretest-${ciDeviceId} to version 1.2.3.",
@@ -69,7 +69,7 @@ And I execute `createJob` of the AWS Iot SDK with
 }
 ```
 
-Then `awsSdk.res.jobId` should equal
+Then `awsSDK.res.jobId` should equal
 
 ```
 ${jobId}
@@ -77,7 +77,7 @@ ${jobId}
 
 ## Cancel Job
 
-When I execute `deleteJob` of the AWS Iot SDK with
+When I execute `deleteJob` of `@aws-sdk/client-iot` with
 
 ```json
 {

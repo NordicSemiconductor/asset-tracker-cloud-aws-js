@@ -9,7 +9,8 @@ needs:
 
 ## Query historical data
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 When I run this Timestream query
 

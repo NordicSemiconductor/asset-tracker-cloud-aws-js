@@ -53,9 +53,10 @@ should be `true`
 
 ## Delete tracker
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
-When I execute `listThingPrincipals` of the AWS Iot SDK with
+When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -63,13 +64,13 @@ When I execute `listThingPrincipals` of the AWS Iot SDK with
 }
 ```
 
-Then `$count(awsSdk.res.principals)` should equal 1
+Then `$count(awsSDK.res.principals)` should equal 1
 
-Given I store `awsSdk.res.principals[0]` into `certificateArn`
+Given I store `awsSDK.res.principals[0]` into `certificateArn`
 
-Given I store `$split(awsSdk.res.principals[0], '/')[1]` into `certificateId`
+Given I store `$split(awsSDK.res.principals[0], '/')[1]` into `certificateId`
 
-Given I execute `detachThingPrincipal` of the AWS Iot SDK with
+Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -78,7 +79,7 @@ Given I execute `detachThingPrincipal` of the AWS Iot SDK with
 }
 ```
 
-And I execute `updateCertificate` of the AWS Iot SDK with
+And I execute `updateCertificate` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -87,7 +88,7 @@ And I execute `updateCertificate` of the AWS Iot SDK with
 }
 ```
 
-And I execute `deleteCertificate` of the AWS Iot SDK with
+And I execute `deleteCertificate` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -95,7 +96,7 @@ And I execute `deleteCertificate` of the AWS Iot SDK with
 }
 ```
 
-And I execute `deleteThing` of the AWS Iot SDK with
+And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
