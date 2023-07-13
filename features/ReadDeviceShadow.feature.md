@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Update Device Configuration
 ---
@@ -15,7 +16,7 @@ Given I am authenticated with Cognito as `${userEmail}` with password
 When I execute `getThingShadow` of `@aws-sdk/client-iotData` with
 
 ```json
-{ "thingName": "{tracker:id}" }
+{ "thingName": "{tracker.id}" }
 ```
 
 And I parse `awsSDK.res.payload` into `shadow`

@@ -5,10 +5,11 @@ import { isNullOrUndefined } from '../../util/isNullOrUndefined.js'
 
 export type Listener = () => unknown
 export type ListenerWithPayload = (payload: Buffer) => unknown
-type Connection = {
+export type Connection = {
 	onConnect: (listener: Listener) => void
 	onMessageOnce: (topic: string, listener: ListenerWithPayload) => Promise<void>
 	publish: (topic: string, message: string) => Promise<void>
+	close: () => void
 }
 
 export const awsIotDeviceConnection = ({
@@ -101,6 +102,10 @@ export const awsIotDeviceConnection = ({
 							listener,
 						]
 					}),
+				close: () => {
+					d.end()
+					delete connections[clientId]
+				},
 			}
 		}
 		return connections[clientId] as Connection

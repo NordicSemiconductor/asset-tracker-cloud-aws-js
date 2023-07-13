@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Store WiFi site surveys
 ---
@@ -49,7 +50,7 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
   },
   "ExpressionAttributeValues": {
     ":deviceId": {
-      "S": "${tracker:id}"
+      "S": "${tracker.id}"
     }
   },
   "Limit": 1

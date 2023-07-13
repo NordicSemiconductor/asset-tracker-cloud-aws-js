@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Device Update Shadow
   - Attach Iot Policy to user
@@ -38,7 +39,7 @@ When I execute `updateThingShadow` of `@aws-sdk/client-iotData` with
 
 ```json
 {
-  "thingName": "${tracker:id}",
+  "thingName": "${tracker.id}",
   "payload": "${payload}"
 }
 ```

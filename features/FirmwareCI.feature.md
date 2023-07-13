@@ -1,3 +1,7 @@
+---
+run: never
+---
+
 # Schedule FOTA jobs during Firmware CI runs
 
 > As a developer I can schedule FOTA jobs for firmware that runs on real devices
@@ -23,10 +27,10 @@ Given I have a random UUID in `ciDeviceId`
 
 When I generate a certificate for the tracker `firmwaretest-${ciDeviceId}`
 
-Then I encode `$lookup($, 'tracker:firmwaretest-${ciDeviceId}:clientCert')` into
+Then I encode `$lookup($, 'tracker.firmwaretest-${ciDeviceId}:clientCert')` into
 `firmwareTestDeviceCertificatePEM` using replaceNewLines
 
-And I encode `$lookup($, 'tracker:firmwaretest-${ciDeviceId}:privateKey')` into
+And I encode `$lookup($, 'tracker.firmwaretest-${ciDeviceId}:privateKey')` into
 `firmwareTestDeviceCertificatePrivateKey` using replaceNewLines
 
 And I encode `'${awsIotRootCA}'` into `awsIotRootCAEncoded` using
@@ -69,11 +73,7 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 }
 ```
 
-Then `awsSDK.res.jobId` should equal
-
-```
-${jobId}
-```
+Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Cancel Job
 

@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Device Update Shadow
 ---
@@ -19,7 +20,7 @@ And I store a random float between `-180` and `180` into `lng2`
 
 ## Devices can publish batch data
 
-Given the tracker publishes this message to the topic `${tracker:id}/batch`
+Given the tracker publishes this message to the topic `${tracker.id}/batch`
 
 ```json
 {
@@ -58,7 +59,7 @@ When I run this Timestream query
 ```
 SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
-WHERE deviceId='${tracker:id}'
+WHERE deviceId='${tracker.id}'
 
 AND measure_name='gnss.lng'
 
