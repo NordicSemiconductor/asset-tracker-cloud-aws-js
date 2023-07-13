@@ -35,6 +35,16 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 		},
 	),
 	matchStep(
+		new RegExp(`^I have a random UUID in ${matchString('storageName')}$`),
+		Type.Object({
+			storageName: Type.String(),
+		}),
+		async ({ storageName }, { context }) => {
+			context[storageName] = randomUUID()
+			return { result: context[storageName] }
+		},
+	),
+	matchStep(
 		new RegExp(
 			`^I have a random ${matchChoice('type', [
 				'number',

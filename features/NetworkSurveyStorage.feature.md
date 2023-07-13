@@ -14,9 +14,9 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-And I have a random number between `$1` and `$2` in `lteNetworkCellId`
+And I have a random number between `1` and `100000000` in `lteNetworkCellId`
 
-And I have a random number between `$1` and `$2` in `lteNetworkAreaId`
+And I have a random number between `1` and `100000000` in `lteNetworkAreaId`
 
 ## Device publishes a networks survey that has neighboring cells and Wi-Fi APs
 

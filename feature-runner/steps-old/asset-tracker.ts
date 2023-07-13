@@ -35,27 +35,6 @@ export const assetTrackerStepRunners = ({
 		awsIotRootCA,
 	})
 	return [
-		regexMatcher<World>(
-			/^the tracker(?: "([^"]+)")? publishes this message to the topic ([^ ]+)$/,
-		)(async ([deviceId, topic], step, runner) => {
-			const catId = deviceId ?? runner.store['tracker:id']
-			if (step.interpolatedArgument === undefined) {
-				throw new Error('Must provide argument!')
-			}
-			const message = JSON.parse(step.interpolatedArgument)
-			const connection = await connectToBroker(catId)
-			const publishPromise = new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(reject, 10 * 1000)
-				connection
-					.publish(topic as string, JSON.stringify(message))
-					.then(resolve)
-					.catch(reject)
-					.finally(() => {
-						clearTimeout(timeout)
-					})
-			})
-			return publishPromise
-		}),
 		regexGroupMatcher(
 			/^the tracker(?: "(?<deviceId>[^"]+)")? receives (?<messageCount>a|[1-9][0-9]*) (?<raw>raw )?messages? on the topic (?<topic>[^ ]+)(?: into "(?<storeName>[^"]+)")?$/,
 		)(async ({ deviceId, messageCount, raw, topic, storeName }, _, runner) => {
@@ -118,38 +97,6 @@ export const assetTrackerStepRunners = ({
 					connection.onMessageOnce(topic as string, listener).catch(catchError)
 				}
 				connection.onMessageOnce(topic as string, listener).catch(catchError)
-			})
-		}),
-		regexGroupMatcher(
-			/^the tracker(?: (?<deviceId>[^ ]+))? fetches the next job into "(?<storeName>[^"]+)"$/,
-		)(async ({ deviceId, storeName }, _, runner) => {
-			const catId = deviceId ?? runner.store['tracker:id']
-			const connection = await connectToBroker(catId)
-
-			const getNextJobTopic = `$aws/things/${catId}/jobs/$next/get`
-			const successTopic = `${getNextJobTopic}/accepted`
-
-			return new Promise((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error(`Did not receive a next job!`))
-				}, 60 * 1000)
-
-				const catchError = (error: Error) => {
-					clearTimeout(timeout)
-					reject(error)
-				}
-
-				connection
-					.onMessageOnce(successTopic, (message) => {
-						clearTimeout(timeout)
-						runner.store[storeName as string] = JSON.parse(
-							message.toString(),
-						).execution
-						resolve(runner.store[storeName as string])
-					})
-					.catch(catchError)
-
-				connection.publish(getNextJobTopic, '').catch(catchError)
 			})
 		}),
 		regexGroupMatcher(
