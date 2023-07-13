@@ -38,6 +38,7 @@ const steps: StepRunner<
 				if (code.language !== 'json') throw new Error(`Arguments must be JSON.`)
 
 				try {
+					progress(code.code)
 					args = JSON.parse(code.code)
 				} catch {
 					throw new Error(`Failed to parse arguments code block!`)

@@ -13,13 +13,13 @@ needs:
 > Prepare the mock API responses. The A-GPS data request will be split into two
 > requests, one for type 2 (ephemerides) and one for the rest.
 
-Given I store a random number between `100` and `999` into `agpsMcc`
+Given I have a random number between `$1` and `$2` in `agpsMcc`
 
-And I store a random number between `0` and `99` into `agpsMnc`
+And I have a random number between `$1` and `$2` in `agpsMnc`
 
-And I store a random number between `1` and `100000000` into `agpsCellId`
+And I have a random number between `$1` and `$2` in `agpsCellId`
 
-And I store a random number between `100` and `199` into `agpsArea`
+And I have a random number between `$1` and `$2` in `agpsArea`
 
 And I enqueue this mock HTTP API response with status code `200` for a `HEAD`
 request to

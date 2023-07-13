@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Device Update Shadow
 ---
@@ -14,9 +13,9 @@ Given I store `$millis()` into `ts1`
 
 And I store `$millis()+(120*1000)` into `ts2`
 
-And I store a random float between `-180` and `180` into `lng1`
+And I have a random float between `-180` and `180` in `lng1`
 
-And I store a random float between `-180` and `180` into `lng2`
+And I have a random float between `-180` and `180` in `lng2`
 
 ## Devices can publish batch data
 
@@ -60,15 +59,14 @@ When I run this Timestream query
 SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
 WHERE deviceId='${tracker.id}'
-
 AND measure_name='gnss.lng'
-
 AND measure_value::double IS NOT NULL
-
 ORDER BY time DESC
 ```
 
-Then "timestreamQueryResult" should match
+<!-- @retryScenario -->
+
+Soon `timestreamQueryResult` should match
 
 ```json
 [
@@ -78,7 +76,9 @@ Then "timestreamQueryResult" should match
 ]
 ```
 
-And "timestreamQueryResult" should match
+<!-- @retryScenario -->
+
+Soon `timestreamQueryResult` should match
 
 ```json
 [

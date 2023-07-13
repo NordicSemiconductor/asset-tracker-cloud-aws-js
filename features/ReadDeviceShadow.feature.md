@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Update Device Configuration
 ---
@@ -13,13 +12,13 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-When I execute `getThingShadow` of `@aws-sdk/client-iotData` with
+When I execute `getThingShadow` of `@aws-sdk/client-iot-data-plane` with
 
 ```json
-{ "thingName": "{tracker.id}" }
+{ "thingName": "${tracker.id}" }
 ```
 
-And I parse `awsSDK.res.payload` into `shadow`
+And I parse JSON-encoded `awsSDK.res.payload` into `shadow`
 
 Then `shadow.state.reported` should match
 

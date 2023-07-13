@@ -23,11 +23,11 @@ needs:
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
-And I store a random number between `0` and `20000` into `accuracy`
+And I have a random number between `$1` and `$2` in `accuracy`
 
-And I store a random float between `-90` and `90` into `lat`
+And I have a random float between `-90` and `90` in `lat`
 
-And I store a random float between `-180` and `180` into `lng`
+And I have a random float between `-180` and `180` in `lng`
 
 And I store `${variant.nw}-ncellmeasCellId` into `cellId`
 

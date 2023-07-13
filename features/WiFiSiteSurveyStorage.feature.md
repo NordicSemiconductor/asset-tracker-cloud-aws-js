@@ -130,6 +130,6 @@ Then `awsSDK.res.Item` should match
       }
     }
   },
-  "deviceId": { "S": "{tracker.id}" }
+  "deviceId": { "S": "${tracker.id}" }
 }
 ```
