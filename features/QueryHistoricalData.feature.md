@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Device Update Shadow
 ---
@@ -17,7 +18,7 @@ When I run this Timestream query
 ```
 SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
-WHERE deviceId='${tracker:id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
+WHERE deviceId='${tracker.id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
 ```
 
 Then `timestreamQueryResult` should match

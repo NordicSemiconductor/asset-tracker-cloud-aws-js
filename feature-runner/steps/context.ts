@@ -6,7 +6,13 @@ import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
 import { matchChoice, matchStep, matchString } from './util.js'
 import jsonata from 'jsonata'
-import { check, objectMatching, objectMatchingStrictly } from 'tsmatchers'
+import {
+	check,
+	objectMatching,
+	objectMatchingStrictly,
+	not,
+	undefinedValue,
+} from 'tsmatchers'
 
 const steps: StepRunner<World & Record<string, any>>[] = [
 	matchStep(
@@ -49,6 +55,71 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			} else {
 				check(value).is(objectMatchingStrictly(expected))
 			}
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^${matchString('expression')} should equal ${matchString('expected')}$`,
+		),
+		Type.Object({
+			expression: Type.String(),
+			expected: Type.String(),
+		}),
+		async (
+			{ expression, expected },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			let e: jsonata.Expression | undefined = undefined
+			try {
+				e = jsonata(expression)
+			} catch {
+				throw new Error(`The expression '${expression}' is not valid JSONata.`)
+			}
+
+			const value = await e.evaluate(context)
+			progress(value)
+
+			check(value).is(expected)
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^I store ${matchString('expression')} into ${matchString(
+				'storageName',
+			)}$`,
+		),
+		Type.Object({
+			expression: Type.String(),
+			storageName: Type.String(),
+		}),
+		async (
+			{ expression, storageName },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			let e: jsonata.Expression | undefined = undefined
+			try {
+				e = jsonata(expression)
+			} catch {
+				throw new Error(`The expression '${expression}' is not valid JSONata.`)
+			}
+
+			const value = await e.evaluate(context)
+
+			check(value).is(not(undefinedValue))
+
+			context[storageName] = value
+
+			return { result: value }
 		},
 	),
 ]

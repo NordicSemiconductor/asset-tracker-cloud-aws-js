@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Connect a tracker
 ---
@@ -65,7 +66,7 @@ Content-Type: application/octet-stream
 > The response should be split into two messages, because A-GPS Ephemerides data
 > is so large it cannot be combined with other types
 
-When the tracker publishes this message to the topic `${tracker:id}/agps/get`
+When the tracker publishes this message to the topic `${tracker.id}/agps/get`
 
 ```json
 {
@@ -77,7 +78,7 @@ When the tracker publishes this message to the topic `${tracker:id}/agps/get`
 }
 ```
 
-Then the tracker receives `2` raw messages on the topic `${tracker:id}/agps`
+Then the tracker receives `2` raw messages on the topic `${tracker.id}/agps`
 into `agpsData`
 
 And

@@ -28,6 +28,7 @@ import randomSteps from './steps/random.js'
 import awsSDKSteps from './steps/aws.js'
 import contextSteps from './steps/context.js'
 import cognitoSteps from './steps/cognito.js'
+import trackerSteps from './steps/tracker.js'
 
 const cf = new CloudFormationClient({})
 const sts = new STSClient({})
@@ -43,10 +44,7 @@ export type World = typeof StackOutputs & {
 		userSecretAccessKey: string
 		bucketName: string
 	}
-
 	awsIotRootCA: string
-	certsDir: string
-	mqttEndpoint: string
 	httpApiMock: {
 		requestsTableName: string
 		responsesTableName: string
@@ -85,17 +83,11 @@ const world: World = {
 		path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 		'utf-8',
 	),
-	certsDir: await certsDir({
-		iotEndpoint: mqttEndpoint,
-		accountId: accountId as string,
-	}),
-	mqttEndpoint,
 	httpApiMock: {
 		requestsTableName: httpApiMockStackConfig.requestsTableName,
 		responsesTableName: httpApiMockStackConfig.responsesTableName,
 		apiURL: httpApiMockStackConfig.apiURL,
 	},
-
 	region: mqttEndpoint.split('.')[2] as string,
 	currentGpsDay: gpsDay(),
 }
@@ -143,8 +135,15 @@ runner
 	.addStepRunners(...randomSteps)
 	.addStepRunners(...awsSDKSteps)
 	.addStepRunners(...contextSteps)
+	.addStepRunners(...cognitoSteps)
 	.addStepRunners(
-		...cognitoSteps,
+		...trackerSteps({
+			certsDir: await certsDir({
+				iotEndpoint: mqttEndpoint,
+				accountId: accountId as string,
+			}),
+			mqttEndpoint,
+		}),
 	)
 
 const res = await runner.run(world)

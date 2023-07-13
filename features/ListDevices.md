@@ -17,7 +17,4 @@ And I am authenticated with Cognito as `${userEmail}` with password
 When I execute `listThings` of `@aws-sdk/client-iot`
 
 Then `awsSDK.res.things[thingName='${tracker:id}'].thingName` should equal
-
-```
-${tracker:id}
-```
+`${tracker:id}`

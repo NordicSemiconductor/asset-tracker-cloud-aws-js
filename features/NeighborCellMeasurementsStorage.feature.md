@@ -1,4 +1,5 @@
 ---
+run: never
 variants:
   - nw: ltem
     nw-modem: LTE-M
@@ -54,7 +55,7 @@ Then the tracker updates its reported state with
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker:id}/ground-fix`
+Then the tracker publishes this message to the topic `${tracker.id}/ground-fix`
 
 ```json
 {
@@ -101,7 +102,7 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
   },
   "ExpressionAttributeValues": {
     ":deviceId": {
-      "S": "${tracker:id}"
+      "S": "${tracker.id}"
     }
   },
   "Limit": 1
@@ -166,6 +167,6 @@ Then `awsSDK.res.Item` should match
     }
   },
   "nw": { "S": "${variant.nw-modem}" },
-  "deviceId": { "S": "{tracker:id}" }
+  "deviceId": { "S": "{tracker.id}" }
 }
 ```

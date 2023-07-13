@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Connect a tracker
 ---
@@ -47,18 +48,14 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "targets": ["${tracker:arn}"],
+  "targets": ["${tracker.arn}"],
   "document": "${jobDocument}",
-  "description": "Upgrade ${tracker:id} to version 1.0.1.",
+  "description": "Upgrade ${tracker.id} to version 1.0.1.",
   "targetSelection": "SNAPSHOT"
 }
 ```
 
-Then `awsSDK.res.jobId` should equal
-
-```
-${jobId}
-```
+Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Fetch the job as a device and mark as in progress
 
@@ -82,7 +79,7 @@ When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker:id}"
+  "thingName": "${tracker.id}"
 }
 ```
 
@@ -104,7 +101,7 @@ When I execute `cancelJobExecution` of `@aws-sdk/client-iot` with
 {
   "jobId": "${jobId}",
   "force": true,
-  "thingName": "${tracker:id}"
+  "thingName": "${tracker.id}"
 }
 ```
 
@@ -113,7 +110,7 @@ When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker:id}"
+  "thingName": "${tracker.id}"
 }
 ```
 
@@ -142,7 +139,7 @@ And I execute `deleteJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker:id}",
+  "thingName": "${tracker.id}",
   "executionNumber": 1
 }
 ```

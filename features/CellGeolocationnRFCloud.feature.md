@@ -1,4 +1,5 @@
 ---
+run: never
 variants:
   - nw: ltem
   - nw: nbiot

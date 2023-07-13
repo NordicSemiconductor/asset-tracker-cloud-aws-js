@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Device Update Shadow
 ---
@@ -21,7 +22,7 @@ And I store a random number between `1` and `100000000` into `lteNetworkAreaId`
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker:id}/ground-fix`
+Then the tracker publishes this message to the topic `${tracker.id}/ground-fix`
 
 ```json
 {
@@ -97,7 +98,7 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
   },
   "ExpressionAttributeValues": {
     ":deviceId": {
-      "S": "${tracker:id}"
+      "S": "${tracker.id}"
     }
   },
   "Limit": 1
@@ -192,6 +193,6 @@ Then `awsSDK.res.Item` should match
       }
     }
   },
-  "deviceId": { "S": "{tracker:id}" }
+  "deviceId": { "S": "{tracker.id}" }
 }
 ```

@@ -1,7 +1,3 @@
----
-run: only
----
-
 # Register a new account
 
 > As a user I can register a new account

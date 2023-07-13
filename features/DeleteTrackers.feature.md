@@ -17,7 +17,7 @@ When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker:id}"
+  "thingName": "${tracker.id}"
 }
 ```
 
@@ -31,7 +31,7 @@ Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker:id}",
+  "thingName": "${tracker.id}",
   "principal": "${certificateArn}"
 }
 ```
@@ -57,6 +57,8 @@ And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker:id}"
+  "thingName": "${tracker.id}"
 }
 ```
+
+And I disconnect the tracker

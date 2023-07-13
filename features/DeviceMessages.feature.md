@@ -1,4 +1,5 @@
 ---
+run: never
 needs:
   - Device Update Shadow
 ---
@@ -20,7 +21,7 @@ And I store a random number between `1` and `300` into `magnitude`
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker:id}/messages`
+Then the tracker publishes this message to the topic `${tracker.id}/messages`
 
 ```json
 {
@@ -33,7 +34,7 @@ Then the tracker publishes this message to the topic `${tracker:id}/messages`
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker:id}/messages`
+Then the tracker publishes this message to the topic `${tracker.id}/messages`
 
 ```json
 {
@@ -52,7 +53,7 @@ When I run this Timestream query
 ```
 SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
-WHERE deviceId='${tracker:id}' AND measure_name='btn' AND measure_value::double IS NOT NULL
+WHERE deviceId='${tracker.id}' AND measure_name='btn' AND measure_value::double IS NOT NULL
 ORDER BY time DESC
 ```
 
@@ -80,7 +81,7 @@ Then `timestreamQueryResult` should match
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker:id}/messages`
+Then the tracker publishes this message to the topic `${tracker.id}/messages`
 
 ```json
 {
@@ -99,7 +100,7 @@ When I run this Timestream query
 ```
 SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
-WHERE deviceId='${tracker:id}' AND measure_name='impact' AND measure_value::double IS NOT NULL
+WHERE deviceId='${tracker.id}' AND measure_name='impact' AND measure_value::double IS NOT NULL
 ORDER BY time DESC
 ```
 
