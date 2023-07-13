@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Device Update Shadow
 ---
@@ -21,7 +20,9 @@ FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
 WHERE deviceId='${tracker.id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
 ```
 
-Then `timestreamQueryResult` should match
+<!-- @retryScenario -->
+
+Soon `timestreamQueryResult` should match
 
 ```json
 [{ "value": 3781 }]

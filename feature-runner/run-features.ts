@@ -29,6 +29,7 @@ import awsSDKSteps from './steps/aws.js'
 import contextSteps from './steps/context.js'
 import cognitoSteps from './steps/cognito.js'
 import trackerSteps from './steps/tracker.js'
+import timestreamStepRunners from './steps/timestream.js'
 
 const cf = new CloudFormationClient({})
 const sts = new STSClient({})
@@ -145,6 +146,7 @@ runner
 			mqttEndpoint,
 		}),
 	)
+	.addStepRunners(...timestreamStepRunners)
 
 const res = await runner.run(world)
 
