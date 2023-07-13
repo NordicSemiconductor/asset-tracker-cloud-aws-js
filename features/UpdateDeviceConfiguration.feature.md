@@ -10,7 +10,8 @@ needs:
 
 ## Update the device configuration as a user
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 And I encode this payload into `payload`
 
@@ -33,7 +34,7 @@ And I encode this payload into `payload`
 }
 ```
 
-When I execute `updateThingShadow` of the AWS IotData SDK with
+When I execute `updateThingShadow` of `@aws-sdk/client-iotData` with
 
 ```json
 {

@@ -1,3 +1,10 @@
+/**
+ * This file configures the BDD Feature runner
+ * by loading the configuration for the test resources
+ * (like AWS services) and providing the required
+ * step runners and reporters.
+ */
+
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import { runFolder } from '@nordicsemiconductor/bdd-markdown'
 import { stackOutput } from '@nordicsemiconductor/cloudformation-helpers'
@@ -17,16 +24,14 @@ import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { gpsDay } from '../pgps/gpsTime.js'
 import { readFile } from 'node:fs/promises'
 import { certsDir } from '../cli/jitp/certsDir.js'
+import randomSteps from './steps/random.js'
+import awsSDKSteps from './steps/aws.js'
+import contextSteps from './steps/context.js'
+import cognitoSteps from './steps/cognito.js'
 
 const cf = new CloudFormationClient({})
 const sts = new STSClient({})
 const iot = new IoTClient({})
-/**
- * This file configures the BDD Feature runner
- * by loading the configuration for the test resources
- * (like AWS services) and providing the required
- * step runners and reporters.
- */
 
 export type World = typeof StackOutputs & {
 	accountId: string
@@ -103,32 +108,44 @@ console.error()
 const print = (arg: unknown) =>
 	typeof arg === 'object' ? JSON.stringify(arg) : arg
 
-const runner = await runFolder<World>({
+const runner = await runFolder<World & Record<string, any>>({
 	folder: path.join(process.cwd(), 'features'),
 	name: 'nRF Asset Tracker for AWS',
 	logObserver: {
 		onDebug: (info, ...args) =>
 			console.error(
-				chalk.magenta(info.context.keyword),
+				chalk.magenta.dim(info.context.keyword),
+				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.cyan(print(arg))),
 			),
 		onError: (info, ...args) =>
 			console.error(
-				chalk.magenta(info.context.keyword),
+				chalk.magenta.dim(info.context.keyword),
+				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.red(print(arg))),
 			),
 		onInfo: (info, ...args) =>
 			console.error(
-				chalk.magenta(info.context.keyword),
+				chalk.magenta.dim(info.context.keyword),
+				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.green(print(arg))),
 			),
 		onProgress: (info, ...args) =>
 			console.error(
-				chalk.magenta(info.context.keyword),
+				chalk.magenta.dim(info.context.keyword),
+				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.yellow(print(arg))),
 			),
 	},
 })
+
+runner
+	.addStepRunners(...randomSteps)
+	.addStepRunners(...awsSDKSteps)
+	.addStepRunners(...contextSteps)
+	.addStepRunners(
+		...cognitoSteps,
+	)
 
 const res = await runner.run(world)
 

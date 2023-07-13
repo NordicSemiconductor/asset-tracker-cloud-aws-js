@@ -1,7 +1,8 @@
 ---
 needs:
   - Attach Iot Policy to user
-run: last
+# run: last
+run: only
 ---
 
 # Delete a user
@@ -10,24 +11,24 @@ run: last
 
 ## un-assign the IoT policy
 
-When I execute `detachPolicy` of the AWS Iot SDK with
+When I execute `detachPolicy` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "target": "${cognito:IdentityId}",
+  "target": "${cognito.IdentityId}",
   "policyName": "${userIotPolicyName}"
 }
 ```
 
-And I execute `listAttachedPolicies` of the AWS Iot SDK with
+And I execute `listAttachedPolicies` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "target": "${cognito:IdentityId}"
+  "target": "${cognito.IdentityId}"
 }
 ```
 
-Then `awsSdk.res.policies` should equal
+Then `awsSDK.res.policies` should equal
 
 ```json
 []
@@ -38,7 +39,7 @@ Then `awsSdk.res.policies` should equal
 
 TODO: We need the real cognito auth here, to get the access token
 
-When I execute `deleteUser` of the AWS CognitoIdentityServiceProvider SDK with
+When I execute `deleteUser` of `@aws-sdk/client-cognito-identity-provider` with
 
 ```json
 {
@@ -46,7 +47,7 @@ When I execute `deleteUser` of the AWS CognitoIdentityServiceProvider SDK with
 }
 ```
 
-Then `awsSdk.result` should equal
+Then `awsSDK.result` should equal
 
 ```json
 {}

@@ -44,7 +44,8 @@ Then the tracker publishes this message to the topic `${tracker:id}/messages`
 }
 ```
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 When I run this Timestream query
 
@@ -90,7 +91,8 @@ Then the tracker publishes this message to the topic `${tracker:id}/messages`
 }
 ```
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 When I run this Timestream query
 

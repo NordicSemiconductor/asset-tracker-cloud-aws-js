@@ -8,9 +8,9 @@ Given I generate a certificate
 
 ## Connect the tracker
 
-> We use just-in-time-provisioning so this scenarion is expected to be retried,
-> because the AWS IoT endpoint will disconnect a new device when it first
-> connects.
+> We use just-in-time-provisioning so this scenario is expected to be retried,
+> because the @aws-sdk/client-iot endpoint will disconnect a new device when it
+> first connects.
 
 > See
 > https://docs.aws.amazon.com/iot/latest/developerguide/jit-provisioning.html

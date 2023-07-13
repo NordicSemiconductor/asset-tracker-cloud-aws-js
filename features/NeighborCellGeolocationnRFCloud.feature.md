@@ -19,7 +19,8 @@ needs:
 > This enqueues a mock response on the mock HTTP API the stack is configure to
 > use for the nRF Cloud integration
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 And I store a random number between `0` and `20000` into `accuracy`
 

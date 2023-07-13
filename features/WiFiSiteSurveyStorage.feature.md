@@ -10,7 +10,8 @@ needs:
 
 ## Background
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 ## Device publishes WiFi site survey
 
@@ -54,7 +55,7 @@ Then the tracker publishes this message to the topic `${tracker:id}/ground-fix`
 
 ## Find the latest survey
 
-When I execute `query` of the AWS DynamoDB SDK with
+When I execute `query` of `@aws-sdk/client-dynamodb` with
 
 ```json
 {
@@ -74,11 +75,11 @@ When I execute `query` of the AWS DynamoDB SDK with
 }
 ```
 
-Then I store `awsSdk.res.Items[0].surveyId.S` into `networkSurveyId`
+Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
 ## Get the latest survey
 
-When I execute `getItem` of the AWS DynamoDB SDK with
+When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 
 ```json
 {
@@ -91,7 +92,7 @@ When I execute `getItem` of the AWS DynamoDB SDK with
 }
 ```
 
-Then `awsSdk.res.Item` should match
+Then `awsSDK.res.Item` should match
 
 ```json
 {

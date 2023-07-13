@@ -30,9 +30,9 @@ import {
 import type { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
 import { certsDir } from '../cli/jitp/certsDir.js'
 import { gpsDay } from '../pgps/gpsTime.js'
-import { assetTrackerStepRunners } from './steps/asset-tracker.js'
-import { httpApiMockStepRunners } from './steps/httpApiMock.js'
-import { timestreamStepRunners } from './steps/timestream.js'
+import { assetTrackerStepRunners } from './steps-old/asset-tracker.js'
+import { httpApiMockStepRunners } from './steps-old/httpApiMock.js'
+import { timestreamStepRunners } from './steps-old/timestream.js'
 
 let ran = false
 

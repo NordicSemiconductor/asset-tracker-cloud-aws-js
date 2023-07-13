@@ -9,11 +9,12 @@ needs:
 
 ## Create a new firmware upgrade as a user
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 Given I have a random UUID in `jobId`
 
-When I execute `putObject` of the AWS S3 SDK with
+When I execute `putObject` of `@aws-sdk/client-s3` with
 
 ```json
 {
@@ -41,7 +42,7 @@ When I encode this payload into `jobDocument`
 }
 ```
 
-And I execute `createJob` of the AWS Iot SDK with
+And I execute `createJob` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -53,7 +54,7 @@ And I execute `createJob` of the AWS Iot SDK with
 }
 ```
 
-Then `awsSdk.res.jobId` should equal
+Then `awsSDK.res.jobId` should equal
 
 ```
 ${jobId}
@@ -76,7 +77,7 @@ And the tracker marks the job in `job` as in progress
 
 ## describe the job
 
-When I execute `describeJobExecution` of the AWS Iot SDK with
+When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -85,7 +86,7 @@ When I execute `describeJobExecution` of the AWS Iot SDK with
 }
 ```
 
-Then `awsSdk.res.execution` should match
+Then `awsSDK.res.execution` should match
 
 ```json
 {
@@ -97,7 +98,7 @@ Then `awsSdk.res.execution` should match
 
 ## cancel the job
 
-When I execute `cancelJobExecution` of the AWS Iot SDK with
+When I execute `cancelJobExecution` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -107,7 +108,7 @@ When I execute `cancelJobExecution` of the AWS Iot SDK with
 }
 ```
 
-When I execute `describeJobExecution` of the AWS Iot SDK with
+When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 
 ```json
 {
@@ -116,7 +117,7 @@ When I execute `describeJobExecution` of the AWS Iot SDK with
 }
 ```
 
-Then `awsSdk.res.execution` should match
+Then `awsSDK.res.execution` should match
 
 ```json
 {
@@ -127,7 +128,7 @@ Then `awsSdk.res.execution` should match
 
 ## delete the job
 
-Given I execute `deleteObject` of the AWS S3 SDK with
+Given I execute `deleteObject` of `@aws-sdk/client-s3` with
 
 ```json
 {
@@ -136,7 +137,7 @@ Given I execute `deleteObject` of the AWS S3 SDK with
 }
 ```
 
-And I execute `deleteJobExecution` of the AWS Iot SDK with
+And I execute `deleteJobExecution` of `@aws-sdk/client-iot` with
 
 ```json
 {

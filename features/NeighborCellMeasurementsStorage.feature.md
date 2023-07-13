@@ -15,7 +15,8 @@ needs:
 
 ## Background
 
-Given I am authenticated with Cognito
+Given I am authenticated with Cognito as `${userEmail}` with password
+`${userPassword}`
 
 And I store a random number between `1` and `100000000` into
 `${variant.nw}-ncellmeasCellId`
@@ -87,7 +88,7 @@ Then the tracker publishes this message to the topic `${tracker:id}/ground-fix`
 
 ## Find the latest report
 
-When I execute `query` of the AWS DynamoDB SDK with
+When I execute `query` of `@aws-sdk/client-dynamodb` with
 
 ```json
 {
@@ -107,14 +108,14 @@ When I execute `query` of the AWS DynamoDB SDK with
 }
 ```
 
-Then I store `awsSdk.res.Items[0].surveyId.S` into
+Then I store `awsSDK.res.Items[0].surveyId.S` into
 `${variant.nw}-ncellmeasSurveyId`
 
 ## Get the latest report
 
 Given I store `${variant.nw}-ncellmeasSurveyId` into `surveyId`
 
-When I execute `getItem` of the AWS DynamoDB SDK with
+When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 
 ```json
 {
@@ -127,7 +128,7 @@ When I execute `getItem` of the AWS DynamoDB SDK with
 }
 ```
 
-Then `awsSdk.res.Item` should match
+Then `awsSDK.res.Item` should match
 
 ```json
 {
