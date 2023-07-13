@@ -34,22 +34,12 @@ Then `awsSDK.res.policies` should equal
 []
 ```
 
-<!--
 ## Delete the Cognito User
-
-TODO: We need the real cognito auth here, to get the access token
 
 When I execute `deleteUser` of `@aws-sdk/client-cognito-identity-provider` with
 
 ```json
 {
-  "AccessToken": "..."
+  "AccessToken": "${cognito.AccessToken}"
 }
 ```
-
-Then `awsSDK.result` should equal
-
-```json
-{}
-```
--->

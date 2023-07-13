@@ -23,6 +23,7 @@ export type UserCredentials = {
 	AccessKeyId: string
 	SecretKey: string
 	SessionToken: string
+	AccessToken: string
 }
 const userCredentials: Record<string, UserCredentials> = {}
 
@@ -92,6 +93,7 @@ const steps: StepRunner<World & { cognito?: UserCredentials }>[] = [
 					AccessKeyId: Credentials!.AccessKeyId!,
 					SecretKey: Credentials!.SecretKey!,
 					SessionToken: Credentials!.SessionToken!,
+					AccessToken: AuthenticationResult!.AccessToken!,
 				}
 
 				progress(`IdentityId: ${userCredentials[email]?.IdentityId}`)
@@ -99,6 +101,7 @@ const steps: StepRunner<World & { cognito?: UserCredentials }>[] = [
 				progress(`AccessKeyId: ${userCredentials[email]?.AccessKeyId}`)
 				progress(`SecretKey: ${userCredentials[email]?.SecretKey}`)
 				progress(`SessionToken: ${userCredentials[email]?.SessionToken}`)
+				progress(`AccessToken: ${userCredentials[email]?.AccessToken}`)
 			}
 			context.cognito = userCredentials[email]
 			return { result: userCredentials[email]?.IdentityId }
