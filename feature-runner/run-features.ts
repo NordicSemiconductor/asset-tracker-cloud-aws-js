@@ -30,6 +30,7 @@ import contextSteps from './steps/context.js'
 import cognitoSteps from './steps/cognito.js'
 import trackerSteps from './steps/tracker.js'
 import timestreamStepRunners from './steps/timestream.js'
+import restSteps from './steps/rest.js'
 
 const cf = new CloudFormationClient({})
 const sts = new STSClient({})
@@ -148,9 +149,10 @@ runner
 		}),
 	)
 	.addStepRunners(...timestreamStepRunners)
+	.addStepRunners(...restSteps)
 
 const res = await runner.run(world)
 
-// console.log(JSON.stringify(res, null, 2))
+console.log(JSON.stringify(res, null, 2))
 
 if (!res.ok) process.exit(1)

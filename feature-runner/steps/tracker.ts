@@ -297,7 +297,7 @@ const steps: ({
 			{
 				context,
 				log: {
-					step: { progress },
+					step: { progress, error },
 				},
 			},
 		) => {
@@ -341,15 +341,20 @@ const steps: ({
 
 			progress(JSON.stringify(res))
 
-			check(res).is(
-				objectMatching({
-					jobId: aString,
-				}),
-			)
+			try {
+				check(res).is(
+					objectMatching({
+						jobId: aString,
+					}),
+				)
 
-			context[storageName] = res
+				context[storageName] = res
 
-			return { result: res }
+				return { result: res }
+			} catch (e) {
+				error(e as Error)
+				return {}
+			}
 		},
 	),
 	matchStep(

@@ -151,7 +151,7 @@ describe('shadowUpdateToTimestreamRecords', () => {
 		const last = r?.[r.length - 1]?.Dimensions?.find(
 			({ Name }) => Name === 'measureGroup',
 		)
-		// measureGroups should be equal for measures
+		// measureGroups should equal equal for measures
 		expect(first?.Value).toEqual(last?.Value)
 	})
 })

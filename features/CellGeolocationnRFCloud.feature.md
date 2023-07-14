@@ -41,16 +41,16 @@ request to `api.nrfcloud.com/v1/location/ground-fix`
 
 Given I store "$millis()" into "ts"
 
-When I
-`GET ${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
+When I GET
+`${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
-Then the response status code should be `200`
+Then the response status code should equal `200`
 
-And the response header Access-Control-Allow-Origin should be `*`
+And the response header `Access-Control-Allow-Origin` should equal `*`
 
-And the response header Content-Type should be `application/json`
+And the response header `Content-Type` should equal `application/json`
 
-And the response should equal
+And the response body should equal
 
 ```json
 {

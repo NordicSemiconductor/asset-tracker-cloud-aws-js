@@ -34,7 +34,7 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 				step,
 				context,
 				log: {
-					step: { progress },
+					step: { progress, error },
 				},
 			},
 		) => {
@@ -52,22 +52,28 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			const value = await e.evaluate(context)
 			progress(value)
 
-			if (matchOrEqual === 'match') {
-				if (Array.isArray(expected)) {
-					check(value).is(arrayMatching(expected.map((o) => objectMatching(o))))
+			try {
+				if (matchOrEqual === 'match') {
+					if (Array.isArray(expected)) {
+						check(value).is(
+							arrayMatching(expected.map((o) => objectMatching(o))),
+						)
+					} else {
+						check(value).is(objectMatching(expected))
+					}
 				} else {
-					check(value).is(objectMatching(expected))
+					if (Array.isArray(expected)) {
+						check(value).is(
+							arrayMatchingStrictly(
+								expected.map((o) => objectMatchingStrictly(o)),
+							),
+						)
+					} else {
+						check(value).is(objectMatchingStrictly(expected))
+					}
 				}
-			} else {
-				if (Array.isArray(expected)) {
-					check(value).is(
-						arrayMatchingStrictly(
-							expected.map((o) => objectMatchingStrictly(o)),
-						),
-					)
-				} else {
-					check(value).is(objectMatchingStrictly(expected))
-				}
+			} catch (e) {
+				error(e as Error)
 			}
 		},
 	),
@@ -84,7 +90,7 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			{
 				context,
 				log: {
-					step: { progress },
+					step: { progress, error },
 				},
 			},
 		) => {
@@ -98,7 +104,11 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			const value = await e.evaluate(context)
 			progress(value)
 
-			check(value).is(expected)
+			try {
+				check(value).is(expected)
+			} catch (e) {
+				error(e as Error)
+			}
 		},
 	),
 	matchStep(
@@ -116,7 +126,7 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			{
 				context,
 				log: {
-					step: { progress },
+					step: { error },
 				},
 			},
 		) => {
@@ -127,13 +137,18 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 				throw new Error(`The expression '${expression}' is not valid JSONata.`)
 			}
 
-			const value = await e.evaluate(context)
+			try {
+				const value = await e.evaluate(context)
 
-			check(value).is(not(undefinedValue))
+				check(value).is(not(undefinedValue))
 
-			context[storageName] = value
+				context[storageName] = value
+				return { result: context[storageName] }
+			} catch (e) {
+				error(e as Error)
 
-			return { result: context[storageName] }
+				return {}
+			}
 		},
 	),
 	matchStep(
@@ -158,7 +173,15 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			storageName: Type.String(),
 			expression: Type.String(),
 		}),
-		async ({ storageName, expression }, { step, context }) => {
+		async (
+			{ storageName, expression },
+			{
+				context,
+				log: {
+					step: { error },
+				},
+			},
+		) => {
 			let e: jsonata.Expression | undefined = undefined
 			try {
 				e = jsonata(expression)
@@ -166,13 +189,18 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 				throw new Error(`The expression '${expression}' is not valid JSONata.`)
 			}
 
-			const value = await e.evaluate(context)
+			try {
+				const value = await e.evaluate(context)
 
-			check(value).is(not(undefinedValue))
+				check(value).is(not(undefinedValue))
 
-			context[storageName] = JSON.parse(new TextDecoder().decode(value))
+				context[storageName] = JSON.parse(new TextDecoder().decode(value))
 
-			return { result: context[storageName] }
+				return { result: context[storageName] }
+			} catch (e) {
+				error(e as Error)
+				return {}
+			}
 		},
 	),
 ]

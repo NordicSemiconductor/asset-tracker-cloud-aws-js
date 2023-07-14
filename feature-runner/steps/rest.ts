@@ -1,51 +1,57 @@
 import {
 	codeBlockOrThrow,
-	matchGroups,
 	noMatch,
-	type StepRunResult,
 	type StepRunner,
-	type StepRunnerArgs,
 } from '@nordicsemiconductor/bdd-markdown'
 import { Type } from '@sinclair/typebox'
-import assert from 'assert/strict'
-import type { World } from '../run-features'
+import type { World } from '../run-features.js'
+import { matchChoice, matchStep, matchString } from './util.js'
+import { check, objectMatching } from 'tsmatchers'
 
-export const steps = (): StepRunner<
-	World & { response?: { body?: string; headers: Headers } }
->[] => {
-	let res: Response | undefined = undefined
-	return [
-		async ({
-			step,
-			log: {
-				step: { progress },
+let res: Response | undefined = undefined
+
+const steps: StepRunner<
+	World & {
+		response?: {
+			body?: string | Record<string, any>
+			statusCode: number
+			headers: Headers
+		}
+	}
+>[] = [
+	matchStep(
+		new RegExp(
+			`^I ${matchChoice('method', [
+				'GET',
+				'POST',
+				'PUT',
+				'DELETE',
+			])} (?:to )?${matchString('url')}(?<hasBody> with)?$`,
+		),
+		Type.Object({
+			method: Type.Union([
+				Type.Literal('GET'),
+				Type.Literal('POST'),
+				Type.Literal('PUT'),
+				Type.Literal('DELETE'),
+			]),
+			url: Type.String(),
+			hasBody: Type.Optional(Type.Literal(' with')),
+		}),
+		async (
+			{ url: urlString, method, hasBody },
+			{
+				context,
+				step,
+				log: {
+					step: { progress },
+				},
 			},
-			context,
-		}: StepRunnerArgs<
-			World & { response?: { body?: string; headers: Headers } }
-		>): Promise<StepRunResult> => {
-			const match = matchGroups(
-				Type.Object({
-					method: Type.Union([
-						Type.Literal('GET'),
-						Type.Literal('POST'),
-						Type.Literal('PUT'),
-						Type.Literal('DELETE'),
-					]),
-					endpoint: Type.RegEx(/^https?:\/\/[^/]+/),
-					resource: Type.RegEx(/^\/.*/),
-					hasBody: Type.Optional(Type.Literal(' with')),
-				}),
-			)(
-				/^I (?<method>(GET|POST|PUT|DELETE)) (?:to )?`(?<endpoint>https?:\/\/[^/]+)(?<resource>\/[^`]*)`(?<hasBody> with)?$/,
-				step.title,
-			)
-			if (match === null) return noMatch
-			const url = new URL(match.resource, match.endpoint).toString()
-			const method = match.method ?? 'GET'
+		) => {
+			const url = new URL(urlString).toString()
 			progress(`${method} ${url}`)
 			let body = undefined
-			if (match.hasBody !== undefined) {
+			if (hasBody !== undefined) {
 				body = codeBlockOrThrow(step).code
 				progress(`> ${body}`)
 			}
@@ -59,62 +65,89 @@ export const steps = (): StepRunner<
 			progress(`${res.status} ${res.statusText}`)
 			let resBody: string | undefined = undefined
 			if (parseInt(res.headers.get('content-length') ?? '0', 10) > 0) {
-				resBody = await res.text()
-				progress(`< ${resBody}`)
+				if (res.headers.get('content-type')?.includes('application/json')) {
+					resBody = await res.json()
+					progress(`< ${JSON.stringify(resBody)}`)
+				} else {
+					resBody = await res.text()
+					progress(`< ${resBody}`)
+				}
 			}
 			progress(`x-amzn-trace-id: ${res.headers.get('x-amzn-trace-id')}`)
-			context.response = { body: resBody ?? '', headers: res.headers }
+			context.response = {
+				body: resBody ?? '',
+				headers: res.headers,
+				statusCode: res.status,
+			}
+			return { result: context.response }
 		},
-		async ({
-			step,
-		}: StepRunnerArgs<
-			World & { response?: { body?: string; headers: Headers } }
-		>): Promise<StepRunResult> => {
-			const match = matchGroups(
-				Type.Object({
-					code: Type.RegEx(/^[0-9]+$/),
-				}),
-			)(/^the response status code should be `(?<code>[0-9]+)`$/, step.title)
-			if (match === null) return noMatch
+	),
+	matchStep(
+		new RegExp(
+			`^the ${matchString('header')} response header should equal ${matchString(
+				'expectedValue',
+			)}$`,
+		),
+		Type.Object({
+			header: Type.String(),
+			expectedValue: Type.String(),
+		}),
+		async (
+			{ header, expectedValue },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const v = context.response?.headers.get(header)
+			progress(v ?? '')
+			check(v).is(expectedValue)
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^the response status code should equal ${matchString(
+				'expectedStatus',
+			)}$`,
+		),
+		Type.Object({
+			expectedStatus: Type.String(),
+		}),
+		async (
+			{ expectedStatus },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const v = context.response?.statusCode
+			progress(v?.toString() ?? '')
 
-			assert.equal(res?.status, parseInt(match.code, 10))
+			check(v).is(parseInt(expectedStatus, 10))
 		},
-		async ({
-			step,
-			context,
-		}: StepRunnerArgs<
-			World & { response?: { body?: string; headers: Headers } }
-		>): Promise<StepRunResult> => {
-			const match = matchGroups(
-				Type.Object({
-					header: Type.String(),
-					expected: Type.String(),
-				}),
-			)(
-				/^the response `(?<header>[^`]+)` header should equal `(?<expected>[^`]+)`$/,
-				step.title,
-			)
-			if (match === null) return noMatch
+	),
+	async ({
+		context,
+		step,
+		log: {
+			step: { progress },
+		},
+	}) => {
+		if (!/^the response body should equal$/.test(step.title)) return noMatch
 
-			assert.equal(context.response?.headers.get(match.header), match.expected)
-		},
-		async ({
-			step,
-			context,
-		}: StepRunnerArgs<
-			World & { response?: { body?: string; headers: Headers } }
-		>): Promise<StepRunResult> => {
-			const match = matchGroups(
-				Type.Object({
-					regexp: Type.String(),
-				}),
-			)(
-				/^the response body should be a string matching `(?<regexp>[^`]+)`$/,
-				step.title,
-			)
-			if (match === null) return noMatch
+		const { code: expected } = codeBlockOrThrow(step)
 
-			assert.match(context.response?.body ?? '', new RegExp(match.regexp, 'i'))
-		},
-	]
-}
+		const body = context.response?.body ?? {}
+		progress(JSON.stringify(body))
+
+		check(body).is(objectMatching(JSON.parse(expected)))
+
+		return {}
+	},
+]
+
+export default steps

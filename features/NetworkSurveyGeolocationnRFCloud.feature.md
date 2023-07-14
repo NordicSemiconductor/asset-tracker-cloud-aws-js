@@ -63,15 +63,15 @@ Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
 Given I store `$millis()` into `ts`
 
-When I `GET ${networkSurveyGeolocationApiUrl}/${networkSurveyId}?ts=${ts}`
+When I GET `${networkSurveyGeolocationApiUrl}/${networkSurveyId}?ts=${ts}`
 
-Then the response status code should be `200`
+Then the response status code should equal `200`
 
-And the `Access-Control-Allow-Origin` response header should be `*`
+And the `Access-Control-Allow-Origin` response header should equal `*`
 
-And the `Content-Type` response header should be `application/json`
+And the `Content-Type` response header should equal `application/json`
 
-And the response should equal
+And the response body should equal
 
 ```json
 {
