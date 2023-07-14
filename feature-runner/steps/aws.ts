@@ -4,12 +4,17 @@ import {
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchStep } from './util.js'
+import { matchStep, matchString } from './util.js'
 import type { UserCredentials } from './cognito'
 import type { AnyRecord } from 'dns'
+import type { AwsCredentialIdentity } from '@smithy/types'
 
 const steps: StepRunner<
-	World & { cognito?: UserCredentials; awsSDK?: { res: AnyRecord } }
+	World & {
+		cognito?: UserCredentials
+		apiKey?: AwsCredentialIdentity
+		awsSDK?: { res: AnyRecord }
+	}
 >[] = [
 	matchStep(
 		new RegExp(
@@ -54,7 +59,9 @@ const steps: StepRunner<
 			progress(clientClassName)
 			const client = new clientLibrary[clientClassName](
 				context.cognito === undefined
-					? {}
+					? {
+							credentials: context.apiKey,
+					  }
 					: {
 							credentials: {
 								secretAccessKey: context.cognito.SecretKey,
@@ -89,6 +96,34 @@ const steps: StepRunner<
 					}. Check the documentation at https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/${clientName}/command/${commandName}/`,
 				)
 			}
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^I am authenticated with AWS key ${matchString(
+				'accessKeyId',
+			)} and secret ${matchString('secretAccessKey')}$`,
+		),
+		Type.Object({
+			accessKeyId: Type.String(),
+			secretAccessKey: Type.String(),
+		}),
+		async (
+			{ accessKeyId, secretAccessKey },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			context.cognito = undefined
+			context.apiKey = {
+				accessKeyId,
+				secretAccessKey,
+			}
+			progress(accessKeyId)
+			progress(secretAccessKey)
 		},
 	),
 ]

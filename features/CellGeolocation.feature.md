@@ -85,7 +85,7 @@ Given I store `$millis()` into `ts`
 When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=211&mccmnc=26201&nw=${variant.nw}&ts=${ts}`
 
-<!-- @retryScenario @retry:delayExecution=1000,initialDelay=1000 -->
+<!-- @retryScenario @retry:delayExecution=2500,initialDelay=1000 -->
 
 Soon the response status code should equal `200`
 
