@@ -63,8 +63,8 @@ Content-Type: application/octet-stream
 
 ## Request A-GPS data
 
-> The response should be split into two messages, because A-GPS Ephemerides data
-> is so large it cannot be combined with other types
+> The response should equal split into two messages, because A-GPS Ephemerides
+> data is so large it cannot be combined with other types
 
 When the tracker publishes this message to the topic `${tracker.id}/agps/get`
 
@@ -83,8 +83,8 @@ into `agpsData`
 
 And
 `$length($filter(agpsData, function($v) { $contains($v, '01010100f9fffffffeffffff0f7b12890612031f00017') })) > 0`
-should be `true`
+should equal `true`
 
 And
 `$length($filter(agpsData, function($v) { $contains($v, '01021e0001006400c675009cff859f13000b0000c6753') })) > 0`
-should be `true`
+should equal `true`

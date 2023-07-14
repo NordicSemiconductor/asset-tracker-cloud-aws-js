@@ -71,27 +71,29 @@ Then the tracker updates its reported state with
 
 Given I store `$millis()` into `ts`
 
-When I
-`GET ${geolocationApiUrl}/cell?cell=${cellId}&area=211&mccmnc=26201&nw=${variant.nw}&ts=${ts}`
+When I GET
+`${geolocationApiUrl}/cell?cell=${cellId}&area=211&mccmnc=26201&nw=${variant.nw}&ts=${ts}`
 
-Then the response status code should be `409`
+Then the response status code should equal `409`
 
-And the `Access-Control-Allow-Origin` response header should be `*`
+And the `Access-Control-Allow-Origin` response header should equal `*`
 
 ## Query a cell
 
 Given I store `$millis()` into `ts`
 
-When I
-`GET /cell?cell=${cellId}&area=211&mccmnc=26201&nw=${variant.nw}&ts=${ts}`
+When I GET
+`${geolocationApiUrl}/cell?cell=${cellId}&area=211&mccmnc=26201&nw=${variant.nw}&ts=${ts}`
 
-Then the response status code should be `200`
+<!-- @retryScenario @retry:delayExecution=1000,initialDelay=1000 -->
 
-And the `Access-Control-Allow-Origin` response header should be `*`
+Soon the response status code should equal `200`
 
-And the `Content-Type` response header should be `application/json`
+And the `Access-Control-Allow-Origin` response header should equal `*`
 
-And the response should equal
+And the `Content-Type` response header should equal `application/json`
+
+And the response body should equal
 
 ```json
 {
