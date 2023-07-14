@@ -15,7 +15,7 @@ import {
 	awsIotDeviceConnection,
 	type Connection,
 } from './awsIotDeviceConnection.js'
-import { aNumber, aString, check, objectMatching } from 'tsmatchers'
+import { aString, check, objectMatching } from 'tsmatchers'
 
 type TrackerInfo = {
 	privateKey: string
@@ -341,20 +341,15 @@ const steps: ({
 
 			progress(JSON.stringify(res))
 
-			try {
-				check(res).is(
-					objectMatching({
-						jobId: aString,
-					}),
-				)
+			check(res).is(
+				objectMatching({
+					jobId: aString,
+				}),
+			)
 
-				context[storageName] = res
+			context[storageName] = res
 
-				return { result: res }
-			} catch (e) {
-				error(e as Error)
-				return {}
-			}
+			return { result: res }
 		},
 	),
 	matchStep(

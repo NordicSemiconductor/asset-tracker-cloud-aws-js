@@ -1,7 +1,3 @@
----
-run: never
----
-
 # Schedule FOTA jobs during Firmware CI runs
 
 > As a developer I can schedule FOTA jobs for firmware that runs on real devices
@@ -27,14 +23,13 @@ Given I have a random UUID in `ciDeviceId`
 
 When I generate a certificate for the tracker `firmwaretest-${ciDeviceId}`
 
-Then I encode `$lookup($, 'tracker.firmwaretest-${ciDeviceId}:clientCert')` into
-`firmwareTestDeviceCertificatePEM` using replaceNewLines
-
-And I encode `$lookup($, 'tracker.firmwaretest-${ciDeviceId}:privateKey')` into
-`firmwareTestDeviceCertificatePrivateKey` using replaceNewLines
-
-And I encode `'${awsIotRootCA}'` into `awsIotRootCAEncoded` using
+Then I encode `tracker.clientCert` into `firmwareTestDeviceCertificatePEM` using
 replaceNewLines
+
+And I encode `tracker.privateKey` into `firmwareTestDeviceCertificatePrivateKey`
+using replaceNewLines
+
+And I encode `awsIotRootCA` into `awsIotRootCAEncoded` using replaceNewLines
 
 <!-- Tracker needs to be connected so a job can be created -->
 
@@ -42,7 +37,7 @@ Then I connect the tracker `firmwaretest-${ciDeviceId}`
 
 <!-- Create a job for the @aws-sdk/client-iot thing used to manage the firmware CI runs -->
 
-When I encode this payload into `jobDocument`
+When I have this JSON-encoded in `jobDocument`
 
 ```json
 {
@@ -65,7 +60,7 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 {
   "jobId": "${jobId}",
   "targets": [
-    "arn:@aws-sdk/client-iot:${region}:${accountId}:thing/firmwaretest-${ciDeviceId}"
+    "arn:aws:iot:${region}:${accountId}:thing/firmwaretest-${ciDeviceId}"
   ],
   "document": "${jobDocument}",
   "description": "Upgrade firmwaretest-${ciDeviceId} to version 1.2.3.",
@@ -85,3 +80,5 @@ When I execute `deleteJob` of `@aws-sdk/client-iot` with
   "force": true
 }
 ```
+
+And I disconnect the tracker `firmwaretest-${ciDeviceId}`
