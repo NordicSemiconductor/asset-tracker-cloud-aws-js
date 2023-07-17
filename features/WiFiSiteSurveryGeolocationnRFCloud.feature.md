@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Store WiFi site surveys
 ---
@@ -35,6 +34,8 @@ And I enqueue this mock HTTP API response for a POST request to
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Find the latest survey
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -59,13 +60,13 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
 
 Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
-## Retrieve the location for the survey
-
 Given I store `$millis()` into `ts`
 
 When I GET `${networkSurveyGeolocationApiUrl}/${networkSurveyId}?ts=${ts}`
 
-Then the response status code should equal `200`
+<!-- @retryScenario @retry:initialDelay=1000 -->
+
+Soon the response status code should equal `200`
 
 And the `Access-Control-Allow-Origin` response header should equal `*`
 

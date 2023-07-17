@@ -29,11 +29,11 @@ And I have a random float between `-90` and `90` in `lat`
 
 And I have a random float between `-180` and `180` in `lng`
 
-And I store `${variant.nw}-ncellmeasCellId` into `cellId`
+And I store `<variant.nw>_ncellmeasCellId` into `cellId`
 
-And I store `${variant.nw}-ncellmeasAreaId` into `areaId`
+And I store `<variant.nw>_ncellmeasAreaId` into `areaId`
 
-And I store `${variant.nw}-ncellmeasSurveyId` into `surveyId`
+And I store `<variant.nw>_ncellmeasSurveyId` into `surveyId`
 
 And I enqueue this mock HTTP API response for a POST request to
 `api.nrfcloud.com/v1/location/ground-fix`

@@ -59,7 +59,7 @@ Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Fetch the job as a device
 
-<!-- @retryScenario @retry:delayExecution=2500,initialDelay=1000 -->
+<!-- @retryScenario @retry:delayExecution=1000 -->
 
 Soon the tracker fetches the next job into `job`
 
@@ -74,7 +74,7 @@ Then `job` should match
 
 ## Mark as in progress
 
- <!-- @retryScenario @retry:initialDelay=1000 -->
+ <!-- @retryScenario @retry:delayExecution=1000 -->
 
 Soon the tracker marks the job in `job` as in progress
 

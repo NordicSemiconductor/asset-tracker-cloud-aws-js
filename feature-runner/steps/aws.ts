@@ -135,5 +135,6 @@ const ucfirst = (s: string): string =>
 const toClientClassName = (clientName: string) => {
 	const parts = clientName.split('-')
 	if (parts[0] === 'iot') parts[0] = 'IoT'
+	if (parts[0] === 'dynamodb') parts[0] = 'DynamoDB'
 	return `${parts.map(ucfirst).join('')}Client`
 }

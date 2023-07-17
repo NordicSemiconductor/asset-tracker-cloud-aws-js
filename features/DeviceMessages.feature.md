@@ -44,6 +44,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/messages`
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## User retrieves the button presses
 
 Given I am authenticated with Cognito as `${userEmail}` with password
@@ -96,6 +98,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/messages`
   }
 }
 ```
+
+<!-- @retry:delayExecution=2000 -->
 
 ## User retrieves the impact messages
 
