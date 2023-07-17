@@ -35,8 +35,8 @@ And I store `${variant.nw}-ncellmeasAreaId` into `areaId`
 
 And I store `${variant.nw}-ncellmeasSurveyId` into `surveyId`
 
-And I enqueue this mock HTTP API response with status code `200` for a `POST`
-request to `api.nrfcloud.com/v1/location/ground-fix`
+And I enqueue this mock HTTP API response for a POST request to
+`api.nrfcloud.com/v1/location/ground-fix`
 
 ```json
 {
@@ -49,7 +49,7 @@ request to `api.nrfcloud.com/v1/location/ground-fix`
 
 ## Retrieve the location for the report
 
-Given I store "$millis()" into "ts"
+Given I store `$millis()` into `ts`
 
 When I GET `${networkSurveyGeolocationApiUrl}/${surveyId}?ts=${ts}`
 
@@ -71,7 +71,7 @@ And the response body should equal
 
 ## The nRF Cloud API should have been called
 
-Then the mock HTTP API should have been called with a `POST` request to
+Then the mock HTTP API should have been called with a POST request to
 `api.nrfcloud.com/v1/location/ground-fix`
 
 ```json
