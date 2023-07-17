@@ -1,5 +1,4 @@
 ---
-run: never
 variants:
   - nw: ltem
   - nw: nbiot
@@ -25,8 +24,8 @@ And I have a random float between `-90` and `90` in `lat`
 
 And I have a random float between `-180` and `180` in `lng`
 
-And I enqueue this mock HTTP API response with status code 200 for a `POST`
-request to `api.nrfcloud.com/v1/location/ground-fix`
+And I enqueue this mock HTTP API response for a POST request to
+`api.nrfcloud.com/v1/location/ground-fix`
 
 ```json
 {
@@ -39,16 +38,18 @@ request to `api.nrfcloud.com/v1/location/ground-fix`
 
 ## Query the cell
 
-Given I store "$millis()" into "ts"
+Given I store `$millis()` into `ts`
 
 When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
-Then the response status code should equal `200`
+<!-- @retryScenario @retry:delayExecution=2500,initialDelay=1000 -->
 
-And the response header `Access-Control-Allow-Origin` should equal `*`
+Soon the response status code should equal `200`
 
-And the response header `Content-Type` should equal `application/json`
+Then the `Access-Control-Allow-Origin` response header should equal `*`
+
+And the `Content-Type` response header should equal `application/json`
 
 And the response body should equal
 
@@ -62,7 +63,7 @@ And the response body should equal
 
 ## The nRF Cloud API should have been called
 
-Then the mock HTTP API should have been called with a `POST` request to
+Then the mock HTTP API should have been called with a POST request to
 `api.nrfcloud.com/v1/location/ground-fix`
 
 ```json

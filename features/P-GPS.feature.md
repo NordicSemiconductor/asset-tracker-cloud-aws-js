@@ -16,8 +16,7 @@ Given I have a random number between `1` and `168` in `predictionCount`
 
 And I have a random number between `0` and `86399` in `startGpsTimeOfDaySeconds`
 
-And I enqueue this mock HTTP API response with status code `200` for a `GET`
-request to
+And I enqueue this mock HTTP API response for a GET request to
 `api.nrfcloud.com/v1/location/pgps?predictionCount=${predictionCount}&predictionIntervalMinutes=240&startGpsDay=${currentGpsDay}&startGpsTimeOfDaySeconds=${startGpsTimeOfDaySeconds}`
 
 ```json

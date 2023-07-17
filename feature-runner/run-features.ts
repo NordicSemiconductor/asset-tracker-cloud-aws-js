@@ -31,6 +31,8 @@ import cognitoSteps from './steps/cognito.js'
 import trackerSteps from './steps/tracker.js'
 import timestreamStepRunners from './steps/timestream.js'
 import restSteps from './steps/rest.js'
+import mockHTTPAPISteps from './steps/mockHTTPAPI.js'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 const cf = new CloudFormationClient({})
 const sts = new STSClient({})
@@ -47,11 +49,6 @@ export type World = typeof StackOutputs & {
 		bucketName: string
 	}
 	awsIotRootCA: string
-	httpApiMock: {
-		requestsTableName: string
-		responsesTableName: string
-		apiURL: string
-	}
 	region: string
 	currentGpsDay: number
 }
@@ -85,11 +82,6 @@ const world: World = {
 		path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
 		'utf-8',
 	),
-	httpApiMock: {
-		requestsTableName: httpApiMockStackConfig.requestsTableName,
-		responsesTableName: httpApiMockStackConfig.responsesTableName,
-		apiURL: httpApiMockStackConfig.apiURL,
-	},
 	region: mqttEndpoint.split('.')[2] as string,
 	currentGpsDay: gpsDay(),
 	geolocationApiUrl: stackConfig.geolocationApiUrl.replace(/\/$/g, ''),
@@ -150,6 +142,14 @@ runner
 	)
 	.addStepRunners(...timestreamStepRunners)
 	.addStepRunners(...restSteps)
+	.addStepRunners(
+		...mockHTTPAPISteps({
+			db: new DynamoDBClient({}),
+			requestsTableName: httpApiMockStackConfig.requestsTableName,
+			responsesTableName: httpApiMockStackConfig.responsesTableName,
+			apiURL: httpApiMockStackConfig.apiURL,
+		}),
+	)
 
 const res = await runner.run(world)
 
