@@ -22,7 +22,7 @@ import type { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/Firmw
 import type { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { gpsDay } from '../pgps/gpsTime.js'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { certsDir } from '../cli/jitp/certsDir.js'
 import randomSteps from './steps/random.js'
 import awsSDKSteps from './steps/aws.js'
@@ -153,6 +153,6 @@ runner
 
 const res = await runner.run(world)
 
-console.log(JSON.stringify(res, null, 2))
-
-if (!res.ok) process.exit(1)
+process.stdout.write(JSON.stringify(res, null, 2), () => {
+	if (!res.ok) process.exit(1)
+})

@@ -36,6 +36,8 @@ And I enqueue this mock HTTP API response for a POST request to
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Query the cell
 
 Given I store `$millis()` into `ts`
@@ -43,7 +45,7 @@ Given I store `$millis()` into `ts`
 When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
-<!-- @retryScenario @retry:delayExecution=2500,initialDelay=1000 -->
+<!-- @retryScenario -->
 
 Soon the response status code should equal `200`
 

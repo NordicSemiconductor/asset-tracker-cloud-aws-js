@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Device Update Shadow
 ---
@@ -54,6 +53,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/ground-fix`
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Find the latest survey
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -78,8 +79,6 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
 
 Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
-## Get the latest survey
-
 When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 
 ```json
@@ -93,7 +92,9 @@ When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 }
 ```
 
-Then `awsSDK.res.Item` should match
+<!-- @retryScenario @retry:initialDelay=1000 -->
+
+Soon `awsSDK.res.Item` should match
 
 ```json
 {

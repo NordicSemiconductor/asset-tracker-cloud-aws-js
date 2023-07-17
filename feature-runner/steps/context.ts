@@ -52,7 +52,10 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			}
 
 			const value = await e.evaluate(context)
-			progress(value)
+			progress('expected')
+			progress(JSON.stringify(expected))
+			progress('actual')
+			progress(JSON.stringify(value))
 
 			if (matchOrEqual === 'match') {
 				if (Array.isArray(expected)) {

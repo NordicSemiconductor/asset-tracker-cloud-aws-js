@@ -7,6 +7,8 @@ needs:
 
 > As a user I can query the historical data of a device
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Query historical data
 
 Given I am authenticated with Cognito as `${userEmail}` with password

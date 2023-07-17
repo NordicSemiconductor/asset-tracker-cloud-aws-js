@@ -1,5 +1,4 @@
 ---
-run: never
 variants:
   - nw: ltem
     nwModem: LTE-M
@@ -20,14 +19,14 @@ Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
 And I have a random number between `1` and `100000000` in
-`${variant.nw}-ncellmeasCellId`
+`<variant.nw>_ncellmeasCellId`
 
 And I have a random number between `1` and `100000000` in
-`${variant.nw}-ncellmeasAreaId`
+`<variant.nw>_ncellmeasAreaId`
 
-And I store `${variant.nw}-ncellmeasCellId` into `cellId`
+And I store `<variant.nw>_ncellmeasCellId` into `cellId`
 
-And I store `${variant.nw}-ncellmeasAreaId` into `areaId`
+And I store `<variant.nw>_ncellmeasAreaId` into `areaId`
 
 ## Device connects
 
@@ -87,6 +86,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/ground-fix`
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Find the latest report
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -110,11 +111,9 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
 ```
 
 Then I store `awsSDK.res.Items[0].surveyId.S` into
-`${variant.nw}-ncellmeasSurveyId`
+`<variant.nw>_ncellmeasSurveyId`
 
-## Get the latest report
-
-Given I store `${variant.nw}-ncellmeasSurveyId` into `surveyId`
+Given I store `<variant.nw>_ncellmeasSurveyId` into `surveyId`
 
 When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 
@@ -129,7 +128,9 @@ When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 }
 ```
 
-Then `awsSDK.res.Item` should match
+<!-- @retryScenario -->
+
+Soon `awsSDK.res.Item` should match
 
 ```json
 {
@@ -156,13 +157,13 @@ Then `awsSDK.res.Item` should match
         ]
       },
       "rsrq": { "N": "-9" },
-      "area": { "N": "{areaId}" },
+      "area": { "N": "$number{areaId}" },
       "adv": { "N": "80" },
       "rsrp": { "N": "-97" },
       "mcc": { "N": "242" },
       "mnc": { "N": "1" },
       "earfcn": { "N": "6446" },
-      "cell": { "N": "{cellId}" },
+      "cell": { "N": "$number{cellId}" },
       "ts": { "N": "${ts}" }
     }
   },

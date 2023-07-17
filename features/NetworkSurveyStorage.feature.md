@@ -1,7 +1,8 @@
 ---
-run: never
 needs:
   - Device Update Shadow
+  - Register a new account
+  - Connect a tracker
 ---
 
 # Store network surveys
@@ -83,6 +84,8 @@ Then the tracker publishes this message to the topic `${tracker.id}/ground-fix`
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Find the latest survey
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -107,8 +110,6 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
 
 Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
-## Get the latest survey
-
 When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 
 ```json
@@ -122,7 +123,9 @@ When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 }
 ```
 
-Then `awsSDK.res.Item` should match
+<!-- @retryScenario -->
+
+Soon `awsSDK.res.Item` should match
 
 ```json
 {
@@ -149,13 +152,13 @@ Then `awsSDK.res.Item` should match
         ]
       },
       "rsrq": { "N": "-9" },
-      "area": { "N": "{lteNetworkAreaId}" },
+      "area": { "N": "$number{lteNetworkAreaId}" },
       "adv": { "N": "80" },
       "rsrp": { "N": "-97" },
       "mcc": { "N": "242" },
       "mnc": { "N": "1" },
       "earfcn": { "N": "6446" },
-      "cell": { "N": "{lteNetworkCellId}" },
+      "cell": { "N": "$number{lteNetworkCellId}" },
       "ts": { "N": "${ts}" }
     }
   },

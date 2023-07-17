@@ -50,7 +50,11 @@ Given the tracker publishes this message to the topic `${tracker.id}/batch`
 }
 ```
 
-And I am authenticated with Cognito as `${userEmail}` with password
+<!-- @retry:delayExecution=2000 -->
+
+## Fetch the batch data
+
+Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
 When I run this Timestream query
