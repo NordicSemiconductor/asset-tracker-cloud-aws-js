@@ -64,7 +64,7 @@ Given I store `$millis()` into `ts`
 
 When I GET `${networkSurveyGeolocationApiUrl}/${networkSurveyId}?ts=${ts}`
 
-<!-- @retryScenario @retry:initialDelay=1000 -->
+<!-- @retryScenario -->
 
 Soon the response status code should equal `200`
 

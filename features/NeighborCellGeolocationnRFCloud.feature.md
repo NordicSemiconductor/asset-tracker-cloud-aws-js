@@ -1,5 +1,4 @@
 ---
-run: never
 variants:
   - nw: ltem
   - nw: nbiot
@@ -47,13 +46,17 @@ And I enqueue this mock HTTP API response for a POST request to
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Retrieve the location for the report
 
 Given I store `$millis()` into `ts`
 
 When I GET `${networkSurveyGeolocationApiUrl}/${surveyId}?ts=${ts}`
 
-Then the response status code should equal `200`
+<!-- @retryScenario -->
+
+Soon the response status code should equal `200`
 
 And the `Access-Control-Allow-Origin` response header should equal `*`
 
