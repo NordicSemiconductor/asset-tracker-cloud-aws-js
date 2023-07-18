@@ -4,7 +4,7 @@
 
 ## Generate a certificate and connect
 
-Given I generate a certificate
+Given I generate a certificate for the tracker
 
 ## Connect the tracker
 

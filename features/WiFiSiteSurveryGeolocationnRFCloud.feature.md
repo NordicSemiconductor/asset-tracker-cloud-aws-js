@@ -51,7 +51,7 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
   },
   "ExpressionAttributeValues": {
     ":deviceId": {
-      "S": "${tracker.id}"
+      "S": "${tracker.default.id}"
     }
   },
   "Limit": 1
@@ -66,9 +66,9 @@ When I GET `${networkSurveyGeolocationApiUrl}/${networkSurveyId}?ts=${ts}`
 
 <!-- @retryScenario -->
 
-Soon the response status code should equal `200`
+Soon the response status code should equal 200
 
-And the `Access-Control-Allow-Origin` response header should equal `*`
+Then the `Access-Control-Allow-Origin` response header should equal `*`
 
 And the `Content-Type` response header should equal `application/json`
 

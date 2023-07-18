@@ -28,7 +28,7 @@ And I enqueue this mock HTTP API response for a GET request to
 
 ## Request P-GPS data
 
-When the tracker publishes this message to the topic `${tracker.id}/pgps/get`
+When the tracker publishes this message to the topic `${tracker.default.id}/pgps/get`
 
 ```json
 {
@@ -39,10 +39,10 @@ When the tracker publishes this message to the topic `${tracker.id}/pgps/get`
 
 <!-- This @retry:tries=5,initialDelay=2,delayFactor=2 -->
 
-Soon the tracker receives a message on the topic `${tracker.id}/pgps` into
+Soon the tracker receives a message on the topic `${tracker.default.id}/pgps` into
 `pgpsData`
 
-And `pgpsData` should match
+Then `pgpsData` should match
 
 ```json
 {

@@ -47,7 +47,7 @@ When I GET
 
 <!-- @retryScenario -->
 
-Soon the response status code should equal `200`
+Soon the response status code should equal 200
 
 Then the `Access-Control-Allow-Origin` response header should equal `*`
 

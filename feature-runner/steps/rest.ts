@@ -5,7 +5,7 @@ import {
 } from '@nordicsemiconductor/bdd-markdown'
 import { Type } from '@sinclair/typebox'
 import type { World } from '../run-features.js'
-import { matchChoice, matchStep, matchString } from './util.js'
+import { matchChoice, matchInteger, matchStep, matchString } from './util.js'
 import { check, objectMatching } from 'tsmatchers'
 
 let res: Response | undefined = undefined
@@ -108,7 +108,7 @@ const steps: StepRunner<
 	),
 	matchStep(
 		new RegExp(
-			`^the response status code should equal ${matchString(
+			`^the response status code should equal ${matchInteger(
 				'expectedStatus',
 			)}$`,
 		),
@@ -126,7 +126,6 @@ const steps: StepRunner<
 		) => {
 			const v = context.response?.statusCode
 			progress(v?.toString() ?? '')
-
 			check(v).is(parseInt(expectedStatus, 10))
 		},
 	),

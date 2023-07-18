@@ -16,24 +16,22 @@ Given I am authenticated with AWS key `${firmwareCI.userAccessKeyId}` and secret
 
 Given I have a random UUID in `jobId`
 
-Given I have a random UUID in `ciDeviceId`
-
 <!-- Create a blank new IoT thing (a regular tracker with certificates generated locally) to be used for this specific test run.
      The firmware is then build specifically for this device. -->
 
-When I generate a certificate for the tracker `firmwaretest-${ciDeviceId}`
+When I generate a certificate for the `firmwareCiDevice` tracker
 
-Then I encode `tracker.clientCert` into `firmwareTestDeviceCertificatePEM` using
-replaceNewLines
+Then I encode `tracker.firmwareCiDevice.clientCert` into
+`firmwareTestDeviceCertificatePEM` using replaceNewLines
 
-And I encode `tracker.privateKey` into `firmwareTestDeviceCertificatePrivateKey`
-using replaceNewLines
+And I encode `tracker.firmwareCiDevice.privateKey` into
+`firmwareTestDeviceCertificatePrivateKey` using replaceNewLines
 
 And I encode `awsIotRootCA` into `awsIotRootCAEncoded` using replaceNewLines
 
 <!-- Tracker needs to be connected so a job can be created -->
 
-Then I connect the tracker `firmwaretest-${ciDeviceId}`
+Then I connect the `firmwareCiDevice` tracker
 
 <!-- Create a job for the @aws-sdk/client-iot thing used to manage the firmware CI runs -->
 
@@ -43,11 +41,11 @@ When I have this JSON-encoded in `jobDocument`
 {
   "operation": "app_fw_update",
   "size": 1234,
-  "filename": "asset-tracker-Thingy91-ltem-debug-firmwaretest-${ciDeviceId}.hex",
+  "filename": "asset-tracker-Thingy91-ltem-debug-${tracker.firmwareCiDevice.id}.hex",
   "location": {
     "protocol": "https",
     "host": "example.com",
-    "path": "asset-tracker-Thingy91-ltem-debug-firmwaretest-${ciDeviceId}.hex"
+    "path": "asset-tracker-Thingy91-ltem-debug-${tracker.firmwareCiDevice.id}.hex"
   },
   "fwversion": "1.2.3",
   "target": "9160DK"
@@ -60,10 +58,10 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 {
   "jobId": "${jobId}",
   "targets": [
-    "arn:aws:iot:${region}:${accountId}:thing/firmwaretest-${ciDeviceId}"
+    "arn:aws:iot:${region}:${accountId}:thing/${tracker.firmwareCiDevice.id}"
   ],
   "document": "${jobDocument}",
-  "description": "Upgrade firmwaretest-${ciDeviceId} to version 1.2.3.",
+  "description": "Upgrade ${tracker.firmwareCiDevice.id} to version 1.2.3.",
   "targetSelection": "SNAPSHOT"
 }
 ```
@@ -81,4 +79,4 @@ When I execute `deleteJob` of `@aws-sdk/client-iot` with
 }
 ```
 
-And I disconnect the tracker `firmwaretest-${ciDeviceId}`
+And I disconnect the `firmwareCiDevice` tracker

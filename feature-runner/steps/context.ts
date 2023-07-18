@@ -4,7 +4,7 @@ import {
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchChoice, matchStep, matchString } from './util.js'
+import { matchChoice, matchInteger, matchStep, matchString } from './util.js'
 import jsonata from 'jsonata'
 import {
 	check,
@@ -78,11 +78,15 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 	),
 	matchStep(
 		new RegExp(
-			`^${matchString('expression')} should equal ${matchString('expected')}$`,
+			`^${matchString('expression')} should equal (?<expected>${matchString(
+				'string',
+			)}|${matchChoice('boolean', ['true', 'false'])}|${matchInteger(
+				'number',
+			)})$`,
 		),
 		Type.Object({
 			expression: Type.String(),
-			expected: Type.String(),
+			expected: Type.Union([Type.String(), Type.Boolean(), Type.Integer()]),
 		}),
 		async (
 			{ expression, expected },
@@ -101,7 +105,14 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			}
 
 			const value = await e.evaluate(context)
-			progress(value)
+
+			if (expected === 'true') expected = true
+			if (expected === 'false') expected = false
+			if (typeof expected === 'string' && expected[0] === '`')
+				expected = expected.slice(1, -1)
+
+			progress(`actual: ${JSON.stringify(value)} (${typeof value})`)
+			progress(`expected: ${JSON.stringify(expected)} (${typeof expected})`)
 
 			check(value).is(expected)
 		},

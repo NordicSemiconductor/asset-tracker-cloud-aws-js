@@ -35,21 +35,21 @@ const steps: ({
 	certsDir: string
 }) => StepRunner<
 	World & {
-		tracker?: TrackerInfo
+		tracker: Record<string, TrackerInfo>
 		connection?: Connection
-	}
+	} & Record<string, any>
 >[] = ({ certsDir, mqttEndpoint }) => [
 	matchStep(
 		new RegExp(
-			`^I generate a certificate(:? for the tracker ${matchString(
-				'deviceId',
-			)})?$`,
+			`^I generate a certificate for the (:? ${matchString(
+				'trackerId',
+			)} )?tracker$`,
 		),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 		}),
 		async (
-			{ deviceId: maybeDeviceId },
+			{ trackerId: maybeTrackerId },
 			{
 				context,
 				log: {
@@ -57,10 +57,9 @@ const steps: ({
 				},
 			},
 		) => {
-			const deviceId =
-				maybeDeviceId ?? (await randomWords({ numWords: 3 })).join('-')
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
+				const deviceId = (await randomWords({ numWords: 3 })).join('-')
 				await createSimulatorKeyAndCSR({
 					deviceId,
 					certsDir,
@@ -91,7 +90,7 @@ const steps: ({
 					readFile(deviceFiles.key, 'utf-8'),
 					readFile(deviceFiles.certWithCA, 'utf-8'),
 				])
-				trackers[trackerId] = {
+				const info: TrackerInfo = {
 					privateKey: privateKey,
 					clientCert: clientCert,
 					id: deviceId,
@@ -99,18 +98,22 @@ const steps: ({
 						context.accountId
 					}:thing/${deviceId}`,
 				}
+				trackers[trackerId] = info
+				context.tracker = {
+					...(context.tracker ?? {}),
+					[trackerId]: info,
+				}
 			}
-			context.tracker = trackers[trackerId]
 			return { result: trackers[trackerId]?.id }
 		},
 	),
 	matchStep(
-		new RegExp(`^I connect the tracker(:? ${matchString('deviceId')})?$`),
+		new RegExp(`^I connect the (:? ${matchString('trackerId')} )?tracker$`),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 		}),
 		async (
-			{ deviceId: maybeDeviceId },
+			{ trackerId: maybeTrackerId },
 			{
 				context,
 				log: {
@@ -118,13 +121,13 @@ const steps: ({
 				},
 			},
 		) => {
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No certificate available for tracker ${trackerId}`)
 			}
 
 			if (connections[trackerId] === undefined) {
-				const deviceId = trackers[trackerId].id
+				const deviceId = (trackers[trackerId] as TrackerInfo).id
 				progress('IoT', `Connecting ${deviceId} to ${mqttEndpoint}`)
 				const connection = await awsIotDeviceConnection({
 					awsIotRootCA: context.awsIotRootCA,
@@ -150,12 +153,12 @@ const steps: ({
 		},
 	),
 	matchStep(
-		new RegExp(`^I disconnect the tracker(:? ${matchString('deviceId')})?$`),
+		new RegExp(`^I disconnect the (:? ${matchString('trackerId')} )?tracker$`),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 		}),
 		async (
-			{ deviceId: maybeDeviceId },
+			{ trackerId: maybeTrackerId },
 			{
 				context,
 				log: {
@@ -163,7 +166,7 @@ const steps: ({
 				},
 			},
 		) => {
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (connections[trackerId] === undefined) {
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
@@ -171,30 +174,27 @@ const steps: ({
 			connections[trackerId]?.close()
 			delete connections[trackerId]
 			progress('Closed')
-
-			context.tracker = undefined
 		},
 	),
 	matchStep(
 		new RegExp(
-			`^the tracker(:? ${matchString(
-				'deviceId',
-			)})? updates its reported state with$`,
+			`^the (:? ${matchString(
+				'trackerId',
+			)} )?tracker updates its reported state with$`,
 		),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 		}),
 		async (
-			{ deviceId: maybeDeviceId },
+			{ trackerId: maybeTrackerId },
 			{
 				step,
-				context,
 				log: {
 					step: { progress },
 				},
 			},
 		) => {
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
 			}
@@ -203,64 +203,69 @@ const steps: ({
 			}
 
 			const reported = JSON.parse(codeBlockOrThrow(step).code)
-			const deviceId = trackers[trackerId].id
-			const connection = connections[trackerId]
+			const deviceId = (trackers[trackerId] as TrackerInfo).id
+			const connection = connections[trackerId] as Connection
 			const shadowBase = `$aws/things/${deviceId}/shadow`
 			const updateStatus = `${shadowBase}/update`
 			const updateStatusAccepted = `${updateStatus}/accepted`
 			const updateStatusRejected = `${updateStatus}/rejected`
 
 			const updatePromise = await new Promise((resolve, reject) => {
-				const timeout = setTimeout(reject, 10 * 1000)
-				Promise.all([
-					connection.onMessageOnce(updateStatusAccepted, (message) => {
-						progress('IoT < status', message.toString())
-						clearTimeout(timeout)
-						resolve(JSON.parse(message.toString()))
-					}),
-					connection.onMessageOnce(updateStatusRejected, (message) => {
-						progress('IoT < status', message.toString())
-						clearTimeout(timeout)
-						reject(new Error(`Update rejected!`))
-					}),
-				])
-					.then(async () => {
-						progress('IoT > reported', deviceId)
-						progress('IoT > reported', JSON.stringify(reported))
-						return connection.publish(
-							updateStatus,
-							JSON.stringify({ state: { reported } }),
-						)
-					})
-					.catch((err) => {
-						clearTimeout(timeout)
-						reject(err)
-					})
+				const timeout = setTimeout(
+					() => reject(new Error(`Timed out!`)),
+					10 * 1000,
+				)
+
+				connection.subscribe(updateStatusAccepted)
+				connection.subscribe(updateStatusRejected)
+
+				connection.onMessage((topic, message) => {
+					switch (topic) {
+						case updateStatusAccepted:
+							progress('IoT < status', message.toString())
+							clearTimeout(timeout)
+							resolve(JSON.parse(message.toString()))
+							break
+						case updateStatusRejected:
+							progress('IoT < status', message.toString())
+							clearTimeout(timeout)
+							reject(new Error(`Update rejected!`))
+							break
+					}
+				})
+
+				progress('IoT > reported', deviceId)
+				progress('IoT > reported', JSON.stringify(reported))
+				connection.publish(
+					updateStatus,
+					JSON.stringify({ state: { reported } }),
+				)
 			})
 			return { result: await updatePromise }
 		},
 	),
 	matchStep(
 		new RegExp(
-			`^the tracker(:? ${matchString(
-				'deviceId',
-			)})? publishes this message to the topic ${matchString('topic')}$`,
+			`^the (:? ${matchString(
+				'trackerId',
+			)} )?tracker publishes this message to the topic ${matchString(
+				'topic',
+			)}$`,
 		),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 			topic: Type.String(),
 		}),
 		async (
-			{ deviceId: maybeDeviceId, topic },
+			{ trackerId: maybeTrackerId, topic },
 			{
 				step,
-				context,
 				log: {
 					step: { progress },
 				},
 			},
 		) => {
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
 			}
@@ -268,10 +273,14 @@ const steps: ({
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 			const message = JSON.parse(codeBlockOrThrow(step).code)
+			progress(`Publishing to ${topic}`)
 			progress(JSON.stringify(message))
-			const connection = connections[trackerId]
+			const connection = connections[trackerId] as Connection
 			await new Promise<void>((resolve, reject) => {
-				const timeout = setTimeout(reject, 10 * 1000)
+				const timeout = setTimeout(
+					() => reject(new Error(`Timed out!`)),
+					10 * 1000,
+				)
 				connection
 					.publish(topic as string, JSON.stringify(message))
 					.then(resolve)
@@ -284,16 +293,16 @@ const steps: ({
 	),
 	matchStep(
 		new RegExp(
-			`^the tracker(:? ${matchString(
-				'deviceId',
-			)})? fetches the next job into ${matchString('storageName')}$`,
+			`^the (:? ${matchString(
+				'trackerId',
+			)} )?tracker fetches the next job into ${matchString('storageName')}$`,
 		),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 			storageName: Type.String(),
 		}),
 		async (
-			{ deviceId: maybeDeviceId, storageName },
+			{ trackerId: maybeTrackerId, storageName },
 			{
 				context,
 				log: {
@@ -301,16 +310,16 @@ const steps: ({
 				},
 			},
 		) => {
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
 			}
 			if (connections[trackerId] === undefined) {
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
-			const connection = connections[trackerId]
+			const connection = connections[trackerId] as Connection
 
-			const deviceId = trackers[trackerId].id
+			const deviceId = (trackers[trackerId] as TrackerInfo).id
 
 			const getNextJobTopic = `$aws/things/${deviceId}/jobs/$next/get`
 			const successTopic = `${getNextJobTopic}/accepted`
@@ -328,13 +337,14 @@ const steps: ({
 					reject(error)
 				}
 
-				connection
-					.onMessageOnce(successTopic, (message) => {
-						progress(message.toString())
-						clearTimeout(timeout)
-						resolve(JSON.parse(message.toString()).execution)
-					})
-					.catch(catchError)
+				connection.subscribe(successTopic)
+
+				connection.onMessage((topic, message) => {
+					if (topic !== successTopic) return
+					progress(message.toString())
+					clearTimeout(timeout)
+					resolve(JSON.parse(message.toString()).execution)
+				})
 
 				connection.publish(getNextJobTopic, '').catch(catchError)
 			})
@@ -354,16 +364,18 @@ const steps: ({
 	),
 	matchStep(
 		new RegExp(
-			`^the tracker(:? ${matchString(
-				'deviceId',
-			)})? marks the job in ${matchString('storageName')} as in progress$`,
+			`^the (:? ${matchString(
+				'trackerId',
+			)} )?tracker marks the job in ${matchString(
+				'storageName',
+			)} as in progress$`,
 		),
 		Type.Object({
-			deviceId: Type.Optional(Type.String()),
+			trackerId: Type.Optional(Type.String()),
 			storageName: Type.String(),
 		}),
 		async (
-			{ deviceId: maybeDeviceId, storageName },
+			{ trackerId: maybeTrackerId, storageName },
 			{
 				context,
 				log: {
@@ -371,16 +383,16 @@ const steps: ({
 				},
 			},
 		) => {
-			const trackerId = maybeDeviceId ?? '__default'
+			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
 			}
 			if (connections[trackerId] === undefined) {
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
-			const connection = connections[trackerId]
+			const connection = connections[trackerId] as Connection
 
-			const deviceId = trackers[trackerId].id
+			const deviceId = (trackers[trackerId] as TrackerInfo).id
 
 			const updateJobTopic = `$aws/things/${deviceId}/jobs/${context[storageName].jobId}/update`
 			const successTopic = `${updateJobTopic}/accepted`
@@ -398,13 +410,14 @@ const steps: ({
 					reject(error)
 				}
 
-				connection
-					.onMessageOnce(successTopic, (message) => {
-						progress(message.toString())
-						clearTimeout(timeout)
-						resolve(JSON.parse(message.toString()))
-					})
-					.catch(catchError)
+				connection.subscribe(successTopic)
+
+				connection.onMessage((topic, message) => {
+					if (topic !== successTopic) return
+					progress(message.toString())
+					clearTimeout(timeout)
+					resolve(JSON.parse(message.toString()))
+				})
 
 				connection
 					.publish(
@@ -421,6 +434,110 @@ const steps: ({
 			progress(JSON.stringify(res))
 
 			return { result: res }
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^the (:? ${matchString(
+				'trackerId',
+			)} )?tracker is subscribed to the topic ${matchString('topic')}$`,
+		),
+		Type.Object({
+			trackerId: Type.Optional(Type.String()),
+			topic: Type.String(),
+		}),
+		async (
+			{ topic, trackerId: maybeTrackerId },
+			{
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const trackerId = maybeTrackerId ?? 'default'
+			if (trackers[trackerId] === undefined) {
+				throw new Error(`No credentials available for tracker ${trackerId}`)
+			}
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const connection = connections[trackerId] as Connection
+
+			connection.subscribe(topic)
+
+			progress(`subscribing to ${topic}`)
+		},
+	),
+	matchStep(
+		new RegExp(
+			`^the (:? ${matchString(
+				'trackerId',
+			)} )?tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
+				'topic',
+			)} into ${matchString('storageName')}$`,
+		),
+		Type.Object({
+			trackerId: Type.Optional(Type.String()),
+			messageCount: Type.String(),
+			topic: Type.String(),
+			storageName: Type.String(),
+			raw: Type.Optional(Type.Literal('raw ')),
+		}),
+		async (
+			{ messageCount, topic, trackerId: maybeTrackerId, storageName, raw },
+			{
+				context,
+				log: {
+					step: { progress },
+				},
+			},
+		) => {
+			const isRaw = raw !== undefined
+			const trackerId = maybeTrackerId ?? 'default'
+			if (trackers[trackerId] === undefined) {
+				throw new Error(`No credentials available for tracker ${trackerId}`)
+			}
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const connection = connections[trackerId] as Connection
+
+			const expectedMessageCount =
+				messageCount === 'a'
+					? 1
+					: parseInt(messageCount.slice(1, -1) as string, 10)
+			const messages: (Record<string, any> | string)[] = []
+
+			await new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(
+						new Error(
+							`timed out with ${
+								expectedMessageCount - messages.length
+							} message${expectedMessageCount > 1 ? 's' : ''} yet to receive.`,
+						),
+					)
+				}, 60 * 1000)
+
+				connection.onMessage((t, message) => {
+					if (topic !== t) return
+					const m = isRaw
+						? message.toString('hex')
+						: JSON.parse(message.toString('utf-8'))
+					messages.push(m)
+					progress(`received message on ${topic}`)
+					progress(JSON.stringify(m))
+					if (messages.length === expectedMessageCount) {
+						clearTimeout(timeout)
+
+						const result = messages.length > 1 ? messages : messages[0]
+
+						if (storageName !== undefined) context[storageName] = result
+
+						return resolve()
+					}
+				})
+			})
 		},
 	),
 ]

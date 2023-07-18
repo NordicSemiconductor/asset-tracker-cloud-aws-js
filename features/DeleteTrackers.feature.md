@@ -17,11 +17,11 @@ When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker.id}"
+  "thingName": "${tracker.default.id}"
 }
 ```
 
-Then `$count(awsSDK.res.principals)` should equal `1`
+Then `$count(awsSDK.res.principals)` should equal 1
 
 Given I store `awsSDK.res.principals[0]` into `certificateArn`
 
@@ -31,7 +31,7 @@ Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker.id}",
+  "thingName": "${tracker.default.id}",
   "principal": "${certificateArn}"
 }
 ```
@@ -57,7 +57,7 @@ And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker.id}"
+  "thingName": "${tracker.default.id}"
 }
 ```
 

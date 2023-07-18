@@ -17,7 +17,8 @@ Given I am authenticated with Cognito as `${userEmail}` with password
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker.id}/ground-fix`
+Then the tracker publishes this message to the topic
+`${tracker.default.id}/ground-fix`
 
 ```json
 {
@@ -70,7 +71,7 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
   },
   "ExpressionAttributeValues": {
     ":deviceId": {
-      "S": "${tracker.id}"
+      "S": "${tracker.default.id}"
     }
   },
   "Limit": 1
@@ -133,6 +134,6 @@ Soon `awsSDK.res.Item` should match
       }
     }
   },
-  "deviceId": { "S": "${tracker.id}" }
+  "deviceId": { "S": "${tracker.default.id}" }
 }
 ```

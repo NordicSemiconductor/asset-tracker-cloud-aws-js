@@ -22,13 +22,13 @@ needs:
 
 Given I have a random UUID in `pgpsDevice`
 
-And I generate a certificate for the tracker `${pgpsDevice}`
+And I generate a certificate for the `${pgpsDevice}` tracker
 
-And I connect the tracker `${pgpsDevice}`
+And I connect the `${pgpsDevice}` tracker
 
 ## Request P-GPS data
 
-When the tracker `${pgpsDevice}` publishes this message to the topic
+When the `${pgpsDevice}` tracker publishes this message to the topic
 `${pgpsDevice}/pgps/get`
 
 ```json
@@ -38,7 +38,7 @@ When the tracker `${pgpsDevice}` publishes this message to the topic
 }
 ```
 
-Then the tracker `${pgpsDevice}` receives a messages on the topic
+Then the `${pgpsDevice}` tracker receives a messages on the topic
 `${pgpsDevice}/pgps` into `pgpsData`
 
 And `pgpsData` should match
@@ -63,7 +63,7 @@ When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 }
 ```
 
-Then `$count(awsSDK.res.principals)` should equal `1`
+Then `$count(awsSDK.res.principals)` should equal 1
 
 Given I store `awsSDK.res.principals[0]` into `certificateArn`
 

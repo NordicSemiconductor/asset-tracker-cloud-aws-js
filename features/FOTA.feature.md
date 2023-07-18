@@ -48,9 +48,9 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "targets": ["${tracker.arn}"],
+  "targets": ["${tracker.default.arn}"],
   "document": "${jobDocument}",
-  "description": "Upgrade ${tracker.id} to version 1.0.1.",
+  "description": "Upgrade ${tracker.default.id} to version 1.0.1.",
   "targetSelection": "SNAPSHOT"
 }
 ```
@@ -85,7 +85,7 @@ When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker.id}"
+  "thingName": "${tracker.default.id}"
 }
 ```
 
@@ -107,7 +107,7 @@ When I execute `cancelJobExecution` of `@aws-sdk/client-iot` with
 {
   "jobId": "${jobId}",
   "force": true,
-  "thingName": "${tracker.id}"
+  "thingName": "${tracker.default.id}"
 }
 ```
 
@@ -116,7 +116,7 @@ When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker.id}"
+  "thingName": "${tracker.default.id}"
 }
 ```
 
@@ -145,7 +145,7 @@ And I execute `deleteJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker.id}",
+  "thingName": "${tracker.default.id}",
   "executionNumber": 1
 }
 ```

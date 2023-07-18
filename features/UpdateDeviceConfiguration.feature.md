@@ -38,7 +38,7 @@ When I execute `updateThingShadow` of `@aws-sdk/client-iot-data-plane` with
 
 ```json
 {
-  "thingName": "${tracker.id}",
+  "thingName": "${tracker.default.id}",
   "payload": "${payload}"
 }
 ```
