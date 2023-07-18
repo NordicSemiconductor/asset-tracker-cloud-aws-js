@@ -95,30 +95,40 @@ console.error()
 const print = (arg: unknown) =>
 	typeof arg === 'object' ? JSON.stringify(arg) : arg
 
+const start = Date.now()
+const ts = () => {
+	const diff = Date.now() - start
+	return chalk.gray(`[${(diff / 1000).toFixed(3).padStart(8, ' ')}]`)
+}
+
 const runner = await runFolder<World & Record<string, any>>({
 	folder: path.join(process.cwd(), 'features'),
 	name: 'nRF Asset Tracker for AWS',
 	logObserver: {
 		onDebug: (info, ...args) =>
 			console.error(
+				ts(),
 				chalk.magenta.dim(info.context.keyword),
 				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.cyan(print(arg))),
 			),
 		onError: (info, ...args) =>
 			console.error(
+				ts(),
 				chalk.magenta.dim(info.context.keyword),
 				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.red(print(arg))),
 			),
 		onInfo: (info, ...args) =>
 			console.error(
+				ts(),
 				chalk.magenta.dim(info.context.keyword),
 				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.green(print(arg))),
 			),
 		onProgress: (info, ...args) =>
 			console.error(
+				ts(),
 				chalk.magenta.dim(info.context.keyword),
 				chalk.magenta(info.context.title),
 				...args.map((arg) => chalk.yellow(print(arg))),
@@ -153,6 +163,8 @@ runner
 
 const res = await runner.run(world)
 
+console.error(`Writing to stdout ...`)
 process.stdout.write(JSON.stringify(res, null, 2), () => {
+	console.error(`Done`, res.ok ? chalk.green('OK') : chalk.red('ERROR'))
 	if (!res.ok) process.exit(1)
 })

@@ -2,13 +2,16 @@ import {
 	consoleReporter,
 	type SuiteResult,
 } from '@nordicsemiconductor/bdd-markdown'
-import { readFileSync } from 'node:fs'
 
-const data = readFileSync(0 as any, 'utf-8')
+const chunks: string[] = []
+
+process.stdin.on('data', (chunk) => chunks.push(chunk.toString()))
+
+await new Promise((resolve) => process.stdin.on('end', resolve))
 
 let res: SuiteResult
 try {
-	res = JSON.parse(data)
+	res = JSON.parse(chunks.join(''))
 } catch (error) {
 	throw new Error(`Failed to parse result JSON: ${(error as Error).message}`)
 }
