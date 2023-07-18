@@ -77,7 +77,9 @@ When I execute `query` of `@aws-sdk/client-dynamodb` with
 }
 ```
 
-Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
+<!-- @retryScenario -->
+
+Soon I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 
 When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 
@@ -92,7 +94,7 @@ When I execute `getItem` of `@aws-sdk/client-dynamodb` with
 }
 ```
 
-<!-- @retryScenario @retry:initialDelay=1000 -->
+<!-- @retryScenario -->
 
 Soon `awsSDK.res.Item` should match
 
