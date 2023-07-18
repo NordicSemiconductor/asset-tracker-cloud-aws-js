@@ -8,6 +8,7 @@ import {
 import { type Static } from '@sinclair/typebox'
 
 export const matchString = (name: string) => '`(?<' + name + '>[^`]+)`'
+export const matchInteger = (name: string) => '(?<' + name + '>-?[1-9][0-9]*)'
 
 export const matchChoice = (name: string, options: string[]) =>
 	`(?<${name}>${options.join('|')})`

@@ -15,7 +15,7 @@ Given I am authenticated with Cognito as `${userEmail}` with password
 When I execute `getThingShadow` of `@aws-sdk/client-iot-data-plane` with
 
 ```json
-{ "thingName": "${tracker.id}" }
+{ "thingName": "${tracker.default.id}" }
 ```
 
 And I parse JSON-encoded `awsSDK.res.payload` into `shadow`

@@ -56,9 +56,9 @@ When I GET `${networkSurveyGeolocationApiUrl}/${surveyId}?ts=${ts}`
 
 <!-- @retryScenario -->
 
-Soon the response status code should equal `200`
+Soon the response status code should equal 200
 
-And the `Access-Control-Allow-Origin` response header should equal `*`
+Then the `Access-Control-Allow-Origin` response header should equal `*`
 
 And the `Content-Type` response header should equal `application/json`
 

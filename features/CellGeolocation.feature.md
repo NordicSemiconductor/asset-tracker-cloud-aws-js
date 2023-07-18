@@ -74,7 +74,7 @@ Given I store `$millis()` into `ts`
 When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=211&mccmnc=26201&nw=${variant.nw}&ts=${ts}`
 
-Then the response status code should equal `409`
+Then the response status code should equal 409
 
 And the `Access-Control-Allow-Origin` response header should equal `*`
 
@@ -89,9 +89,9 @@ When I GET
 
 <!-- @retryScenario -->
 
-Soon the response status code should equal `200`
+Soon the response status code should equal 200
 
-And the `Access-Control-Allow-Origin` response header should equal `*`
+Then the `Access-Control-Allow-Origin` response header should equal `*`
 
 And the `Content-Type` response header should equal `application/json`
 

@@ -19,7 +19,7 @@ And I have a random float between `-180` and `180` in `lng2`
 
 ## Devices can publish batch data
 
-Given the tracker publishes this message to the topic `${tracker.id}/batch`
+Given the tracker publishes this message to the topic `${tracker.default.id}/batch`
 
 ```json
 {
@@ -62,7 +62,7 @@ When I run this Timestream query
 ```
 SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
-WHERE deviceId='${tracker.id}'
+WHERE deviceId='${tracker.default.id}'
 AND measure_name='gnss.lng'
 AND measure_value::double IS NOT NULL
 ORDER BY time DESC

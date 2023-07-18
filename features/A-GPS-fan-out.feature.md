@@ -1,8 +1,8 @@
 ---
 run: never
 variants:
-  - device: cargo container device 1
-  - device: cargo container device 2
+  - device: agpsContainerDevice1
+  - device: agpsContainerDevice1
 needs:
   - A-GPS
 ---
@@ -20,16 +20,14 @@ needs:
 
 ## Register and connect device
 
-Given I have a random UUID in `agpsDevice`
+Given I generate a certificate for the `<variant.device>` tracker
 
-And I generate a certificate for the tracker `${agpsDevice}`
-
-And I connect the tracker `${agpsDevice}`
+And I connect the `<variant.device>` tracker
 
 ## Request A-GPS data
 
-When the tracker `${agpsDevice}` publishes this message to the topic
-`${agpsDevice}/agps/get`
+When the `<variant.device>` tracker publishes this message to the topic
+`${tracker.<variant.device>.id}/agps/get`
 
 ```json
 {
@@ -41,16 +39,16 @@ When the tracker `${agpsDevice}` publishes this message to the topic
 }
 ```
 
-Then the tracker `${agpsDevice}` receives `2` raw messages on the topic
-`${agpsDevice}/agps` into `agpsData`
+Then the `<variant.device>` tracker receives `2` raw messages on the topic
+`<variant.device>/agps` into `agpsData`
 
 And
 `$length($filter(agpsData, function($v) { $contains($v, '01010100f9fffffffeffffff0f7b12890612031f00017') })) > 0`
-should equal `true`
+should equal true
 
 And
 `$length($filter(agpsData, function($v) { $contains($v, '01021e0001006400c675009cff859f13000b0000c6753') })) > 0`
-should equal `true`
+should equal true
 
 ## Delete tracker
 
@@ -61,11 +59,11 @@ When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${agpsDevice}"
+  "thingName": "<variant.device>"
 }
 ```
 
-Then `$count(awsSDK.res.principals)` should equal `1`
+Then `$count(awsSDK.res.principals)` should equal 1
 
 Given I store `awsSDK.res.principals[0]` into `certificateArn`
 
@@ -75,7 +73,7 @@ Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${agpsDevice}",
+  "thingName": "<variant.device>",
   "principal": "${certificateArn}"
 }
 ```
@@ -101,6 +99,6 @@ And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${agpsDevice}"
+  "thingName": "<variant.device>"
 }
 ```
