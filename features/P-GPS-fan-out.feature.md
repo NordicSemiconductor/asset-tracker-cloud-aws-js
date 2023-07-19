@@ -1,8 +1,8 @@
 ---
 run: never
 variants:
-  - device: cargo container device 1
-  - device: cargo container device 2
+  - device: agpsContainerDevice1
+  - device: agpsContainerDevice1
 needs:
   - P-GPS
 ---
@@ -20,16 +20,14 @@ needs:
 
 ## Register and connect device
 
-Given I have a random UUID in `pgpsDevice`
+Given I generate a certificate for the `<variant.device>` tracker
 
-And I generate a certificate for the `${pgpsDevice}` tracker
-
-And I connect the `${pgpsDevice}` tracker
+And I connect the `<variant.device>` tracker
 
 ## Request P-GPS data
 
-When the `${pgpsDevice}` tracker publishes this message to the topic
-`${pgpsDevice}/pgps/get`
+When the `<variant.device>` tracker publishes this message to the topic
+`${tracker.<variant.device>.id}/pgps/get`
 
 ```json
 {
@@ -38,8 +36,8 @@ When the `${pgpsDevice}` tracker publishes this message to the topic
 }
 ```
 
-Then the `${pgpsDevice}` tracker receives a messages on the topic
-`${pgpsDevice}/pgps` into `pgpsData`
+Then the `<variant.device>` tracker receives a messages on the topic
+`${tracker.<variant.device>.id}/pgps` into `pgpsData`
 
 And `pgpsData` should match
 
@@ -59,7 +57,7 @@ When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${pgpsDevice}"
+  "thingName": "${tracker.<variant.device>.id}"
 }
 ```
 
@@ -73,7 +71,7 @@ Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${pgpsDevice}",
+  "thingName": "${tracker.<variant.device>.id}",
   "principal": "${certificateArn}"
 }
 ```
@@ -99,6 +97,8 @@ And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${pgpsDevice}"
+  "thingName": "${tracker.<variant.device>.id}"
 }
 ```
+
+And I disconnect the `<variant.device>` tracker

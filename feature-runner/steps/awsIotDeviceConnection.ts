@@ -55,17 +55,14 @@ export const awsIotDeviceConnection = ({
 				region: mqttEndpoint.split('.')[2],
 			})
 			d.on('connect', () => {
-				console.error(`[MQTT]`, clientId, 'connected')
 				connected = true
 				onConnectListeners.forEach((fn) => fn())
 			})
 			d.on('close', () => {
-				console.error(`[MQTT]`, clientId, 'disconnect')
 				connected = false
 				clearTimeout(connectedTimeout)
 			})
 			d.on('message', (topic, payload) => {
-				console.error(`[MQTT]`, clientId, topic, payload.toString())
 				messages[topic] = [...(messages[topic] ?? []), payload]
 				onMessageListeners.map((listener) => listener(topic, payload))
 			})
@@ -107,7 +104,6 @@ export const awsIotDeviceConnection = ({
 					delete connections[clientId]
 				},
 				subscribe: (topic: string) => {
-					console.error(`[MQTT]`, clientId, 'SUB', topic)
 					d.subscribe(topic)
 				},
 			}
