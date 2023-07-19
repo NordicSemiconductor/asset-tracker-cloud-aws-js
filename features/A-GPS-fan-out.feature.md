@@ -1,10 +1,11 @@
 ---
-run: never
 variants:
   - device: agpsContainerDevice1
   - device: agpsContainerDevice1
 needs:
   - A-GPS
+  - Connect a tracker
+  - Register a new account
 ---
 
 # A-GPS Data Fan Out (The cargo container scenario)
@@ -24,6 +25,8 @@ Given I generate a certificate for the `<variant.device>` tracker
 
 And I connect the `<variant.device>` tracker
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Request A-GPS data
 
 When the `<variant.device>` tracker publishes this message to the topic
@@ -39,10 +42,12 @@ When the `<variant.device>` tracker publishes this message to the topic
 }
 ```
 
-Then the `<variant.device>` tracker receives `2` raw messages on the topic
-`<variant.device>/agps` into `agpsData`
+<!-- @retryScenario -->
 
-And
+Soon the `<variant.device>` tracker receives `2` raw messages on the topic
+`${tracker.<variant.device>.id}/agps` into `agpsData`
+
+Then
 `$length($filter(agpsData, function($v) { $contains($v, '01010100f9fffffffeffffff0f7b12890612031f00017') })) > 0`
 should equal true
 
@@ -59,7 +64,7 @@ When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "<variant.device>"
+  "thingName": "${tracker.<variant.device>.id}"
 }
 ```
 
@@ -73,7 +78,7 @@ Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "<variant.device>",
+  "thingName": "${tracker.<variant.device>.id}",
   "principal": "${certificateArn}"
 }
 ```
@@ -99,6 +104,8 @@ And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "<variant.device>"
+  "thingName": "${tracker.<variant.device>.id}"
 }
 ```
+
+And I disconnect the `<variant.device>` tracker

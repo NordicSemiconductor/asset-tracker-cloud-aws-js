@@ -179,9 +179,9 @@ const steps: ({
 	),
 	matchStep(
 		new RegExp(
-			`^the (:? ${matchString(
+			`^the(:? ${matchString(
 				'trackerId',
-			)} )?tracker updates its reported state with$`,
+			)})? tracker updates its reported state with$`,
 		),
 		Type.Object({
 			trackerId: Type.Optional(Type.String()),
@@ -251,10 +251,11 @@ const steps: ({
 		},
 	),
 	matchStep(
+		// the `agpsContainerDevice1` tracker publishes this message to the topic `lungwort-slangous-puggaree/agps/get`
 		new RegExp(
-			`^the (:? ${matchString(
+			`^the(:? ${matchString(
 				'trackerId',
-			)} )?tracker publishes this message to the topic ${matchString(
+			)})? tracker publishes this message to the topic ${matchString(
 				'topic',
 			)}$`,
 		),
@@ -279,8 +280,8 @@ const steps: ({
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 			const message = JSON.parse(codeBlockOrThrow(step).code)
-			progress(`Publishing to ${topic}`)
-			progress(JSON.stringify(message))
+			progress(`IoT Publishing > ${topic}`)
+			progress(`IoT Publishing > ${JSON.stringify(message)}`)
 			const connection = connections[trackerId] as Connection
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(
@@ -299,9 +300,9 @@ const steps: ({
 	),
 	matchStep(
 		new RegExp(
-			`^the (:? ${matchString(
+			`^the(:? ${matchString(
 				'trackerId',
-			)} )?tracker fetches the next job into ${matchString('storageName')}$`,
+			)})? tracker fetches the next job into ${matchString('storageName')}$`,
 		),
 		Type.Object({
 			trackerId: Type.Optional(Type.String()),
@@ -312,7 +313,7 @@ const steps: ({
 			{
 				context,
 				log: {
-					step: { progress, error },
+					step: { progress },
 				},
 			},
 		) => {
@@ -330,9 +331,6 @@ const steps: ({
 			const getNextJobTopic = `$aws/things/${deviceId}/jobs/$next/get`
 			const successTopic = `${getNextJobTopic}/accepted`
 
-			progress(getNextJobTopic)
-			progress(successTopic)
-
 			const res = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Did not receive a next job!`))
@@ -343,21 +341,20 @@ const steps: ({
 					reject(error)
 				}
 
+				progress(`IoT Job < subscribing to ${successTopic}`)
 				connection.subscribe(successTopic)
 
 				connection.onMessage((topic, message) => {
 					if (topic !== successTopic) return
 					if (JSON.parse(message.toString()).execution?.jobId === undefined)
 						return
-					progress(message.toString())
+					progress(`IoT Job < ${message.toString()}`)
 					clearTimeout(timeout)
 					resolve(JSON.parse(message.toString()).execution)
 				})
 
 				connection.publish(getNextJobTopic, '').catch(catchError)
 			})
-
-			progress(JSON.stringify(res))
 
 			check(res).is(
 				objectMatching({
@@ -372,9 +369,9 @@ const steps: ({
 	),
 	matchStep(
 		new RegExp(
-			`^the (:? ${matchString(
+			`^the(:? ${matchString(
 				'trackerId',
-			)} )?tracker marks the job in ${matchString(
+			)})? tracker marks the job in ${matchString(
 				'storageName',
 			)} as in progress$`,
 		),
@@ -405,9 +402,6 @@ const steps: ({
 			const updateJobTopic = `$aws/things/${deviceId}/jobs/${context[storageName].jobId}/update`
 			const successTopic = `${updateJobTopic}/accepted`
 
-			progress(updateJobTopic)
-			progress(successTopic)
-
 			const res = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Job not marked as in progress!`))
@@ -418,6 +412,7 @@ const steps: ({
 					reject(error)
 				}
 
+				progress(`IoT Job < subscribing to ${successTopic}`)
 				connection.subscribe(successTopic)
 
 				connection.onMessage((topic, message) => {
@@ -427,6 +422,7 @@ const steps: ({
 					resolve(JSON.parse(message.toString()))
 				})
 
+				progress(`IoT Job > publishing to ${updateJobTopic}`)
 				connection
 					.publish(
 						updateJobTopic,
@@ -439,16 +435,14 @@ const steps: ({
 					.catch(catchError)
 			})
 
-			progress(JSON.stringify(res))
-
 			return { result: res }
 		},
 	),
 	matchStep(
 		new RegExp(
-			`^the (:? ${matchString(
+			`^the(:? ${matchString(
 				'trackerId',
-			)} )?tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
+			)})? tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
 				'topic',
 			)} into ${matchString('storageName')}$`,
 		),
@@ -499,15 +493,13 @@ const steps: ({
 				}, 10 * 1000)
 
 				connection.onMessage((t, message) => {
-					progress(t)
-					progress(message.toString())
 					if (topic !== t) return
 					const m = isRaw
 						? message.toString('hex')
 						: JSON.parse(message.toString('utf-8'))
 					messages.push(m)
-					progress(`received message on ${topic}`)
-					progress(JSON.stringify(m))
+					progress(`IoT < received message on ${topic}`)
+					progress(`IoT < ${JSON.stringify(m)}`)
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
 
