@@ -92,6 +92,16 @@ jobs:
         run: ./cli.sh create-ca --tags ci,repository=${{ github.repository }}
       - name: Run End-to-End Tests
         run: npm run test:e2e
+      - name: Print failed End-to-End tests
+        if: failure()
+        run:
+          cat e2e-test-result.json | npx tsx --no-warnings
+          ./feature-runner/console-reporter.ts  --only-failed --with-timestamps
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: e2e-test-result
+          path: e2e-test-result.json
       - name: Get logs
         if: failure()
         run: ./cli.sh logs

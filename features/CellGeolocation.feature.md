@@ -14,6 +14,8 @@ variants:
 > approximate tracker location based on the cell id even if a device has no
 > current GNSS fix
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Device enters a cell
 
 Given I have a random number between `1` and `100000000` in `cellId`
@@ -24,7 +26,9 @@ And I have a random float between `-180` and `180` in `lng`
 
 And I store `$millis()` into `ts`
 
-Then the tracker updates its reported state with
+<!-- @retryScenario -->
+
+Soon the tracker updates its reported state with
 
 ```json
 {
@@ -42,11 +46,15 @@ Then the tracker updates its reported state with
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Device acquires a GNSS fix
 
 Given I store `$millis()+(120*1000)` into `ts`
 
-Then the tracker updates its reported state with
+<!-- @retryScenario -->
+
+Soon the tracker updates its reported state with
 
 ```json
 {

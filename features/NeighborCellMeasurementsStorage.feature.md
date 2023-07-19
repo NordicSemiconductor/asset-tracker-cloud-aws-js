@@ -6,6 +6,7 @@ variants:
     nwModem: NB-IoT
 needs:
   - Connect a tracker
+  - Register a new account
 ---
 
 # Store neighboring cell measurement reports
@@ -28,11 +29,15 @@ And I store `<variant.nw>_ncellmeasCellId` into `cellId`
 
 And I store `<variant.nw>_ncellmeasAreaId` into `areaId`
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Device connects
 
 Given I store `$millis()` into `ts`
 
-Then the tracker updates its reported state with
+<!-- @retryScenario -->
+
+Soon the tracker updates its reported state with
 
 ```json
 {
@@ -54,7 +59,8 @@ Then the tracker updates its reported state with
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker.default.id}/ground-fix`
+Then the tracker publishes this message to the topic
+`${tracker.default.id}/ground-fix`
 
 ```json
 {
