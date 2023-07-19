@@ -448,38 +448,6 @@ const steps: ({
 		new RegExp(
 			`^the (:? ${matchString(
 				'trackerId',
-			)} )?tracker is subscribed to the topic ${matchString('topic')}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			topic: Type.String(),
-		}),
-		async (
-			{ topic, trackerId: maybeTrackerId },
-			{
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
-			const trackerId = maybeTrackerId ?? 'default'
-			if (trackers[trackerId] === undefined) {
-				throw new Error(`No credentials available for tracker ${trackerId}`)
-			}
-			if (connections[trackerId] === undefined) {
-				throw new Error(`No connection available for tracker ${trackerId}`)
-			}
-			const connection = connections[trackerId] as Connection
-
-			connection.subscribe(topic)
-
-			progress(`subscribing to ${topic}`)
-		},
-	),
-	matchStep(
-		new RegExp(
-			`^the (:? ${matchString(
-				'trackerId',
 			)} )?tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
 				'topic',
 			)} into ${matchString('storageName')}$`,
@@ -516,6 +484,9 @@ const steps: ({
 					: parseInt(messageCount.slice(1, -1) as string, 10)
 			const messages: (Record<string, any> | string)[] = []
 
+			progress(`subscribing to ${topic}`)
+			connection.subscribe(topic)
+
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(
@@ -525,9 +496,11 @@ const steps: ({
 							} message${expectedMessageCount > 1 ? 's' : ''} yet to receive.`,
 						),
 					)
-				}, 60 * 1000)
+				}, 10 * 1000)
 
 				connection.onMessage((t, message) => {
+					progress(t)
+					progress(message.toString())
 					if (topic !== t) return
 					const m = isRaw
 						? message.toString('hex')

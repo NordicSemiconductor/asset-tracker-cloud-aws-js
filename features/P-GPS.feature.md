@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Connect a tracker
 ---
@@ -26,9 +25,12 @@ And I enqueue this mock HTTP API response for a GET request to
 }
 ```
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Request P-GPS data
 
-When the tracker publishes this message to the topic `${tracker.default.id}/pgps/get`
+When the tracker publishes this message to the topic
+`${tracker.default.id}/pgps/get`
 
 ```json
 {
@@ -37,10 +39,10 @@ When the tracker publishes this message to the topic `${tracker.default.id}/pgps
 }
 ```
 
-<!-- This @retry:tries=5,initialDelay=2,delayFactor=2 -->
+<!-- @retryScenario -->
 
-Soon the tracker receives a message on the topic `${tracker.default.id}/pgps` into
-`pgpsData`
+Soon the tracker receives a message on the topic `${tracker.default.id}/pgps`
+into `pgpsData`
 
 Then `pgpsData` should match
 
