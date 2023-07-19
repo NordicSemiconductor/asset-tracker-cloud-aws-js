@@ -56,9 +56,7 @@ export const awsIotDeviceConnection = ({
 			})
 			d.on('connect', () => {
 				connected = true
-				connectedTimeout = setTimeout(() => {
-					if (connected) onConnectListeners.forEach((fn) => fn())
-				}, 1000)
+				onConnectListeners.forEach((fn) => fn())
 			})
 			d.on('close', () => {
 				connected = false

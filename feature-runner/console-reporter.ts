@@ -3,6 +3,9 @@ import {
 	type SuiteResult,
 } from '@nordicsemiconductor/bdd-markdown'
 
+const onlyFailed = process.argv.includes('--only-failed')
+const withTimestamps = process.argv.includes('--with-timestamps')
+
 const chunks: string[] = []
 
 process.stdin.on('data', (chunk) => chunks.push(chunk.toString()))
@@ -16,6 +19,9 @@ try {
 	throw new Error(`Failed to parse result JSON: ${(error as Error).message}`)
 }
 
-consoleReporter(res, console.log)
+consoleReporter(res, console.log, {
+	onlyFailed,
+	withTimestamps,
+})
 
 if (!res.ok) process.exit(1)

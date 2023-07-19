@@ -166,5 +166,4 @@ const res = await runner.run(world)
 console.error(`Writing to stdout ...`)
 process.stdout.write(JSON.stringify(res, null, 2), () => {
 	console.error(`Done`, res.ok ? chalk.green('OK') : chalk.red('ERROR'))
-	if (!res.ok) process.exit(1)
 })

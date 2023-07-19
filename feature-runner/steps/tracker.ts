@@ -40,10 +40,11 @@ const steps: ({
 	} & Record<string, any>
 >[] = ({ certsDir, mqttEndpoint }) => [
 	matchStep(
+		// I generate a certificate for the `firmwareCiDevice` tracker"
 		new RegExp(
-			`^I generate a certificate for the (:? ${matchString(
+			`^I generate a certificate for the(:? ${matchString(
 				'trackerId',
-			)} )?tracker$`,
+			)})? tracker$`,
 		),
 		Type.Object({
 			trackerId: Type.Optional(Type.String()),
@@ -108,7 +109,7 @@ const steps: ({
 		},
 	),
 	matchStep(
-		new RegExp(`^I connect the (:? ${matchString('trackerId')} )?tracker$`),
+		new RegExp(`^I connect the(:? ${matchString('trackerId')})? tracker$`),
 		Type.Object({
 			trackerId: Type.Optional(Type.String()),
 		}),
@@ -153,7 +154,7 @@ const steps: ({
 		},
 	),
 	matchStep(
-		new RegExp(`^I disconnect the (:? ${matchString('trackerId')} )?tracker$`),
+		new RegExp(`^I disconnect the(:? ${matchString('trackerId')})? tracker$`),
 		Type.Object({
 			trackerId: Type.Optional(Type.String()),
 		}),
@@ -210,14 +211,17 @@ const steps: ({
 			const updateStatusAccepted = `${updateStatus}/accepted`
 			const updateStatusRejected = `${updateStatus}/rejected`
 
+			progress(`IoT < subscribing to: ${updateStatusAccepted}`)
+			connection.subscribe(updateStatusAccepted)
+
+			progress(`IoT < subscribing to: ${updateStatusRejected}`)
+			connection.subscribe(updateStatusRejected)
+
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(
 					() => reject(new Error(`Timed out!`)),
 					10 * 1000,
 				)
-
-				connection.subscribe(updateStatusAccepted)
-				connection.subscribe(updateStatusRejected)
 
 				connection.onMessage((topic, message) => {
 					switch (topic) {
@@ -234,12 +238,14 @@ const steps: ({
 					}
 				})
 
-				progress('IoT > reported', deviceId)
-				progress('IoT > reported', JSON.stringify(reported))
-				connection.publish(
-					updateStatus,
-					JSON.stringify({ state: { reported } }),
-				)
+				progress(`IoT > publishing to ${updateStatus}`)
+				progress(`IoT > ${JSON.stringify(reported)}`)
+				connection
+					.publish(updateStatus, JSON.stringify({ state: { reported } }))
+					.catch((err) => {
+						clearTimeout(timeout)
+						reject(new Error(`Failed to publish`))
+					})
 			})
 			return { result: await updatePromise }
 		},
@@ -330,7 +336,7 @@ const steps: ({
 			const res = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Did not receive a next job!`))
-				}, 60 * 1000)
+				}, 10 * 1000)
 
 				const catchError = (error: Error) => {
 					clearTimeout(timeout)
@@ -341,6 +347,8 @@ const steps: ({
 
 				connection.onMessage((topic, message) => {
 					if (topic !== successTopic) return
+					if (JSON.parse(message.toString()).execution?.jobId === undefined)
+						return
 					progress(message.toString())
 					clearTimeout(timeout)
 					resolve(JSON.parse(message.toString()).execution)
