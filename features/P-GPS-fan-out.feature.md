@@ -1,5 +1,4 @@
 ---
-run: never
 variants:
   - device: agpsContainerDevice1
   - device: agpsContainerDevice1
