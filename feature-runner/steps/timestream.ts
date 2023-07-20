@@ -6,24 +6,25 @@ import {
 	codeBlockOrThrow,
 	noMatch,
 	type StepRunner,
+	type StepRunnerArgs,
+	type StepRunResult,
 } from '@nordicsemiconductor/bdd-markdown'
 import { parseResult } from '@nordicsemiconductor/timestream-helpers'
 import type { World } from '../run-features.js'
 import type { UserCredentials } from './cognito.js'
 
-const steps: StepRunner<
-	World & {
-		timestreamQueryResult?: Record<string, any>[]
-		cognito?: UserCredentials
-	}
->[] = [
+type TimestreamWorld = World & {
+	timestreamQueryResult?: Record<string, any>[]
+	cognito?: UserCredentials
+}
+const steps: StepRunner<TimestreamWorld>[] = [
 	async ({
 		context,
 		step,
 		log: {
 			step: { progress },
 		},
-	}) => {
+	}: StepRunnerArgs<TimestreamWorld>): Promise<StepRunResult> => {
 		if (!/^I run this Timestream query$/.test(step.title)) return noMatch
 
 		if (context.cognito === undefined)

@@ -55,7 +55,6 @@ const steps: (args: {
 		async (
 			{ resource, method },
 			{
-				context,
 				step,
 				log: {
 					step: { progress },

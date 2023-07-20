@@ -35,7 +35,7 @@ const steps: ({
 	certsDir: string
 }) => StepRunner<
 	World & {
-		tracker: Record<string, TrackerInfo>
+		tracker?: Record<string, TrackerInfo>
 		connection?: Connection
 	} & Record<string, any>
 >[] = ({ certsDir, mqttEndpoint }) => [
@@ -92,8 +92,8 @@ const steps: ({
 					readFile(deviceFiles.certWithCA, 'utf-8'),
 				])
 				const info: TrackerInfo = {
-					privateKey: privateKey,
-					clientCert: clientCert,
+					privateKey,
+					clientCert,
 					id: deviceId,
 					arn: `arn:aws:iot:${mqttEndpoint.split('.')[2]}:${
 						context.accountId
@@ -161,7 +161,6 @@ const steps: ({
 		async (
 			{ trackerId: maybeTrackerId },
 			{
-				context,
 				log: {
 					step: { progress },
 				},
@@ -242,7 +241,7 @@ const steps: ({
 				progress(`IoT > ${JSON.stringify(reported)}`)
 				connection
 					.publish(updateStatus, JSON.stringify({ state: { reported } }))
-					.catch((err) => {
+					.catch(() => {
 						clearTimeout(timeout)
 						reject(new Error(`Failed to publish`))
 					})
@@ -289,7 +288,7 @@ const steps: ({
 					10 * 1000,
 				)
 				connection
-					.publish(topic as string, JSON.stringify(message))
+					.publish(topic, JSON.stringify(message))
 					.then(resolve)
 					.catch(reject)
 					.finally(() => {
@@ -473,9 +472,7 @@ const steps: ({
 			const connection = connections[trackerId] as Connection
 
 			const expectedMessageCount =
-				messageCount === 'a'
-					? 1
-					: parseInt(messageCount.slice(1, -1) as string, 10)
+				messageCount === 'a' ? 1 : parseInt(messageCount.slice(1, -1), 10)
 			const messages: (Record<string, any> | string)[] = []
 
 			progress(`subscribing to ${topic}`)
