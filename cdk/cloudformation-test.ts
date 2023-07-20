@@ -10,8 +10,5 @@ new TestApp({
 	context: {
 		version: process.env.VERSION ?? '0.0.0-development',
 		isTest: true,
-		nrfcloudAGPS: '1',
-		nrfcloudPGPS: '1',
-		nrfcloudGroundFix: '1',
 	},
 }).synth()

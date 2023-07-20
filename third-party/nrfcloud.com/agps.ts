@@ -7,13 +7,13 @@ import { AGPSType, agpsRequestSchema } from '../../agps/types.js'
 import type { ErrorInfo } from '../../api/ErrorInfo.js'
 import { fromEnv } from '../../util/fromEnv.js'
 import { apiClient } from './apiclient.js'
-import { getAGPSLocationApiSettings } from './settings.js'
+import { getLocationServicesApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',
 })(process.env)
 
-const settingsPromise = getAGPSLocationApiSettings({
+const settingsPromise = getLocationServicesApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()

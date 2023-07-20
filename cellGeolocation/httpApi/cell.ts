@@ -1,10 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { SQSClient } from '@aws-sdk/client-sqs'
 import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/protocol'
-import {
-	cellId,
-	NetworkMode,
-} from '@nordicsemiconductor/cell-geolocation-helpers'
 import { Type } from '@sinclair/typebox'
 import type {
 	APIGatewayProxyEventV2,
@@ -15,6 +11,7 @@ import { res } from '../../api/res.js'
 import { queueJob } from '../../geolocation/queueJob.js'
 import { fromEnv } from '../../util/fromEnv.js'
 import { geolocateFromCache } from '../geolocateFromCache.js'
+import { NetworkMode, cellId } from '../cellId.js'
 
 const { cellGeolocationResolutionJobsQueue, cacheTable } = fromEnv({
 	cellGeolocationResolutionJobsQueue: 'CELL_GEOLOCATION_RESOLUTION_JOBS_QUEUE',

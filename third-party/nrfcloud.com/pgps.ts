@@ -11,11 +11,11 @@ import { gpsDay, minimumGpsDay } from '../../pgps/gpsTime.js'
 import { pgpsRequestSchema } from '../../pgps/types.js'
 import { fromEnv } from '../../util/fromEnv.js'
 import { apiClient } from './apiclient.js'
-import { getPGPSLocationApiSettings } from './settings.js'
+import { getLocationServicesApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({ stackName: 'STACK_NAME' })(process.env)
 
-const settingsPromise = getPGPSLocationApiSettings({
+const settingsPromise = getLocationServicesApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()
