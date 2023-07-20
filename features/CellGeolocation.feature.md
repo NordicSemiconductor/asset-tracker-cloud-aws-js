@@ -6,6 +6,7 @@ variants:
     nwModem: LTE-M
   - nw: nbiot
     nwModem: NB-IoT
+run: never
 ---
 
 # Cell Geolocation API
