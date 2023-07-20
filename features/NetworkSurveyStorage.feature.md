@@ -23,7 +23,8 @@ And I have a random number between `1` and `100000000` in `lteNetworkAreaId`
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker.default.id}/ground-fix`
+Then the tracker publishes this message to the topic
+`${tracker.default.id}/ground-fix`
 
 ```json
 {

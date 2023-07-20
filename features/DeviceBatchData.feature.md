@@ -19,7 +19,8 @@ And I have a random float between `-180` and `180` in `lng2`
 
 ## Devices can publish batch data
 
-Given the tracker publishes this message to the topic `${tracker.default.id}/batch`
+Given the tracker publishes this message to the topic
+`${tracker.default.id}/batch`
 
 ```json
 {

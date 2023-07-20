@@ -20,7 +20,8 @@ And I have a random number between `1` and `300` in `magnitude`
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker.default.id}/messages`
+Then the tracker publishes this message to the topic
+`${tracker.default.id}/messages`
 
 ```json
 {
@@ -33,7 +34,8 @@ Then the tracker publishes this message to the topic `${tracker.default.id}/mess
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker.default.id}/messages`
+Then the tracker publishes this message to the topic
+`${tracker.default.id}/messages`
 
 ```json
 {
@@ -88,7 +90,8 @@ Soon `timestreamQueryResult` should match
 
 Given I store `$millis()` into `ts`
 
-Then the tracker publishes this message to the topic `${tracker.default.id}/messages`
+Then the tracker publishes this message to the topic
+`${tracker.default.id}/messages`
 
 ```json
 {
