@@ -67,6 +67,10 @@ jobs:
           key: ${{ runner.OS }}-build-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
         run: npm ci --no-audit
+      - name: Re-install swc
+        # see https://github.com/swc-project/swc/issues/5616
+        if: runner.OS == 'macOS'
+        run: npm i @swc/core
       - name: Compile TypeScript for type checking
         run: npx tsc
       - name: Run Unit Tests
