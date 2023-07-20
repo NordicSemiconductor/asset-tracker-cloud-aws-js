@@ -23,6 +23,8 @@ Given I generate a certificate for the `<variant.device>` tracker
 
 And I connect the `<variant.device>` tracker
 
+<!-- @retry:delayExecution=2000 -->
+
 ## Request P-GPS data
 
 When the `<variant.device>` tracker publishes this message to the topic
@@ -35,7 +37,9 @@ When the `<variant.device>` tracker publishes this message to the topic
 }
 ```
 
-Then the `<variant.device>` tracker receives a messages on the topic
+<!-- @retryScenario -->
+
+Soon the `<variant.device>` tracker receives a messages on the topic
 `${tracker.<variant.device>.id}/pgps` into `pgpsData`
 
 And `pgpsData` should match
