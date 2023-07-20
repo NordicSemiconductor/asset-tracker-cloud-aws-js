@@ -31,7 +31,7 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@nordicsemiconductor/asset-tracker-cloud-docs": "28.5.2",
+    "@nordicsemiconductor/asset-tracker-cloud-docs": "28.5.3",
     "@nordicsemiconductor/cell-geolocation-helpers": "6.0.0",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "4.0.2",
     "@nordicsemiconductor/timestream-helpers": "5.0.0",
@@ -63,7 +63,6 @@
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "12.0.60",
     "@nordicsemiconductor/bdd-markdown": "5.6.0",
     "@nordicsemiconductor/cloudformation-helpers": "8.0.0",
-    "@nordicsemiconductor/e2e-bdd-test-runner": "16.0.139",
     "@nordicsemiconductor/firmware-ci-device-helpers": "14.0.142",
     "@nordicsemiconductor/object-to-env": "5.0.0",
     "@nordicsemiconductor/random-words": "7.0.0",
