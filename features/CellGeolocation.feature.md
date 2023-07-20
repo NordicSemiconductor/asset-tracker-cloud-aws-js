@@ -50,7 +50,7 @@ Soon the tracker updates its reported state with
 
 ## Device acquires a GNSS fix
 
-Given I store `$millis()+(120*1000)` into `ts`
+Given I store `$millis()` into `ts`
 
 <!-- @retryScenario -->
 
