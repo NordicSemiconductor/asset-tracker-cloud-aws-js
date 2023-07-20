@@ -108,7 +108,7 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 
 			if (expected === 'true') expected = true
 			if (expected === 'false') expected = false
-			if (typeof expected === 'string' && expected[0] === '`')
+			if (typeof expected === 'string' && expected.startsWith('`'))
 				expected = expected.slice(1, -1)
 
 			progress(`actual: ${JSON.stringify(value)} (${typeof value})`)

@@ -2,6 +2,8 @@ import {
 	codeBlockOrThrow,
 	noMatch,
 	type StepRunner,
+	type StepRunnerArgs,
+	type StepRunResult,
 } from '@nordicsemiconductor/bdd-markdown'
 import { Type } from '@sinclair/typebox'
 import type { World } from '../run-features.js'
@@ -10,15 +12,14 @@ import { check, objectMatching } from 'tsmatchers'
 
 let res: Response | undefined = undefined
 
-const steps: StepRunner<
-	World & {
-		response?: {
-			body?: string | Record<string, any>
-			statusCode: number
-			headers: Headers
-		}
+type RESTWorld = World & {
+	response?: {
+		body?: string | Record<string, any>
+		statusCode: number
+		headers: Headers
 	}
->[] = [
+}
+const steps: StepRunner<RESTWorld>[] = [
 	matchStep(
 		new RegExp(
 			`^I ${matchChoice('method', [
@@ -65,7 +66,10 @@ const steps: StepRunner<
 			progress(`${res.status} ${res.statusText}`)
 			let resBody: string | undefined = undefined
 			if (parseInt(res.headers.get('content-length') ?? '0', 10) > 0) {
-				if (res.headers.get('content-type')?.includes('application/json')) {
+				if (
+					res.headers.get('content-type')?.includes('application/json') ??
+					false
+				) {
 					resBody = await res.json()
 					progress(`< ${JSON.stringify(resBody)}`)
 				} else {
@@ -135,7 +139,7 @@ const steps: StepRunner<
 		log: {
 			step: { progress },
 		},
-	}) => {
+	}: StepRunnerArgs<RESTWorld>): Promise<StepRunResult> => {
 		if (!/^the response body should equal$/.test(step.title)) return noMatch
 
 		const { code: expected } = codeBlockOrThrow(step)
