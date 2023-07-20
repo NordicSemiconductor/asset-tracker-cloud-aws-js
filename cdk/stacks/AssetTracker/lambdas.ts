@@ -10,7 +10,6 @@ export type AssetTrackerLambdas = {
 		geolocateCellHttpApi: PackedLambda
 		invokeStepFunctionFromSQS: PackedLambda
 		geolocateFromCacheStepFunction: PackedLambda
-		geolocateCellFromDeviceLocationsStepFunction: PackedLambda
 		geolocateCellFromNrfCloudStepFunction: PackedLambda
 		cacheCellGeolocationStepFunction: PackedLambda
 		agpsDeviceRequestHandler: PackedLambda
@@ -49,10 +48,6 @@ export const prepareAssetTrackerLambdas =
 			geolocateFromCacheStepFunction: await packLambdaFromPath(
 				'geolocateFromCacheStepFunction',
 				'cellGeolocation/stepFunction/fromCache.ts',
-			),
-			geolocateCellFromDeviceLocationsStepFunction: await packLambdaFromPath(
-				'geolocateCellFromDeviceLocationsStepFunction',
-				'cellGeolocation/stepFunction/fromDeviceLocations.ts',
 			),
 			geolocateCellFromNrfCloudStepFunction: await packLambdaFromPath(
 				'geolocateCellFromNrfCloudStepFunction',

@@ -17,13 +17,13 @@ import { fromEnv } from '../../util/fromEnv.js'
 import { apiClient } from './apiclient.js'
 import { groundFixRequestSchema } from './groundFixRequestSchema.js'
 import { locateResultSchema } from './locate.js'
-import { getGroundFixApiSettings } from './settings.js'
+import { getLocationServicesApiSettings } from './settings.js'
 
 const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',
 })(process.env)
 
-const settingsPromise = getGroundFixApiSettings({
+const settingsPromise = getLocationServicesApiSettings({
 	ssm: new SSMClient({}),
 	stackName,
 })()

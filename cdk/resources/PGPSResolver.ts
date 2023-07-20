@@ -3,7 +3,6 @@ import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
 import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import { enabledInContext } from '../helper/enabledInContext.js'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
 import { LambdaLogGroup } from './LambdaLogGroup.js'
@@ -29,45 +28,34 @@ export class PGPSResolver extends CloudFormation.Resource {
 	) {
 		super(parent, id)
 
-		const checkFlag = enabledInContext(this.node)
-
 		// Optional step: resolve using nRF Cloud API
-		let fromNrfCloud: Lambda.IFunction | undefined = undefined
-		checkFlag({
-			key: 'nrfcloudPGPS',
-			component: 'nRF Cloud API (P-GPS)',
-			onUndefined: 'disabled',
-			onEnabled: () => {
-				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
-					layers: lambdas.layers,
-					handler: lambdas.lambdas.pgpsNrfCloudStepFunction.handler,
-					architecture: Lambda.Architecture.ARM_64,
-					runtime: Lambda.Runtime.NODEJS_18_X,
-					timeout: CloudFormation.Duration.seconds(10),
-					memorySize: 1792,
-					code: Lambda.Code.fromAsset(
-						lambdas.lambdas.pgpsNrfCloudStepFunction.zipFile,
-					),
-					description:
-						'Use the nRF Cloud API to provide P-GPS data for devices',
-					initialPolicy: [
-						logToCloudWatch,
-						new IAM.PolicyStatement({
-							actions: ['ssm:GetParametersByPath'],
-							resources: [
-								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfcloud`,
-							],
-						}),
+		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
+			layers: lambdas.layers,
+			handler: lambdas.lambdas.pgpsNrfCloudStepFunction.handler,
+			architecture: Lambda.Architecture.ARM_64,
+			runtime: Lambda.Runtime.NODEJS_18_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.pgpsNrfCloudStepFunction.zipFile,
+			),
+			description: 'Use the nRF Cloud API to provide P-GPS data for devices',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['ssm:GetParametersByPath'],
+					resources: [
+						`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfcloud`,
 					],
-					environment: {
-						VERSION: this.node.tryGetContext('version'),
-						STACK_NAME: this.stack.stackName,
-					},
-				})
-
-				new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
+				}),
+			],
+			environment: {
+				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
+
+		new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 
 		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
@@ -75,7 +63,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 
 		const persistResult = new StepFunctionTasks.DynamoUpdateItem(
 			this,
-			'Persist result from third party API',
+			'Persist result from API',
 			{
 				table: storage.cacheTable,
 				key: {
@@ -84,11 +72,10 @@ export class PGPSResolver extends CloudFormation.Resource {
 					),
 				},
 				updateExpression:
-					'SET #unresolved = :unresolved, #url = :url, #source = :source, #updatedAt = :updatedAt',
+					'SET #unresolved = :unresolved, #url = :url, #updatedAt = :updatedAt',
 				expressionAttributeNames: {
 					'#unresolved': 'unresolved',
 					'#url': 'url',
-					'#source': 'source',
 					'#updatedAt': 'updatedAt',
 				},
 				expressionAttributeValues: {
@@ -97,31 +84,12 @@ export class PGPSResolver extends CloudFormation.Resource {
 					':url': StepFunctionTasks.DynamoAttributeValue.fromString(
 						StepFunctions.JsonPath.stringAt('$.pgps.url'),
 					),
-					':source': StepFunctionTasks.DynamoAttributeValue.fromString(
-						StepFunctions.JsonPath.stringAt('$.pgps.source'),
-					),
 					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
 						StepFunctions.JsonPath.stringAt('$$.State.EnteredTime'),
 					),
 				},
 			},
-		).next(
-			new StepFunctions.Succeed(this, 'Done (resolved using third party API)'),
-		)
-
-		const checkApiResult = (
-			n: number,
-		): [StepFunctions.Condition, StepFunctions.IChainable] => [
-			StepFunctions.Condition.booleanEquals(`$.pgps[${n}].resolved`, true),
-			new StepFunctions.Pass(
-				this,
-				`yes: write location data from result ${n} to input`,
-				{
-					resultPath: '$.pgps',
-					inputPath: `$.pgps[${n}]`,
-				},
-			).next(persistResult),
-		]
+		).next(new StepFunctions.Succeed(this, 'Done (resolved using API)'))
 
 		const persistFailure = new StepFunctionTasks.DynamoUpdateItem(
 			this,
@@ -202,61 +170,25 @@ export class PGPSResolver extends CloudFormation.Resource {
 							new StepFunctions.Succeed(this, 'Done (already resolved)'),
 						)
 						.otherwise(
-							(() => {
-								if (fromNrfCloud === undefined) {
-									return new StepFunctions.Fail(this, 'Failed (No API)', {
-										error: 'NO_API',
-										cause:
-											'No third party API is configured to resolve the P-GPS data',
-									})
-								}
-								const markSource = (source: string) =>
-									new StepFunctions.Pass(
-										this,
-										`mark source in result as ${source}`,
-										{
-											resultPath: '$.source',
-											result: StepFunctions.Result.fromString(source),
-										},
+							new StepFunctionTasks.LambdaInvoke(
+								this,
+								'Resolve using nRF Cloud API',
+								{
+									lambdaFunction: fromNrfCloud,
+									payloadResponseOnly: true,
+									resultPath: '$.pgps',
+								},
+							).next(
+								new StepFunctions.Choice(this, 'Resolved from nRF Cloud API?')
+									.when(
+										StepFunctions.Condition.booleanEquals(
+											`$.pgps.resolved`,
+											true,
+										),
+										persistResult,
 									)
-								const branches: StepFunctions.IChainable[] = []
-								if (fromNrfCloud !== undefined) {
-									branches.push(
-										new StepFunctionTasks.LambdaInvoke(
-											this,
-											'Resolve using nRF Cloud API',
-											{
-												lambdaFunction: fromNrfCloud,
-												payloadResponseOnly: true,
-											},
-										).next(markSource('nrfcloud')),
-									)
-								}
-
-								return new StepFunctions.Parallel(
-									this,
-									'Resolve using third party API',
-									{
-										resultPath: '$.pgps',
-									},
-								)
-									.branch(...branches)
-									.next(
-										(() => {
-											const choice = new StepFunctions.Choice(
-												this,
-												'Resolved from any third party API?',
-											)
-
-											for (let i = 0; i < branches.length; i++) {
-												choice.when(...checkApiResult(i))
-											}
-
-											choice.otherwise(noApiResult)
-											return choice
-										})(),
-									)
-							})(),
+									.otherwise(noApiResult),
+							),
 						),
 				),
 			),

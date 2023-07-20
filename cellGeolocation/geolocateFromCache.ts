@@ -1,8 +1,8 @@
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
-import { cellId } from '@nordicsemiconductor/cell-geolocation-helpers'
 import { ErrorType, type ErrorInfo } from '../api/ErrorInfo.js'
 import type { Cell } from '../geolocation/Cell.js'
 import type { Location } from '../geolocation/Location.js'
+import { cellId } from './cellId.js'
 
 export const geolocateFromCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>

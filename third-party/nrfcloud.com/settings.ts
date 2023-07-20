@@ -1,21 +1,8 @@
 import type { SSMClient } from '@aws-sdk/client-ssm'
 import { getSettings } from '../../util/settings.js'
 
-type nRFCloudLocationService = 'agpsLocation' | 'pgpsLocation' | 'groundFix'
-
-export const serviceKeyProperty = (service: nRFCloudLocationService): string =>
-	`${service}ServiceKey`
-
 const getApiSettings =
-	({
-		ssm,
-		stackName,
-		service,
-	}: {
-		ssm: SSMClient
-		stackName: string
-		service: nRFCloudLocationService
-	}) =>
+	({ ssm, stackName }: { ssm: SSMClient; stackName: string }) =>
 	async (): Promise<{
 		endpoint: string
 		serviceKey: string
@@ -27,41 +14,22 @@ const getApiSettings =
 			scope: 'thirdParty',
 			system: 'nrfcloud',
 		})()
-		const { endpoint, teamId } = p
+		const { endpoint, teamId, serviceKey } = p
 		if (teamId === undefined)
 			throw new Error(`No nRF Cloud team ID configured!`)
-		if (p[serviceKeyProperty(service)] === undefined)
-			throw new Error(`No nRF Cloud service key configured for ${service}!`)
+		if (serviceKey === undefined)
+			throw new Error(`No nRF Cloud service key configured!`)
 		return {
-			serviceKey: p[serviceKeyProperty(service)] as nRFCloudLocationService,
+			serviceKey,
 			endpoint: endpoint ?? 'https://api.nrfcloud.com/',
 			teamId,
 		}
 	}
 
-export const getAGPSLocationApiSettings = ({
+export const getLocationServicesApiSettings = ({
 	ssm,
 	stackName,
 }: {
 	ssm: SSMClient
 	stackName: string
-}): ReturnType<typeof getApiSettings> =>
-	getApiSettings({ ssm, stackName, service: 'agpsLocation' })
-
-export const getPGPSLocationApiSettings = ({
-	ssm,
-	stackName,
-}: {
-	ssm: SSMClient
-	stackName: string
-}): ReturnType<typeof getApiSettings> =>
-	getApiSettings({ ssm, stackName, service: 'pgpsLocation' })
-
-export const getGroundFixApiSettings = ({
-	ssm,
-	stackName,
-}: {
-	ssm: SSMClient
-	stackName: string
-}): ReturnType<typeof getApiSettings> =>
-	getApiSettings({ ssm, stackName, service: 'groundFix' })
+}): ReturnType<typeof getApiSettings> => getApiSettings({ ssm, stackName })
