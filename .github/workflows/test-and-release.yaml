@@ -18,6 +18,7 @@ env:
   AWS_DEFAULT_REGION: eu-west-1
   CI: 1
   FORCE_COLOR: 3
+  JSII_SILENCE_WARNING_UNTESTED_NODE_VERSION: 1
 
 jobs:
   tests:
