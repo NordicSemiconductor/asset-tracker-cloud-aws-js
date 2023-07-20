@@ -86,10 +86,10 @@ describe('batchToTimestreamRecords', () => {
 		const g2lat = r?.[3]?.Dimensions?.find(
 			({ Name }) => Name === 'measureGroup',
 		)
-		// measureGroups should be equal for measures from the same object
+		// measureGroups should equal equal for measures from the same object
 		expect(g1lng?.Value).toEqual(g1lat?.Value)
 		expect(g2lng?.Value).toEqual(g2lat?.Value)
-		// measureGroups should be different for each batch messages
+		// measureGroups should equal different for each batch messages
 		expect(g1lng?.Value).not.toEqual(g2lng?.Value)
 	})
 	it('should convert a batch message with a single value', () => {

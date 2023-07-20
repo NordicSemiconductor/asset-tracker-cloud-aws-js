@@ -6,7 +6,7 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 16
+      nodejs: 18
     commands:
       # Next will install Node.js 18
       - n 18

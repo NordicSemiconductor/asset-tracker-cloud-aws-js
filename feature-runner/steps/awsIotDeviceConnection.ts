@@ -3,12 +3,14 @@ import { promises as fs } from 'fs'
 import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import { isNullOrUndefined } from '../../util/isNullOrUndefined.js'
 
-export type Listener = () => unknown
-export type ListenerWithPayload = (payload: Buffer) => unknown
-type Connection = {
+export type Listener = () => void
+export type MessageListener = (topic: string, message: Buffer) => void
+export type Connection = {
 	onConnect: (listener: Listener) => void
-	onMessageOnce: (topic: string, listener: ListenerWithPayload) => Promise<void>
+	onMessage: (listener: MessageListener) => void
 	publish: (topic: string, message: string) => Promise<void>
+	close: () => void
+	subscribe: (topic: string) => void
 }
 
 export const awsIotDeviceConnection = ({
@@ -25,7 +27,8 @@ export const awsIotDeviceConnection = ({
 
 	return async (clientId) => {
 		const onConnectListeners: Listener[] = []
-		const onMessageOnceListeners: Record<string, ListenerWithPayload[]> = {}
+		const onMessageListeners: MessageListener[] = []
+		const messages: Record<string, any[]> = {}
 		if (connections[clientId] === undefined) {
 			let connected = false
 			let connectedTimeout: NodeJS.Timeout
@@ -53,22 +56,34 @@ export const awsIotDeviceConnection = ({
 			})
 			d.on('connect', () => {
 				connected = true
-				connectedTimeout = setTimeout(() => {
-					if (connected) onConnectListeners.forEach((fn) => fn())
-				}, 1000)
+				onConnectListeners.forEach((fn) => fn())
 			})
 			d.on('close', () => {
 				connected = false
 				clearTimeout(connectedTimeout)
 			})
 			d.on('message', (topic, payload) => {
-				d.unsubscribe(topic)
-				onMessageOnceListeners[topic]?.forEach((fn) => fn(payload))
-				onMessageOnceListeners[topic] = []
+				messages[topic] = [...(messages[topic] ?? []), payload]
+				onMessageListeners.map((listener) => listener(topic, payload))
 			})
 			connections[clientId] = {
 				onConnect: (listener) => {
 					onConnectListeners.push(listener)
+					// Notify about connection
+					if (connected) {
+						listener()
+					}
+				},
+				onMessage: (listener) => {
+					onMessageListeners.push(listener)
+					// Notify about older messages
+					for (const [topic, m] of Object.entries(messages)) {
+						for (const listener of onMessageListeners) {
+							for (const message of m) {
+								listener(topic, message)
+							}
+						}
+					}
 				},
 				publish: async (topic, message) =>
 					new Promise<void>((resolve, reject) => {
@@ -84,23 +99,13 @@ export const awsIotDeviceConnection = ({
 							},
 						)
 					}),
-				onMessageOnce: async (topic, listener) =>
-					new Promise((resolve, reject) => {
-						d.subscribe(
-							topic,
-							{
-								qos: 1,
-							},
-							(error) => {
-								if (isNullOrUndefined(error)) return resolve()
-								return reject(error)
-							},
-						)
-						onMessageOnceListeners[topic] = [
-							...(onMessageOnceListeners[topic] ?? []),
-							listener,
-						]
-					}),
+				close: () => {
+					d.end()
+					delete connections[clientId]
+				},
+				subscribe: (topic: string) => {
+					d.subscribe(topic)
+				},
 			}
 		}
 		return connections[clientId] as Connection
