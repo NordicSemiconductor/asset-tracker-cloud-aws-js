@@ -4,10 +4,8 @@ import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
 import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import { enabledInContext } from '../helper/enabledInContext.js'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
-import type { DeviceCellGeolocations } from './DeviceCellGeolocations.js'
 import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 import { logToCloudWatch } from './logToCloudWatch.js'
@@ -24,10 +22,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 		id: string,
 		{
 			lambdas,
-			deviceCellGeo,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
-			deviceCellGeo: DeviceCellGeolocations
 		},
 	) {
 		super(parent, id)
@@ -74,39 +70,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'fromCacheLogs', fromCache)
 
-		const fromDevices = new Lambda.Function(this, 'fromDevices', {
-			layers: lambdas.layers,
-			handler:
-				lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction.handler,
-			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_18_X,
-			timeout: CloudFormation.Duration.seconds(10),
-			memorySize: 1792,
-			code: Lambda.Code.fromAsset(
-				lambdas.lambdas.geolocateCellFromDeviceLocationsStepFunction.zipFile,
-			),
-			description: 'Geolocate cells from device locations',
-			initialPolicy: [
-				logToCloudWatch,
-				new IAM.PolicyStatement({
-					actions: ['dynamodb:Query'],
-					resources: [
-						deviceCellGeo.deviceCellGeolocationTable.tableArn,
-						`${deviceCellGeo.deviceCellGeolocationTable.tableArn}/*`,
-					],
-				}),
-			],
-			environment: {
-				LOCATIONS_TABLE: deviceCellGeo.deviceCellGeolocationTable.tableName,
-				LOCATIONS_TABLE_CELLID_INDEX:
-					deviceCellGeo.deviceCellGeolocationTableCellIdIndex,
-				VERSION: this.node.tryGetContext('version'),
-				STACK_NAME: this.stack.stackName,
-			},
-		})
-
-		new LambdaLogGroup(this, 'fromDevicesLogs', fromDevices)
-
 		const addToCache = new Lambda.Function(this, 'addToCache', {
 			layers: lambdas.layers,
 			handler: lambdas.lambdas.cacheCellGeolocationStepFunction.handler,
@@ -134,45 +97,33 @@ export class CellGeolocation extends CloudFormation.Resource {
 
 		new LambdaLogGroup(this, 'addToCacheLogs', addToCache)
 
-		const checkFlag = enabledInContext(this.node)
-
-		// Optional step: resolve using nRF Cloud API
-		let fromNrfCloud: Lambda.IFunction | undefined = undefined
-		checkFlag({
-			key: 'nrfcloudGroundFix',
-			component: 'nRF Cloud API (ground fix)',
-			onUndefined: 'disabled',
-			onEnabled: () => {
-				fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
-					layers: lambdas.layers,
-					handler:
-						lambdas.lambdas.geolocateCellFromNrfCloudStepFunction.handler,
-					architecture: Lambda.Architecture.ARM_64,
-					runtime: Lambda.Runtime.NODEJS_18_X,
-					timeout: CloudFormation.Duration.seconds(10),
-					memorySize: 1792,
-					code: Lambda.Code.fromAsset(
-						lambdas.lambdas.geolocateCellFromNrfCloudStepFunction.zipFile,
-					),
-					description: 'Resolve cell geolocation using the nRF Cloud API',
-					initialPolicy: [
-						logToCloudWatch,
-						new IAM.PolicyStatement({
-							actions: ['ssm:GetParametersByPath'],
-							resources: [
-								`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfcloud`,
-							],
-						}),
+		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
+			layers: lambdas.layers,
+			handler: lambdas.lambdas.geolocateCellFromNrfCloudStepFunction.handler,
+			architecture: Lambda.Architecture.ARM_64,
+			runtime: Lambda.Runtime.NODEJS_18_X,
+			timeout: CloudFormation.Duration.seconds(10),
+			memorySize: 1792,
+			code: Lambda.Code.fromAsset(
+				lambdas.lambdas.geolocateCellFromNrfCloudStepFunction.zipFile,
+			),
+			description: 'Resolve cell geolocation using the nRF Cloud API',
+			initialPolicy: [
+				logToCloudWatch,
+				new IAM.PolicyStatement({
+					actions: ['ssm:GetParametersByPath'],
+					resources: [
+						`arn:aws:ssm:${parent.region}:${parent.account}:parameter/${CORE_STACK_NAME}/thirdParty/nrfcloud`,
 					],
-					environment: {
-						VERSION: this.node.tryGetContext('version'),
-						STACK_NAME: this.stack.stackName,
-					},
-				})
-
-				new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
+				}),
+			],
+			environment: {
+				VERSION: this.node.tryGetContext('version'),
+				STACK_NAME: this.stack.stackName,
 			},
 		})
+
+		new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 
 		const isGeolocated = StepFunctions.Condition.booleanEquals(
 			'$.cellgeo.located',
@@ -204,22 +155,25 @@ export class CellGeolocation extends CloudFormation.Resource {
 						.otherwise(
 							new StepFunctionTasks.LambdaInvoke(
 								this,
-								'Geolocation using Device Locations',
+								'Resolve using nRF Cloud API',
 								{
-									lambdaFunction: fromDevices,
-									resultPath: '$.cellgeo',
+									lambdaFunction: fromNrfCloud,
 									payloadResponseOnly: true,
+									resultPath: '$.cellgeo',
 								},
 							).next(
 								new StepFunctions.Choice(
 									this,
-									'Geolocated using Device Locations?',
+									'Resolved from nRF Cloud Location Services?',
 								)
 									.when(
-										isGeolocated,
+										StepFunctions.Condition.booleanEquals(
+											`$.cellgeo.located`,
+											true,
+										),
 										new StepFunctionTasks.LambdaInvoke(
 											this,
-											'Cache result from Device Locations',
+											'Cache result from nRF Cloud Location Services',
 											{
 												lambdaFunction: addToCache,
 												resultPath: '$.storedInCache',
@@ -228,133 +182,36 @@ export class CellGeolocation extends CloudFormation.Resource {
 										).next(
 											new StepFunctions.Succeed(
 												this,
-												'Done (resolved using Device Locations)',
+												'Done (resolved using nRF Cloud Location Services)',
 											),
 										),
 									)
 									.otherwise(
-										(() => {
-											if (fromNrfCloud === undefined) {
-												return new StepFunctions.Fail(this, 'Failed (No API)', {
-													error: 'NO_API',
-													cause:
-														'No third party API is configured to resolve the cell geolocation',
-												})
-											}
-											const markSource = (source: string) =>
-												new StepFunctions.Pass(
-													this,
-													`mark source in result as ${source}`,
-													{
-														resultPath: '$.source',
-														result: StepFunctions.Result.fromString(source),
-													},
-												)
-											const branches: StepFunctions.IChainable[] = []
-											if (fromNrfCloud !== undefined) {
-												branches.push(
-													new StepFunctionTasks.LambdaInvoke(
-														this,
-														'Resolve using nRF Cloud API',
-														{
-															lambdaFunction: fromNrfCloud,
-															payloadResponseOnly: true,
-														},
-													).next(markSource('nrfcloud')),
-												)
-											}
-
-											const cacheResult = new StepFunctionTasks.LambdaInvoke(
+										new StepFunctions.Pass(
+											this,
+											'no: mark cell as not located',
+											{
+												resultPath: '$.cellgeo',
+												result: StepFunctions.Result.fromObject({
+													located: false,
+												}),
+											},
+										).next(
+											new StepFunctionTasks.LambdaInvoke(
 												this,
-												'Cache result from third party API',
+												'Cache result (not resolved)',
 												{
 													lambdaFunction: addToCache,
 													resultPath: '$.storedInCache',
 													payloadResponseOnly: true,
 												},
 											).next(
-												new StepFunctions.Succeed(
-													this,
-													'Done (resolved using third party API)',
-												),
-											)
-
-											const checkApiResult = (
-												n: number,
-											): [
-												StepFunctions.Condition,
-												StepFunctions.IChainable,
-											] => [
-												StepFunctions.Condition.booleanEquals(
-													`$.cellgeo[${n}].located`,
-													true,
-												),
-												new StepFunctions.Pass(
-													this,
-													`yes: write location data from result ${n} to input`,
-													{
-														resultPath: '$.cellgeo',
-														inputPath: `$.cellgeo[${n}]`,
-													},
-												).next(cacheResult),
-											]
-
-											return new StepFunctions.Parallel(
-												this,
-												'Resolve using third party API',
-												{
-													resultPath: '$.cellgeo',
-												},
-											)
-												.branch(...branches)
-												.next(
-													(() => {
-														const choice = new StepFunctions.Choice(
-															this,
-															'Resolved from any third party API?',
-														)
-
-														for (let i = 0; i < branches.length; i++) {
-															choice.when(...checkApiResult(i))
-														}
-
-														choice.otherwise(
-															new StepFunctions.Pass(
-																this,
-																'no: mark cell as not located',
-																{
-																	resultPath: '$.cellgeo',
-																	result: StepFunctions.Result.fromObject({
-																		located: false,
-																	}),
-																},
-															).next(
-																new StepFunctionTasks.LambdaInvoke(
-																	this,
-																	'Cache result (not resolved)',
-																	{
-																		lambdaFunction: addToCache,
-																		resultPath: '$.storedInCache',
-																		payloadResponseOnly: true,
-																	},
-																).next(
-																	new StepFunctions.Fail(
-																		this,
-																		'Failed (no resolution)',
-																		{
-																			error: 'FAILED',
-																			cause:
-																				'The cell geolocation could not be resolved',
-																		},
-																	),
-																),
-															),
-														)
-
-														return choice
-													})(),
-												)
-										})(),
+												new StepFunctions.Fail(this, 'Failed (no resolution)', {
+													error: 'FAILED',
+													cause: 'The cell geolocation could not be resolved',
+												}),
+											),
+										),
 									),
 							),
 						),

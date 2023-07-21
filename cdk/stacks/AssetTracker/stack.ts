@@ -3,14 +3,12 @@ import Cognito from 'aws-cdk-lib/aws-cognito'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Iot from 'aws-cdk-lib/aws-iot'
 import Lambda from 'aws-cdk-lib/aws-lambda'
-import { enabledInContext } from '../../helper/enabledInContext.js'
 import { warn } from '../../helper/note.js'
 import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler.js'
 import { AGPSResolver } from '../../resources/AGPSResolver.js'
 import { AGPSStorage } from '../../resources/AGPSStorage.js'
 import { CellGeolocation } from '../../resources/CellGeolocation.js'
 import { CellGeolocationApi } from '../../resources/CellGeolocationApi.js'
-import { DeviceCellGeolocations } from '../../resources/DeviceCellGeolocations.js'
 import { FOTAStorage } from '../../resources/FOTAStorage.js'
 import { HistoricalData } from '../../resources/HistoricalData.js'
 import type { LambdasWithLayer } from '../../resources/LambdasWithLayer.js'
@@ -441,14 +439,8 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 
 		// Cell Geolocation
 
-		const deviceCellGeo = new DeviceCellGeolocations(
-			this,
-			'deviceCellGeolocation',
-		)
-
 		const cellgeo = new CellGeolocation(this, 'cellGeolocation', {
 			lambdas,
-			deviceCellGeo,
 		})
 
 		new CloudFormation.CfnOutput(this, 'cellGeolocationCacheTableName', {
@@ -504,57 +496,46 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		})
 
 		// Network Surveys Storage
-		enabledInContext(this.node)({
-			key: 'nrfcloudGroundFix',
-			component: 'nRF Cloud API (ground fix)',
-			onUndefined: 'disabled',
-			onEnabled: () => {
-				const networkSurveysStorage = new NetworkSurveysStorage(
-					this,
-					'networkSurveyStorage',
-				)
-				new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableName', {
-					value: networkSurveysStorage.surveysTable.tableName,
-					exportName: StackOutputs.networkSurveyStorageTableName,
-				})
-				new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableArn', {
-					value: networkSurveysStorage.surveysTable.tableArn,
-					exportName: StackOutputs.networkSurveyStorageTableArn,
-				})
-				new CloudFormation.CfnOutput(
-					this,
-					'networkSurveyStorageTableStreamArn',
-					{
-						value: networkSurveysStorage.surveysTable.tableStreamArn as string,
-						exportName: StackOutputs.networkSurveyStorageTableStreamArn,
-					},
-				)
-				networkSurveysStorage.surveysTable.grantReadData(userRole)
+		const networkSurveysStorage = new NetworkSurveysStorage(
+			this,
+			'networkSurveyStorage',
+		)
+		new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableName', {
+			value: networkSurveysStorage.surveysTable.tableName,
+			exportName: StackOutputs.networkSurveyStorageTableName,
+		})
+		new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableArn', {
+			value: networkSurveysStorage.surveysTable.tableArn,
+			exportName: StackOutputs.networkSurveyStorageTableArn,
+		})
+		new CloudFormation.CfnOutput(this, 'networkSurveyStorageTableStreamArn', {
+			value: networkSurveysStorage.surveysTable.tableStreamArn as string,
+			exportName: StackOutputs.networkSurveyStorageTableStreamArn,
+		})
+		networkSurveysStorage.surveysTable.grantReadData(userRole)
 
-				const networkSurveyGeolocation = new NetworkSurveyGeolocation(
-					this,
-					'networkSurveyGeolocation',
-					{
-						lambdas,
-						storage: networkSurveysStorage,
-					},
-				)
-
-				const networkSurveysGeolocationApi = new NetworkSurveyGeolocationApi(
-					this,
-					'networkSurveysGeolocationApi',
-					{
-						lambdas,
-						storage: networkSurveysStorage,
-						geolocation: networkSurveyGeolocation,
-					},
-				)
-
-				new CloudFormation.CfnOutput(this, 'networkSurveyGeolocationApiUrl', {
-					value: networkSurveysGeolocationApi.url,
-					exportName: StackOutputs.networkSurveyGeolocationApiUrl,
-				})
+		const networkSurveyGeolocation = new NetworkSurveyGeolocation(
+			this,
+			'networkSurveyGeolocation',
+			{
+				lambdas,
+				storage: networkSurveysStorage,
 			},
+		)
+
+		const networkSurveysGeolocationApi = new NetworkSurveyGeolocationApi(
+			this,
+			'networkSurveysGeolocationApi',
+			{
+				lambdas,
+				storage: networkSurveysStorage,
+				geolocation: networkSurveyGeolocation,
+			},
+		)
+
+		new CloudFormation.CfnOutput(this, 'networkSurveyGeolocationApiUrl', {
+			value: networkSurveysGeolocationApi.url,
+			exportName: StackOutputs.networkSurveyGeolocationApiUrl,
 		})
 	}
 }
