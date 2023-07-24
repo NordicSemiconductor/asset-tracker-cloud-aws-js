@@ -73,7 +73,7 @@ export class WebAppCD extends Construct {
 			environment: {
 				type: 'LINUX_CONTAINER',
 				computeType: 'BUILD_GENERAL1_LARGE',
-				image: 'aws/codebuild/standard:6.0',
+				image: 'aws/codebuild/standard:7.0',
 				environmentVariables: [
 					{
 						name: 'STACK_NAME',
