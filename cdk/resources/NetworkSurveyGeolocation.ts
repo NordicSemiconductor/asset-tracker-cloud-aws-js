@@ -5,10 +5,9 @@ import StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 /**
  * Describes the step functions which resolves the geolocation of network survey using nRF Cloud Location Services
@@ -42,7 +41,6 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 			description:
 				'Resolve device geolocation from network survey using the nRF Cloud API',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['ssm:GetParametersByPath'],
 					resources: [
@@ -54,8 +52,8 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-		new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 
 		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),

@@ -4,6 +4,7 @@ import {
 } from '@aws-sdk/client-cloudformation'
 import {
 	CloudWatchLogsClient,
+	DeleteLogGroupCommand,
 	DescribeLogStreamsCommand,
 	GetLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs'
@@ -22,8 +23,12 @@ export const logsCommand = (): CommandDefinition => ({
 			flags: '-s, --numLogStreams <numLogStreams>',
 			description: 'Number of logStreams to consider, default: 100',
 		},
+		{
+			flags: '-X, --deleteLogGroups',
+			description: 'delete log groups afterwards',
+		},
 	],
-	action: async ({ numLogGroups, numLogStreams }) => {
+	action: async ({ numLogGroups, numLogStreams, deleteLogGroups }) => {
 		const cf = new CloudFormationClient({})
 		const logs = new CloudWatchLogsClient({})
 
@@ -32,10 +37,29 @@ export const logsCommand = (): CommandDefinition => ({
 				await cf.send(
 					new DescribeStackResourcesCommand({ StackName: CORE_STACK_NAME }),
 				)
-			).StackResources?.filter(
-				({ ResourceType }) => ResourceType === 'AWS::Logs::LogGroup',
+			).StackResources?.filter(({ ResourceType }) =>
+				['AWS::Logs::LogGroup', 'Custom::LogRetention'].includes(
+					ResourceType ?? '',
+				),
 			)?.map(({ PhysicalResourceId }) => PhysicalResourceId as string) ??
 			([] as string[])
+
+		if (deleteLogGroups === true) {
+			await Promise.all(
+				logGroups.map(async (logGroupName) => {
+					console.log(
+						chalk.gray(`Deleting log group`),
+						chalk.yellow(logGroupName),
+					)
+					return logs.send(
+						new DeleteLogGroupCommand({
+							logGroupName,
+						}),
+					)
+				}),
+			)
+			return
+		}
 
 		const streams = await Promise.all(
 			logGroups.map(async (logGroupName) => {

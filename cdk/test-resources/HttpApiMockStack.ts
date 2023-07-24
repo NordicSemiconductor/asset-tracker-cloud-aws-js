@@ -3,10 +3,9 @@ import ApiGateway from 'aws-cdk-lib/aws-apigateway'
 import DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
-import { LambdaLogGroup } from '../resources/LambdaLogGroup.js'
-import { logToCloudWatch } from '../resources/logToCloudWatch.js'
 import { HTTP_MOCK_HTTP_API_STACK_NAME } from '../stacks/stackName.js'
 import type { HTTPAPIMockLambdas } from './prepare-test-resources.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 /**
  * This is CloudFormation stack sets up a dummy HTTP API which stores all requests in SQS for inspection
@@ -71,17 +70,14 @@ export class HttpApiMockStack extends CDK.Stack {
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CDK.Duration.seconds(5),
-			initialPolicy: [logToCloudWatch],
 			environment: {
 				REQUESTS_TABLE_NAME: requestsTable.tableName,
 				RESPONSES_TABLE_NAME: responsesTable.tableName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
 		responsesTable.grantReadWriteData(lambda)
 		requestsTable.grantReadWriteData(lambda)
-
-		// Create the log group here, so we can control the retention
-		new LambdaLogGroup(this, 'LambdaLogGroup', lambda)
 
 		// This is the API Gateway, AWS CDK automatically creates a prod stage and deployment
 		const api = new ApiGateway.RestApi(this, 'api', {

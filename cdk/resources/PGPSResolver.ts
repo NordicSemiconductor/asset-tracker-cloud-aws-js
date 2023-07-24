@@ -5,10 +5,9 @@ import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 import type { PGPSStorage } from './PGPSStorage.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 /**
  * Provides a state machine that can resolve P-GPS requests
@@ -41,7 +40,6 @@ export class PGPSResolver extends CloudFormation.Resource {
 			),
 			description: 'Use the nRF Cloud API to provide P-GPS data for devices',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['ssm:GetParametersByPath'],
 					resources: [
@@ -53,9 +51,8 @@ export class PGPSResolver extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 
 		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),

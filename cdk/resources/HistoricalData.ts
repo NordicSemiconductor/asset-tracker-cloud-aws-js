@@ -4,9 +4,8 @@ import IoT from 'aws-cdk-lib/aws-iot'
 import Lambda from 'aws-cdk-lib/aws-lambda'
 import Timestream from 'aws-cdk-lib/aws-timestream'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 /**
  * Provides resources for historical data
@@ -74,7 +73,6 @@ export class HistoricalData extends CloudFormation.Resource {
 			description:
 				'Processes devices messages and updates and stores them in Timestream',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['timestream:WriteRecords'],
 					resources: [this.table.attrArn],
@@ -89,9 +87,8 @@ export class HistoricalData extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'batchLogs', storeMessagesInTimestream)
 
 		const topicRuleRole = new IAM.Role(this, 'Role', {
 			assumedBy: new IAM.ServicePrincipal('iot.amazonaws.com'),

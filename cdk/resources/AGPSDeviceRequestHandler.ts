@@ -7,8 +7,8 @@ import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined.js'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import type { AGPSResolver } from './AGPSResolver.js'
 import type { AGPSStorage } from './AGPSStorage.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
 
@@ -130,10 +130,9 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 						],
 					}),
 				],
+				logRetention: Logs.RetentionDays.ONE_WEEK,
 			},
 		)
-
-		new LambdaLogGroup(this, 'deviceRequestHandlerLogs', deviceRequestHandler)
 
 		// Invoke lambda for all A-GPS requests from devices
 		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {

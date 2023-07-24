@@ -5,10 +5,10 @@ import Lambda from 'aws-cdk-lib/aws-lambda'
 import SQS from 'aws-cdk-lib/aws-sqs'
 import { iotRuleSqlCheckIfDefinedAndNotZero } from '../helper/iotRuleSqlCheckIfDefinedAndNotZero.js'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 import type { PGPSResolver } from './PGPSResolver.js'
 import type { PGPSStorage } from './PGPSStorage.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
 
@@ -126,10 +126,9 @@ export class PGPSDeviceRequestHandler extends CloudFormation.Resource {
 						],
 					}),
 				],
+				logRetention: Logs.RetentionDays.ONE_WEEK,
 			},
 		)
-
-		new LambdaLogGroup(this, 'deviceRequestHandlerLogs', deviceRequestHandler)
 
 		// Invoke lambda for all P-GPS requests from devices
 		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {

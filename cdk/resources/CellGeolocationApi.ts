@@ -2,13 +2,11 @@ import CloudFormation from 'aws-cdk-lib'
 import HttpApi from 'aws-cdk-lib/aws-apigatewayv2'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
-import CloudWatchLogs from 'aws-cdk-lib/aws-logs'
+import Logs from 'aws-cdk-lib/aws-logs'
 import SQS from 'aws-cdk-lib/aws-sqs'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import type { CellGeolocation } from './CellGeolocation.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
 
 /**
  * Allows to resolve cell geolocations using a HTTP API
@@ -50,15 +48,13 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			description:
 				'Invoke the cell geolocation resolution step function for SQS messages',
-			initialPolicy: [logToCloudWatch],
 			environment: {
 				STEP_FUNCTION_ARN: cellgeo.stateMachine.stateMachineArn,
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'fromSQSLogs', fromSQS)
 
 		fromSQS.addPermission('invokeBySQS', {
 			principal: new IAM.ServicePrincipal('sqs.amazonaws.com'),
@@ -85,7 +81,6 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 			code: Lambda.Code.fromAsset(lambdas.lambdas.geolocateCellHttpApi.zipFile),
 			description: 'Geolocate cells',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['dynamodb:GetItem'],
 					resources: [cellgeo.cacheTable.tableArn],
@@ -101,9 +96,8 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'getCellLogs', getCell)
 
 		this.api = new HttpApi.CfnApi(this, 'httpApi', {
 			name: 'Cell Geolocation',
@@ -117,20 +111,16 @@ export class CellGeolocationApi extends CloudFormation.Resource {
 		})
 
 		const isTest = this.node.tryGetContext('isTest') === true
-		const httpApiLogGroup = new CloudWatchLogs.LogGroup(
-			this,
-			`HttpApiLogGroup`,
-			{
-				removalPolicy: isTest
-					? CloudFormation.RemovalPolicy.DESTROY
-					: CloudFormation.RemovalPolicy.RETAIN,
-				logGroupName: `/${this.stack.stackName}/cell/apiAccessLogs`,
-				retention:
-					this.node.tryGetContext('isTest') === true
-						? CloudWatchLogs.RetentionDays.ONE_DAY
-						: CloudWatchLogs.RetentionDays.ONE_WEEK,
-			},
-		)
+		const httpApiLogGroup = new Logs.LogGroup(this, `HttpApiLogGroup`, {
+			removalPolicy: isTest
+				? CloudFormation.RemovalPolicy.DESTROY
+				: CloudFormation.RemovalPolicy.RETAIN,
+			logGroupName: `/${this.stack.stackName}/cell/apiAccessLogs`,
+			retention:
+				this.node.tryGetContext('isTest') === true
+					? Logs.RetentionDays.ONE_DAY
+					: Logs.RetentionDays.ONE_WEEK,
+		})
 		this.stage.accessLogSettings = {
 			destinationArn: httpApiLogGroup.logGroupArn,
 			format: JSON.stringify({

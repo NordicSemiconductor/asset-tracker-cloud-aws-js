@@ -2,9 +2,8 @@ import CloudFormation from 'aws-cdk-lib'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
 import type { CDKLambdas } from '../stacks/AssetTracker/lambdas.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 export class ThingGroupLambda extends CloudFormation.Resource {
 	public readonly function: Lambda.IFunction
@@ -33,10 +32,8 @@ export class ThingGroupLambda extends CloudFormation.Resource {
 					resources: ['*'],
 					actions: ['iot:*'],
 				}),
-				logToCloudWatch,
 			],
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'Logs', this.function)
 	}
 }

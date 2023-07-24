@@ -1,10 +1,10 @@
 import CloudFormation from 'aws-cdk-lib'
 import Lambda from 'aws-cdk-lib/aws-lambda'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 import type { NetworkSurveyGeolocation } from './NetworkSurveyGeolocation.js'
 import type { NetworkSurveysStorage } from './NetworkSurveysStorage.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 /**
  * Provides geo-location for Network surveys from devices through a HTTP API
@@ -47,8 +47,8 @@ export class NetworkSurveyGeolocationApi extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-		new LambdaLogGroup(this, 'logs', getSurveyLocation)
 
 		storage.surveysTable.grantFullAccess(getSurveyLocation)
 

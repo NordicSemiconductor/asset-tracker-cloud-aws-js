@@ -6,9 +6,8 @@ import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
+import Logs from 'aws-cdk-lib/aws-logs'
 
 /**
  * Describes the step functions which resolves the geolocation of LTE/NB-IoT network cells using third-party location providers
@@ -55,7 +54,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			),
 			description: 'Geolocate cells from cache',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['dynamodb:GetItem'],
 					resources: [this.cacheTable.tableArn],
@@ -66,9 +64,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'fromCacheLogs', fromCache)
 
 		const addToCache = new Lambda.Function(this, 'addToCache', {
 			layers: lambdas.layers,
@@ -82,7 +79,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			),
 			description: 'Caches cell geolocations',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['dynamodb:PutItem'],
 					resources: [this.cacheTable.tableArn],
@@ -93,9 +89,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'addToCacheLogs', addToCache)
 
 		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 			layers: lambdas.layers,
@@ -109,7 +104,6 @@ export class CellGeolocation extends CloudFormation.Resource {
 			),
 			description: 'Resolve cell geolocation using the nRF Cloud API',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['ssm:GetParametersByPath'],
 					resources: [
@@ -121,9 +115,8 @@ export class CellGeolocation extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 
 		const isGeolocated = StepFunctions.Condition.booleanEquals(
 			'$.cellgeo.located',

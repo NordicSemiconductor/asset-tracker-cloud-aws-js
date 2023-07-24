@@ -1,14 +1,13 @@
 import CloudFormation from 'aws-cdk-lib'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
+import Logs from 'aws-cdk-lib/aws-logs'
 import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
 import type { AGPSStorage } from './AGPSStorage.js'
-import { LambdaLogGroup } from './LambdaLogGroup.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
-import { logToCloudWatch } from './logToCloudWatch.js'
 
 /**
  * Provides a state machine that can resolve A-GPS requests
@@ -40,7 +39,6 @@ export class AGPSResolver extends CloudFormation.Resource {
 			),
 			description: 'Use the nRF Cloud API to provide A-GPS data for devices',
 			initialPolicy: [
-				logToCloudWatch,
 				new IAM.PolicyStatement({
 					actions: ['ssm:GetParametersByPath'],
 					resources: [
@@ -52,9 +50,8 @@ export class AGPSResolver extends CloudFormation.Resource {
 				VERSION: this.node.tryGetContext('version'),
 				STACK_NAME: this.stack.stackName,
 			},
+			logRetention: Logs.RetentionDays.ONE_WEEK,
 		})
-
-		new LambdaLogGroup(this, 'fromNrfCloudLogs', fromNrfCloud)
 
 		const stateMachineRole = new IAM.Role(this, 'stateMachineRole', {
 			assumedBy: new IAM.ServicePrincipal('states.amazonaws.com'),
