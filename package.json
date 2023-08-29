@@ -86,7 +86,7 @@
     "change-case": "4.1.2",
     "check-node-version": "4.2.1",
     "commander": "11.0.0",
-    "constructs": "10.2.69",
+    "constructs": "10.2.70",
     "date-fns": "2.30.0",
     "glob": "10.3.3",
     "jest": "29.6.4",
