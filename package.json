@@ -47,7 +47,7 @@
     "@aws-sdk/client-cloudwatch-logs": "3.398.0",
     "@aws-sdk/client-codepipeline": "3.398.0",
     "@aws-sdk/client-cognito-identity": "3.398.0",
-    "@aws-sdk/client-cognito-identity-provider": "3.402.0",
+    "@aws-sdk/client-cognito-identity-provider": "3.403.0",
     "@aws-sdk/client-dynamodb": "3.398.0",
     "@aws-sdk/client-iot": "3.398.0",
     "@aws-sdk/client-iot-data-plane": "3.398.0",
