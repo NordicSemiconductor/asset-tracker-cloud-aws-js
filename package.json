@@ -34,7 +34,7 @@
     "@nordicsemiconductor/asset-tracker-cloud-docs": "29.0.2",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "4.0.3",
     "@nordicsemiconductor/timestream-helpers": "5.0.0",
-    "@sinclair/typebox": "0.30.4",
+    "@sinclair/typebox": "0.31.14",
     "ajv": "8.12.0",
     "entities": "4.5.0",
     "fast-xml-parser": "4.2.7",
