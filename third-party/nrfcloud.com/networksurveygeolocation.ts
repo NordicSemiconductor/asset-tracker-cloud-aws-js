@@ -18,6 +18,7 @@ import { apiClient } from './apiclient.js'
 import { groundFixRequestSchema } from './groundFixRequestSchema.js'
 import { locateResultSchema } from './locate.js'
 import { getLocationServicesApiSettings } from './settings.js'
+import type { LocationSource } from '../../cellGeolocation/stepFunction/types.js'
 
 const { stackName } = fromEnv({
 	stackName: 'STACK_NAME',
@@ -98,12 +99,15 @@ export const handler = async (
 		}
 	}
 
-	const { lat, lon, uncertainty } = maybeWifiGeolocation
-	console.debug(JSON.stringify({ lat, lng: lon, accuracy: uncertainty }))
+	const { lat, lon, uncertainty, fulfilledWith } = maybeWifiGeolocation
+	console.debug(
+		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, fulfilledWith }),
+	)
 	return {
 		lat,
 		lng: lon,
 		accuracy: uncertainty,
 		located: true,
+		source: fulfilledWith as LocationSource,
 	}
 }

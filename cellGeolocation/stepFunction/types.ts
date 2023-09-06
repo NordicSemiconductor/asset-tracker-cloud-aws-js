@@ -1,5 +1,18 @@
 import type { Location } from '../../geolocation/Location.js'
 
-export type MaybeCellGeoLocation = {
-	located: boolean
-} & Partial<Location>
+export enum LocationSource {
+	MCELL = 'MCELL',
+	SCELL = 'SCELL',
+	WIFI = 'WIFI',
+}
+
+export type MaybeCellGeoLocation = (
+	| {
+			located: false
+	  }
+	| {
+			located: true
+			source: LocationSource
+	  }
+) &
+	Partial<Location>

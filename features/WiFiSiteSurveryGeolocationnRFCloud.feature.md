@@ -78,7 +78,8 @@ And the response body should equal
 {
   "accuracy": "$number{accuracy}",
   "lat": "$number{lat}",
-  "lng": "$number{lng}"
+  "lng": "$number{lng}",
+  "source": "WIFI"
 }
 ```
 

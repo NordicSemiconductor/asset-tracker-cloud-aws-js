@@ -3,13 +3,16 @@ import { ErrorType, type ErrorInfo } from '../api/ErrorInfo.js'
 import type { Cell } from '../geolocation/Cell.js'
 import type { Location } from '../geolocation/Location.js'
 import { cellId } from './cellId.js'
+import type { LocationSource } from './stepFunction/types.js'
 
 export const geolocateFromCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
 	async (
 		cell: Cell,
 	): Promise<
-		{ error: ErrorInfo } | ({ unresolved: boolean } & Partial<Location>)
+		| { error: ErrorInfo }
+		| (({ unresolved: true } | { unresolved: false; source: LocationSource }) &
+				Partial<Location>)
 	> => {
 		try {
 			const { Item } = await dynamodb.send(
@@ -38,6 +41,7 @@ export const geolocateFromCache =
 							Item?.accuracy?.N !== undefined
 								? parseFloat(Item.accuracy.N)
 								: 5000,
+						source: Item?.source?.S as LocationSource,
 					}
 				}
 			}
