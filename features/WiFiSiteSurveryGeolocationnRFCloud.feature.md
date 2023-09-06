@@ -5,8 +5,8 @@ needs:
 
 # nRF Cloud WiFi Site Survey Geolocation
 
-> Optionally, device locations can be resolved by the nRF Cloud API using the
-> WiFi site surveys
+> Resolve the device geolocation through the WiFi site survey using the nRF
+> Cloud API
 
 ## Background
 
@@ -78,7 +78,8 @@ And the response body should equal
 {
   "accuracy": "$number{accuracy}",
   "lat": "$number{lat}",
-  "lng": "$number{lng}"
+  "lng": "$number{lng}",
+  "source": "WIFI"
 }
 ```
 

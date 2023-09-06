@@ -15,7 +15,8 @@ const locator = geolocateFromCache({
 
 export const handler = async (input: Cell): Promise<MaybeCellGeoLocation> => {
 	const optionalLocation = await locator(input)
-	if ('error' in optionalLocation) return { located: false }
+	if ('error' in optionalLocation || optionalLocation.unresolved)
+		return { located: false }
 	return {
 		located: true,
 		...optionalLocation,

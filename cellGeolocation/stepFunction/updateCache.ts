@@ -29,7 +29,7 @@ export const handler = async (
 		},
 	}
 	if (located) {
-		const { lat, lng, accuracy } = maybeLocatedCell.cellgeo
+		const { lat, lng, accuracy, source } = maybeLocatedCell.cellgeo
 		Item = {
 			...Item,
 			...{
@@ -41,6 +41,9 @@ export const handler = async (
 				},
 				accuracy: {
 					N: `${accuracy}`,
+				},
+				source: {
+					S: `${source}`,
 				},
 			},
 		}

@@ -1,7 +1,10 @@
 import { SSMClient } from '@aws-sdk/client-ssm'
 import type { TObject, TProperties } from '@sinclair/typebox'
 import { URL } from 'url'
-import type { MaybeCellGeoLocation } from '../../cellGeolocation/stepFunction/types.js'
+import type {
+	LocationSource,
+	MaybeCellGeoLocation,
+} from '../../cellGeolocation/stepFunction/types.js'
 import type { Cell } from '../../geolocation/Cell.js'
 import { parseMCCMNC } from '../../geolocation/parseMCCMNC.js'
 import { fromEnv } from '../../util/fromEnv.js'
@@ -45,14 +48,21 @@ export const handler = async (cell: Cell): Promise<MaybeCellGeoLocation> => {
 			located: false,
 		}
 	}
-	const { lat, lon, uncertainty } = maybeCellGeolocation
+	const { lat, lon, uncertainty, fulfilledWith } = maybeCellGeolocation
 	console.debug(
-		JSON.stringify({ lat, lng: lon, accuracy: uncertainty, located: true }),
+		JSON.stringify({
+			lat,
+			lng: lon,
+			accuracy: uncertainty,
+			fulfilledWith,
+			located: true,
+		}),
 	)
 	return {
 		lat,
 		lng: lon,
 		accuracy: uncertainty,
+		source: fulfilledWith as LocationSource,
 		located: true,
 	}
 }

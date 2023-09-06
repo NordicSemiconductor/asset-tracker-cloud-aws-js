@@ -2,6 +2,7 @@ import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { ErrorType, type ErrorInfo } from '../api/ErrorInfo.js'
 import type { Location } from '../geolocation/Location.js'
+import type { LocationSource } from '../cellGeolocation/stepFunction/types.js'
 
 export type Survey = {
 	deviceId: string
@@ -18,7 +19,8 @@ export const geolocateSurvey =
 	async (
 		id: string,
 	): Promise<
-		{ error: ErrorInfo } | { survey: Survey & { location?: Location } }
+		| { error: ErrorInfo }
+		| { survey: Survey & { location?: Location; source?: LocationSource } }
 	> => {
 		try {
 			const { Item } = await dynamodb.send(
@@ -41,15 +43,17 @@ export const geolocateSurvey =
 			if (Item === undefined) throw new Error('NOT_FOUND')
 
 			const entry = unmarshall(Item)
-			const survey: Survey & { location?: Location } = {
-				surveyId: entry.surveyId,
-				deviceId: entry.deviceId,
-				timestamp: new Date(entry.timestamp),
-				unresolved: entry.unresolved,
-				lte: entry.lte as Record<string, any> | undefined,
-				nw: entry.nw as string | undefined,
-				wifi: entry.wifi as Record<string, any> | undefined,
-			}
+			const survey: Survey & { location?: Location; source?: LocationSource } =
+				{
+					surveyId: entry.surveyId,
+					deviceId: entry.deviceId,
+					timestamp: new Date(entry.timestamp),
+					unresolved: entry.unresolved,
+					source: entry.source ?? undefined,
+					lte: entry.lte as Record<string, any> | undefined,
+					nw: entry.nw as string | undefined,
+					wifi: entry.wifi as Record<string, any> | undefined,
+				}
 			if ('lat' in entry) {
 				survey.location = {
 					lat: entry.lat,
