@@ -1,7 +1,7 @@
 import CloudFormation from 'aws-cdk-lib'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Lambda from 'aws-cdk-lib/aws-lambda'
-import StepFunctions from 'aws-cdk-lib/aws-stepfunctions'
+import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
@@ -170,12 +170,14 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 			)
 			.otherwise(persistFailure)
 
-		const definition = resolveNetworkSurvey.next(checkAPIResult)
+		const definitionBody = DefinitionBody.fromChainable(
+			resolveNetworkSurvey.next(checkAPIResult),
+		)
 
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
 			stateMachineName: `${this.stack.stackName}-networkSurveyGeo`,
 			stateMachineType: StepFunctions.StateMachineType.STANDARD,
-			definition,
+			definitionBody,
 			timeout: CloudFormation.Duration.minutes(5),
 			role: stateMachineRole,
 		})
