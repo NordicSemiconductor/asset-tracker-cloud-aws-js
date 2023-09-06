@@ -1,4 +1,5 @@
 import { Type } from '@sinclair/typebox'
+import { LocationSource } from '../../cellGeolocation/stepFunction/types.js'
 
 /**
  * @see https://api.nrfcloud.com/v1#tag/Ground-Fix/operation/GetLocationFromCellsOrWifiNetworks
@@ -19,9 +20,5 @@ export const locateResultSchema = Type.Object({
 		description:
 			'Radius of the uncertainty circle around the location in meters. Also known as Horizontal Positioning Error (HPE).',
 	}),
-	fulfilledWith: Type.Union([
-		Type.Literal('MCELL'),
-		Type.Literal('SCELL'),
-		Type.Literal('WIFI'),
-	]),
+	fulfilledWith: Type.Enum(LocationSource),
 })
