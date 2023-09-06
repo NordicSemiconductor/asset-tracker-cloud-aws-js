@@ -84,13 +84,14 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 					),
 				},
 				updateExpression:
-					'SET #unresolved = :unresolved, #lat= :lat, #lng = :lng, #accuracy = :accuracy, #updatedAt = :updatedAt',
+					'SET #unresolved = :unresolved, #lat= :lat, #lng = :lng, #accuracy = :accuracy, #source = :source, #updatedAt = :updatedAt',
 				expressionAttributeNames: {
 					'#unresolved': 'unresolved',
 					'#lat': 'lat',
 					'#lng': 'lng',
 					'#accuracy': 'accuracy',
 					'#updatedAt': 'updatedAt',
+					'#source': 'source',
 				},
 				expressionAttributeValues: {
 					':unresolved':
@@ -109,6 +110,11 @@ export class NetworkSurveyGeolocation extends CloudFormation.Resource {
 					':accuracy': StepFunctionTasks.DynamoAttributeValue.numberFromString(
 						StepFunctions.JsonPath.stringAt(
 							`States.Format('{}', $.networksurveygeo.accuracy)`,
+						),
+					),
+					':source': StepFunctionTasks.DynamoAttributeValue.fromString(
+						StepFunctions.JsonPath.stringAt(
+							`States.Format('{}', $.networksurveygeo.source)`,
 						),
 					),
 					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(

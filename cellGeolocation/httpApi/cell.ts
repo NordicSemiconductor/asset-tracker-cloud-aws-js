@@ -105,5 +105,6 @@ export const handler = async (
 		lat: cell.lat,
 		lng: cell.lng,
 		accuracy: cell.accuracy,
+		source: cell.source,
 	})
 }

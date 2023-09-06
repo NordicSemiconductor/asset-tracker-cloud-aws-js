@@ -6,7 +6,8 @@ variants:
 
 # nRF Cloud Cell Geolocation
 
-> Optionally, cell locations can be resolved using the nRF Cloud API
+> Resolve device geo location through the cell it is connected to using the nRF
+> Cloud API.
 
 > Note: nRF Cloud's geolocation API does not distinguish between different
 > network modes.

@@ -8,8 +8,8 @@ needs:
 
 # nRF Cloud Neighbor Cell Geolocation
 
-> Optionally, device locations can be resolved by the nRF Cloud API using the
-> neighboring cell measurement reports
+> Resolve the device geolocation through the neighboring cell measurement
+> reports using the nRF Cloud API.
 
 > Note: nRF Cloud's geolocation API does not distinguish between different
 > network modes.

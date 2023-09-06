@@ -23,7 +23,15 @@ export const geolocateFromCache =
 							S: cellId(cell),
 						},
 					},
-					ProjectionExpression: 'nw,lat,lng,accuracy,unresolved',
+					ExpressionAttributeNames: {
+						'#nw': 'nw',
+						'#lat': 'lat',
+						'#lng': 'lng',
+						'#accuracy': 'accuracy',
+						'#unresolved': 'unresolved',
+						'#source': 'source',
+					},
+					ProjectionExpression: '#nw,#lat,#lng,#accuracy,#unresolved,#source',
 				}),
 			)
 			if (Item) {

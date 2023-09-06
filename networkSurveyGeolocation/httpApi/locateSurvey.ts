@@ -88,14 +88,14 @@ export const handler = async (
 	console.log(JSON.stringify(maybeSurvey))
 
 	const {
-		survey: { location, unresolved },
+		survey: { location, unresolved, source },
 	} = maybeSurvey
 
 	// survey was located
 	if (location !== undefined) {
 		return res(200, {
 			expires: 86400,
-		})(location)
+		})({ ...location, source })
 	}
 
 	// survey was not resolved
