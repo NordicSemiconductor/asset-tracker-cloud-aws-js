@@ -21,4 +21,12 @@ describe('commonParent()', () => {
 				'/other/dir/lambda/onMessage.ts',
 			]),
 		).toEqual('/'))
+
+	it('should return the common ancestor only up until the directory level', () =>
+		expect(
+			commonParent([
+				'/some/dir/lambdas/cors.ts',
+				'/some/dir/lambdas/corsHeaders.ts',
+			]),
+		).toEqual('/some/dir/lambdas/'))
 })

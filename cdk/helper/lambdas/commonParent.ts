@@ -9,8 +9,8 @@ export const commonParent = (files: string[]): string => {
 	let prefix = '/'
 
 	while (files.filter((f) => f.startsWith(prefix)).length === files.length) {
-		prefix = files[0]?.slice(0, ++index) ?? ''
+		prefix = files[0]?.slice(0, index++) ?? ''
 	}
 
-	return prefix.slice(0, prefix.length - 1)
+	return prefix.slice(0, prefix.lastIndexOf('/') + 1)
 }
