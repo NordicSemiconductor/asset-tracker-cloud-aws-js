@@ -1,3 +1,10 @@
+---
+exampleContext:
+  userPoolClientId: 3s8c3hhgtc6ut8gapd45ljnvgk
+  userPassword: secret
+  userEmail: user@example.com
+---
+
 # Register a new account
 
 > As a user I can register a new account

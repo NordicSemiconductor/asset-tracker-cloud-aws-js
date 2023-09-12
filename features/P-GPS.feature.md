@@ -1,6 +1,13 @@
 ---
 needs:
   - Connect a tracker
+exampleContext:
+  currentGpsDay: 15956
+  startGpsTimeOfDaySeconds: 0
+  predictionCount: 1
+  tracker:
+    default:
+      id: cf3fbe5d-a8fe-4d70-8d4a-8e46e01d85c2
 ---
 
 # P-GPS
