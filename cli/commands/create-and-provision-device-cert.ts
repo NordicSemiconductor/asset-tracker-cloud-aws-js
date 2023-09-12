@@ -5,7 +5,7 @@ import {
 	flashCertificate,
 	getIMEI,
 	type Connection,
-} from '@nordicsemiconductor/firmware-ci-device-helpers'
+} from '@nordicsemiconductor/device-helpers'
 import chalk from 'chalk'
 import { promises as fs } from 'fs'
 import os from 'os'

@@ -64,19 +64,6 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 			)
 		}
 
-		// CD for the Device Simulator Web Application is implied by enabled CD (in that case this Stack exists) and enabled Device Simulator Web Application
-		const enabledFirmwareCiCD = checkFlag({
-			key: 'firmware-ci',
-			component: 'Firmware CI Continuous Deployment',
-			onUndefined: 'disabled',
-		})
-		new CloudFormation.CfnOutput(this, 'firmwareCiCD', {
-			value: enabledFirmwareCiCD ? 'enabled' : 'disabled',
-			exportName: `${this.stackName}:firmwareCiCD`,
-			description:
-				'Whether the continuous deployment of the Firmware CI is enabled or disabled.',
-		})
-
 		const codeBuildRole = new IAM.Role(this, 'CodeBuildRole', {
 			assumedBy: new IAM.ServicePrincipal('codebuild.amazonaws.com'),
 			inlinePolicies: {

@@ -12,13 +12,11 @@ import chalk from 'chalk'
 import * as path from 'node:path'
 import {
 	CORE_STACK_NAME,
-	FIRMWARE_CI_STACK_NAME,
 	HTTP_MOCK_HTTP_API_STACK_NAME,
 } from '../cdk/stacks/stackName.js'
 import type { StackOutputs } from '../cdk/stacks/AssetTracker/stack.js'
 import { getIotEndpoint } from '../cdk/helper/getIotEndpoint.js'
 import { IoTClient } from '@aws-sdk/client-iot'
-import type { StackOutputs as FirmwareCIStackOutputs } from '../cdk/stacks/FirmwareCI.js'
 import type { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { gpsDay } from '../pgps/gpsTime.js'
@@ -43,11 +41,6 @@ export type World = typeof StackOutputs & {
 	userIotPolicyName: string
 	historicaldataTableName: string
 	historicaldataDatabaseName: string
-	firmwareCI: {
-		userAccessKeyId: string
-		userSecretAccessKey: string
-		bucketName: string
-	}
 	awsIotRootCA: string
 	region: string
 	currentGpsDay: number
@@ -56,9 +49,6 @@ export type World = typeof StackOutputs & {
 const stackConfig = await stackOutput(cf)<typeof StackOutputs>(CORE_STACK_NAME)
 const mqttEndpoint = await getIotEndpoint(iot)
 
-const firmwareCIStackConfig = await stackOutput(cf)<FirmwareCIStackOutputs>(
-	FIRMWARE_CI_STACK_NAME,
-)
 const httpApiMockStackConfig = await stackOutput(cf)<HttpApiMockStackOutputs>(
 	HTTP_MOCK_HTTP_API_STACK_NAME,
 )
@@ -69,11 +59,6 @@ const [historicaldataDatabaseName, historicaldataTableName] =
 	stackConfig.historicaldataTableInfo.split('|') as [string, string]
 const world: World = {
 	...stackConfig,
-	firmwareCI: {
-		userAccessKeyId: firmwareCIStackConfig.userAccessKeyId,
-		userSecretAccessKey: firmwareCIStackConfig.userSecretAccessKey,
-		bucketName: firmwareCIStackConfig.bucketName,
-	},
 	userIotPolicyName: stackConfig.userIotPolicyName,
 	historicaldataTableName,
 	historicaldataDatabaseName,

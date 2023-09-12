@@ -12,7 +12,6 @@ import chalk from 'chalk'
 import {
 	CONTINUOUS_DEPLOYMENT_STACK_NAME,
 	CORE_STACK_NAME,
-	FIRMWARE_CI_STACK_NAME,
 	WEBAPP_STACK_NAME,
 } from '../../cdk/stacks/stackName.js'
 import { paginate } from '../../util/paginate.js'
@@ -43,7 +42,6 @@ export const purgeBucketsCommand = (): CommandDefinition => ({
 			...(await listBuckets(CORE_STACK_NAME)),
 			...(await listBuckets(WEBAPP_STACK_NAME)),
 			...(await listBuckets(CONTINUOUS_DEPLOYMENT_STACK_NAME)),
-			...(await listBuckets(FIRMWARE_CI_STACK_NAME)),
 		]
 		const s3 = new S3Client({})
 		await Promise.all(

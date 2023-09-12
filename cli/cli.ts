@@ -12,7 +12,6 @@ import { configureCommand } from './commands/configure.js'
 import { createAndProvisionDeviceCertCommand } from './commands/create-and-provision-device-cert.js'
 import { createCACommand } from './commands/create-ca.js'
 import { createSimulatorCertCommand } from './commands/create-simulator-cert.js'
-import { firmwareCICommand } from './commands/firmware-ci.js'
 import { flashFirmwareCommand } from './commands/flash-firmware.js'
 import { imeiCommand } from './commands/imei.js'
 import { infoCommand } from './commands/info.js'
@@ -114,9 +113,6 @@ const assetTrackerCLI = async ({ isCI }: { isCI: boolean }) => {
 				'Do you really want to purge all nRF Asset Tracker CAs?',
 				purgeCAsCommand({ certsDir }),
 			),
-			firmwareCICommand({
-				endpoint,
-			}),
 			webappCICommand({ accountId }),
 			imeiCommand(),
 		)

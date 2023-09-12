@@ -1,4 +1,4 @@
-import type { Connection } from '@nordicsemiconductor/firmware-ci-device-helpers'
+import type { Connection } from '@nordicsemiconductor/device-helpers'
 import chalk from 'chalk'
 import readline from 'readline'
 import { defaultFirmwareRepository } from '../commands/flash-firmware.js'

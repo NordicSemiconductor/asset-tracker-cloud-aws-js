@@ -2,7 +2,7 @@ import {
 	atHostHexfile,
 	connect,
 	getIMEI,
-} from '@nordicsemiconductor/firmware-ci-device-helpers'
+} from '@nordicsemiconductor/device-helpers'
 import chalk from 'chalk'
 import type { CommandDefinition } from './CommandDefinition.js'
 import { defaultPort } from './create-and-provision-device-cert.js'

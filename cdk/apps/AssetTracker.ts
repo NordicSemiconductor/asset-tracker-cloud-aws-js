@@ -8,7 +8,6 @@ import type {
 } from '../stacks/AssetTracker/lambdas.js'
 import { AssetTrackerStack } from '../stacks/AssetTracker/stack.js'
 import { ContinuousDeploymentStack } from '../stacks/ContinuousDeployment.js'
-import { FirmwareCIStack } from '../stacks/FirmwareCI.js'
 import { WebAppStack } from '../stacks/WebApp.js'
 import { WebAppCIStack } from '../stacks/WebAppCI.js'
 
@@ -30,14 +29,6 @@ export class AssetTrackerApp extends App {
 			component: 'Web App',
 			onUndefined: 'enabled',
 			onEnabled: () => new WebAppStack(this).addDependency(coreStack),
-		})
-		// Firmware CI
-		checkFlag({
-			key: 'firmware-ci',
-			component: 'Firmware CI',
-			onEnabled: () => {
-				new FirmwareCIStack(this)
-			},
 		})
 		// Web App CI
 		checkFlag({

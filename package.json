@@ -32,6 +32,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@nordicsemiconductor/asset-tracker-cloud-docs": "29.0.8",
+    "@nordicsemiconductor/device-helpers": "15.0.0",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "4.0.3",
     "@nordicsemiconductor/timestream-helpers": "5.0.0",
     "@sinclair/typebox": "0.31.14",
@@ -62,7 +63,6 @@
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "12.0.86",
     "@nordicsemiconductor/bdd-markdown": "5.6.19",
     "@nordicsemiconductor/cloudformation-helpers": "8.0.0",
-    "@nordicsemiconductor/firmware-ci-device-helpers": "14.0.201",
     "@nordicsemiconductor/object-to-env": "5.0.0",
     "@nordicsemiconductor/random-words": "7.0.0",
     "@octokit/rest": "20.0.1",

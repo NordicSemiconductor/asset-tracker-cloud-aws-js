@@ -1,4 +1,4 @@
-import { flash } from '@nordicsemiconductor/firmware-ci-device-helpers'
+import { flash } from '@nordicsemiconductor/device-helpers'
 import { Octokit } from '@octokit/rest'
 import chalk from 'chalk'
 import fs from 'fs'

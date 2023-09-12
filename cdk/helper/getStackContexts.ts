@@ -4,13 +4,11 @@ import { getSettings } from '../../util/settings.js'
 type StackContexts = {
 	cd: '0' | '1'
 	webapp: '0' | '1'
-	'firmware-ci': '0' | '1'
 }
 
 const defaults: StackContexts = {
 	cd: '0',
 	webapp: '1',
-	'firmware-ci': '0',
 }
 
 export const getStackContexts =
