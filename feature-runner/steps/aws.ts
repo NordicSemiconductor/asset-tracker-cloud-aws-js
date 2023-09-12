@@ -1,10 +1,11 @@
 import {
 	codeBlockOrThrow,
 	type StepRunner,
+	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchStep, matchString } from './util.js'
+import { matchString } from './util.js'
 import type { UserCredentials } from './cognito'
 import type { AnyRecord } from 'dns'
 import type { AwsCredentialIdentity } from '@smithy/types'
@@ -16,25 +17,23 @@ const steps: StepRunner<
 		awsSDK?: { res: AnyRecord }
 	}
 >[] = [
-	matchStep(
-		new RegExp(
-			'^I execute `(?<methodName>[^`]+)` of `@aws-sdk/client-(?<clientName>[^`]+)`(?<withArgs> with)$',
-		),
-		Type.Object({
-			clientName: Type.String(),
-			methodName: Type.String(),
-			withArgs: Type.Optional(Type.String()),
-		}),
-		async (
-			{ clientName, methodName, withArgs },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-				step,
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				'^I execute `(?<methodName>[^`]+)` of `@aws-sdk/client-(?<clientName>[^`]+)`(?<withArgs> with)$',
+			),
+			schema: Type.Object({
+				clientName: Type.String(),
+				methodName: Type.String(),
+				withArgs: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { clientName, methodName, withArgs },
+			context,
+			log: { progress },
+			step,
+		}) => {
 			const code = withArgs === undefined ? undefined : codeBlockOrThrow(step)
 
 			let args: Record<string, any> | undefined = undefined
@@ -87,8 +86,6 @@ const steps: StepRunner<
 				context.awsSDK = { res }
 
 				progress(JSON.stringify(res))
-
-				return { result: res }
 			} catch (error) {
 				throw new Error(
 					`Failed to create ${commandName} of ${clientPackageName}: ${
@@ -98,25 +95,23 @@ const steps: StepRunner<
 			}
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^I am authenticated with AWS key ${matchString(
-				'accessKeyId',
-			)} and secret ${matchString('secretAccessKey')}$`,
-		),
-		Type.Object({
-			accessKeyId: Type.String(),
-			secretAccessKey: Type.String(),
-		}),
-		async (
-			{ accessKeyId, secretAccessKey },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I am authenticated with AWS key ${matchString(
+					'accessKeyId',
+				)} and secret ${matchString('secretAccessKey')}$`,
+			),
+			schema: Type.Object({
+				accessKeyId: Type.String(),
+				secretAccessKey: Type.String(),
+			}),
+		},
+		async ({
+			match: { accessKeyId, secretAccessKey },
+			context,
+			log: { progress },
+		}) => {
 			context.cognito = undefined
 			context.apiKey = {
 				accessKeyId,
