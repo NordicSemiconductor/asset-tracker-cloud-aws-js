@@ -4,6 +4,9 @@ variants:
   - device: agpsContainerDevice1
 needs:
   - P-GPS
+exampleContext:
+  variant:
+    device: agpsContainerDevice1
 ---
 
 # P-GPS Data Fan Out (The cargo container scenario)
