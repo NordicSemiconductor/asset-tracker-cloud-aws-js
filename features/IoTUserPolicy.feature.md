@@ -1,3 +1,12 @@
+---
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  cognito:
+    IdentityId: ea2fec87-3d53-41f0-ac45-965fbbc3d755
+  userIotPolicyName: asset-tracker-userIotPolicy-1R9BPIB0QVIOJ
+---
+
 # Attach Iot Policy to user
 
 > As a user I need to attach an IoT policy to my account so it can send and
