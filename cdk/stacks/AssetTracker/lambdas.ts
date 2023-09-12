@@ -91,12 +91,7 @@ export const prepareAssetTrackerLambdas =
 export const prepareCDKLambdas = async (): Promise<CDKLambdas> => ({
 	layerZipFileName: (
 		await packLayer({
-			dependencies: [
-				'@nordicsemiconductor/cloudformation-helpers',
-				'fast-xml-parser',
-				// uuid is still needed for the ThingGroup Custom Resource lambda
-				'uuid',
-			],
+			dependencies: ['@nordicsemiconductor/cloudformation-helpers'],
 			id: 'cdk-layer',
 		})
 	).layerZipFile,
