@@ -1,10 +1,11 @@
 import {
 	codeBlockOrThrow,
 	type StepRunner,
+	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
 import { Type } from '@sinclair/typebox'
 import type { World } from '../run-features.js'
-import { matchChoice, matchStep, matchString } from './util.js'
+import { matchChoice, matchString } from './util.js'
 import {
 	AttributeValue,
 	DeleteItemCommand,
@@ -47,20 +48,14 @@ const steps: (args: {
 	responsesTableName,
 	apiURL,
 }) => [
-	matchStep(
-		new RegExp(
-			`^I enqueue this mock HTTP API response for a ${matchMethod} request to ${matchResource}$`,
-		),
-		stepArgs,
-		async (
-			{ resource, method },
-			{
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I enqueue this mock HTTP API response for a ${matchMethod} request to ${matchResource}$`,
+			),
+			schema: stepArgs,
+		},
+		async ({ match: { resource, method }, step, log: { progress } }) => {
 			const url = new URL(resource, apiURL).toString()
 			progress(`${method} ${url}`)
 			const responseBody = codeBlockOrThrow(step)
@@ -98,20 +93,14 @@ const steps: (args: {
 			)
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the mock HTTP API should have been called with a ${matchMethod} request to ${matchResource}$`,
-		),
-		stepArgs,
-		async (
-			{ method, resource },
-			{
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the mock HTTP API should have been called with a ${matchMethod} request to ${matchResource}$`,
+			),
+			schema: stepArgs,
+		},
+		async ({ match: { method, resource }, step, log: { progress } }) => {
 			let expectedBody: Record<string, any> | undefined = undefined
 			let expectedHeaders: Record<string, string> | undefined = undefined
 
