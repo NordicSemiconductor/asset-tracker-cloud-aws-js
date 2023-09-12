@@ -1,10 +1,11 @@
 import {
 	codeBlockOrThrow,
 	type StepRunner,
+	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchChoice, matchInteger, matchStep, matchString } from './util.js'
+import { matchChoice, matchInteger, matchString } from './util.js'
 import jsonata from 'jsonata'
 import {
 	check,
@@ -19,27 +20,28 @@ import {
 } from 'tsmatchers'
 
 const steps: StepRunner<World & Record<string, any>>[] = [
-	matchStep(
-		new RegExp(
-			`^${matchString('expression')} should ${matchChoice('matchOrEqual', [
-				'match',
-				'equal',
-			])}$`,
-		),
-		Type.Object({
-			expression: Type.String(),
-			matchOrEqual: Type.Union([Type.Literal('match'), Type.Literal('equal')]),
-		}),
-		async (
-			{ expression, matchOrEqual },
-			{
-				step,
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^${matchString('expression')} should ${matchChoice('matchOrEqual', [
+					'match',
+					'equal',
+				])}$`,
+			),
+			schema: Type.Object({
+				expression: Type.String(),
+				matchOrEqual: Type.Union([
+					Type.Literal('match'),
+					Type.Literal('equal'),
+				]),
+			}),
+		},
+		async ({
+			match: { expression, matchOrEqual },
+			step,
+			context,
+			log: { progress },
+		}) => {
 			const code = codeBlockOrThrow(step)
 			const expected =
 				code.language === 'json' ? JSON.parse(code.code) : code.code
@@ -76,27 +78,21 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			}
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^${matchString('expression')} should equal (?<expected>${matchString(
-				'string',
-			)}|${matchChoice('boolean', ['true', 'false'])}|${matchInteger(
-				'number',
-			)})$`,
-		),
-		Type.Object({
-			expression: Type.String(),
-			expected: Type.Union([Type.String(), Type.Boolean(), Type.Integer()]),
-		}),
-		async (
-			{ expression, expected },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^${matchString('expression')} should equal (?<expected>${matchString(
+					'string',
+				)}|${matchChoice('boolean', ['true', 'false'])}|${matchInteger(
+					'number',
+				)})$`,
+			),
+			schema: Type.Object({
+				expression: Type.String(),
+				expected: Type.Union([Type.String(), Type.Boolean(), Type.Integer()]),
+			}),
+		},
+		async ({ match: { expression, expected }, context, log: { progress } }) => {
 			let e: jsonata.Expression | undefined = undefined
 			try {
 				e = jsonata(expression)
@@ -117,17 +113,19 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			check(value).is(expected)
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^I store ${matchString('expression')} into ${matchString(
-				'storageName',
-			)}$`,
-		),
-		Type.Object({
-			expression: Type.String(),
-			storageName: Type.String(),
-		}),
-		async ({ expression, storageName }, { context }) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I store ${matchString('expression')} into ${matchString(
+					'storageName',
+				)}$`,
+			),
+			schema: Type.Object({
+				expression: Type.String(),
+				storageName: Type.String(),
+			}),
+		},
+		async ({ match: { expression, storageName }, context }) => {
 			let e: jsonata.Expression | undefined = undefined
 			try {
 				e = jsonata(expression)
@@ -140,32 +138,36 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			check(value).is(not(undefinedValue))
 
 			context[storageName] = value
-			return { result: context[storageName] }
 		},
 	),
-	matchStep(
-		new RegExp(`^I have this JSON-encoded in ${matchString('storageName')}$`),
-		Type.Object({
-			storageName: Type.String(),
-		}),
-		async ({ storageName }, { step, context }) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I have this JSON-encoded in ${matchString('storageName')}$`,
+			),
+			schema: Type.Object({
+				storageName: Type.String(),
+			}),
+		},
+		async ({ match: { storageName }, step, context }) => {
 			context[storageName] = JSON.stringify(
 				JSON.stringify(JSON.parse(codeBlockOrThrow(step).code)),
 			).slice(1, -1)
-			return { result: context[storageName] }
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^I parse JSON-encoded ${matchString('expression')} into ${matchString(
-				'storageName',
-			)}$`,
-		),
-		Type.Object({
-			storageName: Type.String(),
-			expression: Type.String(),
-		}),
-		async ({ storageName, expression }, { context }) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I parse JSON-encoded ${matchString('expression')} into ${matchString(
+					'storageName',
+				)}$`,
+			),
+			schema: Type.Object({
+				storageName: Type.String(),
+				expression: Type.String(),
+			}),
+		},
+		async ({ match: { storageName, expression }, context }) => {
 			let e: jsonata.Expression | undefined = undefined
 			try {
 				e = jsonata(expression)
@@ -178,41 +180,37 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			check(value).is(not(undefinedValue))
 
 			context[storageName] = JSON.parse(new TextDecoder().decode(value))
-
-			return { result: context[storageName] }
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^I encode ${matchString('expression')} into ${matchString(
-				'storageName',
-			)} using ${matchChoice('encoding', [
-				'replaceNewLines',
-				'base64',
-				'JSON',
-				'querystring',
-			])}$`,
-			'',
-		),
-		Type.Object({
-			storageName: Type.String(),
-			expression: Type.String(),
-			encoding: Type.Union([
-				Type.Literal('replaceNewLines'),
-				Type.Literal('base64'),
-				Type.Literal('JSON'),
-				Type.Literal('querystring'),
-			]),
-		}),
-		async (
-			{ storageName, expression, encoding },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I encode ${matchString('expression')} into ${matchString(
+					'storageName',
+				)} using ${matchChoice('encoding', [
+					'replaceNewLines',
+					'base64',
+					'JSON',
+					'querystring',
+				])}$`,
+				'',
+			),
+			schema: Type.Object({
+				storageName: Type.String(),
+				expression: Type.String(),
+				encoding: Type.Union([
+					Type.Literal('replaceNewLines'),
+					Type.Literal('base64'),
+					Type.Literal('JSON'),
+					Type.Literal('querystring'),
+				]),
+			}),
+		},
+		async ({
+			match: { storageName, expression, encoding },
+			context,
+			log: { progress },
+		}) => {
 			let e: jsonata.Expression | undefined = undefined
 			try {
 				e = jsonata(expression)
@@ -242,8 +240,6 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 					context[storageName] = new URLSearchParams(value).toString()
 					break
 			}
-
-			return { result: context[storageName] }
 		},
 	),
 ]

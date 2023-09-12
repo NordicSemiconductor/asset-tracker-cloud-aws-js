@@ -1,13 +1,11 @@
 import {
 	codeBlockOrThrow,
-	noMatch,
 	type StepRunner,
-	type StepRunnerArgs,
-	type StepRunResult,
+	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
 import { Type } from '@sinclair/typebox'
 import type { World } from '../run-features.js'
-import { matchChoice, matchInteger, matchStep, matchString } from './util.js'
+import { matchChoice, matchInteger, matchString } from './util.js'
 import { check, objectMatching } from 'tsmatchers'
 
 let res: Response | undefined = undefined
@@ -20,35 +18,33 @@ type RESTWorld = World & {
 	}
 }
 const steps: StepRunner<RESTWorld>[] = [
-	matchStep(
-		new RegExp(
-			`^I ${matchChoice('method', [
-				'GET',
-				'POST',
-				'PUT',
-				'DELETE',
-			])} (?:to )?${matchString('url')}(?<hasBody> with)?$`,
-		),
-		Type.Object({
-			method: Type.Union([
-				Type.Literal('GET'),
-				Type.Literal('POST'),
-				Type.Literal('PUT'),
-				Type.Literal('DELETE'),
-			]),
-			url: Type.String(),
-			hasBody: Type.Optional(Type.Literal(' with')),
-		}),
-		async (
-			{ url: urlString, method, hasBody },
-			{
-				context,
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I ${matchChoice('method', [
+					'GET',
+					'POST',
+					'PUT',
+					'DELETE',
+				])} (?:to )?${matchString('url')}(?<hasBody> with)?$`,
+			),
+			schema: Type.Object({
+				method: Type.Union([
+					Type.Literal('GET'),
+					Type.Literal('POST'),
+					Type.Literal('PUT'),
+					Type.Literal('DELETE'),
+				]),
+				url: Type.String(),
+				hasBody: Type.Optional(Type.Literal(' with')),
+			}),
+		},
+		async ({
+			match: { url: urlString, method, hasBody },
+			context,
+			step,
+			log: { progress },
+		}) => {
 			const url = new URL(urlString).toString()
 			progress(`${method} ${url}`)
 			let body = undefined
@@ -83,73 +79,57 @@ const steps: StepRunner<RESTWorld>[] = [
 				headers: res.headers,
 				statusCode: res.status,
 			}
-			return { result: context.response }
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the ${matchString('header')} response header should equal ${matchString(
-				'expectedValue',
-			)}$`,
-		),
-		Type.Object({
-			header: Type.String(),
-			expectedValue: Type.String(),
-		}),
-		async (
-			{ header, expectedValue },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the ${matchString(
+					'header',
+				)} response header should equal ${matchString('expectedValue')}$`,
+			),
+			schema: Type.Object({
+				header: Type.String(),
+				expectedValue: Type.String(),
+			}),
+		},
+		async ({
+			match: { header, expectedValue },
+			context,
+			log: { progress },
+		}) => {
 			const v = context.response?.headers.get(header)
 			progress(v ?? '')
 			check(v).is(expectedValue)
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the response status code should equal ${matchInteger(
-				'expectedStatus',
-			)}$`,
-		),
-		Type.Object({
-			expectedStatus: Type.String(),
-		}),
-		async (
-			{ expectedStatus },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the response status code should equal ${matchInteger(
+					'expectedStatus',
+				)}$`,
+			),
+			schema: Type.Object({
+				expectedStatus: Type.String(),
+			}),
+		},
+		async ({ match: { expectedStatus }, context, log: { progress } }) => {
 			const v = context.response?.statusCode
 			progress(v?.toString() ?? '')
 			check(v).is(parseInt(expectedStatus, 10))
 		},
 	),
-	async ({
-		context,
-		step,
-		log: {
-			step: { progress },
+	<StepRunner<RESTWorld>>{
+		match: (title) => /^the response body should equal$/.test(title),
+		run: async ({ context, step, log: { progress } }) => {
+			const { code: expected } = codeBlockOrThrow(step)
+
+			const body = context.response?.body ?? {}
+			progress(JSON.stringify(body))
+
+			check(body).is(objectMatching(JSON.parse(expected)))
 		},
-	}: StepRunnerArgs<RESTWorld>): Promise<StepRunResult> => {
-		if (!/^the response body should equal$/.test(step.title)) return noMatch
-
-		const { code: expected } = codeBlockOrThrow(step)
-
-		const body = context.response?.body ?? {}
-		progress(JSON.stringify(body))
-
-		check(body).is(objectMatching(JSON.parse(expected)))
-
-		return {}
 	},
 ]
 
