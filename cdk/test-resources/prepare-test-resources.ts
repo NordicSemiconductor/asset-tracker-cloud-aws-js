@@ -13,12 +13,7 @@ export const prepareHTTPAPIMockLambdas =
 	async (): Promise<HTTPAPIMockLambdas> => ({
 		layerZipFileName: (
 			await packLayer({
-				dependencies: [
-					'@aws-sdk/client-dynamodb',
-					'fast-xml-parser',
-					// Needed by old AWS SDK
-					'uuid',
-				],
+				dependencies: ['@aws-sdk/client-dynamodb'],
 				id: 'httpApiMock-layer',
 			})
 		).layerZipFile,
