@@ -1,10 +1,11 @@
 import {
 	codeBlockOrThrow,
 	type StepRunner,
+	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchStep, matchString } from './util.js'
+import { matchString } from './util.js'
 import { randomWords } from '@nordicsemiconductor/random-words'
 import { readFile } from 'node:fs/promises'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate.js'
@@ -39,25 +40,22 @@ const steps: ({
 		connection?: Connection
 	} & Record<string, any>
 >[] = ({ certsDir, mqttEndpoint }) => [
-	matchStep(
-		// I generate a certificate for the `firmwareCiDevice` tracker"
-		new RegExp(
-			`^I generate a certificate for the(:? ${matchString(
-				'trackerId',
-			)})? tracker$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I generate a certificate for the(:? ${matchString(
+					'trackerId',
+				)})? tracker$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				const deviceId = (await randomWords({ numWords: 3 })).join('-')
@@ -105,23 +103,22 @@ const steps: ({
 					[trackerId]: info,
 				}
 			}
-			return { result: trackers[trackerId]?.id }
 		},
 	),
-	matchStep(
-		new RegExp(`^I connect the(:? ${matchString('trackerId')})? tracker$`),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I connect the(:? ${matchString('trackerId')})? tracker$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No certificate available for tracker ${trackerId}`)
@@ -149,23 +146,18 @@ const steps: ({
 					})
 				})
 			}
-
-			return { result: trackers[trackerId]?.id }
 		},
 	),
-	matchStep(
-		new RegExp(`^I disconnect the(:? ${matchString('trackerId')})? tracker$`),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I disconnect the(:? ${matchString('trackerId')})? tracker$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({ match: { trackerId: maybeTrackerId }, log: { progress } }) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (connections[trackerId] === undefined) {
 				throw new Error(`No connection available for tracker ${trackerId}`)
@@ -176,24 +168,22 @@ const steps: ({
 			progress('Closed')
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker updates its reported state with$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker updates its reported state with$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId },
+			step,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -246,31 +236,28 @@ const steps: ({
 						reject(new Error(`Failed to publish`))
 					})
 			})
-			return { result: await updatePromise }
+			await updatePromise
 		},
 	),
-	matchStep(
-		// the `agpsContainerDevice1` tracker publishes this message to the topic `lungwort-slangous-puggaree/agps/get`
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker publishes this message to the topic ${matchString(
-				'topic',
-			)}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			topic: Type.String(),
-		}),
-		async (
-			{ trackerId: maybeTrackerId, topic },
-			{
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker publishes this message to the topic ${matchString(
+					'topic',
+				)}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				topic: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, topic },
+			step,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -297,25 +284,23 @@ const steps: ({
 			})
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker fetches the next job into ${matchString('storageName')}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			storageName: Type.String(),
-		}),
-		async (
-			{ trackerId: maybeTrackerId, storageName },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker fetches the next job into ${matchString('storageName')}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				storageName: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, storageName },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -362,31 +347,27 @@ const steps: ({
 			)
 
 			context[storageName] = res
-
-			return { result: res }
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker marks the job in ${matchString(
-				'storageName',
-			)} as in progress$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			storageName: Type.String(),
-		}),
-		async (
-			{ trackerId: maybeTrackerId, storageName },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker marks the job in ${matchString(
+					'storageName',
+				)} as in progress$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				storageName: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, storageName },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -401,7 +382,7 @@ const steps: ({
 			const updateJobTopic = `$aws/things/${deviceId}/jobs/${context[storageName].jobId}/update`
 			const successTopic = `${updateJobTopic}/accepted`
 
-			const res = await new Promise((resolve, reject) => {
+			await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Job not marked as in progress!`))
 				}, 60 * 1000)
@@ -433,34 +414,36 @@ const steps: ({
 					)
 					.catch(catchError)
 			})
-
-			return { result: res }
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
-				'topic',
-			)} into ${matchString('storageName')}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			messageCount: Type.String(),
-			topic: Type.String(),
-			storageName: Type.String(),
-			raw: Type.Optional(Type.Literal('raw ')),
-		}),
-		async (
-			{ messageCount, topic, trackerId: maybeTrackerId, storageName, raw },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
+					'topic',
+				)} into ${matchString('storageName')}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				messageCount: Type.String(),
+				topic: Type.String(),
+				storageName: Type.String(),
+				raw: Type.Optional(Type.Literal('raw ')),
+			}),
+		},
+		async ({
+			match: {
+				messageCount,
+				topic,
+				trackerId: maybeTrackerId,
+				storageName,
+				raw,
 			},
-		) => {
+			context,
+			log: { progress },
+		}) => {
 			const isRaw = raw !== undefined
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
