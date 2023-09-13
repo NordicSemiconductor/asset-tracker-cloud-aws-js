@@ -45,7 +45,7 @@ And I enqueue this mock HTTP API response for a POST request to
 
 Given I store `$millis()` into `ts`
 
-Soon I GET
+When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
 Soon the response status code should equal 200
