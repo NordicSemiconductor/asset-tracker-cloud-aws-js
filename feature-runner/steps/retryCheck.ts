@@ -17,14 +17,14 @@ export const retryCheck = async (
 		/**
 		 * The exponential factor to use.
 		 *
-		 * @default 1
+		 * @default 1.25
 		 */
 		factor?: number
 
 		/**
 		 * The number of milliseconds before starting the second retry.
 		 *
-		 * @default 5000
+		 * @default 2500
 		 */
 		minDelay?: number
 
@@ -40,7 +40,7 @@ export const retryCheck = async (
 		checkFn()
 	} catch {
 		const maxTries = (options?.tries ?? 3) - 1
-		let wait = options?.minDelay ?? 5000
+		let wait = options?.minDelay ?? 2500
 
 		for (let i = 0; i < maxTries; i++) {
 			try {
@@ -52,7 +52,7 @@ export const retryCheck = async (
 				await new Promise((resolve) => setTimeout(resolve, wait))
 				wait = Math.max(
 					options?.maxDelay ?? Number.POSITIVE_INFINITY,
-					wait * (options?.factor ?? 2),
+					wait * (options?.factor ?? 1.25),
 				)
 			}
 		}
