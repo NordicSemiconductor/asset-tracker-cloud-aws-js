@@ -1,6 +1,9 @@
 ---
 needs:
   - Update Device Configuration
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
 ---
 
 # Read Device Shadow

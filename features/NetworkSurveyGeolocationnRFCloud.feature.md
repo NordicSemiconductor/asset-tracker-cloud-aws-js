@@ -1,6 +1,12 @@
 ---
 needs:
   - Store network surveys
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  networkSurveyGeolocationApiUrl: https://daaxyz.lambda-url.eu-west-1.on.aws
+  networkSurveyId: bdfe16e9-2aec-48e3-8b1f-addd9560d3b7
+  ts: 1694598183204
 ---
 
 # nRF Cloud Network Survey Geolocation
@@ -34,8 +40,6 @@ And I enqueue this mock HTTP API response for a POST request to
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Find the latest survey
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -63,8 +67,6 @@ Then I store `awsSDK.res.Items[0].surveyId.S` into `networkSurveyId`
 Given I store `$millis()` into `ts`
 
 When I GET `${networkSurveyGeolocationApiUrl}/${networkSurveyId}?ts=${ts}`
-
-<!-- @retryScenario -->
 
 Soon the response status code should equal 200
 
