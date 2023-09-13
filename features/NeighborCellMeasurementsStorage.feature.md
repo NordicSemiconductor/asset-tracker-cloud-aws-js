@@ -7,6 +7,12 @@ variants:
 needs:
   - Connect a tracker
   - Register a new account
+exampleContext:
+  tracker:
+    default:
+      id: device-a
+  userPassword: secret
+  userEmail: user@example.com
 ---
 
 # Store neighboring cell measurement reports
@@ -29,13 +35,9 @@ And I store `<variant.nw>_ncellmeasCellId` into `cellId`
 
 And I store `<variant.nw>_ncellmeasAreaId` into `areaId`
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Device connects
 
 Given I store `$millis()` into `ts`
-
-<!-- @retryScenario -->
 
 Soon the tracker updates its reported state with
 
@@ -92,8 +94,6 @@ Then the tracker publishes this message to the topic
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Find the latest report
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -133,8 +133,6 @@ When I execute `getItem` of `@aws-sdk/client-dynamodb` with
   }
 }
 ```
-
-<!-- @retryScenario -->
 
 Soon `awsSDK.res.Item` should match
 

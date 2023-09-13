@@ -1,13 +1,14 @@
 ---
 needs:
   - Device Update Shadow
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
 ---
 
 # Query Data
 
 > As a user I can query the historical data of a device
-
-<!-- @retry:delayExecution=2000 -->
 
 ## Query historical data
 
@@ -21,8 +22,6 @@ SELECT measure_value::double AS value
 FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
 WHERE deviceId='${tracker.default.id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
 ```
-
-<!-- @retryScenario -->
 
 Soon `timestreamQueryResult` should match
 

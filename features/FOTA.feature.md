@@ -2,6 +2,10 @@
 needs:
   - Connect a tracker
   - Register a new account
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  jobId: bdfe16e9-2aec-48e3-8b1f-addd9560d3b7
 ---
 
 # Device Firmware Upgrade over the air
@@ -59,8 +63,6 @@ Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Fetch the job as a device
 
-<!-- @retryScenario @retry:delayExecution=1000 -->
-
 Soon the tracker fetches the next job into `job`
 
 Then `job` should match
@@ -73,8 +75,6 @@ Then `job` should match
 ```
 
 ## Mark as in progress
-
- <!-- @retryScenario @retry:delayExecution=1000 -->
 
 Soon the tracker marks the job in `job` as in progress
 

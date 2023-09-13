@@ -1,11 +1,19 @@
 ---
 variants:
   - device: agpsContainerDevice1
-  - device: agpsContainerDevice1
+  - device: agpsContainerDevice2
 needs:
   - A-GPS
   - Connect a tracker
   - Register a new account
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  tracker:
+    agpsContainerDevice1:
+      id: device-a
+    agpsContainerDevice2:
+      id: device-b
 ---
 
 # A-GPS Data Fan Out (The cargo container scenario)
@@ -25,8 +33,6 @@ Given I generate a certificate for the `<variant.device>` tracker
 
 And I connect the `<variant.device>` tracker
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Request A-GPS data
 
 When the `<variant.device>` tracker publishes this message to the topic
@@ -41,8 +47,6 @@ When the `<variant.device>` tracker publishes this message to the topic
   "types": [1, 2, 3, 4, 6, 7, 8, 9]
 }
 ```
-
-<!-- @retryScenario -->
 
 Soon the `<variant.device>` tracker receives `2` raw messages on the topic
 `${tracker.<variant.device>.id}/agps` into `agpsData`

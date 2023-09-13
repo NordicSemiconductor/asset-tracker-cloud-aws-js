@@ -32,8 +32,6 @@ And I enqueue this mock HTTP API response for a GET request to
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Request P-GPS data
 
 When the tracker publishes this message to the topic
@@ -45,8 +43,6 @@ When the tracker publishes this message to the topic
   "time": "$number{startGpsTimeOfDaySeconds}"
 }
 ```
-
-<!-- @retryScenario -->
 
 Soon the tracker receives a message on the topic `${tracker.default.id}/pgps`
 into `pgpsData`

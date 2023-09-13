@@ -7,13 +7,9 @@ needs:
 
 > Devices can update their shadow
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Publish device information to reported state
 
 Given I store `$millis()` into `updateShadowTs`
-
-<!-- @retryScenario -->
 
 Soon the tracker updates its reported state with
 
