@@ -1,12 +1,17 @@
 ---
 variants:
-  - device: agpsContainerDevice1
-  - device: agpsContainerDevice1
+  - device: pgpsContainerDevice1
+  - device: pgpsContainerDevice2
 needs:
   - P-GPS
 exampleContext:
-  variant:
-    device: agpsContainerDevice1
+  tracker:
+    pgpsContainerDevice1:
+      id: device-a
+    pgpsContainerDevice2:
+      id: device-b
+  userPassword: secret
+  userEmail: user@example.com
 ---
 
 # P-GPS Data Fan Out (The cargo container scenario)
@@ -26,8 +31,6 @@ Given I generate a certificate for the `<variant.device>` tracker
 
 And I connect the `<variant.device>` tracker
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Request P-GPS data
 
 When the `<variant.device>` tracker publishes this message to the topic
@@ -39,8 +42,6 @@ When the `<variant.device>` tracker publishes this message to the topic
   "time": "$number{startGpsTimeOfDaySeconds}"
 }
 ```
-
-<!-- @retryScenario -->
 
 Soon the `<variant.device>` tracker receives a messages on the topic
 `${tracker.<variant.device>.id}/pgps` into `pgpsData`

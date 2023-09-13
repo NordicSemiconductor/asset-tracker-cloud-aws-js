@@ -3,6 +3,12 @@ needs:
   - Device Update Shadow
   - Register a new account
   - Connect a tracker
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  tracker:
+    default:
+      id: device-a
 ---
 
 # Store network surveys
@@ -85,8 +91,6 @@ Then the tracker publishes this message to the topic
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Find the latest survey
 
 When I execute `query` of `@aws-sdk/client-dynamodb` with
@@ -123,8 +127,6 @@ When I execute `getItem` of `@aws-sdk/client-dynamodb` with
   }
 }
 ```
-
-<!-- @retryScenario -->
 
 Soon `awsSDK.res.Item` should match
 

@@ -2,6 +2,9 @@
 needs:
   - Device Update Shadow
   - Attach Iot Policy to user
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
 ---
 
 # Update Device Configuration
