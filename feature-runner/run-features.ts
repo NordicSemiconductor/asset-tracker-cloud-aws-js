@@ -138,7 +138,7 @@ runner
 		}),
 	)
 	.addStepRunners(...timestreamStepRunners)
-	.addStepRunners(...restSteps)
+	.addStepRunners(...restSteps())
 	.addStepRunners(
 		...mockHTTPAPISteps({
 			db: new DynamoDBClient({}),
