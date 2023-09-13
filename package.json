@@ -91,7 +91,7 @@
     "nock": "13.3.3",
     "octokit-auth-netrc": "2.1.0",
     "tsmatchers": "4.0.12",
-    "tsx": "3.12.9",
+    "tsx": "3.12.10",
     "typescript": "5.2.2",
     "yazl": "2.5.1"
   },
