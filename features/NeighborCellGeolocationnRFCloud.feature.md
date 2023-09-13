@@ -4,6 +4,12 @@ variants:
   - nw: nbiot
 needs:
   - Store neighboring cell measurement reports
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  networkSurveyGeolocationApiUrl: https://daaxyz.lambda-url.eu-west-1.on.aws
+  surveyId: bdfe16e9-2aec-48e3-8b1f-addd9560d3b7
+  ts: 1694598183204
 ---
 
 # nRF Cloud Neighbor Cell Geolocation
@@ -46,15 +52,11 @@ And I enqueue this mock HTTP API response for a POST request to
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Retrieve the location for the report
 
 Given I store `$millis()` into `ts`
 
 When I GET `${networkSurveyGeolocationApiUrl}/${surveyId}?ts=${ts}`
-
-<!-- @retryScenario -->
 
 Soon the response status code should equal 200
 
