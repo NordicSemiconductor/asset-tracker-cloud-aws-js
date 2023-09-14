@@ -23,7 +23,7 @@ FROM "${historicaldataDatabaseName}"."${historicaldataTableName}"
 WHERE deviceId='${tracker.default.id}' AND measure_name='bat' AND measure_value::double IS NOT NULL LIMIT 1
 ```
 
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [{ "value": 3781 }]

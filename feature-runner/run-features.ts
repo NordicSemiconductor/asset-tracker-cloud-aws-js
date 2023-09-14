@@ -137,7 +137,7 @@ runner
 			mqttEndpoint,
 		}),
 	)
-	.addStepRunners(...timestreamStepRunners)
+	.addStepRunners(...timestreamStepRunners())
 	.addStepRunners(...restSteps())
 	.addStepRunners(
 		...mockHTTPAPISteps({

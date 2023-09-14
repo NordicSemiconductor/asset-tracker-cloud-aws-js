@@ -66,7 +66,7 @@ WHERE deviceId='${tracker.default.id}' AND measure_name='btn' AND measure_value:
 ORDER BY time DESC
 ```
 
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
@@ -76,7 +76,7 @@ Soon `timestreamQueryResult` should match
 ]
 ```
 
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
@@ -116,7 +116,7 @@ WHERE deviceId='${tracker.default.id}' AND measure_name='impact' AND measure_val
 ORDER BY time DESC
 ```
 
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
