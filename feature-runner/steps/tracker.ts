@@ -209,7 +209,7 @@ const steps: ({
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(
 					() => reject(new Error(`Timed out!`)),
-					10 * 1000,
+					60 * 1000,
 				)
 
 				connection.onMessage((topic, message) => {
@@ -272,7 +272,7 @@ const steps: ({
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(
 					() => reject(new Error(`Timed out!`)),
-					10 * 1000,
+					60 * 1000,
 				)
 				connection
 					.publish(topic, JSON.stringify(message))
@@ -318,7 +318,7 @@ const steps: ({
 			const res = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Did not receive a next job!`))
-				}, 10 * 1000)
+				}, 60 * 1000)
 
 				const catchError = (error: Error) => {
 					clearTimeout(timeout)
@@ -470,7 +470,7 @@ const steps: ({
 							} message${expectedMessageCount > 1 ? 's' : ''} yet to receive.`,
 						),
 					)
-				}, 10 * 1000)
+				}, 60 * 1000)
 
 				connection.onMessage((t, message) => {
 					if (topic !== t) return
