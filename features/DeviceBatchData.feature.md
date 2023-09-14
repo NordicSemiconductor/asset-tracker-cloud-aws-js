@@ -73,7 +73,7 @@ AND measure_value::double IS NOT NULL
 ORDER BY time DESC
 ```
 
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
@@ -83,7 +83,7 @@ Soon `timestreamQueryResult` should match
 ]
 ```
 
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
