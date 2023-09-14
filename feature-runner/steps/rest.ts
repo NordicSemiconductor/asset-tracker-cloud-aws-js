@@ -3,12 +3,13 @@ import {
 	type StepRunner,
 	regExpMatchedStep,
 	type Logger,
+	type Step,
 } from '@nordicsemiconductor/bdd-markdown'
 import { Type } from '@sinclair/typebox'
 import type { World } from '../run-features.js'
 import { matchChoice, matchInteger, matchString } from './util.js'
 import { check, objectMatching } from 'tsmatchers'
-import { retryCheck } from './retryCheck.js'
+import { retryCheck, type Options } from './retryCheck.js'
 
 type RESTContext = {
 	response?: {
@@ -60,7 +61,8 @@ const client = ({
 					progress(`< ${resBody}`)
 				}
 			}
-			progress(`x-amzn-trace-id: ${res.headers.get('x-amzn-trace-id')}`)
+			const awsTraceId = res.headers.get('x-amzn-trace-id')
+			if (awsTraceId !== null) progress(`x-amzn-trace-id: ${awsTraceId}`)
 			context.response = {
 				body: resBody ?? '',
 				headers: res.headers,
@@ -145,11 +147,15 @@ const steps = (): StepRunner<RESTWorld>[] => {
 					expectedStatus: Type.String(),
 				}),
 			},
-			async ({ match: { expectedStatus } }) =>
-				retryCheck(
+			async ({ match: { expectedStatus }, step, log }) => {
+				const retryConfig = parseComment(step)
+				log.progress('retryConfig', JSON.stringify(retryConfig))
+				await retryCheck(
 					() => check(req?.statusCode()).is(parseInt(expectedStatus, 10)),
 					async () => req?.send(),
-				),
+					retryConfig,
+				)
+			},
 		),
 		<StepRunner<RESTWorld>>{
 			match: (title) => /^the response body should equal$/.test(title),
@@ -166,3 +172,20 @@ const steps = (): StepRunner<RESTWorld>[] => {
 }
 
 export default steps
+
+const parseComment = (step: Step): Options => {
+	const settings = new URLSearchParams(
+		/retry:([^ ]+)/.exec(step.comment?.text ?? '')?.[1] ?? '',
+	)
+	const tries = settings.get('tries')
+	const factor = settings.get('factor')
+	const minDelay = settings.get('minDelay')
+	const maxDelay = settings.get('maxDelay')
+	const options: Options = {}
+
+	if (tries !== null) options.tries = parseInt(tries, 10)
+	if (minDelay !== null) options.minDelay = parseInt(minDelay, 10)
+	if (maxDelay !== null) options.maxDelay = parseInt(maxDelay, 10)
+	if (factor !== null) options.factor = parseFloat(factor)
+	return options
+}

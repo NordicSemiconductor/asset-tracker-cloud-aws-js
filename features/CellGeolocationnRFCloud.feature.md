@@ -48,6 +48,8 @@ Given I store `$millis()` into `ts`
 When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
+<!-- retry:minDelay=10000&factor=1 -->
+
 Soon the response status code should equal 200
 
 Then the `Access-Control-Allow-Origin` response header should equal `*`
