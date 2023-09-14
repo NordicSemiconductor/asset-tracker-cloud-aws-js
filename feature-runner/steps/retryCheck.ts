@@ -1,3 +1,33 @@
+export type Options = {
+	/**
+	 * Number of tries (including the initial try)
+	 *
+	 * @default 3
+	 */
+	tries?: number
+
+	/**
+	 * The exponential factor to use.
+	 *
+	 * @default 1.5
+	 */
+	factor?: number
+
+	/**
+	 * The number of milliseconds before starting the second retry.
+	 *
+	 * @default 2500
+	 */
+	minDelay?: number
+
+	/**
+	 * The maximum number of milliseconds between two retries.
+	 *
+	 * @default Infinity
+	 */
+	maxDelay?: number
+}
+
 /**
  * Immediately executes the check function and in case it fails, retries the check after executing the retry function.
  *
@@ -6,35 +36,7 @@
 export const retryCheck = async (
 	checkFn: () => unknown,
 	retryFn: () => Promise<unknown>,
-	options?: {
-		/**
-		 * Number of tries (including the initial try)
-		 *
-		 * @default 3
-		 */
-		tries?: number
-
-		/**
-		 * The exponential factor to use.
-		 *
-		 * @default 1.25
-		 */
-		factor?: number
-
-		/**
-		 * The number of milliseconds before starting the second retry.
-		 *
-		 * @default 2500
-		 */
-		minDelay?: number
-
-		/**
-		 * The maximum number of milliseconds between two retries.
-		 *
-		 * @default Infinity
-		 */
-		maxDelay?: number
-	},
+	options?: Options,
 ): Promise<void> => {
 	try {
 		checkFn()
@@ -52,7 +54,7 @@ export const retryCheck = async (
 				await new Promise((resolve) => setTimeout(resolve, wait))
 				wait = Math.max(
 					options?.maxDelay ?? Number.POSITIVE_INFINITY,
-					wait * (options?.factor ?? 1.25),
+					wait * (options?.factor ?? 1.5),
 				)
 			}
 		}
