@@ -64,10 +64,10 @@ const steps: ({
 					deviceId,
 					certsDir,
 					log: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 					debug: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 				})
 				await createDeviceCertificate({
@@ -75,10 +75,10 @@ const steps: ({
 					certsDir,
 					caId: getCurrentCA({ certsDir }),
 					log: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 					debug: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 					daysValid: 1,
 				})
@@ -127,7 +127,11 @@ const steps: ({
 
 			if (connections[trackerId] === undefined) {
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				progress('IoT', `Connecting ${deviceId} to ${mqttEndpoint}`)
+				progress(
+					`[MQTT]`,
+					trackerId,
+					`Connecting ${deviceId} to ${mqttEndpoint}`,
+				)
 				const connection = await awsIotDeviceConnection({
 					awsIotRootCA: context.awsIotRootCA,
 					certsDir,
@@ -136,18 +140,18 @@ const steps: ({
 
 				connections[trackerId] = await new Promise((resolve, reject) => {
 					const timeout = setTimeout(async () => {
-						progress('IoT', `Connection timeout`)
+						progress(`[MQTT]`, trackerId, `Connection timeout`)
 						reject(new Error(`Connection timeout`))
 					}, 60 * 1000)
 
 					connection.onConnect(() => {
-						progress('IoT', 'Connected')
+						progress(`[MQTT]`, trackerId, 'Connected')
 						clearTimeout(timeout)
 						resolve(connection)
 					})
 
 					connection.onDisconnect(() => {
-						progress('IoT', 'Disconnect')
+						progress(`[MQTT]`, trackerId, 'Disconnect')
 					})
 				})
 			}
@@ -170,7 +174,7 @@ const steps: ({
 
 			connections[trackerId]?.close()
 			delete connections[trackerId]
-			progress('Closed')
+			progress(`[MQTT]`, trackerId, 'Closed')
 		},
 	),
 	regExpMatchedStep(
@@ -205,10 +209,10 @@ const steps: ({
 			const updateStatusAccepted = `${updateStatus}/accepted`
 			const updateStatusRejected = `${updateStatus}/rejected`
 
-			progress(`IoT < subscribing to: ${updateStatusAccepted}`)
+			progress(`[MQTT]`, trackerId, `< subscribing to: ${updateStatusAccepted}`)
 			connection.subscribe(updateStatusAccepted)
 
-			progress(`IoT < subscribing to: ${updateStatusRejected}`)
+			progress(`[MQTT]`, trackerId, `< subscribing to: ${updateStatusRejected}`)
 			connection.subscribe(updateStatusRejected)
 
 			const updatePromise = await new Promise((resolve, reject) => {
@@ -224,14 +228,14 @@ const steps: ({
 				): Promise<void> => {
 					switch (topic) {
 						case updateStatusAccepted:
-							progress('IoT < status', message.toString())
+							progress(`[MQTT]`, trackerId, '< status', message.toString())
 							clearTimeout(timeout)
 							done = true
 							resolve(JSON.parse(message.toString()))
 							connection.offMessage(listener)
 							break
 						case updateStatusRejected:
-							progress('IoT < status', message.toString())
+							progress(`[MQTT]`, trackerId, '< status', message.toString())
 							clearTimeout(timeout)
 							done = true
 							reject(new Error(`Update rejected!`))
@@ -241,15 +245,15 @@ const steps: ({
 
 				connection.onMessage(listener)
 
-				progress(`IoT > publishing to ${updateStatus}`)
-				progress(`IoT > ${JSON.stringify(reported)}`)
+				progress(`[MQTT]`, trackerId, `> publishing to ${updateStatus}`)
+				progress(`[MQTT]`, trackerId, `> ${JSON.stringify(reported)}`)
 
 				// The first shadow update is not replied to, most likely because the shadow does not exist. Send shadow updates twice, just in case
 				const publish = async () =>
 					connection
 						.publish(updateStatus, JSON.stringify({ state: { reported } }))
 						.then(() => {
-							progress(`IoT > published to ${updateStatus}`)
+							progress(`[MQTT]`, trackerId, `> published to ${updateStatus}`)
 						})
 						.catch(() => {
 							reject(new Error(`Failed to publish`))
@@ -296,8 +300,8 @@ const steps: ({
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 			const message = JSON.parse(codeBlockOrThrow(step).code)
-			progress(`IoT Publishing > ${topic}`)
-			progress(`IoT Publishing > ${JSON.stringify(message)}`)
+			progress(`[MQTT]`, trackerId, `Publishing > ${topic}`)
+			progress(`[MQTT]`, trackerId, `Publishing > ${JSON.stringify(message)}`)
 			const connection = connections[trackerId] as Connection
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(
@@ -361,27 +365,31 @@ const steps: ({
 					reject(error)
 				}
 
-				progress(`IoT Job < subscribing to ${successTopic}`)
+				progress(`[MQTT]`, trackerId, `Job < subscribing to ${successTopic}`)
 				connection.subscribe(successTopic)
-				progress(`IoT Job < subscribing to ${errorTopic}`)
+				progress(`[MQTT]`, trackerId, `Job < subscribing to ${errorTopic}`)
 				connection.subscribe(errorTopic)
 
 				connection.onMessage((topic, message) => {
 					switch (topic) {
 						case successTopic:
-							progress(`IoT Job < ${message.toString()}`)
+							progress(`[MQTT]`, trackerId, `Job < ${message.toString()}`)
 							clearTimeout(timeout)
 							done = true
 							resolve(JSON.parse(message.toString()).execution)
 							break
 						case errorTopic:
-							progress(`IoT Job < ${message.toString()}`)
+							progress(`[MQTT]`, trackerId, `Job < ${message.toString()}`)
 							break
 					}
 				})
 
 				const publish = async () => {
-					progress(`IoT Job > ${startNextPendingJobExecutionTopic}`)
+					progress(
+						`[MQTT]`,
+						trackerId,
+						`Job > ${startNextPendingJobExecutionTopic}`,
+					)
 					return connection
 						.publish(startNextPendingJobExecutionTopic, '')
 						.catch(catchError)
@@ -464,8 +472,8 @@ const steps: ({
 						? message.toString('hex')
 						: JSON.parse(message.toString('utf-8'))
 					messages.push(m)
-					progress(`IoT < received message on ${topic}`)
-					progress(`IoT < ${JSON.stringify(m)}`)
+					progress(`[MQTT]`, trackerId, `< received message on ${topic}`)
+					progress(`[MQTT]`, trackerId, `< ${JSON.stringify(m)}`)
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
 
@@ -500,7 +508,7 @@ const steps: ({
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 			const connection = connections[trackerId] as Connection
-			progress(`IoT < subscribing to ${topic}`)
+			progress(`[MQTT]`, trackerId, `< subscribing to ${topic}`)
 			connection.subscribe(topic)
 		},
 	),

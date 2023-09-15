@@ -1,5 +1,4 @@
 ---
-run: never
 needs:
   - Connect a tracker
   - Register a new account
@@ -12,6 +11,12 @@ exampleContext:
 # Device Firmware Upgrade over the air
 
 > As a user I can upgrade the firmware of my devices over the air
+
+## Register and connect device
+
+Given I generate a certificate for the `fota` tracker
+
+And I connect the `fota` tracker
 
 ## Create a new firmware upgrade as a user
 
@@ -53,9 +58,9 @@ And I execute `createJob` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "targets": ["${tracker.default.arn}"],
+  "targets": ["${tracker.fota.arn}"],
   "document": "${jobDocument}",
-  "description": "Upgrade ${tracker.default.id} to version 1.0.1.",
+  "description": "Upgrade ${tracker.fota.id} to version 1.0.1.",
   "targetSelection": "SNAPSHOT"
 }
 ```
@@ -64,7 +69,7 @@ Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Fetch the job as a device
 
-Soon the tracker stores the next started job into `job`
+Soon the `fota` tracker stores the next started job into `job`
 
 Then `job` should match
 
@@ -82,7 +87,7 @@ When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker.default.id}"
+  "thingName": "${tracker.fota.id}"
 }
 ```
 
@@ -104,7 +109,7 @@ When I execute `cancelJobExecution` of `@aws-sdk/client-iot` with
 {
   "jobId": "${jobId}",
   "force": true,
-  "thingName": "${tracker.default.id}"
+  "thingName": "${tracker.fota.id}"
 }
 ```
 
@@ -113,7 +118,7 @@ When I execute `describeJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker.default.id}"
+  "thingName": "${tracker.fota.id}"
 }
 ```
 
@@ -142,7 +147,9 @@ And I execute `deleteJobExecution` of `@aws-sdk/client-iot` with
 ```json
 {
   "jobId": "${jobId}",
-  "thingName": "${tracker.default.id}",
+  "thingName": "${tracker.fota.id}",
   "executionNumber": 1
 }
 ```
+
+Then I disconnect the `fota` tracker
