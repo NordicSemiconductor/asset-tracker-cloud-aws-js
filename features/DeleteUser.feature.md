@@ -1,7 +1,7 @@
 ---
 needs:
   - Attach Iot Policy to user
-run: last
+order: last
 ---
 
 # Delete a user

@@ -1,11 +1,13 @@
 ---
-run: last
 exampleContext:
   userPassword: secret
   userEmail: user@example.com
   tracker:
     default:
       id: device-a
+needs:
+  - Connect a tracker
+order: last
 ---
 
 # Delete trackers
