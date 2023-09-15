@@ -15,6 +15,7 @@ import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import {
 	awsIotDeviceConnection,
 	type Connection,
+	type MessageListener,
 } from './awsIotDeviceConnection.js'
 import { aString, check, objectMatching } from 'tsmatchers'
 
@@ -208,33 +209,58 @@ const steps: ({
 
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(
-					() => reject(new Error(`Timed out!`)),
-					60 * 1000,
+					() => reject(new Error('Timed out waiting for message!')),
+					10 * 1000,
 				)
+				let done = false
 
-				connection.onMessage((topic, message) => {
+				const listener: MessageListener = async (
+					topic: string,
+					message: Buffer,
+				): Promise<void> => {
 					switch (topic) {
 						case updateStatusAccepted:
 							progress('IoT < status', message.toString())
 							clearTimeout(timeout)
+							done = true
 							resolve(JSON.parse(message.toString()))
+							connection.offMessage(listener)
 							break
 						case updateStatusRejected:
 							progress('IoT < status', message.toString())
 							clearTimeout(timeout)
+							done = true
 							reject(new Error(`Update rejected!`))
-							break
+							connection.offMessage(listener)
 					}
-				})
+				}
+
+				connection.onMessage(listener)
 
 				progress(`IoT > publishing to ${updateStatus}`)
 				progress(`IoT > ${JSON.stringify(reported)}`)
-				connection
-					.publish(updateStatus, JSON.stringify({ state: { reported } }))
-					.catch(() => {
-						clearTimeout(timeout)
-						reject(new Error(`Failed to publish`))
-					})
+
+				// The first shadow update is not replied to, most likely because the shadow does not exist. Send shadow updates twice, just in case
+				const publish = async () =>
+					connection
+						.publish(updateStatus, JSON.stringify({ state: { reported } }))
+						.then(() => {
+							progress(`IoT > published to ${updateStatus}`)
+						})
+						.catch(() => {
+							reject(new Error(`Failed to publish`))
+							clearTimeout(timeout)
+							done = true
+							connection.offMessage(listener)
+						})
+
+				void Promise.all([
+					publish(),
+					new Promise((resolve) => setTimeout(resolve, 1000)).then(async () => {
+						if (done) return
+						return publish()
+					}),
+				])
 			})
 			await updatePromise
 		},
@@ -458,9 +484,6 @@ const steps: ({
 				messageCount === 'a' ? 1 : parseInt(messageCount.slice(1, -1), 10)
 			const messages: (Record<string, any> | string)[] = []
 
-			progress(`subscribing to ${topic}`)
-			connection.subscribe(topic)
-
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(
@@ -491,6 +514,31 @@ const steps: ({
 					}
 				})
 			})
+		},
+	),
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker is subscribed to the topic ${matchString('topic')}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				topic: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, topic },
+			log: { progress },
+		}) => {
+			const trackerId = maybeTrackerId ?? 'default'
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const connection = connections[trackerId] as Connection
+			progress(`subscribing to ${topic}`)
+			connection.subscribe(topic)
 		},
 	),
 ]

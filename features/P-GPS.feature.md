@@ -34,6 +34,8 @@ And I enqueue this mock HTTP API response for a GET request to
 
 ## Request P-GPS data
 
+Given the tracker is subscribed to the topic `${tracker.default.id}/pgps`
+
 When the tracker publishes this message to the topic
 `${tracker.default.id}/pgps/get`
 

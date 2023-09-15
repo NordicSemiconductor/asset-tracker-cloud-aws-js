@@ -33,6 +33,9 @@ And I connect the `<variant.device>` tracker
 
 ## Request P-GPS data
 
+Given the `<variant.device>` tracker is subscribed to the topic
+`${tracker.<variant.device>.id}/pgps`
+
 When the `<variant.device>` tracker publishes this message to the topic
 `${tracker.<variant.device>.id}/pgps/get`
 
