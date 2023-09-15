@@ -315,7 +315,7 @@ const steps: ({
 			regExp: new RegExp(
 				`^the(:? ${matchString(
 					'trackerId',
-				)})? tracker fetches the next job into ${matchString('storageName')}$`,
+				)})? tracker starts the next job into ${matchString('storageName')}$`,
 			),
 			schema: Type.Object({
 				trackerId: Type.Optional(Type.String()),
@@ -338,32 +338,56 @@ const steps: ({
 
 			const deviceId = (trackers[trackerId] as TrackerInfo).id
 
-			const getNextJobTopic = `$aws/things/${deviceId}/jobs/$next/get`
-			const successTopic = `${getNextJobTopic}/accepted`
+			// See https://docs.aws.amazon.com/iot/latest/developerguide/jobs-mqtt-api.html
+			const startNextPendingJobExecutionTopic = `$aws/things/${deviceId}/jobs/start-next`
+			const successTopic = `${startNextPendingJobExecutionTopic}/accepted`
+			const errorTopic = `$aws/things/MyThing/jobs/get/rejected`
 
 			const res = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Did not receive a next job!`))
 				}, 60 * 1000)
+				let done = false
 
 				const catchError = (error: Error) => {
 					clearTimeout(timeout)
+					done = true
 					reject(error)
 				}
 
 				progress(`IoT Job < subscribing to ${successTopic}`)
 				connection.subscribe(successTopic)
+				progress(`IoT Job < subscribing to ${errorTopic}`)
+				connection.subscribe(errorTopic)
 
 				connection.onMessage((topic, message) => {
-					if (topic !== successTopic) return
-					if (JSON.parse(message.toString()).execution?.jobId === undefined)
-						return
-					progress(`IoT Job < ${message.toString()}`)
-					clearTimeout(timeout)
-					resolve(JSON.parse(message.toString()).execution)
+					switch (topic) {
+						case successTopic:
+							progress(`IoT Job < ${message.toString()}`)
+							clearTimeout(timeout)
+							done = true
+							resolve(JSON.parse(message.toString()).execution)
+							break
+						case errorTopic:
+							progress(`IoT Job < ${message.toString()}`)
+							break
+					}
 				})
 
-				connection.publish(getNextJobTopic, '').catch(catchError)
+				const publish = async () => {
+					progress(`IoT Job > ${startNextPendingJobExecutionTopic}`)
+					return connection
+						.publish(startNextPendingJobExecutionTopic, '')
+						.catch(catchError)
+				}
+
+				void Promise.all([
+					publish(),
+					new Promise((resolve) => setTimeout(resolve, 1000)).then(async () => {
+						if (done) return
+						return publish()
+					}),
+				])
 			})
 
 			check(res).is(
@@ -373,73 +397,6 @@ const steps: ({
 			)
 
 			context[storageName] = res
-		},
-	),
-	regExpMatchedStep(
-		{
-			regExp: new RegExp(
-				`^the(:? ${matchString(
-					'trackerId',
-				)})? tracker marks the job in ${matchString(
-					'storageName',
-				)} as in progress$`,
-			),
-			schema: Type.Object({
-				trackerId: Type.Optional(Type.String()),
-				storageName: Type.String(),
-			}),
-		},
-		async ({
-			match: { trackerId: maybeTrackerId, storageName },
-			context,
-			log: { progress },
-		}) => {
-			const trackerId = maybeTrackerId ?? 'default'
-			if (trackers[trackerId] === undefined) {
-				throw new Error(`No credentials available for tracker ${trackerId}`)
-			}
-			if (connections[trackerId] === undefined) {
-				throw new Error(`No connection available for tracker ${trackerId}`)
-			}
-			const connection = connections[trackerId] as Connection
-
-			const deviceId = (trackers[trackerId] as TrackerInfo).id
-
-			const updateJobTopic = `$aws/things/${deviceId}/jobs/${context[storageName].jobId}/update`
-			const successTopic = `${updateJobTopic}/accepted`
-
-			await new Promise((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error(`Job not marked as in progress!`))
-				}, 60 * 1000)
-
-				const catchError = (error: Error) => {
-					clearTimeout(timeout)
-					reject(error)
-				}
-
-				progress(`IoT Job < subscribing to ${successTopic}`)
-				connection.subscribe(successTopic)
-
-				connection.onMessage((topic, message) => {
-					if (topic !== successTopic) return
-					progress(message.toString())
-					clearTimeout(timeout)
-					resolve(JSON.parse(message.toString()))
-				})
-
-				progress(`IoT Job > publishing to ${updateJobTopic}`)
-				connection
-					.publish(
-						updateJobTopic,
-						JSON.stringify({
-							status: 'IN_PROGRESS',
-							expectedVersion: context[storageName].versionNumber,
-							executionNumber: context[storageName].executionNumber,
-						}),
-					)
-					.catch(catchError)
-			})
 		},
 	),
 	regExpMatchedStep(
@@ -537,7 +494,7 @@ const steps: ({
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 			const connection = connections[trackerId] as Connection
-			progress(`subscribing to ${topic}`)
+			progress(`IoT < subscribing to ${topic}`)
 			connection.subscribe(topic)
 		},
 	),
