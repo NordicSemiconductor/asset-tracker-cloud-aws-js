@@ -35,6 +35,9 @@ And I connect the `<variant.device>` tracker
 
 ## Request A-GPS data
 
+Given the `<variant.device>` tracker is subscribed to the topic
+`${tracker.<variant.device>.id}/agps`
+
 When the `<variant.device>` tracker publishes this message to the topic
 `${tracker.<variant.device>.id}/agps/get`
 

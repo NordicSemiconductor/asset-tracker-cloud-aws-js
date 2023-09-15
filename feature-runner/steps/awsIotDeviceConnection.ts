@@ -8,6 +8,7 @@ export type MessageListener = (topic: string, message: Buffer) => void
 export type Connection = {
 	onConnect: (listener: Listener) => void
 	onMessage: (listener: MessageListener) => void
+	offMessage: (listener: MessageListener) => void
 	publish: (topic: string, message: string) => Promise<void>
 	close: () => void
 	subscribe: (topic: string) => void
@@ -27,7 +28,7 @@ export const awsIotDeviceConnection = ({
 
 	return async (clientId) => {
 		const onConnectListeners: Listener[] = []
-		const onMessageListeners: MessageListener[] = []
+		let onMessageListeners: MessageListener[] = []
 		const messages: Record<string, any[]> = {}
 		if (connections[clientId] === undefined) {
 			let connected = false
@@ -84,6 +85,14 @@ export const awsIotDeviceConnection = ({
 							}
 						}
 					}
+				},
+				offMessage: (listener) => {
+					const idx = onMessageListeners.indexOf(listener)
+					if (idx < 0) return
+					onMessageListeners = [
+						...onMessageListeners.slice(0, idx),
+						...onMessageListeners.slice(idx + 1),
+					]
 				},
 				publish: async (topic, message) =>
 					new Promise<void>((resolve, reject) => {
