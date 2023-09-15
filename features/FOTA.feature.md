@@ -63,20 +63,16 @@ Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Fetch the job as a device
 
-Soon the tracker fetches the next job into `job`
+Soon the tracker starts the next job into `job`
 
 Then `job` should match
 
 ```json
 {
   "jobId": "${jobId}",
-  "status": "QUEUED"
+  "status": "IN_PROGRESS"
 }
 ```
-
-## Mark as in progress
-
-Soon the tracker marks the job in `job` as in progress
 
 ## describe the job
 
