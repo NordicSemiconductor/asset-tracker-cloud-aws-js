@@ -64,7 +64,7 @@ Then `awsSDK.res.jobId` should equal `${jobId}`
 
 ## Fetch the job as a device
 
-Soon the tracker starts the next job into `job`
+Soon the tracker stores the next started job into `job`
 
 Then `job` should match
 
