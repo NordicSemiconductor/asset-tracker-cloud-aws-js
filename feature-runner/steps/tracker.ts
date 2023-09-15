@@ -145,6 +145,10 @@ const steps: ({
 						clearTimeout(timeout)
 						resolve(connection)
 					})
+
+					connection.onDisconnect(() => {
+						progress('IoT', 'Disconnect')
+					})
 				})
 			}
 		},
@@ -315,7 +319,9 @@ const steps: ({
 			regExp: new RegExp(
 				`^the(:? ${matchString(
 					'trackerId',
-				)})? tracker starts the next job into ${matchString('storageName')}$`,
+				)})? tracker stores the next started job into ${matchString(
+					'storageName',
+				)}$`,
 			),
 			schema: Type.Object({
 				trackerId: Type.Optional(Type.String()),
