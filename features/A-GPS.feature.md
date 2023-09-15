@@ -75,6 +75,8 @@ Content-Length: 1864
 > The response should equal split into two messages, because A-GPS Ephemerides
 > data is so large it cannot be combined with other types
 
+Given the tracker is subscribed to the topic `${tracker.default.id}/agps`
+
 When the tracker publishes this message to the topic
 `${tracker.default.id}/agps/get`
 
