@@ -1,6 +1,12 @@
 ---
 needs:
   - Device Update Shadow
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  tracker:
+    default:
+      id: device-a
 ---
 
 # Device Batch Data
@@ -51,8 +57,6 @@ Given the tracker publishes this message to the topic
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Fetch the batch data
 
 Given I am authenticated with Cognito as `${userEmail}` with password
@@ -69,9 +73,7 @@ AND measure_value::double IS NOT NULL
 ORDER BY time DESC
 ```
 
-<!-- @retryScenario -->
-
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
@@ -81,9 +83,7 @@ Soon `timestreamQueryResult` should match
 ]
 ```
 
-<!-- @retryScenario -->
-
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [

@@ -1,6 +1,12 @@
 ---
 needs:
   - Device Update Shadow
+exampleContext:
+  userPassword: secret
+  userEmail: user@example.com
+  tracker:
+    default:
+      id: device-a
 ---
 
 # Device Messages
@@ -46,8 +52,6 @@ Then the tracker publishes this message to the topic
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## User retrieves the button presses
 
 Given I am authenticated with Cognito as `${userEmail}` with password
@@ -62,9 +66,7 @@ WHERE deviceId='${tracker.default.id}' AND measure_name='btn' AND measure_value:
 ORDER BY time DESC
 ```
 
-<!-- @retryScenario -->
-
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
@@ -74,9 +76,7 @@ Soon `timestreamQueryResult` should match
 ]
 ```
 
-<!-- @retryScenario -->
-
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [
@@ -102,8 +102,6 @@ Then the tracker publishes this message to the topic
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## User retrieves the impact messages
 
 Given I am authenticated with Cognito as `${userEmail}` with password
@@ -118,9 +116,7 @@ WHERE deviceId='${tracker.default.id}' AND measure_name='impact' AND measure_val
 ORDER BY time DESC
 ```
 
-<!-- @retryScenario -->
-
-Soon `timestreamQueryResult` should match
+Soon the Timestream result should match
 
 ```json
 [

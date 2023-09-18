@@ -1,7 +1,10 @@
-import { type StepRunner } from '@nordicsemiconductor/bdd-markdown'
+import {
+	type StepRunner,
+	regExpMatchedStep,
+} from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchStep, matchString } from './util.js'
+import { matchString } from './util.js'
 import {
 	CognitoIdentityClient,
 	GetCredentialsForIdentityCommand,
@@ -28,25 +31,19 @@ export type UserCredentials = {
 const userCredentials: Record<string, UserCredentials> = {}
 
 const steps: StepRunner<World & { cognito?: UserCredentials }>[] = [
-	matchStep(
-		new RegExp(
-			`^I am authenticated with Cognito as ${matchString(
-				'email',
-			)} with password ${matchString('password')}$`,
-		),
-		Type.Object({
-			email: Type.String(),
-			password: Type.String(),
-		}),
-		async (
-			{ email, password },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I am authenticated with Cognito as ${matchString(
+					'email',
+				)} with password ${matchString('password')}$`,
+			),
+			schema: Type.Object({
+				email: Type.String(),
+				password: Type.String(),
+			}),
+		},
+		async ({ match: { email, password }, context, log: { progress } }) => {
 			if (userCredentials[email] === undefined) {
 				await cisp.send(
 					new AdminConfirmSignUpCommand({
@@ -104,7 +101,6 @@ const steps: StepRunner<World & { cognito?: UserCredentials }>[] = [
 				progress(`AccessToken: ${userCredentials[email]?.AccessToken}`)
 			}
 			context.cognito = userCredentials[email]
-			return { result: userCredentials[email]?.IdentityId }
 		},
 	),
 ]

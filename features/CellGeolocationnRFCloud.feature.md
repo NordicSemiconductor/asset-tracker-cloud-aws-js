@@ -2,6 +2,10 @@
 variants:
   - nw: ltem
   - nw: nbiot
+exampleContext:
+  geolocationApiUrl: https://daaxyz.lambda-url.eu-west-1.on.aws
+  cellId: 1
+  ts: 1694598183204
 ---
 
 # nRF Cloud Cell Geolocation
@@ -41,12 +45,10 @@ And I enqueue this mock HTTP API response for a POST request to
 
 Given I store `$millis()` into `ts`
 
-<!-- @retry:delayExecution=5000,initialDelay=2500 -->
-
-Soon I GET
+When I GET
 `${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
-<!-- @retryScenario -->
+<!-- retry:minDelay=10000&factor=1 -->
 
 Soon the response status code should equal 200
 

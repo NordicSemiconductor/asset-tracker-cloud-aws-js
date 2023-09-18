@@ -1,10 +1,11 @@
 import {
 	codeBlockOrThrow,
 	type StepRunner,
+	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
-import { matchStep, matchString } from './util.js'
+import { matchString } from './util.js'
 import { randomWords } from '@nordicsemiconductor/random-words'
 import { readFile } from 'node:fs/promises'
 import { createDeviceCertificate } from '../../cli/jitp/createDeviceCertificate.js'
@@ -14,6 +15,7 @@ import { deviceFileLocations } from '../../cli/jitp/deviceFileLocations.js'
 import {
 	awsIotDeviceConnection,
 	type Connection,
+	type MessageListener,
 } from './awsIotDeviceConnection.js'
 import { aString, check, objectMatching } from 'tsmatchers'
 
@@ -39,25 +41,22 @@ const steps: ({
 		connection?: Connection
 	} & Record<string, any>
 >[] = ({ certsDir, mqttEndpoint }) => [
-	matchStep(
-		// I generate a certificate for the `firmwareCiDevice` tracker"
-		new RegExp(
-			`^I generate a certificate for the(:? ${matchString(
-				'trackerId',
-			)})? tracker$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I generate a certificate for the(:? ${matchString(
+					'trackerId',
+				)})? tracker$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				const deviceId = (await randomWords({ numWords: 3 })).join('-')
@@ -65,10 +64,10 @@ const steps: ({
 					deviceId,
 					certsDir,
 					log: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 					debug: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 				})
 				await createDeviceCertificate({
@@ -76,10 +75,10 @@ const steps: ({
 					certsDir,
 					caId: getCurrentCA({ certsDir }),
 					log: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 					debug: (...message: any[]) => {
-						progress('IoT (cert)', ...message)
+						progress(`[MQTT]`, trackerId, '(cert)', ...message)
 					},
 					daysValid: 1,
 				})
@@ -105,23 +104,22 @@ const steps: ({
 					[trackerId]: info,
 				}
 			}
-			return { result: trackers[trackerId]?.id }
 		},
 	),
-	matchStep(
-		new RegExp(`^I connect the(:? ${matchString('trackerId')})? tracker$`),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I connect the(:? ${matchString('trackerId')})? tracker$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No certificate available for tracker ${trackerId}`)
@@ -129,7 +127,11 @@ const steps: ({
 
 			if (connections[trackerId] === undefined) {
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				progress('IoT', `Connecting ${deviceId} to ${mqttEndpoint}`)
+				progress(
+					`[MQTT]`,
+					trackerId,
+					`Connecting ${deviceId} to ${mqttEndpoint}`,
+				)
 				const connection = await awsIotDeviceConnection({
 					awsIotRootCA: context.awsIotRootCA,
 					certsDir,
@@ -138,34 +140,33 @@ const steps: ({
 
 				connections[trackerId] = await new Promise((resolve, reject) => {
 					const timeout = setTimeout(async () => {
-						progress('IoT', `Connection timeout`)
+						progress(`[MQTT]`, trackerId, `Connection timeout`)
 						reject(new Error(`Connection timeout`))
 					}, 60 * 1000)
 
 					connection.onConnect(() => {
-						progress('IoT', 'Connected')
+						progress(`[MQTT]`, trackerId, 'Connected')
 						clearTimeout(timeout)
 						resolve(connection)
 					})
+
+					connection.onDisconnect(() => {
+						progress(`[MQTT]`, trackerId, 'Disconnect')
+					})
 				})
 			}
-
-			return { result: trackers[trackerId]?.id }
 		},
 	),
-	matchStep(
-		new RegExp(`^I disconnect the(:? ${matchString('trackerId')})? tracker$`),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^I disconnect the(:? ${matchString('trackerId')})? tracker$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({ match: { trackerId: maybeTrackerId }, log: { progress } }) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (connections[trackerId] === undefined) {
 				throw new Error(`No connection available for tracker ${trackerId}`)
@@ -173,27 +174,25 @@ const steps: ({
 
 			connections[trackerId]?.close()
 			delete connections[trackerId]
-			progress('Closed')
+			progress(`[MQTT]`, trackerId, 'Closed')
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker updates its reported state with$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-		}),
-		async (
-			{ trackerId: maybeTrackerId },
-			{
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker updates its reported state with$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId },
+			step,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -210,67 +209,89 @@ const steps: ({
 			const updateStatusAccepted = `${updateStatus}/accepted`
 			const updateStatusRejected = `${updateStatus}/rejected`
 
-			progress(`IoT < subscribing to: ${updateStatusAccepted}`)
+			progress(`[MQTT]`, trackerId, `< subscribing to: ${updateStatusAccepted}`)
 			connection.subscribe(updateStatusAccepted)
 
-			progress(`IoT < subscribing to: ${updateStatusRejected}`)
+			progress(`[MQTT]`, trackerId, `< subscribing to: ${updateStatusRejected}`)
 			connection.subscribe(updateStatusRejected)
 
 			const updatePromise = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(
-					() => reject(new Error(`Timed out!`)),
+					() => reject(new Error('Timed out waiting for message!')),
 					10 * 1000,
 				)
+				let done = false
 
-				connection.onMessage((topic, message) => {
+				const listener: MessageListener = async (
+					topic: string,
+					message: Buffer,
+				): Promise<void> => {
 					switch (topic) {
 						case updateStatusAccepted:
-							progress('IoT < status', message.toString())
+							progress(`[MQTT]`, trackerId, '< status', message.toString())
 							clearTimeout(timeout)
+							done = true
 							resolve(JSON.parse(message.toString()))
+							connection.offMessage(listener)
 							break
 						case updateStatusRejected:
-							progress('IoT < status', message.toString())
+							progress(`[MQTT]`, trackerId, '< status', message.toString())
 							clearTimeout(timeout)
+							done = true
 							reject(new Error(`Update rejected!`))
-							break
+							connection.offMessage(listener)
 					}
-				})
+				}
 
-				progress(`IoT > publishing to ${updateStatus}`)
-				progress(`IoT > ${JSON.stringify(reported)}`)
-				connection
-					.publish(updateStatus, JSON.stringify({ state: { reported } }))
-					.catch(() => {
-						clearTimeout(timeout)
-						reject(new Error(`Failed to publish`))
-					})
+				connection.onMessage(listener)
+
+				progress(`[MQTT]`, trackerId, `> publishing to ${updateStatus}`)
+				progress(`[MQTT]`, trackerId, `> ${JSON.stringify(reported)}`)
+
+				// The first shadow update is not replied to, most likely because the shadow does not exist. Send shadow updates twice, just in case
+				const publish = async () =>
+					connection
+						.publish(updateStatus, JSON.stringify({ state: { reported } }))
+						.then(() => {
+							progress(`[MQTT]`, trackerId, `> published to ${updateStatus}`)
+						})
+						.catch(() => {
+							reject(new Error(`Failed to publish`))
+							clearTimeout(timeout)
+							done = true
+							connection.offMessage(listener)
+						})
+
+				void Promise.all([
+					publish(),
+					new Promise((resolve) => setTimeout(resolve, 1000)).then(async () => {
+						if (done) return
+						return publish()
+					}),
+				])
 			})
-			return { result: await updatePromise }
+			await updatePromise
 		},
 	),
-	matchStep(
-		// the `agpsContainerDevice1` tracker publishes this message to the topic `lungwort-slangous-puggaree/agps/get`
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker publishes this message to the topic ${matchString(
-				'topic',
-			)}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			topic: Type.String(),
-		}),
-		async (
-			{ trackerId: maybeTrackerId, topic },
-			{
-				step,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker publishes this message to the topic ${matchString(
+					'topic',
+				)}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				topic: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, topic },
+			step,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -279,13 +300,13 @@ const steps: ({
 				throw new Error(`No connection available for tracker ${trackerId}`)
 			}
 			const message = JSON.parse(codeBlockOrThrow(step).code)
-			progress(`IoT Publishing > ${topic}`)
-			progress(`IoT Publishing > ${JSON.stringify(message)}`)
+			progress(`[MQTT]`, trackerId, `Publishing > ${topic}`)
+			progress(`[MQTT]`, trackerId, `Publishing > ${JSON.stringify(message)}`)
 			const connection = connections[trackerId] as Connection
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(
 					() => reject(new Error(`Timed out!`)),
-					10 * 1000,
+					60 * 1000,
 				)
 				connection
 					.publish(topic, JSON.stringify(message))
@@ -297,25 +318,25 @@ const steps: ({
 			})
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker fetches the next job into ${matchString('storageName')}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			storageName: Type.String(),
-		}),
-		async (
-			{ trackerId: maybeTrackerId, storageName },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker stores the next started job into ${matchString(
+					'storageName',
+				)}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				storageName: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, storageName },
+			context,
+			log: { progress },
+		}) => {
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
 				throw new Error(`No credentials available for tracker ${trackerId}`)
@@ -327,32 +348,60 @@ const steps: ({
 
 			const deviceId = (trackers[trackerId] as TrackerInfo).id
 
-			const getNextJobTopic = `$aws/things/${deviceId}/jobs/$next/get`
-			const successTopic = `${getNextJobTopic}/accepted`
+			// See https://docs.aws.amazon.com/iot/latest/developerguide/jobs-mqtt-api.html
+			const startNextPendingJobExecutionTopic = `$aws/things/${deviceId}/jobs/start-next`
+			const successTopic = `${startNextPendingJobExecutionTopic}/accepted`
+			const errorTopic = `$aws/things/MyThing/jobs/get/rejected`
 
 			const res = await new Promise((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(new Error(`Did not receive a next job!`))
-				}, 10 * 1000)
+				}, 60 * 1000)
+				let done = false
 
 				const catchError = (error: Error) => {
 					clearTimeout(timeout)
+					done = true
 					reject(error)
 				}
 
-				progress(`IoT Job < subscribing to ${successTopic}`)
+				progress(`[MQTT]`, trackerId, `Job < subscribing to ${successTopic}`)
 				connection.subscribe(successTopic)
+				progress(`[MQTT]`, trackerId, `Job < subscribing to ${errorTopic}`)
+				connection.subscribe(errorTopic)
 
 				connection.onMessage((topic, message) => {
-					if (topic !== successTopic) return
-					if (JSON.parse(message.toString()).execution?.jobId === undefined)
-						return
-					progress(`IoT Job < ${message.toString()}`)
-					clearTimeout(timeout)
-					resolve(JSON.parse(message.toString()).execution)
+					switch (topic) {
+						case successTopic:
+							progress(`[MQTT]`, trackerId, `Job < ${message.toString()}`)
+							clearTimeout(timeout)
+							done = true
+							resolve(JSON.parse(message.toString()).execution)
+							break
+						case errorTopic:
+							progress(`[MQTT]`, trackerId, `Job < ${message.toString()}`)
+							break
+					}
 				})
 
-				connection.publish(getNextJobTopic, '').catch(catchError)
+				const publish = async () => {
+					progress(
+						`[MQTT]`,
+						trackerId,
+						`Job > ${startNextPendingJobExecutionTopic}`,
+					)
+					return connection
+						.publish(startNextPendingJobExecutionTopic, '')
+						.catch(catchError)
+				}
+
+				void Promise.all([
+					publish(),
+					new Promise((resolve) => setTimeout(resolve, 1000)).then(async () => {
+						if (done) return
+						return publish()
+					}),
+				])
 			})
 
 			check(res).is(
@@ -362,105 +411,36 @@ const steps: ({
 			)
 
 			context[storageName] = res
-
-			return { result: res }
 		},
 	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker marks the job in ${matchString(
-				'storageName',
-			)} as in progress$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			storageName: Type.String(),
-		}),
-		async (
-			{ trackerId: maybeTrackerId, storageName },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
-			},
-		) => {
-			const trackerId = maybeTrackerId ?? 'default'
-			if (trackers[trackerId] === undefined) {
-				throw new Error(`No credentials available for tracker ${trackerId}`)
-			}
-			if (connections[trackerId] === undefined) {
-				throw new Error(`No connection available for tracker ${trackerId}`)
-			}
-			const connection = connections[trackerId] as Connection
-
-			const deviceId = (trackers[trackerId] as TrackerInfo).id
-
-			const updateJobTopic = `$aws/things/${deviceId}/jobs/${context[storageName].jobId}/update`
-			const successTopic = `${updateJobTopic}/accepted`
-
-			const res = await new Promise((resolve, reject) => {
-				const timeout = setTimeout(() => {
-					reject(new Error(`Job not marked as in progress!`))
-				}, 60 * 1000)
-
-				const catchError = (error: Error) => {
-					clearTimeout(timeout)
-					reject(error)
-				}
-
-				progress(`IoT Job < subscribing to ${successTopic}`)
-				connection.subscribe(successTopic)
-
-				connection.onMessage((topic, message) => {
-					if (topic !== successTopic) return
-					progress(message.toString())
-					clearTimeout(timeout)
-					resolve(JSON.parse(message.toString()))
-				})
-
-				progress(`IoT Job > publishing to ${updateJobTopic}`)
-				connection
-					.publish(
-						updateJobTopic,
-						JSON.stringify({
-							status: 'IN_PROGRESS',
-							expectedVersion: context[storageName].versionNumber,
-							executionNumber: context[storageName].executionNumber,
-						}),
-					)
-					.catch(catchError)
-			})
-
-			return { result: res }
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
+					'topic',
+				)} into ${matchString('storageName')}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				messageCount: Type.String(),
+				topic: Type.String(),
+				storageName: Type.String(),
+				raw: Type.Optional(Type.Literal('raw ')),
+			}),
 		},
-	),
-	matchStep(
-		new RegExp(
-			`^the(:? ${matchString(
-				'trackerId',
-			)})? tracker receives (?<messageCount>a|\`[1-9][0-9]*\`) (?<raw>raw )?messages? on the topic ${matchString(
-				'topic',
-			)} into ${matchString('storageName')}$`,
-		),
-		Type.Object({
-			trackerId: Type.Optional(Type.String()),
-			messageCount: Type.String(),
-			topic: Type.String(),
-			storageName: Type.String(),
-			raw: Type.Optional(Type.Literal('raw ')),
-		}),
-		async (
-			{ messageCount, topic, trackerId: maybeTrackerId, storageName, raw },
-			{
-				context,
-				log: {
-					step: { progress },
-				},
+		async ({
+			match: {
+				messageCount,
+				topic,
+				trackerId: maybeTrackerId,
+				storageName,
+				raw,
 			},
-		) => {
+			context,
+			log: { progress },
+		}) => {
 			const isRaw = raw !== undefined
 			const trackerId = maybeTrackerId ?? 'default'
 			if (trackers[trackerId] === undefined) {
@@ -475,9 +455,6 @@ const steps: ({
 				messageCount === 'a' ? 1 : parseInt(messageCount.slice(1, -1), 10)
 			const messages: (Record<string, any> | string)[] = []
 
-			progress(`subscribing to ${topic}`)
-			connection.subscribe(topic)
-
 			await new Promise<void>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					reject(
@@ -487,7 +464,7 @@ const steps: ({
 							} message${expectedMessageCount > 1 ? 's' : ''} yet to receive.`,
 						),
 					)
-				}, 10 * 1000)
+				}, 60 * 1000)
 
 				connection.onMessage((t, message) => {
 					if (topic !== t) return
@@ -495,8 +472,8 @@ const steps: ({
 						? message.toString('hex')
 						: JSON.parse(message.toString('utf-8'))
 					messages.push(m)
-					progress(`IoT < received message on ${topic}`)
-					progress(`IoT < ${JSON.stringify(m)}`)
+					progress(`[MQTT]`, trackerId, `< received message on ${topic}`)
+					progress(`[MQTT]`, trackerId, `< ${JSON.stringify(m)}`)
 					if (messages.length === expectedMessageCount) {
 						clearTimeout(timeout)
 
@@ -508,6 +485,31 @@ const steps: ({
 					}
 				})
 			})
+		},
+	),
+	regExpMatchedStep(
+		{
+			regExp: new RegExp(
+				`^the(:? ${matchString(
+					'trackerId',
+				)})? tracker is subscribed to the topic ${matchString('topic')}$`,
+			),
+			schema: Type.Object({
+				trackerId: Type.Optional(Type.String()),
+				topic: Type.String(),
+			}),
+		},
+		async ({
+			match: { trackerId: maybeTrackerId, topic },
+			log: { progress },
+		}) => {
+			const trackerId = maybeTrackerId ?? 'default'
+			if (connections[trackerId] === undefined) {
+				throw new Error(`No connection available for tracker ${trackerId}`)
+			}
+			const connection = connections[trackerId] as Connection
+			progress(`[MQTT]`, trackerId, `< subscribing to ${topic}`)
+			connection.subscribe(topic)
 		},
 	),
 ]

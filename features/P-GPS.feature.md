@@ -1,6 +1,13 @@
 ---
 needs:
   - Connect a tracker
+exampleContext:
+  currentGpsDay: 15956
+  startGpsTimeOfDaySeconds: 0
+  predictionCount: 1
+  tracker:
+    default:
+      id: cf3fbe5d-a8fe-4d70-8d4a-8e46e01d85c2
 ---
 
 # P-GPS
@@ -25,9 +32,9 @@ And I enqueue this mock HTTP API response for a GET request to
 }
 ```
 
-<!-- @retry:delayExecution=2000 -->
-
 ## Request P-GPS data
+
+Given the tracker is subscribed to the topic `${tracker.default.id}/pgps`
 
 When the tracker publishes this message to the topic
 `${tracker.default.id}/pgps/get`
@@ -38,8 +45,6 @@ When the tracker publishes this message to the topic
   "time": "$number{startGpsTimeOfDaySeconds}"
 }
 ```
-
-<!-- @retryScenario -->
 
 Soon the tracker receives a message on the topic `${tracker.default.id}/pgps`
 into `pgpsData`
