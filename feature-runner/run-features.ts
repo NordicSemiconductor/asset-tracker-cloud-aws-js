@@ -20,7 +20,6 @@ import { IoTClient } from '@aws-sdk/client-iot'
 import type { StackOutputs as HttpApiMockStackOutputs } from '../cdk/test-resources/HttpApiMockStack.js'
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { gpsDay } from '../pgps/gpsTime.js'
-import { readFile } from 'node:fs/promises'
 import { certsDir } from '../cli/jitp/certsDir.js'
 import randomSteps from './steps/random.js'
 import awsSDKSteps from './steps/aws.js'
@@ -41,7 +40,6 @@ export type World = typeof StackOutputs & {
 	userIotPolicyName: string
 	historicaldataTableName: string
 	historicaldataDatabaseName: string
-	awsIotRootCA: string
 	region: string
 	currentGpsDay: number
 }
@@ -63,10 +61,6 @@ const world: World = {
 	historicaldataTableName,
 	historicaldataDatabaseName,
 	accountId: accountId as string,
-	awsIotRootCA: await readFile(
-		path.join(process.cwd(), 'data', 'AmazonRootCA1.pem'),
-		'utf-8',
-	),
 	region: mqttEndpoint.split('.')[2] as string,
 	currentGpsDay: gpsDay(),
 	geolocationApiUrl: stackConfig.geolocationApiUrl.replace(/\/$/g, ''),
