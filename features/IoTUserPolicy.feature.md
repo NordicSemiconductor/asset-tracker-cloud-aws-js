@@ -1,4 +1,6 @@
 ---
+needs:
+  - Register a new account
 exampleContext:
   userPassword: secret
   userEmail: user@example.com

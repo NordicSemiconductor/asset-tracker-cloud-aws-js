@@ -1,6 +1,7 @@
 ---
 needs:
   - Attach Iot Policy to user
+  - Delete trackers
 order: last
 ---
 

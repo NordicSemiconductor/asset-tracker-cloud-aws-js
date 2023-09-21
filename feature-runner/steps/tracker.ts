@@ -59,6 +59,12 @@ const connect = async ({
 			logger.progress(`${clientId} connected`)
 			resolve(connection)
 		})
+		connection.on('disconnect', () => {
+			logger.progress(`${clientId} disconnected`)
+		})
+		connection.on('closed', () => {
+			logger.progress(`${clientId} closed`)
+		})
 		connection.connect().catch(() => {
 			logger.debug(`${clientId} failed to connect.`)
 		})
@@ -219,9 +225,12 @@ const steps: ({
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
 				const connection = await iotConnect(deviceId, log)
 				log.progress(`${deviceId} disconnecting...`)
-				await connection.disconnect()
-				await new Promise((resolve) => setTimeout(resolve, 5000, []))
-				log.progress(`${deviceId} closed...`)
+				try {
+					await connection.disconnect()
+					log.progress(`${deviceId} closed...`)
+				} catch (err) {
+					log.debug(`Failed closing connection: ${(err as Error).message}.`)
+				}
 			},
 		),
 		regExpMatchedStep(
@@ -257,7 +266,6 @@ const steps: ({
 						clearTimeout(timeout)
 						reject(err)
 					}
-					connection.on('error', onError)
 					void shadow
 						.subscribeToUpdateShadowAccepted(
 							{
@@ -283,7 +291,7 @@ const steps: ({
 								mqtt.QoS.AtLeastOnce,
 							),
 						)
-						.catch(reject)
+						.catch(onError)
 				})
 				await updatePromise
 			},
@@ -499,7 +507,7 @@ const steps: ({
 							return m
 						})
 					check(m.length).is(expectedMessageCount)
-					const result = messages.length > 1 ? m : m[0]
+					const result = expectedMessageCount > 1 ? m : m[0]
 
 					if (storageName !== undefined) context[storageName] = result
 				})

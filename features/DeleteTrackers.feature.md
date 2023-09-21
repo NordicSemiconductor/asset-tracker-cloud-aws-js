@@ -3,11 +3,18 @@ exampleContext:
   userPassword: secret
   userEmail: user@example.com
   tracker:
-    default:
+    <variant.device>:
       id: device-a
 needs:
   - Connect a tracker
 order: last
+variants:
+  - device: default
+  - device: agpsContainerDevice1
+  - device: agpsContainerDevice2
+  - device: pgpsContainerDevice1
+  - device: pgpsContainerDevice2
+  - device: fota
 ---
 
 # Delete trackers
@@ -19,13 +26,15 @@ order: last
 Given I am authenticated with Cognito as `${userEmail}` with password
 `${userPassword}`
 
+And I disconnect the tracker
+
 ## Delete the tracker
 
 When I execute `listThingPrincipals` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker.default.id}"
+  "thingName": "${tracker.<variant.device>.id}"
 }
 ```
 
@@ -39,7 +48,7 @@ Given I execute `detachThingPrincipal` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker.default.id}",
+  "thingName": "${tracker.<variant.device>.id}",
   "principal": "${certificateArn}"
 }
 ```
@@ -65,8 +74,6 @@ And I execute `deleteThing` of `@aws-sdk/client-iot` with
 
 ```json
 {
-  "thingName": "${tracker.default.id}"
+  "thingName": "${tracker.<variant.device>.id}"
 }
 ```
-
-And I disconnect the tracker
