@@ -2,6 +2,7 @@ import {
 	codeBlockOrThrow,
 	type StepRunner,
 	regExpMatchedStep,
+	type Logger,
 } from '@nordicsemiconductor/bdd-markdown'
 import type { World } from '../run-features'
 import { Type } from '@sinclair/typebox'
@@ -32,11 +33,13 @@ const connect = async ({
 	privateKey,
 	clientId,
 	mqttEndpoint,
+	logger,
 }: {
 	clientCert: string
 	privateKey: string
 	clientId: string
 	mqttEndpoint: string
+	logger: Logger
 }) =>
 	new Promise<mqtt.MqttClientConnection>((resolve, reject) => {
 		const cfg = iot.AwsIotMqttConnectionConfigBuilder.new_mtls_builder(
@@ -49,16 +52,15 @@ const connect = async ({
 		const client = new mqtt.MqttClient(clientBootstrap)
 		const connection = client.new_connection(cfg.build())
 		connection.on('error', (err) => {
-			console.error(err)
+			logger.debug(JSON.stringify(err))
 			reject(err)
 		})
 		connection.on('connect', () => {
-			console.log('CONNECTED')
+			logger.progress(`${clientId} connected`)
 			resolve(connection)
 		})
-		connection.connect().catch((err) => {
-			console.debug(`Failed to connect.`)
-			console.error(err)
+		connection.connect().catch(() => {
+			logger.debug(`${clientId} failed to connect.`)
 		})
 	})
 
@@ -68,9 +70,12 @@ const awsIotThingMQTTConnection = ({
 }: {
 	mqttEndpoint: string
 	certsDir: string
-}): ((clientId: string) => Promise<mqtt.MqttClientConnection>) => {
+}): ((
+	clientId: string,
+	logger: Logger,
+) => Promise<mqtt.MqttClientConnection>) => {
 	const connections: Record<string, Promise<mqtt.MqttClientConnection>> = {}
-	return async (clientId: string): Promise<mqtt.MqttClientConnection> => {
+	return async (clientId, logger): Promise<mqtt.MqttClientConnection> => {
 		const maybeConnection = connections[clientId]
 		if (maybeConnection !== undefined) return maybeConnection
 		const deviceFiles = deviceFileLocations({
@@ -90,6 +95,7 @@ const awsIotThingMQTTConnection = ({
 				privateKey,
 				clientId,
 				mqttEndpoint,
+				logger,
 			}),
 		)
 		connections[clientId] = connection
@@ -138,34 +144,18 @@ const steps: ({
 					trackerId: Type.Optional(Type.String()),
 				}),
 			},
-			async ({
-				match: { trackerId: maybeTrackerId },
-				context,
-				log: { progress },
-			}) => {
+			async ({ match: { trackerId: maybeTrackerId }, context }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					const deviceId = (await randomWords({ numWords: 3 })).join('-')
 					await createSimulatorKeyAndCSR({
 						deviceId,
 						certsDir,
-						log: (...message: any[]) => {
-							progress(`[MQTT]`, trackerId, '(cert)', ...message)
-						},
-						debug: (...message: any[]) => {
-							progress(`[MQTT]`, trackerId, '(cert)', ...message)
-						},
 					})
 					await createDeviceCertificate({
 						deviceId,
 						certsDir,
 						caId: getCurrentCA({ certsDir }),
-						log: (...message: any[]) => {
-							progress(`[MQTT]`, trackerId, '(cert)', ...message)
-						},
-						debug: (...message: any[]) => {
-							progress(`[MQTT]`, trackerId, '(cert)', ...message)
-						},
 						daysValid: 1,
 					})
 					const deviceFiles = deviceFileLocations({
@@ -201,19 +191,15 @@ const steps: ({
 					trackerId: Type.Optional(Type.String()),
 				}),
 			},
-			async ({ match: { trackerId: maybeTrackerId }, log: { progress } }) => {
+			async ({ match: { trackerId: maybeTrackerId }, log }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					throw new Error(`No certificate available for tracker ${trackerId}`)
 				}
 
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				progress(
-					`[MQTT]`,
-					trackerId,
-					`Connecting ${deviceId} to ${mqttEndpoint}`,
-				)
-				await iotConnect(deviceId)
+				log.progress(`Connecting ${deviceId} to ${mqttEndpoint}`)
+				await iotConnect(deviceId, log)
 			},
 		),
 		regExpMatchedStep(
@@ -225,17 +211,17 @@ const steps: ({
 					trackerId: Type.Optional(Type.String()),
 				}),
 			},
-			async ({ match: { trackerId: maybeTrackerId }, log: { progress } }) => {
+			async ({ match: { trackerId: maybeTrackerId }, log }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					throw new Error(`No certificate available for tracker ${trackerId}`)
 				}
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				const connection = await iotConnect(deviceId)
-				progress(`[MQTT]`, trackerId, 'disconnecting...')
+				const connection = await iotConnect(deviceId, log)
+				log.progress(`${deviceId} disconnecting...`)
 				await connection.disconnect()
 				await new Promise((resolve) => setTimeout(resolve, 5000, []))
-				progress(`[MQTT]`, trackerId, 'Closed')
+				log.progress(`${deviceId} closed...`)
 			},
 		),
 		regExpMatchedStep(
@@ -249,17 +235,13 @@ const steps: ({
 					trackerId: Type.Optional(Type.String()),
 				}),
 			},
-			async ({
-				match: { trackerId: maybeTrackerId },
-				step,
-				log: { progress },
-			}) => {
+			async ({ match: { trackerId: maybeTrackerId }, step, log }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					throw new Error(`No credentials available for tracker ${trackerId}`)
 				}
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				const connection = await iotConnect(deviceId)
+				const connection = await iotConnect(deviceId, log)
 				const shadow = new iotshadow.IotShadowClient(connection)
 
 				const reported = JSON.parse(codeBlockOrThrow(step).code)
@@ -271,7 +253,7 @@ const steps: ({
 					)
 
 					const onError = (err: any) => {
-						console.error(err)
+						log.error(err)
 						clearTimeout(timeout)
 						reject(err)
 					}
@@ -286,12 +268,12 @@ const steps: ({
 								if (error !== undefined) {
 									return onError(error)
 								}
-								progress('IoT < status', JSON.stringify(response?.state))
+								log.progress(`< status ${JSON.stringify(response?.state)}`)
 								clearTimeout(timeout)
 								resolve(response?.state)
 							},
 						)
-						.then(() => progress('IoT > reported', JSON.stringify(reported)))
+						.then(() => log.progress(`> reported ${JSON.stringify(reported)}`))
 						.then(async () =>
 							shadow.publishUpdateShadow(
 								{
@@ -320,20 +302,16 @@ const steps: ({
 					topic: Type.String(),
 				}),
 			},
-			async ({
-				match: { trackerId: maybeTrackerId, topic },
-				step,
-				log: { progress },
-			}) => {
+			async ({ match: { trackerId: maybeTrackerId, topic }, step, log }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					throw new Error(`No credentials available for tracker ${trackerId}`)
 				}
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				const connection = await iotConnect(deviceId)
+				const connection = await iotConnect(deviceId, log)
 				const message = JSON.parse(codeBlockOrThrow(step).code)
-				progress(`[MQTT]`, trackerId, `Publishing > ${topic}`)
-				progress(`[MQTT]`, trackerId, `Publishing > ${JSON.stringify(message)}`)
+				log.progress(`> ${topic}`)
+				log.progress(`> ${JSON.stringify(message)}`)
 				await new Promise<void>((resolve, reject) => {
 					const timeout = setTimeout(
 						() => reject(new Error(`Timed out!`)),
@@ -370,19 +348,27 @@ const steps: ({
 			async ({
 				match: { trackerId: maybeTrackerId, storageName },
 				context,
+				log,
 			}) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					throw new Error(`No credentials available for tracker ${trackerId}`)
 				}
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				const connection = await iotConnect(deviceId)
+				const connection = await iotConnect(deviceId, log)
 				const jobsClient = new iotjobs.IotJobsClient(connection)
 
-				const res = await new Promise((resolve, reject) => {
+				const res = await new Promise<{
+					jobId: string // e.g. '97ce393b-2877-4b14-adb8-be2418acde02'
+					status: string // e.g. 'IN_PROGRESS'
+					versionNumber: number // e.g. 2
+					executionNumber: number // e.g. 1
+					jobDocument: Record<string, any>
+				}>((resolve, reject) => {
 					const timeout = setTimeout(() => {
 						reject(new Error(`Did not receive a next job!`))
 					}, 60 * 1000)
+					let done = false
 
 					connection.on('error', (error) => {
 						clearTimeout(timeout)
@@ -400,25 +386,62 @@ const steps: ({
 									clearTimeout(timeout)
 									return reject(error)
 								}
+								log.progress(
+									`subscribeToStartNextPendingJobExecutionAccepted < ${JSON.stringify(
+										job,
+									)}`,
+								)
 								clearTimeout(timeout)
+								done = true
 								const jobId = job?.execution?.jobId
-								context[storageName] = jobId
-								resolve({ jobId })
+								if (jobId !== undefined) {
+									resolve(job?.execution as any)
+								}
 							},
 						)
 						.then(async () =>
-							jobsClient
-								.publishStartNextPendingJobExecution(
-									{
-										thingName: deviceId,
-									},
-									mqtt.QoS.AtLeastOnce,
-								)
-								.catch(reject)
-								.finally(() => {
+							jobsClient.subscribeToStartNextPendingJobExecutionRejected(
+								{
+									thingName: deviceId,
+								},
+								mqtt.QoS.AtLeastOnce,
+								(error, rejected) => {
+									if (error !== undefined) {
+										clearTimeout(timeout)
+										reject(error)
+										return
+									}
 									clearTimeout(timeout)
-								}),
+									done = true
+									reject(
+										new Error(
+											`subscribeToStartNextPendingJobExecutionRejected < ${JSON.stringify(
+												rejected,
+											)}`,
+										),
+									)
+								},
+							),
 						)
+						.then(async () => {
+							let tries = 0
+							while (!done && ++tries < 5) {
+								await new Promise((resolve) =>
+									setTimeout(resolve, tries * 1000),
+								)
+								void jobsClient
+									.publishStartNextPendingJobExecution(
+										{
+											thingName: deviceId,
+										},
+										mqtt.QoS.AtLeastOnce,
+									)
+									.catch((err) => {
+										done = true
+										reject(err)
+									})
+							}
+						})
 				})
 
 				check(res).is(
@@ -476,7 +499,7 @@ const steps: ({
 							return m
 						})
 					check(m.length).is(expectedMessageCount)
-					const result = messages.length > 1 ? messages : messages[0]
+					const result = messages.length > 1 ? m : m[0]
 
 					if (storageName !== undefined) context[storageName] = result
 				})
@@ -494,17 +517,14 @@ const steps: ({
 					topic: Type.String(),
 				}),
 			},
-			async ({
-				match: { trackerId: maybeTrackerId, topic },
-				log: { progress },
-			}) => {
+			async ({ match: { trackerId: maybeTrackerId, topic }, log }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
 					throw new Error(`No certificate available for tracker ${trackerId}`)
 				}
 				const deviceId = (trackers[trackerId] as TrackerInfo).id
-				const connection = await iotConnect(deviceId)
-				progress(`[MQTT]`, trackerId, `< subscribing to ${topic}`)
+				const connection = await iotConnect(deviceId, log)
+				log.progress(`< subscribing to ${topic}`)
 				void connection.subscribe(
 					topic,
 					mqtt.QoS.AtLeastOnce,
