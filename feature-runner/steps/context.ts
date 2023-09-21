@@ -15,8 +15,6 @@ import {
 	undefinedValue,
 	arrayMatching,
 	arrayMatchingStrictly,
-	aString,
-	anObject,
 } from 'tsmatchers'
 
 const steps: StepRunner<World & Record<string, any>>[] = [
@@ -180,66 +178,6 @@ const steps: StepRunner<World & Record<string, any>>[] = [
 			check(value).is(not(undefinedValue))
 
 			context[storageName] = JSON.parse(new TextDecoder().decode(value))
-		},
-	),
-	regExpMatchedStep(
-		{
-			regExp: new RegExp(
-				`^I encode ${matchString('expression')} into ${matchString(
-					'storageName',
-				)} using ${matchChoice('encoding', [
-					'replaceNewLines',
-					'base64',
-					'JSON',
-					'querystring',
-				])}$`,
-				'',
-			),
-			schema: Type.Object({
-				storageName: Type.String(),
-				expression: Type.String(),
-				encoding: Type.Union([
-					Type.Literal('replaceNewLines'),
-					Type.Literal('base64'),
-					Type.Literal('JSON'),
-					Type.Literal('querystring'),
-				]),
-			}),
-		},
-		async ({
-			match: { storageName, expression, encoding },
-			context,
-			log: { progress },
-		}) => {
-			let e: jsonata.Expression | undefined = undefined
-			try {
-				e = jsonata(expression)
-			} catch {
-				throw new Error(`The expression '${expression}' is not valid JSONata.`)
-			}
-
-			const value = await e.evaluate(context)
-
-			progress(value)
-
-			switch (encoding) {
-				case 'replaceNewLines':
-					check(value).is(aString)
-					context[storageName] = value.replace(/\n/g, '\\n')
-					break
-				case 'base64':
-					check(value).is(aString)
-					context[storageName] = Buffer.from(value).toString('base64')
-					break
-				case 'JSON':
-					check(value).is(anObject)
-					context[storageName] = JSON.stringify(value)
-					break
-				case 'querystring':
-					check(value).is(anObject)
-					context[storageName] = new URLSearchParams(value).toString()
-					break
-			}
 		},
 	),
 ]

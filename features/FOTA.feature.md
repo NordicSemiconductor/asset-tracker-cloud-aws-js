@@ -151,5 +151,3 @@ And I execute `deleteJobExecution` of `@aws-sdk/client-iot` with
   "executionNumber": 1
 }
 ```
-
-Then I disconnect the `fota` tracker

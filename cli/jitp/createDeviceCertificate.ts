@@ -63,8 +63,8 @@ export const createDeviceCertificate = async ({
 
 	const certWithCa = (
 		await Promise.all([
-			fs.readFile(deviceFiles.cert),
-			fs.readFile(caFiles.cert),
+			fs.readFile(deviceFiles.cert, 'utf-8'),
+			fs.readFile(caFiles.cert, 'utf-8'),
 		])
 	).join(os.EOL)
 
