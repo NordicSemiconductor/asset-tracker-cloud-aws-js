@@ -1,10 +1,11 @@
 import type { Dimension, _Record } from '@aws-sdk/client-timestream-write'
-import { writeClient } from '@nordicsemiconductor/timestream-helpers'
+import { toRecord, writeClient } from '@nordicsemiconductor/timestream-helpers'
 import { fromEnv } from '../util/fromEnv.js'
 import { batchToTimestreamRecords } from './batchToTimestreamRecords.js'
 import { messageToTimestreamRecords } from './messageToTimestreamRecords.js'
 import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords.js'
 import { storeRecordsInTimeseries } from './storeRecordsInTimeseries.js'
+import { randomUUID } from 'node:crypto'
 
 const { tableInfo } = fromEnv({
 	tableInfo: 'TABLE_INFO',
@@ -42,7 +43,25 @@ export const handler = async (
 
 	try {
 		if ('reported' in event) {
-			await storeUpdate(shadowUpdateToTimestreamRecords(event), Dimensions)
+			const { cfg, bat, ...reported } = event.reported
+			void cfg // remove from reported
+			const records = shadowUpdateToTimestreamRecords({
+				reported,
+			})
+			if (bat !== undefined) {
+				const batRecord = toRecord({
+					name: 'bat',
+					ts: bat.ts,
+					v: bat.v,
+					dimensions: {
+						measureGroup: records[0]?.Dimensions?.[0]?.Value ?? randomUUID(),
+					},
+				})
+				if (batRecord !== undefined) {
+					records.push(batRecord)
+				}
+			}
+			await storeUpdate(records, Dimensions)
 			return
 		}
 		if ('message' in event) {

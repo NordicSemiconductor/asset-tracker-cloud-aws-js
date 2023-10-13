@@ -1,27 +1,18 @@
 import { shadowUpdateToTimestreamRecords } from './shadowUpdateToTimestreamRecords.js'
 
+const Dimensions = [
+	{
+		Name: 'measureGroup',
+		Value: expect.stringMatching(
+			/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+		),
+	},
+]
+
 describe('shadowUpdateToTimestreamRecords', () => {
 	it('should convert a shadow update to Timestream records', () => {
-		const Dimensions = [
-			{
-				Name: 'measureGroup',
-				Value: expect.stringMatching(
-					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
-				),
-			},
-		]
 		const r = shadowUpdateToTimestreamRecords({
 			reported: {
-				cfg: {
-					act: false,
-					actwt: 60,
-					mvres: 300,
-					mvt: 3600,
-					loct: 60,
-					accath: 10.5,
-					accith: 5.2,
-					accito: 1.7,
-				},
 				dev: {
 					v: {
 						modV: 'device-simulator',
@@ -45,7 +36,6 @@ describe('shadowUpdateToTimestreamRecords', () => {
 					ts: 1606395292763,
 				},
 			},
-			deviceId: 'slipslop-particle-santalum',
 		})
 		expect(r).toEqual([
 			{
@@ -154,4 +144,29 @@ describe('shadowUpdateToTimestreamRecords', () => {
 		// measureGroups should equal equal for measures
 		expect(first?.Value).toEqual(last?.Value)
 	})
+
+	// null values are sent by the device to remove a property from the shadow document
+	it('should ignore properties that have null values', () =>
+		expect(
+			shadowUpdateToTimestreamRecords({
+				reported: {
+					fg: {
+						ts: 1697156932592,
+						v: {
+							V: 3916,
+							TTF: null,
+						},
+					},
+				},
+			}),
+		).toEqual([
+			{
+				Dimensions,
+				MeasureName: 'fg.V',
+				MeasureValue: '3916',
+				MeasureValueType: 'DOUBLE',
+				Time: '1697156932592',
+				TimeUnit: 'MILLISECONDS',
+			},
+		]))
 })

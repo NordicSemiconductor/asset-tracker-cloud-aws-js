@@ -1,15 +1,16 @@
 import { messageToTimestreamRecords } from './messageToTimestreamRecords.js'
 
+const Dimensions = [
+	{
+		Name: 'measureGroup',
+		Value: expect.stringMatching(
+			/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+		),
+	},
+]
+
 describe('messageToTimestreamRecords', () => {
-	it('should convert a message to Timestream records', () => {
-		const Dimensions = [
-			{
-				Name: 'measureGroup',
-				Value: expect.stringMatching(
-					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
-				),
-			},
-		]
+	it('should convert a message to Timestream records', () =>
 		expect(
 			messageToTimestreamRecords({
 				message: {
@@ -29,17 +30,8 @@ describe('messageToTimestreamRecords', () => {
 				Time: '1606474470069',
 				TimeUnit: 'MILLISECONDS',
 			},
-		])
-	})
-	it('should convert a impact message to Timestream records', () => {
-		const Dimensions = [
-			{
-				Name: 'measureGroup',
-				Value: expect.stringMatching(
-					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
-				),
-			},
-		]
+		]))
+	it('should convert a impact message to Timestream records', () =>
 		expect(
 			messageToTimestreamRecords({
 				message: {
@@ -59,6 +51,5 @@ describe('messageToTimestreamRecords', () => {
 				Time: '1606474470069',
 				TimeUnit: 'MILLISECONDS',
 			},
-		])
-	})
+		]))
 })
