@@ -60,7 +60,7 @@
     "@commitlint/config-conventional": "17.8.0",
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "12.0.98",
     "@nordicsemiconductor/bdd-markdown": "7.0.0",
-    "@nordicsemiconductor/cloudformation-helpers": "8.0.0",
+    "@nordicsemiconductor/cloudformation-helpers": "9.0.2",
     "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "16.0.22",
     "@nordicsemiconductor/object-to-env": "5.0.0",
     "@nordicsemiconductor/random-words": "7.0.0",
