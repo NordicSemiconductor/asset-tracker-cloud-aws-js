@@ -1,8 +1,10 @@
 import { cacheKey } from './cacheKey.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('cacheKey', () => {
-	it('should create a cache key', () =>
-		expect(
+void describe('cacheKey', () => {
+	void it('should create a cache key', () =>
+		assert.equal(
 			cacheKey({
 				binHours: 1,
 				request: {
@@ -13,7 +15,6 @@ describe('cacheKey', () => {
 					types: [1, 2, 3, 4, 6, 7, 8, 9],
 				},
 			}),
-		).toEqual(
 			`242-1-21626624-30401-1_2_3_4_6_7_8_9-${new Date()
 				.toISOString()
 				.slice(0, 13)

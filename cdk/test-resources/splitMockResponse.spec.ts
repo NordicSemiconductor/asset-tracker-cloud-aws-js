@@ -1,15 +1,18 @@
 import { splitMockResponse } from './splitMockResponse.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('split mock response', () => {
-	it('should parse headers and body', () =>
-		expect(
+void describe('split mock response', () => {
+	void it('should parse headers and body', () =>
+		assert.deepEqual(
 			splitMockResponse(`Content-Type: application/octet-stream
 
 (binary A-GPS data) other types`),
-		).toMatchObject({
-			headers: {
-				'Content-Type': 'application/octet-stream',
+			{
+				headers: {
+					'Content-Type': 'application/octet-stream',
+				},
+				body: '(binary A-GPS data) other types',
 			},
-			body: '(binary A-GPS data) other types',
-		}))
+		))
 })

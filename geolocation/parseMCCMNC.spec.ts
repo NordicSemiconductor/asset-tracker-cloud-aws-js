@@ -1,10 +1,13 @@
 import { parseMCCMNC } from './parseMCCMNC.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('parseMCCMNC()', () => {
-	it.each([
+void describe('parseMCCMNC()', () => {
+	for (const [mccmnc, mcc, mnc] of [
 		[310410, 310, 410],
 		[24201, 242, 1],
-	])('should parse the MCCMNC %d into MNC %d and MCC %d', (mccmnc, mcc, mnc) =>
-		expect(parseMCCMNC(mccmnc)).toEqual([mcc, mnc]),
-	)
+	] as [number, number, number][]) {
+		void it(`should parse the MCCMNC ${mccmnc} into MNC ${mnc} and MCC ${mcc}`, () =>
+			assert.deepEqual(parseMCCMNC(mccmnc), [mcc, mnc]))
+	}
 })

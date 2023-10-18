@@ -1,32 +1,38 @@
 import { commonParent } from './commonParent.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('commonParent()', () => {
-	it('should return the common parent directory', () =>
-		expect(
+void describe('commonParent()', () => {
+	void it('should return the common parent directory', () =>
+		assert.equal(
 			commonParent([
 				'/some/dir/lambda/onMessage.ts',
 				'/some/dir/lambda/notifyClients.ts',
 				'/some/dir/lambda/wirepasPublish.ts',
 				'/some/dir/wirepas-5g-mesh-gateway/protobuf/ts/data_message.ts',
 			]),
-		).toEqual('/some/dir/'))
-	it('should return the entire parent tree for a single file', () =>
-		expect(commonParent(['/some/dir/lambda/onMessage.ts'])).toEqual(
+			'/some/dir/',
+		))
+	void it('should return the entire parent tree for a single file', () =>
+		assert.equal(
+			commonParent(['/some/dir/lambda/onMessage.ts']),
 			'/some/dir/lambda/',
 		))
-	it('should return "/" if files have no common directory', () =>
-		expect(
+	void it('should return "/" if files have no common directory', () =>
+		assert.equal(
 			commonParent([
 				'/some/dir/lambda/onMessage.ts',
 				'/other/dir/lambda/onMessage.ts',
 			]),
-		).toEqual('/'))
+			'/',
+		))
 
-	it('should return the common ancestor only up until the directory level', () =>
-		expect(
+	void it('should return the common ancestor only up until the directory level', () =>
+		assert.equal(
 			commonParent([
 				'/some/dir/lambdas/cors.ts',
 				'/some/dir/lambdas/corsHeaders.ts',
 			]),
-		).toEqual('/some/dir/lambdas/'))
+			'/some/dir/lambdas/',
+		))
 })

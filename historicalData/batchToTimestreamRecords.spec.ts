@@ -1,15 +1,10 @@
 import { batchToTimestreamRecords } from './batchToTimestreamRecords.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
+import { arrayContaining, check, stringMatching, withLength } from 'tsmatchers'
 
-describe('batchToTimestreamRecords', () => {
-	it('should convert a message to Timestream records', () => {
-		const Dimensions = [
-			{
-				Name: 'measureGroup',
-				Value: expect.stringMatching(
-					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
-				),
-			},
-		]
+void describe('batchToTimestreamRecords', () => {
+	void it('should convert a message to Timestream records', () => {
 		const r = batchToTimestreamRecords({
 			batch: {
 				gnss: [
@@ -39,40 +34,57 @@ describe('batchToTimestreamRecords', () => {
 			},
 			deviceId: 'slipslop-particle-santalum',
 		})
-		expect(r).toEqual([
+		const Dimensions = [
 			{
-				Dimensions,
-				MeasureName: 'gnss.lng',
-				MeasureValue: '8.669555',
-				MeasureValueType: 'DOUBLE',
-				Time: '1606483136657',
-				TimeUnit: 'MILLISECONDS',
+				Name: 'measureGroup',
+				Value: stringMatching(
+					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+				),
 			},
-			{
-				Dimensions,
-				MeasureName: 'gnss.lat',
-				MeasureValue: '50.109177',
-				MeasureValueType: 'DOUBLE',
-				Time: '1606483136657',
-				TimeUnit: 'MILLISECONDS',
-			},
-			{
-				Dimensions,
-				MeasureName: 'gnss.lng',
-				MeasureValue: '10.424793',
-				MeasureValueType: 'DOUBLE',
-				Time: '1606483256659',
-				TimeUnit: 'MILLISECONDS',
-			},
-			{
-				Dimensions,
-				MeasureName: 'gnss.lat',
-				MeasureValue: '63.422975',
-				MeasureValueType: 'DOUBLE',
-				Time: '1606483256659',
-				TimeUnit: 'MILLISECONDS',
-			},
-		])
+		]
+		check(r).is(
+			withLength(4)
+				.and(
+					arrayContaining({
+						Dimensions,
+						MeasureName: 'gnss.lng',
+						MeasureValue: '8.669555',
+						MeasureValueType: 'DOUBLE',
+						Time: '1606483136657',
+						TimeUnit: 'MILLISECONDS',
+					}),
+				)
+				.and(
+					arrayContaining({
+						Dimensions,
+						MeasureName: 'gnss.lat',
+						MeasureValue: '50.109177',
+						MeasureValueType: 'DOUBLE',
+						Time: '1606483136657',
+						TimeUnit: 'MILLISECONDS',
+					}),
+				)
+				.and(
+					arrayContaining({
+						Dimensions,
+						MeasureName: 'gnss.lng',
+						MeasureValue: '10.424793',
+						MeasureValueType: 'DOUBLE',
+						Time: '1606483256659',
+						TimeUnit: 'MILLISECONDS',
+					}),
+				)
+				.and(
+					arrayContaining({
+						Dimensions,
+						MeasureName: 'gnss.lat',
+						MeasureValue: '63.422975',
+						MeasureValueType: 'DOUBLE',
+						Time: '1606483256659',
+						TimeUnit: 'MILLISECONDS',
+					}),
+				),
+		)
 
 		const g1lng = r?.[0]?.Dimensions?.find(
 			({ Name }) => Name === 'measureGroup',
@@ -87,12 +99,12 @@ describe('batchToTimestreamRecords', () => {
 			({ Name }) => Name === 'measureGroup',
 		)
 		// measureGroups should equal equal for measures from the same object
-		expect(g1lng?.Value).toEqual(g1lat?.Value)
-		expect(g2lng?.Value).toEqual(g2lat?.Value)
+		assert.equal(g1lng?.Value, g1lat?.Value)
+		assert.equal(g2lng?.Value, g2lat?.Value)
 		// measureGroups should equal different for each batch messages
-		expect(g1lng?.Value).not.toEqual(g2lng?.Value)
+		assert.notEqual(g1lng?.Value, g2lng?.Value)
 	})
-	it('should convert a batch message with a single value', () => {
+	void it('should convert a batch message with a single value', () => {
 		const r = batchToTimestreamRecords({
 			batch: {
 				bat: [
@@ -104,23 +116,24 @@ describe('batchToTimestreamRecords', () => {
 			},
 			deviceId: '352656100248049',
 		})
-		const Dimensions = [
-			{
-				Name: 'measureGroup',
-				Value: expect.stringMatching(
-					/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
-				),
-			},
-		]
-		expect(r).toEqual([
-			{
-				Dimensions,
-				MeasureName: 'bat',
-				MeasureValue: '4460',
-				MeasureValueType: 'DOUBLE',
-				Time: '1614959974018',
-				TimeUnit: 'MILLISECONDS',
-			},
-		])
+		check(r).is(
+			withLength(1).and(
+				arrayContaining({
+					Dimensions: [
+						{
+							Name: 'measureGroup',
+							Value: stringMatching(
+								/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i,
+							),
+						},
+					],
+					MeasureName: 'bat',
+					MeasureValue: '4460',
+					MeasureValueType: 'DOUBLE',
+					Time: '1614959974018',
+					TimeUnit: 'MILLISECONDS',
+				}),
+			),
+		)
 	})
 })

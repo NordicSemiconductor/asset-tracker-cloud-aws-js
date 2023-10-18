@@ -1,32 +1,33 @@
 import { retryCheck } from './retryCheck.js'
+import { describe, it, mock } from 'node:test'
+import assert from 'node:assert'
 
-describe('retryCheck()', () => {
-	it('should execute the check function once if it succeeds', async () => {
-		const checkFn = jest.fn(() => true).mockName('checkFn')
-		const retryFn = jest.fn(async () => Promise.resolve()).mockName('retryFn')
+void describe('retryCheck()', () => {
+	void it('should execute the check function once if it succeeds', async () => {
+		const checkFn = mock.fn(() => true)
+		const retryFn = mock.fn(async () => Promise.resolve())
 		await retryCheck(checkFn, retryFn)
-		expect(checkFn).toHaveBeenCalledTimes(1)
-		expect(retryFn).toHaveBeenCalledTimes(0)
+		assert.equal(checkFn.mock.callCount(), 1)
+		assert.equal(retryFn.mock.callCount(), 0)
 	})
-	it('should run the retry function if the check function fails', async () => {
-		const checkFn = jest.fn().mockName('checkFn')
-		checkFn.mockImplementationOnce(() => {
+	void it('should run the retry function if the check function fails', async () => {
+		const checkFn = mock.fn()
+		checkFn.mock.mockImplementationOnce(() => {
 			throw new Error()
-		})
-		checkFn.mockReturnValueOnce(true)
-		const retryFn = jest.fn(async () => Promise.resolve()).mockName('retryFn')
+		}, 0)
+		checkFn.mock.mockImplementationOnce(() => true, 1)
+		const retryFn = mock.fn(async () => Promise.resolve())
 		await retryCheck(checkFn, retryFn)
-		expect(checkFn).toHaveBeenCalledTimes(2)
-		expect(retryFn).toHaveBeenCalledTimes(1)
+		assert.equal(checkFn.mock.callCount(), 2)
+		assert.equal(retryFn.mock.callCount(), 1)
 	})
-	it('should reject with error from check function if number of retries is exceeded', async () => {
+	void it('should reject with error from check function if number of retries is exceeded', async () => {
 		const err = new Error()
-		const checkFn = jest
-			.fn(() => {
-				throw err
-			})
-			.mockName('checkFn')
-		const retryFn = jest.fn(async () => Promise.resolve()).mockName('retryFn')
+		const checkFn = mock.fn(() => {
+			throw err
+		})
+
+		const retryFn = mock.fn(async () => Promise.resolve())
 		try {
 			await retryCheck(checkFn, retryFn, {
 				tries: 3,
@@ -34,9 +35,9 @@ describe('retryCheck()', () => {
 				maxDelay: 0,
 			})
 		} catch (error) {
-			expect(error).toEqual(err)
+			assert.equal(error, err)
 		}
-		expect(checkFn).toHaveBeenCalledTimes(3)
-		expect(retryFn).toHaveBeenCalledTimes(2)
+		assert.equal(checkFn.mock.callCount(), 3)
+		assert.equal(retryFn.mock.callCount(), 2)
 	})
 })

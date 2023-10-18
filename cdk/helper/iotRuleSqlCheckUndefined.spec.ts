@@ -1,8 +1,11 @@
 import { iotRuleSqlCheckUndefined } from './iotRuleSqlCheckUndefined.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('iotRuleSqlCheckUndefined', () => {
-	it('should check for undefined for the given values', () =>
-		expect(iotRuleSqlCheckUndefined(['foo', 'bar'])).toEqual(
+void describe('iotRuleSqlCheckUndefined', () => {
+	void it('should check for undefined for the given values', () =>
+		assert.equal(
+			iotRuleSqlCheckUndefined(['foo', 'bar']),
 			'isUndefined(foo) = false AND isUndefined(bar) = false',
 		))
 })

@@ -1,14 +1,13 @@
 import type { Static } from '@sinclair/typebox'
 import Ajv from 'ajv'
 import { groundFixRequestSchema } from './groundFixRequestSchema.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
 const ajv = new Ajv()
-// see @https://github.com/sinclairzx81/typebox/issues/51
-ajv.addKeyword('kind')
-ajv.addKeyword('modifier')
 
-describe('groundFixRequestSchema', () => {
-	it('should throw error if a request with only 1 wifi access point', () => {
+void describe('groundFixRequestSchema', () => {
+	void it('should throw error if a request with only 1 wifi access point', () => {
 		const v = ajv.compile(groundFixRequestSchema)
 		const request: Static<typeof groundFixRequestSchema> = {
 			wifi: {
@@ -20,11 +19,11 @@ describe('groundFixRequestSchema', () => {
 			},
 		}
 		const valid = v(request)
-		expect(v.errors).not.toBeNull()
-		expect(valid).toEqual(false)
+		assert.notEqual(v.errors, null)
+		assert.equal(valid, false)
 	})
 
-	it('should validate a request with 2 wifi access points as minimum requirements', () => {
+	void it('should validate a request with 2 wifi access points as minimum requirements', () => {
 		const v = ajv.compile(groundFixRequestSchema)
 		const request: Static<typeof groundFixRequestSchema> = {
 			wifi: {
@@ -40,11 +39,11 @@ describe('groundFixRequestSchema', () => {
 			},
 		}
 		const valid = v(request)
-		expect(v.errors).toBeNull()
-		expect(valid).toEqual(true)
+		assert.equal(v.errors, null)
+		assert.equal(valid, true)
 	})
 
-	it('should validate a request with full details of wifi access points', () => {
+	void it('should validate a request with full details of wifi access points', () => {
 		const v = ajv.compile(groundFixRequestSchema)
 		const request: Static<typeof groundFixRequestSchema> = {
 			wifi: {
@@ -232,11 +231,11 @@ describe('groundFixRequestSchema', () => {
 			},
 		}
 		const valid = v(request)
-		expect(v.errors).toBeNull()
-		expect(valid).toEqual(true)
+		assert.equal(v.errors, null)
+		assert.equal(valid, true)
 	})
 
-	it('should validate a neighboring cell request', () => {
+	void it('should validate a neighboring cell request', () => {
 		const v = ajv.compile(groundFixRequestSchema)
 		const request: Static<typeof groundFixRequestSchema> = {
 			lte: [
@@ -267,7 +266,7 @@ describe('groundFixRequestSchema', () => {
 			],
 		}
 		const valid = v(request)
-		expect(v.errors).toBeNull()
-		expect(valid).toEqual(true)
+		assert.equal(v.errors, null)
+		assert.equal(valid, true)
 	})
 })

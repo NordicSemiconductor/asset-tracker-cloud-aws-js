@@ -1,14 +1,17 @@
 import { extractRepoAndOwner } from './extract-repo-and-owner.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('extractRepoAndOwner()', () => {
-	it('should parse a git repo', () => {
-		expect(
+void describe('extractRepoAndOwner()', () => {
+	void it('should parse a git repo', () => {
+		assert.deepEqual(
 			extractRepoAndOwner(
 				'git+https://github.com/NordicSemiconductor/asset-tracker-cloud-aws-js.git',
 			),
-		).toEqual({
-			owner: 'NordicSemiconductor',
-			repo: 'asset-tracker-cloud-aws-js',
-		})
+			{
+				owner: 'NordicSemiconductor',
+				repo: 'asset-tracker-cloud-aws-js',
+			},
+		)
 	})
 })

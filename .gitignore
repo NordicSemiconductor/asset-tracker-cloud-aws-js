@@ -10,3 +10,4 @@ certificates/
 log.log
 tsconfig.tsbuildinfo
 e2e-test-result.json
+test_suite_analysis/

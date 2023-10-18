@@ -1,10 +1,13 @@
 import { expandMac } from './expandMac.js'
+import { describe, it } from 'node:test'
+import assert from 'node:assert'
 
-describe('expandMac()', () => {
-	it.each([
+void describe('expandMac()', () => {
+	for (const [original, expanded] of [
 		['80e01d098f6e', '80:e0:1d:09:8f:6e'],
 		['80:e0:1d:09:8f:6e', '80:e0:1d:09:8f:6e'],
-	])('should expand the mac %s to %s', (original, expanded) =>
-		expect(expandMac(original)).toEqual(expanded),
-	)
+	] as [string, string][]) {
+		void it(`should expand the mac ${original} to ${expanded}`, () =>
+			assert.equal(expandMac(original), expanded))
+	}
 })
