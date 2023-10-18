@@ -10,8 +10,8 @@ needs:
 order: last
 variants:
   - device: default
-  - device: agpsContainerDevice1
-  - device: agpsContainerDevice2
+  - device: agnssContainerDevice1
+  - device: agnssContainerDevice2
   - device: pgpsContainerDevice1
   - device: pgpsContainerDevice2
   - device: fota

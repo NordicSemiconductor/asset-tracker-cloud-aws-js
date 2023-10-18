@@ -3,7 +3,7 @@ import { validateWithType } from '@nordicsemiconductor/asset-tracker-cloud-docs/
 import { verify } from '@nordicsemiconductor/nrfcloud-location-services-tests'
 import { Type, type Static } from '@sinclair/typebox'
 import { URL } from 'url'
-import { AGPSType, agpsRequestSchema } from '../../agps/types.js'
+import { AGNSSType, agnssRequestSchema } from '../../agnss/types.js'
 import type { ErrorInfo } from '../../api/ErrorInfo.js'
 import { fromEnv } from '../../util/fromEnv.js'
 import { apiClient } from './apiclient.js'
@@ -27,21 +27,20 @@ const apiRequestSchema = Type.Object(
 	{
 		eci: PositiveInteger,
 		tac: PositiveInteger,
-		requestType: Type.RegEx(/^custom$/),
 		mcc: Type.Integer({ minimum: 100, maximum: 999 }),
 		mnc: Type.Integer({ minimum: 0, maximum: 999 }),
-		customTypes: Type.Array(Type.Enum(AGPSType), { minItems: 1 }),
+		types: Type.Array(Type.Enum(AGNSSType), { minItems: 1 }),
 	},
 	{ additionalProperties: false },
 )
 
-const validateInput = validateWithType(agpsRequestSchema)
+const validateInput = validateWithType(agnssRequestSchema)
 
 export const handler = async (
-	agps: Static<typeof agpsRequestSchema>,
+	agnss: Static<typeof agnssRequestSchema>,
 ): Promise<{ resolved: boolean; dataHex?: readonly string[] }> => {
-	console.log(JSON.stringify({ event: agps }))
-	const maybeValidInput = validateInput(agps)
+	console.log(JSON.stringify({ event: agnss }))
+	const maybeValidInput = validateInput(agnss)
 	if ('errors' in maybeValidInput) {
 		console.error(JSON.stringify(maybeValidInput))
 		return {
@@ -55,24 +54,25 @@ export const handler = async (
 	const { mcc, mnc, cell, area, types } = maybeValidInput.value
 
 	// Split requests, so that request for Ephemerides is a separate one
-	const otherTypesInRequest = types.filter((t) => t !== AGPSType.Ephemerides)
+	const otherTypesInRequest = types.filter(
+		(t) => t !== AGNSSType['GPS Ephemerides'],
+	)
 	const requestTypes = []
-	if (types.includes(AGPSType.Ephemerides))
-		requestTypes.push([AGPSType.Ephemerides])
+	if (types.includes(AGNSSType['GPS Ephemerides']))
+		requestTypes.push([AGNSSType['GPS Ephemerides']])
 	if (otherTypesInRequest.length > 0) requestTypes.push(otherTypesInRequest)
 
 	try {
 		const res = await Promise.all(
 			requestTypes.map(async (types) => {
 				const request = {
-					resource: 'location/agps',
+					resource: 'location/agnss',
 					payload: {
 						eci: cell,
 						tac: area,
-						requestType: 'custom',
 						mcc,
 						mnc,
-						customTypes: types,
+						types,
 					},
 					headers: {
 						'Content-Type': 'application/octet-stream',
@@ -87,13 +87,13 @@ export const handler = async (
 
 				if ('error' in headers) {
 					throw new Error(
-						`Failed the request A-GPS data info: ${
+						`Failed the request A-GNSS data info: ${
 							(headers.error as ErrorInfo).message
 						}`,
 					)
 				}
 
-				const agpsData = await c.getBinary({
+				const agnssData = await c.getBinary({
 					...request,
 					headers: {
 						...request.headers,
@@ -102,21 +102,21 @@ export const handler = async (
 					requestSchema: apiRequestSchema,
 				})
 
-				if ('error' in agpsData) {
+				if ('error' in agnssData) {
 					throw new Error(
-						`Failed the request A-GPS data: ${agpsData.error.message}`,
+						`Failed the request A-GNSS data: ${agnssData.error.message}`,
 					)
 				}
 
-				const agpsDataInfo = verify(agpsData)
+				const agnssDataInfo = verify(agnssData)
 
-				if ('error' in agpsDataInfo) {
+				if ('error' in agnssDataInfo) {
 					throw new Error(
-						`Failed the request A-GPS data: ${agpsDataInfo.error.message}`,
+						`Failed the request A-GNSS data: ${agnssDataInfo.error.message}`,
 					)
 				}
-				console.log(JSON.stringify({ agpsData: agpsDataInfo }))
-				return agpsData.toString('hex')
+				console.log(JSON.stringify({ agnssData: agnssDataInfo }))
+				return agnssData.toString('hex')
 			}),
 		)
 		// If any request fails, mark operation as failed
