@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-node --loader tsx --no-warnings ./cli/cli.ts "$@"
+node --import tsx --no-warnings ./cli/cli.ts "$@"
