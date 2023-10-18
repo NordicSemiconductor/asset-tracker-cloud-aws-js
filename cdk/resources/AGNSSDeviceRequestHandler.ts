@@ -5,8 +5,8 @@ import Lambda from 'aws-cdk-lib/aws-lambda'
 import SQS from 'aws-cdk-lib/aws-sqs'
 import { iotRuleSqlCheckUndefined } from '../helper/iotRuleSqlCheckUndefined.js'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
-import type { AGPSResolver } from './AGPSResolver.js'
-import type { AGPSStorage } from './AGPSStorage.js'
+import type { AGNSSResolver } from './AGNSSResolver.js'
+import type { AGNSSStorage } from './AGNSSStorage.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 import Logs from 'aws-cdk-lib/aws-logs'
 
@@ -29,7 +29,7 @@ export const MAX_RESOLUTION_TIME_IN_MINUTES = 10
  *     • persist a temporary entry in the cache table so other items won't try to start execution as well
  *     • return item to queue (which will later call the lambda again with the item)
  */
-export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
+export class AGNSSDeviceRequestHandler extends CloudFormation.Resource {
 	public constructor(
 		parent: CloudFormation.Stack,
 		id: string,
@@ -39,8 +39,8 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			resolver,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
-			storage: AGPSStorage
-			resolver: AGPSResolver
+			storage: AGNSSStorage
+			resolver: AGNSSResolver
 		},
 	) {
 		super(parent, id)
@@ -71,13 +71,13 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 		})
 		queue.grantSendMessages(topicRuleRole)
 
-		new IoT.CfnTopicRule(this, 'deviceAGPSRequestRule', {
+		new IoT.CfnTopicRule(this, 'deviceAGNSSRequestRule', {
 			topicRulePayload: {
 				description:
-					'Devices request A-GPS data by publishing the the AWS IoT topic <deviceId>/agps/get. This puts all requests in a queue so we can resolved the requested data, but also ensure that we do not hit the third part APIs if many devices request the same assistance data at once (cargo container scenario).',
+					'Devices request A-GNSS data by publishing the the AWS IoT topic <deviceId>/agnss/get. This puts all requests in a queue so we can resolved the requested data, but also ensure that we do not hit the third part APIs if many devices request the same assistance data at once (cargo container scenario).',
 				ruleDisabled: false,
 				awsIotSqlVersion: '2016-03-23',
-				sql: `SELECT mcc, mnc, cell, area, phycell, types, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/agps/get' WHERE ${iotRuleSqlCheckUndefined(
+				sql: `SELECT mcc, mnc, cell, area, phycell, types, clientid() as deviceId, parse_time("yyyy-MM-dd'T'HH:mm:ss.S'Z'", timestamp()) as timestamp FROM '+/agnss/get' WHERE ${iotRuleSqlCheckUndefined(
 					['mcc', 'mnc', 'cell', 'area', 'types'], // phycell is optional
 				)}`,
 				actions: [
@@ -103,16 +103,16 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			'deviceRequestHandler',
 			{
 				layers: lambdas.layers,
-				handler: lambdas.lambdas.agpsDeviceRequestHandler.handler,
+				handler: lambdas.lambdas.agnssDeviceRequestHandler.handler,
 				architecture: Lambda.Architecture.ARM_64,
 				runtime: Lambda.Runtime.NODEJS_18_X,
 				timeout: CloudFormation.Duration.minutes(1),
 				memorySize: 1792,
 				code: Lambda.Code.fromAsset(
-					lambdas.lambdas.agpsDeviceRequestHandler.zipFile,
+					lambdas.lambdas.agnssDeviceRequestHandler.zipFile,
 				),
 				description:
-					'Handles A-GPS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
+					'Handles A-GNSS requests which have been queued, either by fullfilling them by using the resolved data, or by starting a new resolution',
 				environment: {
 					CACHE_TABLE: storage.cacheTable.tableName,
 					VERSION: this.node.tryGetContext('version'),
@@ -126,7 +126,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 					new IAM.PolicyStatement({
 						actions: ['iot:Publish'],
 						resources: [
-							`arn:aws:iot:${parent.region}:${parent.account}:topic/*/agps`,
+							`arn:aws:iot:${parent.region}:${parent.account}:topic/*/agnss`,
 						],
 					}),
 				],
@@ -134,7 +134,7 @@ export class AGPSDeviceRequestHandler extends CloudFormation.Resource {
 			},
 		)
 
-		// Invoke lambda for all A-GPS requests from devices
+		// Invoke lambda for all A-GNSS requests from devices
 		new Lambda.EventSourceMapping(this, 'invokeLambdaFromNotificationQueue', {
 			eventSourceArn: queue.queueArn,
 			target: deviceRequestHandler,

@@ -6,13 +6,13 @@ import StepFunctions, { DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions'
 import StepFunctionTasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
 import type { AssetTrackerLambdas } from '../stacks/AssetTracker/lambdas.js'
 import { CORE_STACK_NAME } from '../stacks/stackName.js'
-import type { AGPSStorage } from './AGPSStorage.js'
+import type { AGNSSStorage } from './AGNSSStorage.js'
 import type { LambdasWithLayer } from './LambdasWithLayer.js'
 
 /**
- * Provides a state machine that can resolve A-GPS requests
+ * Provides a state machine that can resolve A-GNSS requests
  */
-export class AGPSResolver extends CloudFormation.Resource {
+export class AGNSSResolver extends CloudFormation.Resource {
 	public readonly stateMachine: StepFunctions.IStateMachine
 	public constructor(
 		parent: CloudFormation.Stack,
@@ -22,22 +22,22 @@ export class AGPSResolver extends CloudFormation.Resource {
 			storage,
 		}: {
 			lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']>
-			storage: AGPSStorage
+			storage: AGNSSStorage
 		},
 	) {
 		super(parent, id)
 
 		const fromNrfCloud = new Lambda.Function(this, 'fromNrfCloud', {
 			layers: lambdas.layers,
-			handler: lambdas.lambdas.agpsNrfCloudStepFunction.handler,
+			handler: lambdas.lambdas.agnssNrfCloudStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
 			runtime: Lambda.Runtime.NODEJS_18_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: Lambda.Code.fromAsset(
-				lambdas.lambdas.agpsNrfCloudStepFunction.zipFile,
+				lambdas.lambdas.agnssNrfCloudStepFunction.zipFile,
 			),
-			description: 'Use the nRF Cloud API to provide A-GPS data for devices',
+			description: 'Use the nRF Cloud API to provide A-GNSS data for devices',
 			initialPolicy: [
 				new IAM.PolicyStatement({
 					actions: ['ssm:GetParametersByPath'],
@@ -78,7 +78,7 @@ export class AGPSResolver extends CloudFormation.Resource {
 					':unresolved':
 						StepFunctionTasks.DynamoAttributeValue.fromBoolean(false),
 					':dataHex': StepFunctionTasks.DynamoAttributeValue.fromStringSet(
-						StepFunctions.JsonPath.listAt('$.agps.dataHex'),
+						StepFunctions.JsonPath.listAt('$.agnss.dataHex'),
 					),
 					':updatedAt': StepFunctionTasks.DynamoAttributeValue.fromString(
 						StepFunctions.JsonPath.stringAt('$$.State.EnteredTime'),
@@ -117,7 +117,7 @@ export class AGPSResolver extends CloudFormation.Resource {
 			this,
 			'no: mark request as not resolved',
 			{
-				resultPath: '$.agps',
+				resultPath: '$.agnss',
 				result: StepFunctions.Result.fromObject({ located: false }),
 			},
 		)
@@ -125,7 +125,7 @@ export class AGPSResolver extends CloudFormation.Resource {
 			.next(
 				new StepFunctions.Fail(this, 'Failed (no resolution)', {
 					error: 'FAILED',
-					cause: 'The A-GPS request could not be resolved',
+					cause: 'The A-GNSS request could not be resolved',
 				}),
 			)
 
@@ -148,7 +148,7 @@ export class AGPSResolver extends CloudFormation.Resource {
 		 * This is not possible with EXPRESS StepFunctions.
 		 */
 		this.stateMachine = new StepFunctions.StateMachine(this, 'StateMachine', {
-			stateMachineName: `${this.stack.stackName}-agps`,
+			stateMachineName: `${this.stack.stackName}-agnss`,
 			stateMachineType: StepFunctions.StateMachineType.STANDARD,
 			definitionBody: DefinitionBody.fromChainable(
 				fetchCache.next(
@@ -172,13 +172,13 @@ export class AGPSResolver extends CloudFormation.Resource {
 								{
 									lambdaFunction: fromNrfCloud,
 									payloadResponseOnly: true,
-									resultPath: '$.agps',
+									resultPath: '$.agnss',
 								},
 							).next(
 								new StepFunctions.Choice(this, 'resolved from nRF Cloud API')
 									.when(
 										StepFunctions.Condition.booleanEquals(
-											`$.agps.resolved`,
+											`$.agnss.resolved`,
 											true,
 										),
 										persistResult,

@@ -2,9 +2,9 @@ import CloudFormation from 'aws-cdk-lib'
 import DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 
 /**
- * Provides storage for A-GPS requests
+ * Provides storage for A-GNSS requests
  */
-export class AGPSStorage extends CloudFormation.Resource {
+export class AGNSSStorage extends CloudFormation.Resource {
 	public readonly cacheTable: DynamoDB.ITable
 	public constructor(parent: CloudFormation.Stack, id: string) {
 		super(parent, id)
