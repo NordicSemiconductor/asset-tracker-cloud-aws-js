@@ -69,7 +69,7 @@
     "@swc/core": "1.3.93",
     "@swc/jest": "0.2.29",
     "@types/aws-lambda": "8.10.125",
-    "@types/backoff": "2.5.3",
+    "@types/backoff": "2.5.4",
     "@types/cfn-response": "1.0.6",
     "@types/jest": "29.5.5",
     "@types/jsonwebtoken": "9.0.3",
