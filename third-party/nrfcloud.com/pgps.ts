@@ -88,7 +88,7 @@ export const handler = async (
 	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const { n, int, day, time } = maybeValidInput
+	const { n, int, day, time } = maybeValidInput.value
 
 	const result = await c.get({
 		resource: 'location/pgps',

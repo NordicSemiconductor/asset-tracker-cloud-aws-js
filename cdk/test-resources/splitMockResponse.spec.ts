@@ -7,12 +7,12 @@ void describe('split mock response', () => {
 		assert.deepEqual(
 			splitMockResponse(`Content-Type: application/octet-stream
 
-(binary A-GPS data) other types`),
+(binary A-GNSS data) other types`),
 			{
 				headers: {
 					'Content-Type': 'application/octet-stream',
 				},
-				body: '(binary A-GPS data) other types',
+				body: '(binary A-GNSS data) other types',
 			},
 		))
 })

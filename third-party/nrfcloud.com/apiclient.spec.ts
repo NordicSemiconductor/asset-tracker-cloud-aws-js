@@ -8,11 +8,10 @@ void describe('nRF Cloud API client', () => {
 			toQueryString({
 				eci: 21626624,
 				tac: 30401,
-				requestType: 'custom',
 				mcc: 242,
 				mnc: 1,
-				customTypes: [1, 2, 3, 4, 6, 7, 8, 9],
+				types: [1, 2, 3, 4, 6, 7, 8, 9],
 			}),
-			'?eci=21626624&tac=30401&requestType=custom&mcc=242&mnc=1&customTypes=1,2,3,4,6,7,8,9',
+			'?eci=21626624&tac=30401&mcc=242&mnc=1&types=1,2,3,4,6,7,8,9',
 		))
 })

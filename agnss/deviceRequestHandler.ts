@@ -14,8 +14,8 @@ import type { SQSEvent, SQSMessageAttributes } from 'aws-lambda'
 import { randomUUID } from 'node:crypto'
 import { fromEnv } from '../util/fromEnv.js'
 import { cacheKey } from './cacheKey.js'
-import { getCache, type AGPSDataCache } from './getCache.js'
-import type { agpsRequestSchema } from './types.js'
+import { getCache, type AGNSSDataCache } from './getCache.js'
+import type { agnssRequestSchema } from './types.js'
 
 const {
 	binHoursString,
@@ -51,7 +51,7 @@ const c = getCache({
 	TableName,
 })
 
-type AGPSRequestFromIoTRule = Static<typeof agpsRequestSchema> & {
+type AGNSSRequestFromIoTRule = Static<typeof agnssRequestSchema> & {
 	deviceId: string
 	timestamp: string
 }
@@ -63,7 +63,7 @@ const sqs = new SQSClient({})
 const sf = new SFNClient({})
 
 // Keep a local cache in case many devices requests the same location
-const resolvedRequests: Record<string, AGPSDataCache> = {}
+const resolvedRequests: Record<string, AGNSSDataCache> = {}
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	console.log(JSON.stringify({ event }))
@@ -72,7 +72,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		messageAttributes,
 	})) as {
 		messageAttributes: SQSMessageAttributes
-		request: AGPSRequestFromIoTRule
+		request: AGNSSRequestFromIoTRule
 	}[]
 	console.log(JSON.stringify({ deviceRequests }))
 
@@ -91,7 +91,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			string,
 			{
 				messageAttributes: SQSMessageAttributes
-				request: AGPSRequestFromIoTRule
+				request: AGNSSRequestFromIoTRule
 			}[]
 		>,
 	)
@@ -184,7 +184,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 							console.debug(cacheKey, 'Processing of the request is finished')
 							resolvedRequests[cacheKey] = d
 							if (d.unresolved === true) {
-								console.error(cacheKey, `A-GPS request is unresolved.`)
+								console.error(cacheKey, `A-GNSS request is unresolved.`)
 								return
 							}
 						}
@@ -207,14 +207,14 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						deviceRequests.map(async (deviceRequest) =>
 							Promise.all(
 								(resolvedRequests[cacheKey]?.dataHex ?? []).map(
-									async (agpsdata) => {
+									async (agnssdata) => {
 										console.log(
-											`Sending ${agpsdata.length} bytes to ${deviceRequest.request.deviceId}`,
+											`Sending ${agnssdata.length} bytes to ${deviceRequest.request.deviceId}`,
 										)
 										return iotData.send(
 											new PublishCommand({
-												topic: `${deviceRequest.request.deviceId}/agps`,
-												payload: Buffer.from(agpsdata, 'hex'),
+												topic: `${deviceRequest.request.deviceId}/agnss`,
+												payload: Buffer.from(agnssdata, 'hex'),
 												qos: 1,
 											}),
 										)

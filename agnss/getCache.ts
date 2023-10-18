@@ -2,9 +2,9 @@ import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { unmarshall } from '@aws-sdk/util-dynamodb'
 import type { Static } from '@sinclair/typebox'
 import { ErrorType, type ErrorInfo } from '../api/ErrorInfo.js'
-import type { agpsRequestSchema } from './types.js'
+import type { agnssRequestSchema } from './types.js'
 
-export type AGPSDataCache = Static<typeof agpsRequestSchema> & {
+export type AGNSSDataCache = Static<typeof agnssRequestSchema> & {
 	source: string
 	dataHex?: string[]
 	unresolved?: boolean
@@ -13,7 +13,7 @@ export type AGPSDataCache = Static<typeof agpsRequestSchema> & {
 
 export const getCache =
 	({ dynamodb, TableName }: { dynamodb: DynamoDBClient; TableName: string }) =>
-	async (cacheKey: string): Promise<{ error: ErrorInfo } | AGPSDataCache> => {
+	async (cacheKey: string): Promise<{ error: ErrorInfo } | AGNSSDataCache> => {
 		try {
 			const { Item } = await dynamodb.send(
 				new GetItemCommand({
@@ -37,7 +37,7 @@ export const getCache =
 					entry.dataHex !== undefined
 						? [...(entry.dataHex as Set<string>)]
 						: undefined,
-			} as AGPSDataCache
+			} as AGNSSDataCache
 		} catch (err) {
 			if (
 				(err as Error).message === 'NOT_FOUND' ||

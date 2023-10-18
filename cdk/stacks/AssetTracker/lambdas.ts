@@ -12,8 +12,8 @@ export type AssetTrackerLambdas = {
 		geolocateFromCacheStepFunction: PackedLambda
 		geolocateCellFromNrfCloudStepFunction: PackedLambda
 		cacheCellGeolocationStepFunction: PackedLambda
-		agpsDeviceRequestHandler: PackedLambda
-		agpsNrfCloudStepFunction: PackedLambda
+		agnssDeviceRequestHandler: PackedLambda
+		agnssNrfCloudStepFunction: PackedLambda
 		pgpsDeviceRequestHandler: PackedLambda
 		pgpsNrfCloudStepFunction: PackedLambda
 		geolocateNetworkSurveyHttpApi: PackedLambda
@@ -61,13 +61,13 @@ export const prepareAssetTrackerLambdas =
 				'geolocateCellHttpApi',
 				'cellGeolocation/httpApi/cell.ts',
 			),
-			agpsDeviceRequestHandler: await packLambdaFromPath(
-				'agpsDeviceRequestHandler',
-				'agps/deviceRequestHandler.ts',
+			agnssDeviceRequestHandler: await packLambdaFromPath(
+				'agnssDeviceRequestHandler',
+				'agnss/deviceRequestHandler.ts',
 			),
-			agpsNrfCloudStepFunction: await packLambdaFromPath(
-				'agpsNrfCloudStepFunction',
-				'third-party/nrfcloud.com/agps.ts',
+			agnssNrfCloudStepFunction: await packLambdaFromPath(
+				'agnssNrfCloudStepFunction',
+				'third-party/nrfcloud.com/agnss.ts',
 			),
 			pgpsDeviceRequestHandler: await packLambdaFromPath(
 				'pgpsDeviceRequestHandler',

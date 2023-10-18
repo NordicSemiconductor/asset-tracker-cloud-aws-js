@@ -1,31 +1,31 @@
 ---
 variants:
-  - device: agpsContainerDevice1
-  - device: agpsContainerDevice2
+  - device: agnssContainerDevice1
+  - device: agnssContainerDevice2
 needs:
-  - A-GPS
+  - A-GNSS
   - Connect a tracker
   - Register a new account
 exampleContext:
   userPassword: secret
   userEmail: user@example.com
   tracker:
-    agpsContainerDevice1:
+    agnssContainerDevice1:
       id: device-a
-    agpsContainerDevice2:
+    agnssContainerDevice2:
       id: device-b
 ---
 
-# A-GPS Data Fan Out (The cargo container scenario)
+# A-GNSS Data Fan Out (The cargo container scenario)
 
 > In this scenario hundreds, or thousands of devices are unloaded from a steel
 > walled cargo container (intermodal container). All of them connect to the
-> cellular network, and the same cell tower, and request A-GPS data, because
+> cellular network, and the same cell tower, and request A-GNSS data, because
 > they have been offline for weeks while being shipped over the ocean.
 >
-> While all devices should receive A-GPS data as per their request, we do not
+> While all devices should receive A-GNSS data as per their request, we do not
 > want to hammer to third-party API with thousands of requests for the same
-> A-GPS data.
+> A-GNSS data.
 
 ## Register and connect device
 
@@ -33,31 +33,31 @@ Given I generate a certificate for the `<variant.device>` tracker
 
 And I connect the `<variant.device>` tracker
 
-## Request A-GPS data
+## Request A-GNSS data
 
 Given the `<variant.device>` tracker is subscribed to the topic
-`${tracker.<variant.device>.id}/agps`
+`${tracker.<variant.device>.id}/agnss`
 
 When the `<variant.device>` tracker publishes this message to the topic
-`${tracker.<variant.device>.id}/agps/get`
+`${tracker.<variant.device>.id}/agnss/get`
 
 ```json
 {
-  "mcc": "$number{agpsMcc}",
-  "mnc": "$number{agpsMnc}",
-  "cell": "$number{agpsCellId}",
-  "area": "$number{agpsArea}",
+  "mcc": "$number{agnssMcc}",
+  "mnc": "$number{agnssMnc}",
+  "cell": "$number{agnssCellId}",
+  "area": "$number{agnssArea}",
   "types": [1, 2, 3, 4, 6, 7, 8, 9]
 }
 ```
 
 Soon the `<variant.device>` tracker receives `2` raw messages on the topic
-`${tracker.<variant.device>.id}/agps` into `agpsData`
+`${tracker.<variant.device>.id}/agnss` into `agnssData`
 
 Then
-`$length($filter(agpsData, function($v) { $contains($v, '01010100f9fffffffeffffff0f7b12890612031f00017') })) > 0`
+`$length($filter(agnssData, function($v) { $contains($v, '01010100f9fffffffeffffff0f7b12890612031f00017') })) > 0`
 should equal true
 
 And
-`$length($filter(agpsData, function($v) { $contains($v, '01021e0001006400c675009cff859f13000b0000c6753') })) > 0`
+`$length($filter(agnssData, function($v) { $contains($v, '01021e0001006400c675009cff859f13000b0000c6753') })) > 0`
 should equal true

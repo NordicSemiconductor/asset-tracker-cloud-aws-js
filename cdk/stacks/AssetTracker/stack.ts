@@ -4,9 +4,9 @@ import IAM from 'aws-cdk-lib/aws-iam'
 import Iot from 'aws-cdk-lib/aws-iot'
 import Lambda from 'aws-cdk-lib/aws-lambda'
 import { warn } from '../../helper/note.js'
-import { AGPSDeviceRequestHandler } from '../../resources/AGPSDeviceRequestHandler.js'
-import { AGPSResolver } from '../../resources/AGPSResolver.js'
-import { AGPSStorage } from '../../resources/AGPSStorage.js'
+import { AGNSSDeviceRequestHandler } from '../../resources/AGNSSDeviceRequestHandler.js'
+import { AGNSSResolver } from '../../resources/AGNSSResolver.js'
+import { AGNSSStorage } from '../../resources/AGNSSStorage.js'
 import { CellGeolocation } from '../../resources/CellGeolocation.js'
 import { CellGeolocationApi } from '../../resources/CellGeolocationApi.js'
 import { FOTAStorage } from '../../resources/FOTAStorage.js'
@@ -471,16 +471,16 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			exportName: StackOutputs.geolocationApiId,
 		})
 
-		// A-GPS support
-		const agpsStorage = new AGPSStorage(this, 'agpsStorage')
-		const agpsResolver = new AGPSResolver(this, 'agpsResolver', {
-			storage: agpsStorage,
+		// A-GNSS support
+		const agnssStorage = new AGNSSStorage(this, 'agnssStorage')
+		const agnssResolver = new AGNSSResolver(this, 'agnssResolver', {
+			storage: agnssStorage,
 			lambdas,
 		})
-		new AGPSDeviceRequestHandler(this, 'agpsDeviceRequestHandler', {
+		new AGNSSDeviceRequestHandler(this, 'agnssDeviceRequestHandler', {
 			lambdas,
-			storage: agpsStorage,
-			resolver: agpsResolver,
+			storage: agnssStorage,
+			resolver: agnssResolver,
 		})
 
 		// P-GPS support
