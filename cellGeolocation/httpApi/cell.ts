@@ -50,8 +50,6 @@ const cellInputSchema = Type.Object(
 	{ additionalProperties: false },
 )
 
-console.log(JSON.stringify(cellInputSchema, null, 2))
-
 const validateInput = validateWithType(cellInputSchema)
 
 const allMembersToInt = (o: Record<string, any>): Record<string, number> =>
