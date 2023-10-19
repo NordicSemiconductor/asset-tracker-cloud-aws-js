@@ -70,7 +70,7 @@ export const handler = async (
 		return res(toStatusCode[ErrorType.BadRequest])(maybeValidRequest.errors)
 	}
 
-	const maybeSurvey = await locator(maybeValidRequest.id)
+	const maybeSurvey = await locator(maybeValidRequest.value.id)
 	if ('error' in maybeSurvey) {
 		if (maybeSurvey.error.type === ErrorType.EntityNotFound) {
 			return res(toStatusCode[maybeSurvey.error.type], {

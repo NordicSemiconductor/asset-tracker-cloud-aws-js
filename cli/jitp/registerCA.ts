@@ -8,6 +8,8 @@ import {
 	RegisterCACertificateCommand,
 	UpdateEventConfigurationsCommand,
 	type Tag,
+	EventType,
+	type Configuration,
 } from '@aws-sdk/client-iot'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 import { randomUUID } from 'crypto'
@@ -111,7 +113,7 @@ export const registerCA = async ({
 				CERTIFICATE: {
 					Enabled: true,
 				},
-			},
+			} as Record<EventType, Configuration>,
 		}),
 	)
 

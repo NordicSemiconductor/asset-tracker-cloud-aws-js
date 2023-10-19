@@ -72,12 +72,12 @@ export const handler = async (
 	if ('errors' in maybeValidInput) {
 		return res(toStatusCode[ErrorType.BadRequest])(maybeValidInput.errors)
 	}
-	const cell = await locator(maybeValidInput)
+	const cell = await locator(maybeValidInput.value)
 
 	if ('error' in cell) {
 		const scheduled = await q({
 			payload: maybeValidInput,
-			deduplicationId: cellId(maybeValidInput),
+			deduplicationId: cellId(maybeValidInput.value),
 		})
 		if (scheduled !== undefined && 'error' in scheduled) {
 			return res(toStatusCode[scheduled.error.type], {

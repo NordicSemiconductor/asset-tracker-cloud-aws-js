@@ -52,7 +52,7 @@ export const handler = async (
 	const { serviceKey, teamId, endpoint } = await settingsPromise
 	const c = apiClient({ endpoint: new URL(endpoint), serviceKey, teamId })
 
-	const { mcc, mnc, cell, area, types } = maybeValidInput
+	const { mcc, mnc, cell, area, types } = maybeValidInput.value
 
 	// Split requests, so that request for Ephemerides is a separate one
 	const otherTypesInRequest = types.filter((t) => t !== AGPSType.Ephemerides)
