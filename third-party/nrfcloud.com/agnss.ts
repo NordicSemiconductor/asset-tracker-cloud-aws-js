@@ -131,7 +131,7 @@ export const handler = async (
 			dataHex: res,
 		}
 	} catch (err) {
-		console.error(JSON.stringify(err))
+		console.error(err)
 		return {
 			resolved: false,
 		}
