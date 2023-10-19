@@ -58,15 +58,15 @@ export const handler = async (
 
 	// Request to nRFCloud
 	const payload: Static<typeof groundFixRequestSchema> = {}
-	if (maybeValidInput.wifi !== undefined) {
+	if (maybeValidInput.value.wifi !== undefined) {
 		payload.wifi = {
-			accessPoints: maybeValidInput.wifi.aps.map((macAddress) => ({
+			accessPoints: maybeValidInput.value.wifi.aps.map((macAddress) => ({
 				macAddress: expandMac(macAddress),
 			})),
 		}
 	}
-	if (maybeValidInput.lte !== undefined) {
-		const report = maybeValidInput.lte
+	if (maybeValidInput.value.lte !== undefined) {
+		const report = maybeValidInput.value.lte
 		payload.lte = [
 			{
 				mcc: report.mcc,
