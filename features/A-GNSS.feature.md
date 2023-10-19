@@ -29,7 +29,7 @@ And I have a random number between `1` and `100000000` in `agnssCellId`
 And I have a random number between `100` and `199` in `agnssArea`
 
 And I enqueue this mock HTTP API response for a HEAD request to
-`api.nrfcloud.com/v1/location/agnss?types=1%2C3%2C4%2C6%2C7%2C8%2C9&eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}`
+`api.nrfcloud.com/v1/location/agnss?eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}&types=1%2C3%2C4%2C6%2C7%2C8%2C9`
 
 ```
 HTTP/1.1 200 OK
@@ -39,7 +39,7 @@ Content-Length: 1160
 ```
 
 And I enqueue this mock HTTP API response for a GET request to
-`api.nrfcloud.com/v1/location/agnss?types=1%2C3%2C4%2C6%2C7%2C8%2C9&eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}`
+`api.nrfcloud.com/v1/location/agnss?eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}&types=1%2C3%2C4%2C6%2C7%2C8%2C9`
 
 ```
 HTTP/1.1 200 OK
@@ -50,7 +50,7 @@ Content-Length: 1160
 ```
 
 And I enqueue this mock HTTP API response for a HEAD request to
-`api.nrfcloud.com/v1/location/agnss?types=2&eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}`
+`api.nrfcloud.com/v1/location/agnss?eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}&types=2`
 
 ```
 HTTP/1.1 200 OK
@@ -60,7 +60,7 @@ Content-Length: 1864
 ```
 
 And I enqueue this mock HTTP API response for a GET request to
-`api.nrfcloud.com/v1/location/agnss?types=2&eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}`
+`api.nrfcloud.com/v1/location/agnss?eci=${agnssCellId}&mcc=${agnssMcc}&mnc=${agnssMnc}&tac=${agnssArea}&types=2`
 
 ```
 HTTP/1.1 200 OK
