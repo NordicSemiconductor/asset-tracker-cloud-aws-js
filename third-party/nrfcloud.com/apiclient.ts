@@ -20,7 +20,7 @@ export const toQueryString = (query: Record<string, any>): string => {
 		if (Array.isArray(v)) return `${encodeURIComponent(k)}=${v.join(',')}`
 		return `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
 	})
-	return `?${parts.join('&')}`
+	return `?${parts.sort((s1, s2) => s1.localeCompare(s2)).join('&')}`
 }
 
 const validate =

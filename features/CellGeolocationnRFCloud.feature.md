@@ -46,7 +46,7 @@ And I enqueue this mock HTTP API response for a POST request to
 Given I store `$millis()` into `ts`
 
 When I GET
-`${geolocationApiUrl}/cell?cell=${cellId}&area=30401&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
+`${geolocationApiUrl}/cell?area=30401&cell=${cellId}&mccmnc=24201&nw=${variant.nw}&ts=${ts}`
 
 <!-- retry:minDelay=10000&factor=1 -->
 
