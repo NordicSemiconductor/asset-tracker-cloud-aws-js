@@ -35,7 +35,7 @@ const neighboringCellsSurvey = Type.Array(
 		{
 			eci: Type.Integer({ minimum: 1 }),
 			mcc: Type.Integer({ minimum: 100, maximum: 999 }),
-			mnc: Type.Integer({ minimum: 1, maximum: 999 }),
+			mnc: Type.Integer({ minimum: 0, maximum: 999 }),
 			tac: Type.Integer({ minimum: 1 }),
 			earfcn: Type.Optional(EARFCN),
 			adv: Type.Optional(TimingAdvance),

@@ -269,4 +269,20 @@ void describe('groundFixRequestSchema', () => {
 		assert.equal(v.errors, null)
 		assert.equal(valid, true)
 	})
+
+	void it('should validate a cell geo location request', () => {
+		const v = ajv.compile(groundFixRequestSchema)
+		const valid = v({
+			lte: [
+				{
+					eci: 23820260,
+					mcc: 460,
+					mnc: 0,
+					tac: 24327,
+				},
+			],
+		})
+		assert.equal(v.errors, null)
+		assert.equal(valid, true)
+	})
 })
