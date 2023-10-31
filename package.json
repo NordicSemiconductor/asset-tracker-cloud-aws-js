@@ -71,7 +71,7 @@
     "@types/backoff": "2.5.4",
     "@types/cfn-response": "1.0.7",
     "@types/jsonwebtoken": "9.0.4",
-    "@types/node": "20.8.9",
+    "@types/node": "20.8.10",
     "@types/yazl": "2.4.4",
     "@typescript-eslint/eslint-plugin": "6.9.1",
     "aws-cdk-lib": "2.103.1",
