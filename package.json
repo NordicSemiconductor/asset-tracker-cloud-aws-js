@@ -44,7 +44,7 @@
     "@aws-sdk/client-cloudformation": "3.441.0",
     "@aws-sdk/client-cloudwatch-logs": "3.441.0",
     "@aws-sdk/client-codepipeline": "3.441.0",
-    "@aws-sdk/client-cognito-identity": "3.441.0",
+    "@aws-sdk/client-cognito-identity": "3.444.0",
     "@aws-sdk/client-cognito-identity-provider": "3.441.0",
     "@aws-sdk/client-dynamodb": "3.441.0",
     "@aws-sdk/client-iot": "3.441.0",
