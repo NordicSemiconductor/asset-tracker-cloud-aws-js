@@ -51,7 +51,7 @@
     "@aws-sdk/client-iot-data-plane": "3.445.0",
     "@aws-sdk/client-s3": "3.445.0",
     "@aws-sdk/client-sfn": "3.445.0",
-    "@aws-sdk/client-sqs": "3.445.0",
+    "@aws-sdk/client-sqs": "3.446.0",
     "@aws-sdk/client-ssm": "3.445.0",
     "@aws-sdk/client-sts": "3.445.0",
     "@aws-sdk/client-timestream-query": "3.445.0",
