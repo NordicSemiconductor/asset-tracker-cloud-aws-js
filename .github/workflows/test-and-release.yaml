@@ -74,6 +74,10 @@ jobs:
         run: npm i @swc/core
       - name: Compile TypeScript for type checking
         run: npx tsc
+      - name: Check source code with eslint
+        run: npx eslint --fix --ext .js,.ts,.jsx,.tsx ./
+      - name: Check if source code is properly formatted
+        run: npx prettier -c ./
       - name: Run Unit Tests
         run: npm test
       - name: Generate Stack ID
