@@ -41,8 +41,8 @@
   },
   "devDependencies": {
     "@aws-sdk/client-apigatewayv2": "3.445.0",
-    "@aws-sdk/client-cloudformation": "3.445.0",
-    "@aws-sdk/client-cloudwatch-logs": "3.445.0",
+    "@aws-sdk/client-cloudformation": "3.448.0",
+    "@aws-sdk/client-cloudwatch-logs": "3.448.0",
     "@aws-sdk/client-codepipeline": "3.445.0",
     "@aws-sdk/client-cognito-identity": "3.445.0",
     "@aws-sdk/client-cognito-identity-provider": "3.445.0",
