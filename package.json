@@ -89,7 +89,7 @@
     "eslint-plugin-unicorn": "49.0.0",
     "glob": "10.3.10",
     "tsmatchers": "^5.0.0",
-    "tsx": "4.0.0",
+    "tsx": "4.1.0",
     "typescript": "5.2.2",
     "yazl": "2.5.1"
   },
