@@ -32,7 +32,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@nordicsemiconductor/asset-tracker-cloud-docs": "33.0.5",
-    "@nordicsemiconductor/device-helpers": "15.0.65",
+    "@nordicsemiconductor/device-helpers": "15.0.66",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "4.0.3",
     "@nordicsemiconductor/timestream-helpers": "6.0.1",
     "@sinclair/typebox": "0.31.23",
