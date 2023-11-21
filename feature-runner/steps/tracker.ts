@@ -153,7 +153,7 @@ const steps: ({
 			async ({ match: { trackerId: maybeTrackerId }, context }) => {
 				const trackerId = maybeTrackerId ?? 'default'
 				if (trackers[trackerId] === undefined) {
-					const deviceId = (await randomWords({ numWords: 3 })).join('-')
+					const deviceId = randomWords({ numWords: 3 }).join('-')
 					await createSimulatorKeyAndCSR({
 						deviceId,
 						certsDir,

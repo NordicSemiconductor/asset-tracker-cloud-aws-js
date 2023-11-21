@@ -56,7 +56,7 @@ export const createSimulatorCertCommand = ({
 		secTag?: string
 		mqttEndpoint?: string
 	}) => {
-		const id = deviceId ?? (await randomWords({ numWords: 3 })).join('-')
+		const id = deviceId ?? randomWords({ numWords: 3 }).join('-')
 		const effectiveSecTag = secTag ?? defaultSecTag
 		const effectiveMqttEndpoint = customEndpoint ?? mqttEndpoint
 
