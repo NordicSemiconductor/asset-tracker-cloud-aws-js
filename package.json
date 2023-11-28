@@ -61,7 +61,7 @@
     "@nordicsemiconductor/asset-tracker-cloud-code-style": "13.0.0",
     "@nordicsemiconductor/bdd-markdown": "7.0.15",
     "@nordicsemiconductor/cloudformation-helpers": "9.0.2",
-    "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "16.0.23",
+    "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "17.0.0",
     "@nordicsemiconductor/object-to-env": "6.0.0",
     "@nordicsemiconductor/random-words": "8.0.0",
     "@octokit/rest": "20.0.2",
