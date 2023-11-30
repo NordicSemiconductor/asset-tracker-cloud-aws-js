@@ -33,7 +33,7 @@
   "dependencies": {
     "@nordicsemiconductor/asset-tracker-cloud-docs": "35.0.0",
     "@nordicsemiconductor/device-helpers": "16.0.2",
-    "@nordicsemiconductor/nrfcloud-location-services-tests": "5.0.0",
+    "@nordicsemiconductor/nrfcloud-location-services-tests": "6.0.0",
     "@nordicsemiconductor/timestream-helpers": "6.0.1",
     "@sinclair/typebox": "0.31.28",
     "ajv": "8.12.0",
