@@ -11,7 +11,7 @@ import type { CommandDefinition } from './CommandDefinition.js'
 
 export const defaultFirmwareRepository =
 	'https://github.com/NordicSemiconductor/asset-tracker-cloud-firmware-aws'
-const netrclocation = path.resolve(os.homedir(), '.netrc.js')
+const netrclocation = path.resolve(os.homedir(), '.netrc')
 
 type FWVariant = 'memfault' | 'debug' | 'nodebug'
 
