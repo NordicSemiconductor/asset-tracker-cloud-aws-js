@@ -20,11 +20,13 @@ const getLatestFirmware = async ({
 	dk,
 	firmwareRepository,
 	ghToken,
+	debug,
 }: {
 	variant?: FWVariant
 	dk: boolean
 	firmwareRepository: string
 	ghToken: string
+	debug?: (...args: string[]) => void
 }) => {
 	const { owner, repo } = extractRepoAndOwner(firmwareRepository)
 	const octokit = new Octokit({
@@ -37,6 +39,9 @@ const getLatestFirmware = async ({
 			per_page: 1,
 		})
 	).data[0]
+
+	debug?.(`Latest release: ${latestRelease?.name}`)
+
 	const assets = (
 		await octokit.repos.listReleaseAssets({
 			owner,
@@ -46,7 +51,7 @@ const getLatestFirmware = async ({
 	).data
 
 	const hexfile = assets.find(({ name }) => {
-		if (!name.includes('.hex.js')) return false
+		if (!name.includes('.hex')) return false
 		if (name.includes('-signed')) return false
 		if (!name.includes(dk ? 'nRF9160DK' : 'Thingy91')) return false
 		switch (variant) {
@@ -227,6 +232,7 @@ export const flashFirmwareCommand = (): CommandDefinition => ({
 				variant: variant !== undefined ? (variant as FWVariant) : undefined,
 				ghToken,
 				firmwareRepository: firmwareRepository ?? defaultFirmwareRepository,
+				debug: debug === true ? console.debug : undefined,
 			}))
 
 		await flash({
