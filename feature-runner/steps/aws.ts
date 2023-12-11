@@ -60,7 +60,7 @@ const steps: StepRunner<
 				context.cognito === undefined
 					? {
 							credentials: context.apiKey,
-					  }
+						}
 					: {
 							credentials: {
 								secretAccessKey: context.cognito.SecretKey,
@@ -68,7 +68,7 @@ const steps: StepRunner<
 								accessKeyId: context.cognito.AccessKeyId,
 								sessionToken: context.cognito.SessionToken,
 							},
-					  },
+						},
 			)
 
 			const commandName = `${ucfirst(methodName)}Command`
