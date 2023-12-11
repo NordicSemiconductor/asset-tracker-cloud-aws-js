@@ -298,7 +298,7 @@ export class ContinuousDeploymentStack extends CloudFormation.Stack {
 										],
 										runOrder: 2,
 									},
-							  ]
+								]
 							: []),
 					],
 				},

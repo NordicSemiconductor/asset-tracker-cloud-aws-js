@@ -273,7 +273,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 									: parseInt(
 											deviceRequest.messageAttributes.DelaySeconds.stringValue,
 											10,
-									  )) * delayFactor,
+										)) * delayFactor,
 							),
 						)
 						return {

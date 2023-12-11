@@ -133,7 +133,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 												r?.phycell !== undefined
 													? {
 															N: `${r.phycell}`,
-													  }
+														}
 													: { NULL: true },
 											types: {
 												NS: r?.types.map((t) => `${t}`) ?? [],
@@ -274,7 +274,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 									: parseInt(
 											deviceRequest.messageAttributes.DelaySeconds.stringValue,
 											10,
-									  )) * delayFactor,
+										)) * delayFactor,
 							),
 						)
 						return {
