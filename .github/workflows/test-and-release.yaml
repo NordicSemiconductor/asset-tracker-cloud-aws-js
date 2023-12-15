@@ -80,7 +80,7 @@ jobs:
         run:
           cat e2e-test-result.json | npx tsx --no-warnings
           ./feature-runner/console-reporter.ts  --only-failed --with-timestamps
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: e2e-test-result
@@ -103,7 +103,7 @@ jobs:
           ./cli.sh purge-buckets
           npx cdk -a 'node --import tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-test.ts' destroy -f '*'
           npx cdk -a 'node --import tsx --no-warnings --unhandled-rejections=strict cdk/cloudformation-http-api-mock.ts' destroy -f '*'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           if-no-files-found: error
