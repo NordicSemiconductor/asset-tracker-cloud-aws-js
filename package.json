@@ -58,7 +58,7 @@
     "@aws-sdk/client-timestream-write": "3.474.0",
     "@aws-sdk/util-dynamodb": "3.474.0",
     "@commitlint/config-conventional": "18.4.3",
-    "@nordicsemiconductor/asset-tracker-cloud-code-style": "13.1.4",
+    "@nordicsemiconductor/asset-tracker-cloud-code-style": "13.1.5",
     "@nordicsemiconductor/bdd-markdown": "7.0.15",
     "@nordicsemiconductor/cloudformation-helpers": "9.0.2",
     "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript": "17.0.0",
