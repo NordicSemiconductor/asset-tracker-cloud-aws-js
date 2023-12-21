@@ -86,7 +86,7 @@
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-prefer-arrow": "1.2.3",
-    "eslint-plugin-unicorn": "49.0.0",
+    "eslint-plugin-unicorn": "50.0.1",
     "glob": "10.3.10",
     "tsmatchers": "^5.0.2",
     "tsx": "4.7.0",
