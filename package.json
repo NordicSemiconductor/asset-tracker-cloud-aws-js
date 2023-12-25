@@ -73,7 +73,7 @@
     "@types/jsonwebtoken": "9.0.5",
     "@types/node": "20.10.5",
     "@types/yazl": "2.4.5",
-    "@typescript-eslint/eslint-plugin": "6.15.0",
+    "@typescript-eslint/eslint-plugin": "6.16.0",
     "aws-cdk-lib": "2.116.1",
     "aws-iot-device-sdk-v2": "1.18.0",
     "backoff": "2.5.0",
