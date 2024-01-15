@@ -5,39 +5,38 @@ import { isNotNullOrUndefined } from '../util/isNullOrUndefined.js'
 
 export const batchToTimestreamRecords = (event: BatchMessage): _Record[] => {
 	const Records: (_Record | undefined)[] = Object.entries(event.batch)
-		.map(
-			([name, messages]) =>
-				(
-					messages as (
-						| NumberValueSensor
-						| NumbersValueSensor
-						| NumbersAndStringsValueSensor
-					)[]
-				)
-					?.map((m) => {
-						const ts = m.ts
-						const measureGroup = randomUUID()
-						if (typeof m.v === 'number') {
-							return toRecord({
-								name,
-								v: m.v,
+		.map(([name, messages]) =>
+			(
+				messages as (
+					| NumberValueSensor
+					| NumbersValueSensor
+					| NumbersAndStringsValueSensor
+				)[]
+			)
+				?.map((m) => {
+					const ts = m.ts
+					const measureGroup = randomUUID()
+					if (typeof m.v === 'number') {
+						return toRecord({
+							name,
+							v: m.v,
+							ts,
+							dimensions: { measureGroup },
+						})
+					}
+					return Object.entries(m.v)
+						.map(([k, v]) =>
+							toRecord({
+								name: `${name}.${k}`,
+								v,
 								ts,
 								dimensions: { measureGroup },
-							})
-						}
-						return Object.entries(m.v)
-							.map(([k, v]) =>
-								toRecord({
-									name: `${name}.${k}`,
-									v,
-									ts,
-									dimensions: { measureGroup },
-								}),
-							)
-							.filter(isNotNullOrUndefined)
-							.flat()
-					})
-					.flat(),
+							}),
+						)
+						.filter(isNotNullOrUndefined)
+						.flat()
+				})
+				.flat(),
 		)
 		.flat()
 
