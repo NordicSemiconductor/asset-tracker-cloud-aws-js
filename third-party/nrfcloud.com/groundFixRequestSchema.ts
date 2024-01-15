@@ -65,7 +65,9 @@ const wifiSiteSurvey = Type.Object({
 	accessPoints: Type.Array(
 		Type.Object(
 			{
-				macAddress: Type.RegExp(/^([a-f0-9]{2}:){5}[a-f0-9]{2}$/i),
+				macAddress: Type.String({
+					pattern: '^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$',
+				}),
 				age: Type.Optional(Type.Integer()),
 				frequency: Type.Optional(Type.Number()),
 				channel: Type.Optional(Type.Integer()),

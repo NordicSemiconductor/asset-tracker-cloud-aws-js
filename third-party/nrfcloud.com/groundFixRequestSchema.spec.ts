@@ -35,6 +35,9 @@ void describe('groundFixRequestSchema', () => {
 					{
 						macAddress: '80:e0:1d:2a:92:f2',
 					},
+					{
+						macAddress: '40:01:7A:C9:10:21',
+					},
 				],
 			},
 		}
