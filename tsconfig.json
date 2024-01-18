@@ -16,6 +16,6 @@
     "noUnusedLocals": true,
     "noEmit": true,
     "verbatimModuleSyntax": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+  },
 }
