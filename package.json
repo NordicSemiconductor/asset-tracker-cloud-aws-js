@@ -13,7 +13,7 @@
   "scripts": {
     "test": "find ./ -type f -name '*.spec.ts' -print | grep -v /node_modules/ | grep -v /dist/ | xargs npx tsx --no-warnings --test",
     "test:e2e": "npx tsx --no-warnings ./feature-runner/run-features.ts > e2e-test-result.json && cat e2e-test-result.json | npx tsx --no-warnings ./feature-runner/console-reporter.ts --only-failed --with-timestamps",
-    "prepare": "husky install && check-node-version --package",
+    "prepare": "husky && check-node-version --package",
     "prepublishOnly": "npx swc -d dist ./cli npx swc -d dist ./features"
   },
   "repository": {
@@ -88,6 +88,7 @@
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-unicorn": "50.0.1",
     "glob": "10.3.10",
+    "husky": "9.0.7",
     "tsmatchers": "^5.0.2",
     "tsx": "4.7.0",
     "typescript": "5.3.3",
