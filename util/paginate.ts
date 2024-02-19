@@ -9,7 +9,7 @@ export const paginate = async ({
 	paginator,
 	startKey,
 }: {
-	paginator: (startKey?: any) => Promise<unknown | undefined>
+	paginator: (startKey?: any) => Promise<unknown>
 	startKey?: any
 }): Promise<void> => {
 	const nextStartKey = await paginator(startKey)

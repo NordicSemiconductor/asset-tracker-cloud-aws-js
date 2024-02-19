@@ -1,7 +1,0 @@
-node_modules/
-dist/
-cdk.out/
-certificates/
-cli/index.js
-commitlint.config.js
-aws/

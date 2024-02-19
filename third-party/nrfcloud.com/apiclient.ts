@@ -113,8 +113,8 @@ const doRequest =
 					if (res.statusCode >= 400) {
 						return reject(
 							new Error(
-								`Error ${res.statusCode}: "${new Error(
-									Buffer.concat(body).toString('utf-8'),
+								`Error ${res.statusCode}: "${Buffer.concat(body).toString(
+									'utf-8',
 								)}"`,
 							),
 						)

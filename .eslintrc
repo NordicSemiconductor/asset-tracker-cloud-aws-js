@@ -1,3 +1,0 @@
-{
-  "extends": "@nordicsemiconductor/eslint-config-asset-tracker-cloud-typescript"
-}

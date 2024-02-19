@@ -38,7 +38,7 @@ const client = ({
 		statusCode: () => res?.status,
 		response: () => res,
 		send: async () => {
-			progress(`${method} ${url}`)
+			progress(`${method} ${url.toString()}`)
 			if (body !== undefined) {
 				progress(`> ${body}`)
 			}
