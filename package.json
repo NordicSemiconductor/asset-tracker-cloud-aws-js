@@ -35,7 +35,7 @@
     "@nordicsemiconductor/device-helpers": "17.0.80",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "6.0.0",
     "@nordicsemiconductor/timestream-helpers": "6.0.2",
-    "@sinclair/typebox": "0.32.9",
+    "@sinclair/typebox": "0.32.14",
     "ajv": "8.12.0",
     "jsonwebtoken": "9.0.2"
   },
