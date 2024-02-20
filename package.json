@@ -31,7 +31,7 @@
   "author": "Nordic Semiconductor ASA | nordicsemi.no",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@nordicsemiconductor/asset-tracker-cloud-docs": "36.0.4",
+    "@nordicsemiconductor/asset-tracker-cloud-docs": "36.0.5",
     "@nordicsemiconductor/device-helpers": "17.0.81",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "7.0.1",
     "@nordicsemiconductor/timestream-helpers": "6.0.2",
