@@ -1,4 +1,4 @@
-import CloudFormation from 'aws-cdk-lib'
+import CloudFormation, { Stack } from 'aws-cdk-lib'
 import Cognito from 'aws-cdk-lib/aws-cognito'
 import IAM from 'aws-cdk-lib/aws-iam'
 import Iot from 'aws-cdk-lib/aws-iot'
@@ -352,14 +352,11 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 			cdkLambdas: {
 				lambdas: packedCDKLambdas.lambdas,
 				layers: [
-					new Lambda.LayerVersion(
-						this,
-						`${CORE_STACK_NAME}-cloudformation-layer`,
-						{
-							code: Lambda.Code.fromAsset(packedCDKLambdas.layerZipFileName),
-							compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
-						},
-					),
+					new Lambda.LayerVersion(this, `cloudformation-layer`, {
+						code: Lambda.Code.fromAsset(packedCDKLambdas.layerZipFileName),
+						compatibleRuntimes: [Lambda.Runtime.NODEJS_20_X],
+						layerVersionName: `${Stack.of(this).stackName}-cloudformation-layer`,
+					}),
 				],
 			},
 		})
@@ -387,9 +384,10 @@ export class AssetTrackerStack extends CloudFormation.Stack {
 		const lambdas: LambdasWithLayer<AssetTrackerLambdas['lambdas']> = {
 			lambdas: packedLambdas.lambdas,
 			layers: [
-				new Lambda.LayerVersion(this, `${CORE_STACK_NAME}-layer`, {
+				new Lambda.LayerVersion(this, `base-layer`, {
 					code: Lambda.Code.fromAsset(packedLambdas.layerZipFileName),
-					compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
+					layerVersionName: `${Stack.of(this).stackName}-base-layer`,
+					compatibleRuntimes: [Lambda.Runtime.NODEJS_20_X],
 				}),
 			],
 		}

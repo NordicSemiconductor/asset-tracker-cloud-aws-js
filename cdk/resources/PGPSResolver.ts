@@ -32,7 +32,7 @@ export class PGPSResolver extends CloudFormation.Resource {
 			layers: lambdas.layers,
 			handler: lambdas.lambdas.pgpsNrfCloudStepFunction.handler,
 			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_18_X,
+			runtime: Lambda.Runtime.NODEJS_20_X,
 			timeout: CloudFormation.Duration.seconds(10),
 			memorySize: 1792,
 			code: Lambda.Code.fromAsset(

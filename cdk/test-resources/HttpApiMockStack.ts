@@ -1,4 +1,4 @@
-import CDK from 'aws-cdk-lib'
+import CDK, { Stack } from 'aws-cdk-lib'
 import ApiGateway from 'aws-cdk-lib/aws-apigateway'
 import DynamoDB from 'aws-cdk-lib/aws-dynamodb'
 import IAM from 'aws-cdk-lib/aws-iam'
@@ -51,10 +51,11 @@ export class HttpApiMockStack extends CDK.Stack {
 
 		const httpAPIMockLambdaLayer = new Lambda.LayerVersion(
 			this,
-			`${HTTP_MOCK_HTTP_API_STACK_NAME}-cloudformation-layer`,
+			`cloudformation-layer`,
 			{
 				code: Lambda.Code.fromAsset(packedHTTPAPIMockLambdas.layerZipFileName),
-				compatibleRuntimes: [Lambda.Runtime.NODEJS_18_X],
+				compatibleRuntimes: [Lambda.Runtime.NODEJS_20_X],
+				layerVersionName: `${Stack.of(this).stackName}-cloudformation-layer`,
 			},
 		)
 
@@ -68,7 +69,7 @@ export class HttpApiMockStack extends CDK.Stack {
 			layers: [httpAPIMockLambdaLayer],
 			handler: packedHTTPAPIMockLambdas.lambdas.httpApiMock.handler,
 			architecture: Lambda.Architecture.ARM_64,
-			runtime: Lambda.Runtime.NODEJS_18_X,
+			runtime: Lambda.Runtime.NODEJS_20_X,
 			timeout: CDK.Duration.seconds(5),
 			environment: {
 				REQUESTS_TABLE_NAME: requestsTable.tableName,
