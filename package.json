@@ -71,7 +71,7 @@
     "@types/backoff": "2.5.5",
     "@types/cfn-response": "1.0.8",
     "@types/jsonwebtoken": "9.0.6",
-    "@types/node": "20.11.20",
+    "@types/node": "20.11.21",
     "@types/yazl": "2.4.5",
     "aws-cdk-lib": "2.130.0",
     "aws-iot-device-sdk-v2": "1.19.1",
