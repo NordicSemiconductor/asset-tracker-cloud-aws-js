@@ -1,5 +1,6 @@
 import type { Static } from '@sinclair/typebox'
-import Ajv from 'ajv'
+import ajvLib from 'ajv'
+const Ajv = ajvLib.default
 import { groundFixRequestSchema } from './groundFixRequestSchema.js'
 import { describe, it } from 'node:test'
 import assert from 'node:assert'

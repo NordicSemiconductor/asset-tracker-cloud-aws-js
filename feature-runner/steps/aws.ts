@@ -3,10 +3,10 @@ import {
 	type StepRunner,
 	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
-import type { World } from '../run-features'
+import type { World } from '../run-features.js'
 import { Type } from '@sinclair/typebox'
 import { matchString } from './util.js'
-import type { UserCredentials } from './cognito'
+import type { UserCredentials } from './cognito.js'
 import type { AnyRecord } from 'dns'
 import type { AwsCredentialIdentity } from '@smithy/types'
 

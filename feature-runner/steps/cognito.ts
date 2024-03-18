@@ -2,7 +2,7 @@ import {
 	type StepRunner,
 	regExpMatchedStep,
 } from '@nordicsemiconductor/bdd-markdown'
-import type { World } from '../run-features'
+import type { World } from '../run-features.js'
 import { Type } from '@sinclair/typebox'
 import { matchString } from './util.js'
 import {
