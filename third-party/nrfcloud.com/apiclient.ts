@@ -1,5 +1,6 @@
 import type { Static, TObject, TProperties } from '@sinclair/typebox'
-import Ajv from 'ajv'
+import ajvLib from 'ajv'
+const Ajv = ajvLib.default
 import type { IncomingHttpHeaders, OutgoingHttpHeaders } from 'http'
 import { request as nodeRequest, type RequestOptions } from 'https'
 import type { URL } from 'url'

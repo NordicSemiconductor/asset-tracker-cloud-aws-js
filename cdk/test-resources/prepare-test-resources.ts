@@ -1,4 +1,4 @@
-import type { PackedLambda } from '../helper/lambdas/packLambda'
+import type { PackedLambda } from '../helper/lambdas/packLambda.js'
 import { packLambdaFromPath } from '../helper/lambdas/packLambdaFromPath.js'
 import { packLayer } from '../helper/lambdas/packLayer.js'
 
