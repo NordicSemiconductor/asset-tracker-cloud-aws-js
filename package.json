@@ -65,7 +65,7 @@
     "@nordicsemiconductor/object-to-env": "7.0.7",
     "@nordicsemiconductor/random-words": "8.0.1",
     "@octokit/rest": "20.0.2",
-    "@swc/cli": "0.3.10",
+    "@swc/cli": "0.3.12",
     "@swc/core": "1.4.11",
     "@types/aws-lambda": "8.10.136",
     "@types/backoff": "2.5.5",
