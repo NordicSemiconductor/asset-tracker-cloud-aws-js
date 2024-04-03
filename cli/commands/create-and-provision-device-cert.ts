@@ -17,7 +17,7 @@ import {
 import { getCurrentCA } from '../jitp/currentCA.js'
 import { deviceFileLocations } from '../jitp/deviceFileLocations.js'
 import { readlineDevice } from '../jitp/readlineDevice.js'
-import { run } from '../process/run.js'
+import run from '@bifravst/run'
 import type { CommandDefinition } from './CommandDefinition.js'
 
 export const defaultPort = '/dev/ttyACM0'

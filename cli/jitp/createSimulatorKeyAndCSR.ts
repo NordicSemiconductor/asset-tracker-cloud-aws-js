@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs'
-import { run } from '../process/run.js'
+import run from '@bifravst/run'
 import { deviceFileLocations } from './deviceFileLocations.js'
 
 /**
@@ -39,7 +39,7 @@ export const createSimulatorKeyAndCSR = async ({
 			'prime256v1',
 			'-genkey',
 		],
-		log: debug,
+		log: { debug },
 	})
 
 	log?.(`Generating CSR for device ${deviceId}`)
@@ -56,7 +56,7 @@ export const createSimulatorKeyAndCSR = async ({
 			'-subj',
 			`/CN=${deviceId}`,
 		],
-		log: debug,
+		log: { debug },
 	})
 
 	return { deviceId }

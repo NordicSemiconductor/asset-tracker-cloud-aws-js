@@ -15,7 +15,7 @@ import { toObject } from '@nordicsemiconductor/cloudformation-helpers'
 import { randomUUID } from 'crypto'
 import { copyFile, readFile, unlink } from 'fs/promises'
 import path from 'path'
-import { run } from '../process/run.js'
+import run from '@bifravst/run'
 import { caFileLocations } from './caFileLocations.js'
 
 export const registerCA = async ({
@@ -59,7 +59,7 @@ export const registerCA = async ({
 	await run({
 		command: 'openssl',
 		args: ['genrsa', '-out', verificationKeyFile, '2048'],
-		log: debug,
+		log: { debug },
 	})
 
 	const registrationCode = await iot
@@ -80,7 +80,7 @@ export const registerCA = async ({
 			'-subj',
 			`/CN=${registrationCode}`,
 		],
-		log: debug,
+		log: { debug },
 	})
 
 	await run({
@@ -101,7 +101,7 @@ export const registerCA = async ({
 			`1`,
 			'-sha256',
 		],
-		log: debug,
+		log: { debug },
 	})
 
 	await iot.send(

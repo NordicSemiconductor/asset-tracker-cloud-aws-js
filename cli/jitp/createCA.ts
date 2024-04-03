@@ -2,7 +2,7 @@ import type { CloudFormationClient } from '@aws-sdk/client-cloudformation'
 import type { IoTClient, Tag } from '@aws-sdk/client-iot'
 import { randomUUID } from 'crypto'
 import { mkdir, stat, unlink } from 'fs/promises'
-import { run } from '../process/run.js'
+import run from '@bifravst/run'
 import { caFileLocations } from './caFileLocations.js'
 import { registerCA } from './registerCA.js'
 
@@ -37,7 +37,7 @@ export const createCA = async (args: {
 	await run({
 		command: 'openssl',
 		args: ['genrsa', '-out', caFiles.key, '2048'],
-		log: debug,
+		log: { debug },
 	})
 
 	await run({
@@ -57,7 +57,7 @@ export const createCA = async (args: {
 			'-subj',
 			`/OU=${args.subject ?? args.stack}`,
 		],
-		log: debug,
+		log: { debug },
 	})
 
 	const { certificateId } = await registerCA({

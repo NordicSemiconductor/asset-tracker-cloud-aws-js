@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
 import os from 'os'
-import { run } from '../process/run.js'
+import run from '@bifravst/run'
 import { caFileLocations } from './caFileLocations.js'
 import { deviceFileLocations } from './deviceFileLocations.js'
 
@@ -58,7 +58,7 @@ export const createDeviceCertificate = async ({
 			`${daysValid ?? defaultDeviceCertificateValidityInDays}`,
 			'-sha256',
 		],
-		log: debug,
+		log: { debug },
 	})
 
 	const certWithCa = (
