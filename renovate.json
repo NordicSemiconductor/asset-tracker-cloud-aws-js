@@ -1,4 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>bifravst/renovate-config"]
+  "extends": ["github>bifravst/renovate-config"],
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "@nordicsemiconductor/asset-tracker-cloud-docs",
+        "@sinclair/typebox",
+        "@nordicsemiconductor/bdd-markdown"
+      ],
+      "groupName": "typebox"
+    }
+  ]
 }
