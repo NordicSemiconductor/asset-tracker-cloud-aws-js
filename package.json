@@ -32,11 +32,11 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@bifravst/run": "1.2.0",
-    "@nordicsemiconductor/asset-tracker-cloud-docs": "36.0.11",
+    "@nordicsemiconductor/asset-tracker-cloud-docs": "36.0.13",
     "@nordicsemiconductor/device-helpers": "17.0.142",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "7.0.1",
     "@nordicsemiconductor/timestream-helpers": "6.0.2",
-    "@sinclair/typebox": "0.32.20",
+    "@sinclair/typebox": "0.32.22",
     "ajv": "8.12.0",
     "jsonwebtoken": "9.0.2"
   },
@@ -61,7 +61,7 @@
     "@bifravst/eslint-config-typescript": "6.0.23",
     "@bifravst/prettier-config": "1.0.0",
     "@commitlint/config-conventional": "19.2.2",
-    "@nordicsemiconductor/bdd-markdown": "8.1.0",
+    "@nordicsemiconductor/bdd-markdown": "8.1.1",
     "@nordicsemiconductor/cloudformation-helpers": "9.0.3",
     "@nordicsemiconductor/object-to-env": "7.0.7",
     "@nordicsemiconductor/random-words": "8.0.1",
