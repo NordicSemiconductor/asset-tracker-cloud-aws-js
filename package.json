@@ -33,7 +33,7 @@
   "dependencies": {
     "@bifravst/run": "1.2.0",
     "@nordicsemiconductor/asset-tracker-cloud-docs": "36.0.13",
-    "@nordicsemiconductor/device-helpers": "17.0.148",
+    "@nordicsemiconductor/device-helpers": "17.0.149",
     "@nordicsemiconductor/nrfcloud-location-services-tests": "7.0.1",
     "@nordicsemiconductor/timestream-helpers": "6.0.2",
     "@sinclair/typebox": "0.32.27",
