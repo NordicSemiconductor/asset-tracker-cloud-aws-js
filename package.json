@@ -61,7 +61,7 @@
     "@bifravst/eslint-config-typescript": "6.0.25",
     "@bifravst/prettier-config": "1.0.0",
     "@commitlint/config-conventional": "19.2.2",
-    "@nordicsemiconductor/bdd-markdown": "8.1.11",
+    "@nordicsemiconductor/bdd-markdown": "8.1.12",
     "@nordicsemiconductor/cloudformation-helpers": "9.0.3",
     "@nordicsemiconductor/object-to-env": "7.0.7",
     "@nordicsemiconductor/random-words": "8.0.1",
