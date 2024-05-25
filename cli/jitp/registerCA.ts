@@ -1,14 +1,11 @@
-import {
-	CloudFormationClient,
-	DescribeStacksCommand,
-} from '@aws-sdk/client-cloudformation'
+import type { CloudFormationClient } from '@aws-sdk/client-cloudformation'
+import { DescribeStacksCommand } from '@aws-sdk/client-cloudformation'
+import type { IoTClient, EventType } from '@aws-sdk/client-iot'
 import {
 	GetRegistrationCodeCommand,
-	IoTClient,
 	RegisterCACertificateCommand,
 	UpdateEventConfigurationsCommand,
 	type Tag,
-	EventType,
 	type Configuration,
 } from '@aws-sdk/client-iot'
 import { toObject } from '@nordicsemiconductor/cloudformation-helpers'

@@ -1,6 +1,6 @@
+import type { IoTClient } from '@aws-sdk/client-iot'
 import {
 	DescribeCACertificateCommand,
-	IoTClient,
 	ListCACertificatesCommand,
 } from '@aws-sdk/client-iot'
 import { paginate } from '../../util/paginate.js'

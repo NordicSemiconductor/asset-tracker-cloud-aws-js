@@ -1,4 +1,5 @@
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
+import type { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { GetItemCommand } from '@aws-sdk/client-dynamodb'
 import { ErrorType, type ErrorInfo } from '../api/ErrorInfo.js'
 import type { Cell } from '../geolocation/Cell.js'
 import type { Location } from '../geolocation/Location.js'

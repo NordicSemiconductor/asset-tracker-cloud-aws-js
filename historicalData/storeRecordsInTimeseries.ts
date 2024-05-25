@@ -1,5 +1,5 @@
+import type { TimestreamWriteClient } from '@aws-sdk/client-timestream-write'
 import {
-	TimestreamWriteClient,
 	WriteRecordsCommand,
 	type _Record,
 } from '@aws-sdk/client-timestream-write'
