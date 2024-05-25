@@ -6,10 +6,9 @@ import {
 import { Type } from '@sinclair/typebox'
 import type { World } from '../run-features.js'
 import { matchChoice, matchString } from './util.js'
+import type { AttributeValue, DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import {
-	AttributeValue,
 	DeleteItemCommand,
-	DynamoDBClient,
 	PutItemCommand,
 	QueryCommand,
 } from '@aws-sdk/client-dynamodb'

@@ -1,4 +1,5 @@
-import { DescribeEndpointCommand, IoTClient } from '@aws-sdk/client-iot'
+import type { IoTClient } from '@aws-sdk/client-iot'
+import { DescribeEndpointCommand } from '@aws-sdk/client-iot'
 
 export const getIotEndpoint = async (iot: IoTClient): Promise<string> =>
 	iot
