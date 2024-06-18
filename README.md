@@ -12,4 +12,4 @@ using [AWS CDK](https://aws.amazon.com/cdk) in
 [TypeScript](https://www.typescriptlang.org/).
 
 > :information_source:
-> [Read the complete nRF Asset Tracker documentation](https://nordicsemiconductor.github.io/asset-tracker-cloud-docs/).
+> [Read the complete nRF Asset Tracker documentation](https://docs.nordicsemi.com/bundle/nrf-asset-tracker-saga/).
