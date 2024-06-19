@@ -83,7 +83,7 @@
     "commander": "12.1.0",
     "constructs": "10.3.0",
     "date-fns": "3.6.0",
-    "glob": "10.4.1",
+    "glob": "10.4.2",
     "husky": "9.0.11",
     "tsmatchers": "^5.0.2",
     "tsx": "4.15.6",
