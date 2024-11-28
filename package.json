@@ -65,7 +65,7 @@
     "@nordicsemiconductor/cloudformation-helpers": "9.1.0",
     "@nordicsemiconductor/object-to-env": "7.0.7",
     "@nordicsemiconductor/random-words": "8.0.1",
-    "@octokit/rest": "20.1.1",
+    "@octokit/rest": "21.0.0",
     "@swc/cli": "0.4.0",
     "@swc/core": "1.6.13",
     "@types/aws-lambda": "8.10.140",
